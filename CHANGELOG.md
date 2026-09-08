@@ -7,8 +7,8 @@ the migration.
 
 ## [0.1.0] - 2026-09-08
 
-First tagged release. On-disk format 3 (see FORMAT.md). Tested on macOS on
-arm64; the Linux sync path exists but has not run; Windows is not
+First tagged release. On-disk format 3 (see FORMAT.md). Tests, the race
+detector and fuzz targets run in CI on Linux and macOS; Windows is not
 supported.
 
 ### Added

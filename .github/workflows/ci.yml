@@ -22,6 +22,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+          cache-dependency-path: bench/go.sum
       - run: go version
       - name: vet
         run: go vet ./...
@@ -46,6 +47,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+          cache-dependency-path: bench/go.sum
       - name: race pass
         run: go test -race -count=1 -timeout 45m .
 
@@ -58,6 +60,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+          cache-dependency-path: bench/go.sum
       - name: documents
         run: go test -run='^$' -fuzz='^FuzzDocument$' -fuzztime=45s .
       - name: pipelines

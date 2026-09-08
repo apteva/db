@@ -26,8 +26,9 @@ rows, _ := orders.Aggregate(ctx, []byte(`[
 Version 0.1.0, on-disk format 3. The engine has no dependencies. See
 [FORMAT.md](FORMAT.md) for the file format and its compatibility policy,
 [DURABILITY.md](DURABILITY.md) for what survives which crash, and
-[CHANGELOG.md](CHANGELOG.md). Tested on macOS on arm64; the Linux sync path
-has not run yet and Windows is not supported.
+[CHANGELOG.md](CHANGELOG.md). CI runs vet, the tests, the race detector and
+a fuzz smoke test on Linux and macOS; benchmarks were taken on macOS on
+arm64. Windows is not supported.
 
 Layout: the root package is the engine; `cmd/aptevadbctl` inspects and
 maintains a database; `bench/` is a separate module holding the benchmark
