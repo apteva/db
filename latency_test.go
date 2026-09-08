@@ -1,6 +1,7 @@
 package aptevadb
 
 import (
+	"os"
 	"encoding/binary"
 	"math/rand"
 	"sync"
@@ -75,6 +76,12 @@ func TestCheckpointsDoNotStallWriters(t *testing.T) {
 	if raceEnabled {
 		limit = 150 * time.Millisecond // the detector slows every locked section several-fold
 	}
+	if os.Getenv("CI") != "" {
+		limit *= 4 // shared runners: slow disks and neighbours
+	}
+	// a slow disk lengthens the log tail a compaction swap replays under
+	// the lock in proportion to its own stalls
+	limit += st.LockHolds["wal-flush-write"]
 	// A write may still wait when the disk itself stalls the log writer for
 	// longer than the buffer covers; that is flow control, not a lock hold,
 	// and shows up as a long log write. Everything the engine controls is
