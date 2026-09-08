@@ -1,9 +1,9 @@
 package aptevadb
 
 import (
-	"os"
 	"encoding/binary"
 	"math/rand"
+	"os"
 	"sync"
 	"testing"
 	"time"
