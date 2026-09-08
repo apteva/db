@@ -1,0 +1,39 @@
+name: soak
+
+# A nightly soak: concurrent writers, readers, joins on snapshots, index
+# builds, compactions, backups and crash-recovery phases for an hour, with
+# the whole database checked against the writers' models at every phase.
+# Also runnable on demand with a duration of your choosing.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: "how long to run, as a Go duration"
+        default: "60m"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  soak:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          cache-dependency-path: bench/go.sum
+      - name: soak
+        env:
+          SOAK: ${{ github.event.inputs.duration || '60m' }}
+        run: go test -count=1 -timeout 110m -run '^TestSoak$' -v . 2>&1 | grep -E "soak_test|^(--- |ok|FAIL|panic)"
