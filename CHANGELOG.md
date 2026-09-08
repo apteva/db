@@ -34,6 +34,11 @@ supported.
 - `aptevadbctl`: stats, verify, collections, get, dump, agg, compact,
   backup, format, version.
 - Documents: FORMAT.md, DURABILITY.md.
+- Tests: a fault-injection crash test over random writes and recovery,
+  crash coverage of index builds, drops, compaction and the log trim, fuzz
+  targets, and a soak test (`SOAK=<duration>`) with crash-recovery phases;
+  CI runs vet, tests, race and fuzz on Linux and macOS, and the soak
+  nightly.
 
 ### API decisions taken for this release
 
