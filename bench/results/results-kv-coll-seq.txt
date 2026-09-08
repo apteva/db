@@ -1,0 +1,42 @@
+ours               seq    insert              178 ns/op     5621200 ops/s
+ours               seq    settle              125 ns/op     8013554 ops/s
+ours               seq    find-hit           1104 ns/op      906173 ops/s
+ours               seq    find-miss           996 ns/op     1004113 ops/s
+ours               seq    find-hit-par10      225 ns/op     4446736 ops/s
+ours-coll4         seq    insert              309 ns/op     3234971 ops/s
+ours-coll4         seq    settle             1255 ns/op      796886 ops/s
+ours-coll4         seq    find-hit           1053 ns/op      949488 ops/s
+ours-coll4         seq    find-miss           949 ns/op     1053263 ops/s
+ours-coll4         seq    find-hit-par10      217 ns/op     4609868 ops/s
+pebble             seq    insert              631 ns/op     1584847 ops/s
+pebble             seq    settle             1597 ns/op      626120 ops/s
+pebble             seq    find-hit           2629 ns/op      380334 ops/s
+pebble             seq    find-miss          2400 ns/op      416590 ops/s
+pebble             seq    find-hit-par10      521 ns/op     1920379 ops/s
+pebble-coll4       seq    insert              698 ns/op     1432249 ops/s
+pebble-coll4       seq    settle             2813 ns/op      355499 ops/s
+pebble-coll4       seq    find-hit           2608 ns/op      383488 ops/s
+pebble-coll4       seq    find-miss          2333 ns/op      428659 ops/s
+pebble-coll4       seq    find-hit-par10      550 ns/op     1817708 ops/s
+sqlite-c           seq    insert             7783 ns/op      128478 ops/s
+sqlite-c           seq    settle                0 ns/op  3054600993 ops/s
+sqlite-c           seq    find-hit           3104 ns/op      322129 ops/s
+sqlite-c           seq    find-miss          2795 ns/op      357797 ops/s
+sqlite-c           seq    find-hit-par10     2501 ns/op      399869 ops/s
+sqlite-c-tables4   seq    insert             8197 ns/op      122000 ops/s
+sqlite-c-tables4   seq    settle                0 ns/op  3338898164 ops/s
+sqlite-c-tables4   seq    find-hit           3106 ns/op      321923 ops/s
+sqlite-c-tables4   seq    find-miss          2821 ns/op      354430 ops/s
+sqlite-c-tables4   seq    find-hit-par10     2312 ns/op      432592 ops/s
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=seq (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss find-hit-par10       disk
+ours                          178            125           1104            996            225      128MB
+ours-coll4                    309           1255           1053            949            217      134MB
+pebble                        631           1597           2629           2400            521      138MB
+pebble-coll4                  698           2813           2608           2333            550      139MB
+sqlite-c                     7783              0           3104           2795           2501      135MB
+sqlite-c-tables4             8197              0           3106           2821           2312      135MB
+

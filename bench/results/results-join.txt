@@ -1,0 +1,26 @@
+ours       load 0.38s index 1.64s  389.2ms  51.4ms  510.9ms  0.0ms  44.9ms  0.1ms  53.1ms
+ours-par   load 0.48s index 1.61s  60.5ms  13.8ms  254.0ms  0.0ms  39.4ms  0.1ms  14.4ms
+sqlite-c   load 0.92s index 4.23s  854.3ms  44.5ms  905.4ms  0.0ms  70.2ms  791.1ms  46.7ms
+
+joins: 100000 users, 1000000 orders (ms per query, best of 5; lower is better; ours = one core, ours-par = all cores)
+
+no secondary indexes
+query                                                        ours     ours-par     sqlite-c
+orders JOIN users, group by country: count, sum             475.8         63.0        753.1
+shipped orders of FR users: count, avg                      239.3         42.9        117.6
+top 10 spenders (existing users only)                       509.4        251.5        925.8
+one user's orders (point join)                               75.1         72.0         46.2
+users with no orders (anti-join)                            131.7        109.3       1133.4
+
+with indexes
+query                                                        ours     ours-par     sqlite-c
+orders JOIN users, group by country: count, sum             389.2         60.5        854.3
+shipped orders of FR users: count, avg                       51.4         13.8         44.5
+top 10 spenders (existing users only)                       510.9        254.0        905.4
+one user's orders (point join)                                0.0          0.0          0.0
+users with no orders (anti-join)                             44.9         39.4         70.2
+indexed: orders > 999.9 JOIN users, by country                0.1          0.1        791.1
+indexed: FR users JOIN their orders, per user                53.1         14.4         46.7
+
+load both collections (seconds)                              0.38         0.48         0.92
+build indexes (seconds)                                      1.64         1.61         4.23

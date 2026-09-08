@@ -1,0 +1,45 @@
+ours               random insert             1341 ns/op      745558 ops/s
+ours               random settle             1218 ns/op      821160 ops/s
+ours               random find-hit            867 ns/op     1153435 ops/s
+ours               random find-miss           654 ns/op     1528655 ops/s
+ours               random scan                 71 ns/op    14137923 ops/s
+ours               random find-hit-par10      734 ns/op     1362172 ops/s
+ours               random insert             1527 ns/op  (rep 2)
+ours               random settle              987 ns/op  (rep 2)
+ours               random find-hit            860 ns/op  (rep 2)
+ours               random find-miss          1531 ns/op  (rep 2)
+ours               random scan                 73 ns/op  (rep 2)
+ours               random find-hit-par10      672 ns/op  (rep 2)
+pebble             random insert             1801 ns/op      555396 ops/s
+pebble             random settle             3756 ns/op      266238 ops/s
+pebble             random find-hit          10121 ns/op       98809 ops/s
+pebble             random find-miss         10309 ns/op       97006 ops/s
+pebble             random scan                105 ns/op     9530856 ops/s
+pebble             random find-hit-par10     7616 ns/op      131308 ops/s
+pebble             random insert             1966 ns/op  (rep 2)
+pebble             random settle             4535 ns/op  (rep 2)
+pebble             random find-hit          12264 ns/op  (rep 2)
+pebble             random find-miss         10261 ns/op  (rep 2)
+pebble             random scan                118 ns/op  (rep 2)
+pebble             random find-hit-par10     5470 ns/op  (rep 2)
+sqlite-c-bulk-mmap random insert             4996 ns/op      200168 ops/s
+sqlite-c-bulk-mmap random settle               16 ns/op    61114268 ops/s
+sqlite-c-bulk-mmap random find-hit           2751 ns/op      363568 ops/s
+sqlite-c-bulk-mmap random find-miss          2608 ns/op      383393 ops/s
+sqlite-c-bulk-mmap random scan                205 ns/op     4868835 ops/s
+sqlite-c-bulk-mmap random find-hit-par10     1772 ns/op      564386 ops/s
+sqlite-c-bulk-mmap random insert             5047 ns/op  (rep 2)
+sqlite-c-bulk-mmap random settle                3 ns/op  (rep 2)
+sqlite-c-bulk-mmap random find-hit           3150 ns/op  (rep 2)
+sqlite-c-bulk-mmap random find-miss          3227 ns/op  (rep 2)
+sqlite-c-bulk-mmap random scan                133 ns/op  (rep 2)
+sqlite-c-bulk-mmap random find-hit-par10     1716 ns/op  (rep 2)
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours                         1341            987            860            654             71            672      128MB
+pebble                       1801           3756          10121          10261            105           5470      142MB
+sqlite-c-bulk-mmap           4996              3           2751           2608            133           1716      134MB
+

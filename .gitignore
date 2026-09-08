@@ -1,0 +1,14 @@
+# built binaries
+/aptevadb-bench
+/aptevadbctl
+/bench/aptevadb-bench
+*.test
+
+# profiles and scratch output
+*.prof
+/bench/results/*.log
+/bench/results/*-out.txt
+/bench/results/test-list.txt
+
+# databases created by the demo or by benchmark runs kept with -dir
+/demo-db/

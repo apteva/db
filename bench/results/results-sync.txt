@@ -1,0 +1,9 @@
+
+keys=3000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss       disk
+ours-sync                 8470917           9533            135            112        1MB
+pebble-sync               7472628          18845           2036           1048        1MB
+sqlite-c-sync             6756046           7496           1702           1481        0MB
+

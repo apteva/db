@@ -1,0 +1,392 @@
+package engine
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"math"
+	"sort"
+)
+
+// Secondary indexes live in the same B+tree under a reserved key prefix, so
+// they are maintained, checkpointed, snapshotted and recovered together with
+// the data. User keys may not begin with the reserved byte.
+//
+//	catalog entry:  \x00 c <name>                       -> {id, field}
+//	index entry:    \x00 i <id u32> <valkey> \x00 <pk>  -> empty
+//
+// <valkey> is an order-preserving encoding whose byte order matches
+// compareValues, so a prefix scan of an index yields primary keys ordered by
+// the indexed field. Numbers are indexed as float64, so integer keys beyond
+// 2^53 may collide in the index (the fetched document is always exact).
+const reservedPrefix = 0x00
+
+var (
+	ErrReservedKey  = errors.New("engine: user keys may not begin with 0x00")
+	ErrIndexExists  = errors.New("engine: index already exists")
+	ErrNoSuchIndex  = errors.New("engine: no such index")
+	ErrIndexField   = errors.New("engine: indexed value is not a scalar")
+)
+
+type indexDef struct {
+	ID    uint32 `json:"id"`
+	Field string `json:"field"`
+}
+
+func catalogKey(name string) []byte { return append([]byte{reservedPrefix, 'c'}, name...) }
+
+func indexPrefix(id uint32) []byte {
+	b := []byte{reservedPrefix, 'i', 0, 0, 0, 0}
+	le.PutUint32(b[2:], id)
+	return b
+}
+
+// encodeIndexValue appends an order-preserving encoding of v to dst.
+func encodeIndexValue(dst []byte, v value) ([]byte, error) {
+	dst = append(dst, byte(rank(v)))
+	switch v.k {
+	case kMissing, kNull:
+	case kBool:
+		dst = append(dst, byte(v.i))
+	case kInt, kFloat:
+		dst = appendOrderedFloat(dst, v.num())
+	case kString:
+		dst = appendOrderedBytes(dst, v.s)
+	default:
+		return nil, ErrIndexField
+	}
+	return dst, nil
+}
+
+// appendOrderedFloat writes a float so unsigned byte order matches numeric order.
+func appendOrderedFloat(dst []byte, f float64) []byte {
+	bits := math.Float64bits(f)
+	if bits&(1<<63) != 0 {
+		bits = ^bits // negatives: flip all bits
+	} else {
+		bits |= 1 << 63 // positives: flip sign
+	}
+	return le.AppendUint64(dst, bitsBE(bits))
+}
+
+// bitsBE returns b with bytes reversed so a little-endian append stores big-endian.
+func bitsBE(b uint64) uint64 {
+	return (b&0xff)<<56 | (b&0xff00)<<40 | (b&0xff0000)<<24 | (b&0xff000000)<<8 |
+		(b&0xff00000000)>>8 | (b&0xff0000000000)>>24 | (b&0xff000000000000)>>40 | (b >> 56)
+}
+
+// appendOrderedBytes writes s escaped so a following separator sorts correctly:
+// 0x00 -> 0x00 0xff, terminated by 0x00 0x00.
+func appendOrderedBytes(dst, s []byte) []byte {
+	for _, c := range s {
+		if c == 0 {
+			dst = append(dst, 0, 0xff)
+		} else {
+			dst = append(dst, c)
+		}
+	}
+	return append(dst, 0, 0)
+}
+
+// indexEntryKey builds the full index key for (value, primaryKey).
+func indexEntryKey(id uint32, v value, pk []byte) ([]byte, error) {
+	k := indexPrefix(id)
+	k, err := encodeIndexValue(k, v)
+	if err != nil {
+		return nil, err
+	}
+	k = append(k, 0) // separator before the primary key
+	return append(k, pk...), nil
+}
+
+// loadCatalog reads every index definition. Writer lock held during open.
+func (db *DB) loadCatalog() error {
+	db.indexes = map[string]indexDef{}
+	lo := []byte{reservedPrefix, 'c'}
+	hi := []byte{reservedPrefix, 'c', 0xff}
+	return db.scanLocked(lo, hi, func(k, v []byte) bool {
+		var d indexDef
+		if json.Unmarshal(v, &d) == nil {
+			db.indexes[string(k[2:])] = d
+			if d.ID >= db.nextIndexID {
+				db.nextIndexID = d.ID + 1
+			}
+		}
+		return true
+	})
+}
+
+// CreateIndex builds an index on a scalar field of stored documents. It scans
+// the whole database once. Existing documents lacking the field, or whose
+// field is not a scalar, are simply not indexed.
+func (db *DB) CreateIndex(name, field string) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+	if db.closed {
+		return ErrClosed
+	}
+	if db.failed != nil {
+		return db.failed
+	}
+	if _, ok := db.indexes[name]; ok {
+		return ErrIndexExists
+	}
+	def := indexDef{ID: db.nextIndexID, Field: field}
+	b := db.NewBatch()
+	// index every current document
+	var derr error
+	err := db.scanLocked(nil, nil, func(k, val []byte) bool {
+		if len(k) > 0 && k[0] == reservedPrefix {
+			return true
+		}
+		v := docFieldPath(val, field)
+		if v.k == kMissing || v.k == kNull {
+			return true
+		}
+		ek, err := indexEntryKey(def.ID, v, k)
+		if err != nil {
+			return true // non-scalar: skip
+		}
+		if err := b.Insert(ek, nil); err != nil {
+			derr = err
+			return false
+		}
+		return true
+	})
+	if err == nil {
+		err = derr
+	}
+	if err != nil {
+		return err
+	}
+	meta, _ := json.Marshal(def)
+	if err := b.Insert(catalogKey(name), meta); err != nil {
+		return err
+	}
+	if err := b.commitLocked(); err != nil {
+		return err
+	}
+	db.indexes[name] = def
+	db.nextIndexID++
+	return nil
+}
+
+// DropIndex removes an index and all its entries.
+func (db *DB) DropIndex(name string) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+	if db.closed {
+		return ErrClosed
+	}
+	def, ok := db.indexes[name]
+	if !ok {
+		return ErrNoSuchIndex
+	}
+	b := db.NewBatch()
+	pfx := indexPrefix(def.ID)
+	hi := append(append([]byte(nil), pfx...), 0xff, 0xff, 0xff, 0xff)
+	var derr error
+	err := db.scanLocked(pfx, hi, func(k, _ []byte) bool {
+		if derr = b.Delete(append([]byte(nil), k...)); derr != nil {
+			return false
+		}
+		return true
+	})
+	if err == nil {
+		err = derr
+	}
+	if err != nil {
+		return err
+	}
+	if err := b.Delete(catalogKey(name)); err != nil {
+		return err
+	}
+	if err := b.commitLocked(); err != nil {
+		return err
+	}
+	delete(db.indexes, name)
+	return nil
+}
+
+// Indexes returns the names and fields of the defined indexes.
+func (db *DB) Indexes() map[string]string {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	out := map[string]string{}
+	for name, def := range db.indexes {
+		out[name] = def.Field
+	}
+	return out
+}
+
+// indexOpsLocked appends the index maintenance for changing key from oldVal to
+// newVal (newVal nil = delete) to batch b. Writer lock held.
+func (db *DB) indexOpsLocked(b *Batch, key, oldVal, newVal []byte) error {
+	for _, def := range db.indexes {
+		if oldVal != nil {
+			if ov := docFieldPath(oldVal, def.Field); ov.k != kMissing && ov.k != kNull {
+				if ek, err := indexEntryKey(def.ID, ov, key); err == nil {
+					if err := b.Delete(ek); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		if newVal != nil {
+			if nv := docFieldPath(newVal, def.Field); nv.k != kMissing && nv.k != kNull {
+				if ek, err := indexEntryKey(def.ID, nv, key); err == nil {
+					if err := b.Insert(ek, nil); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// docFieldPath resolves a dotted path against a document value.
+func docFieldPath(doc []byte, path string) value {
+	v := value{k: kDoc, s: doc}
+	return pathValue(v, path)
+}
+
+// ScanIndex calls fn(indexedValue, primaryKey) for entries whose value is in
+// [lo, hi) (nil bounds are open), in index order. lo and hi are JSON scalars.
+func (db *DB) ScanIndex(name string, lo, hi []byte, fn func(primaryKey []byte) bool) error {
+	db.mu.RLock()
+	def, ok := db.indexes[name]
+	db.mu.RUnlock()
+	if !ok {
+		return ErrNoSuchIndex
+	}
+	start, end, err := indexBounds(def.ID, lo, hi)
+	if err != nil {
+		return err
+	}
+	return db.Scan(start, end, func(k, _ []byte) bool {
+		return fn(primaryKeyOf(k))
+	})
+}
+
+func indexBounds(id uint32, lo, hi []byte) (start, end []byte, err error) {
+	pfx := indexPrefix(id)
+	start = append([]byte(nil), pfx...)
+	if lo != nil {
+		v, err := jsonScalar(lo)
+		if err != nil {
+			return nil, nil, err
+		}
+		if start, err = encodeIndexValue(start, v); err != nil {
+			return nil, nil, err
+		}
+	}
+	if hi == nil {
+		end = append(append([]byte(nil), pfx...), 0xff, 0xff, 0xff, 0xff)
+	} else {
+		v, err := jsonScalar(hi)
+		if err != nil {
+			return nil, nil, err
+		}
+		end = append([]byte(nil), pfx...)
+		if end, err = encodeIndexValue(end, v); err != nil {
+			return nil, nil, err
+		}
+	}
+	return start, end, nil
+}
+
+func jsonScalar(raw []byte) (value, error) {
+	var a any
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	if err := dec.Decode(&a); err != nil {
+		return value{}, err
+	}
+	v := valueOf(a)
+	if v.k == kDoc || v.k == kArray || v.k == kMissing {
+		return value{}, ErrIndexField
+	}
+	return v, nil
+}
+
+// primaryKeyOf extracts the primary key from an index entry key: everything
+// after the value terminator. The value encoding never contains a bare 0x00
+// except its own 0x00 0x00 terminator, so the first 0x00 0x00 ends the value.
+func primaryKeyOf(k []byte) []byte {
+	i := 6 // past \x00 i <id u32>
+	for i < len(k) {
+		if k[i] == 0 {
+			if i+1 < len(k) && k[i+1] == 0xff {
+				i += 2
+				continue
+			}
+			// value terminator 0x00 0x00, then the separator 0x00, then pk
+			return k[i+3:]
+		}
+		i++
+	}
+	return nil
+}
+
+// indexedEqualitySource returns a Source over documents whose indexed field
+// equals val, and true, when the pipeline's leading match is a single
+// equality on an indexed field. Otherwise it returns false.
+func (db *DB) indexedSourceFor(preds []pred) (Source, bool) {
+	if len(preds) != 1 {
+		return nil, false
+	}
+	p := preds[0]
+	db.mu.RLock()
+	var def indexDef
+	found := false
+	for _, d := range db.indexes {
+		if d.Field == p.field {
+			def, found = d, true
+			break
+		}
+	}
+	db.mu.RUnlock()
+	if !found {
+		return nil, false
+	}
+	var lo, hi []byte
+	switch p.op {
+	case opEq:
+		lo, _ = encodeIndexValue(indexPrefix(def.ID), p.v)
+		hi = append(append([]byte(nil), lo...), 0) // include the separator range
+		hi = append(hi, 0xff)
+	case opGt, opGte:
+		s, _ := encodeIndexValue(indexPrefix(def.ID), p.v)
+		if p.op == opGt {
+			s = append(s, 0xff) // skip past this value's entries
+		}
+		lo = s
+		hi = append(append([]byte(nil), indexPrefix(def.ID)...), 0xff, 0xff, 0xff, 0xff)
+	case opLt, opLte:
+		lo = indexPrefix(def.ID)
+		s, _ := encodeIndexValue(indexPrefix(def.ID), p.v)
+		if p.op == opLte {
+			s = append(s, 0xff)
+		}
+		hi = s
+	default:
+		return nil, false
+	}
+	return func(yield func(k, v []byte) bool) error {
+		var vbuf []byte
+		return db.Scan(lo, hi, func(k, _ []byte) bool {
+			pk := primaryKeyOf(k)
+			v, ok, err := db.Find(pk, vbuf)
+			if err != nil || !ok {
+				return err == nil
+			}
+			vbuf = v
+			return yield(pk, v)
+		})
+	}, true
+}
+
+var _ = sort.Search
+var _ = fmt.Sprint

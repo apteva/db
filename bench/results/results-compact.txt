@@ -1,0 +1,8 @@
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss       disk
+ours                          886            192            795            533      154MB
+ours-compact                  856            487            765            528      128MB
+

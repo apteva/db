@@ -1,0 +1,93 @@
+ours-sync          random insert          5822791 ns/op         172 ops/s
+ours-sync          random insert-par10     616576 ns/op        1622 ops/s
+ours-sync          random insert-par50     133384 ns/op        7497 ops/s
+ours-sync          random insert          5595595 ns/op  (rep 2)
+ours-sync          random insert-par10     554560 ns/op  (rep 2)
+ours-sync          random insert-par50     147270 ns/op  (rep 2)
+ours-sync-batch1000 random insert             6970 ns/op      143479 ops/s
+ours-sync-batch1000 random insert-par10       6999 ns/op      142882 ops/s
+ours-sync-batch1000 random insert-par50       7261 ns/op      137721 ops/s
+ours-sync-batch1000 random insert             8221 ns/op  (rep 2)
+ours-sync-batch1000 random insert-par10      13310 ns/op  (rep 2)
+ours-sync-batch1000 random insert-par50      13161 ns/op  (rep 2)
+pebble-sync        random insert          5828612 ns/op         172 ops/s
+pebble-sync        random insert-par10    1236009 ns/op         809 ops/s
+pebble-sync        random insert-par50     334569 ns/op        2989 ops/s
+pebble-sync        random insert          5416673 ns/op  (rep 2)
+pebble-sync        random insert-par10    1062894 ns/op  (rep 2)
+pebble-sync        random insert-par50     234409 ns/op  (rep 2)
+pebble-sync-batch1000 random insert            14106 ns/op       70892 ops/s
+pebble-sync-batch1000 random insert-par10       6008 ns/op      166453 ops/s
+pebble-sync-batch1000 random insert-par50      11703 ns/op       85448 ops/s
+pebble-sync-batch1000 random insert            19703 ns/op  (rep 2)
+pebble-sync-batch1000 random insert-par10       7476 ns/op  (rep 2)
+pebble-sync-batch1000 random insert-par50      10163 ns/op  (rep 2)
+sqlite-c-sync      random insert          5572519 ns/op         179 ops/s
+sqlite-c-sync      random insert-par10    6046072 ns/op         165 ops/s
+sqlite-c-sync      random insert-par50    5782110 ns/op         173 ops/s
+sqlite-c-sync      random insert          5431020 ns/op  (rep 2)
+sqlite-c-sync      random insert-par10    6155249 ns/op  (rep 2)
+sqlite-c-sync      random insert-par50    5462037 ns/op  (rep 2)
+sqlite-c-sync-txn1000 random insert             8511 ns/op      117498 ops/s
+sqlite-c-sync-txn1000 random insert-par10      11322 ns/op       88328 ops/s
+sqlite-c-sync-txn1000 random insert-par50      20059 ns/op       49852 ops/s
+sqlite-c-sync-txn1000 random insert             6732 ns/op  (rep 2)
+sqlite-c-sync-txn1000 random insert-par10      10287 ns/op  (rep 2)
+sqlite-c-sync-txn1000 random insert-par50      16736 ns/op  (rep 2)
+ours-sync          seq    insert          5236569 ns/op         191 ops/s
+ours-sync          seq    insert-par10     561273 ns/op        1782 ops/s
+ours-sync          seq    insert-par50     138161 ns/op        7238 ops/s
+ours-sync          seq    insert          5620915 ns/op  (rep 2)
+ours-sync          seq    insert-par10     484631 ns/op  (rep 2)
+ours-sync          seq    insert-par50     112308 ns/op  (rep 2)
+ours-sync-batch1000 seq    insert             5005 ns/op      199819 ops/s
+ours-sync-batch1000 seq    insert-par10       5283 ns/op      189301 ops/s
+ours-sync-batch1000 seq    insert-par50       7033 ns/op      142187 ops/s
+ours-sync-batch1000 seq    insert             5072 ns/op  (rep 2)
+ours-sync-batch1000 seq    insert-par10       5250 ns/op  (rep 2)
+ours-sync-batch1000 seq    insert-par50       5036 ns/op  (rep 2)
+pebble-sync        seq    insert          5100727 ns/op         196 ops/s
+pebble-sync        seq    insert-par10    1154427 ns/op         866 ops/s
+pebble-sync        seq    insert-par50     216876 ns/op        4611 ops/s
+pebble-sync        seq    insert          5228584 ns/op  (rep 2)
+pebble-sync        seq    insert-par10    1659494 ns/op  (rep 2)
+pebble-sync        seq    insert-par50     247772 ns/op  (rep 2)
+pebble-sync-batch1000 seq    insert            15148 ns/op       66013 ops/s
+pebble-sync-batch1000 seq    insert-par10       6835 ns/op      146314 ops/s
+pebble-sync-batch1000 seq    insert-par50      11980 ns/op       83474 ops/s
+pebble-sync-batch1000 seq    insert            12069 ns/op  (rep 2)
+pebble-sync-batch1000 seq    insert-par10       6186 ns/op  (rep 2)
+pebble-sync-batch1000 seq    insert-par50      11053 ns/op  (rep 2)
+sqlite-c-sync      seq    insert          5207054 ns/op         192 ops/s
+sqlite-c-sync      seq    insert-par10    5066557 ns/op         197 ops/s
+sqlite-c-sync      seq    insert-par50    5314300 ns/op         188 ops/s
+sqlite-c-sync      seq    insert          5592539 ns/op  (rep 2)
+sqlite-c-sync      seq    insert-par10    5272974 ns/op  (rep 2)
+sqlite-c-sync      seq    insert-par50    5418797 ns/op  (rep 2)
+sqlite-c-sync-txn1000 seq    insert            19330 ns/op       51734 ops/s
+sqlite-c-sync-txn1000 seq    insert-par10      10592 ns/op       94411 ops/s
+sqlite-c-sync-txn1000 seq    insert-par50      20976 ns/op       47674 ops/s
+sqlite-c-sync-txn1000 seq    insert             9375 ns/op  (rep 2)
+sqlite-c-sync-txn1000 seq    insert-par10       9660 ns/op  (rep 2)
+sqlite-c-sync-txn1000 seq    insert-par50      11613 ns/op  (rep 2)
+
+keys=3000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert   insert-par10   insert-par50       disk
+ours-sync                 5595595         554560         133384        3MB
+ours-sync-batch1000           6970           6999           7261        3MB
+pebble-sync               5416673        1062894         234409        1MB
+pebble-sync-batch1000          14106           6008          10163        1MB
+sqlite-c-sync             5431020        6046072        5462037        1MB
+sqlite-c-sync-txn1000           6732          10287          16736        1MB
+
+workload=seq (ns/op, lower is better)
+engine                     insert   insert-par10   insert-par50       disk
+ours-sync                 5236569         484631         112308        3MB
+ours-sync-batch1000           5005           5250           5036        2MB
+pebble-sync               5100727        1154427         216876        1MB
+pebble-sync-batch1000          12069           6186          11053        1MB
+sqlite-c-sync             5207054        5066557        5314300        1MB
+sqlite-c-sync-txn1000           9375           9660          11613        1MB
+

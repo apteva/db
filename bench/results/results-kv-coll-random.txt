@@ -1,0 +1,42 @@
+ours               random insert              914 ns/op     1094336 ops/s
+ours               random settle              230 ns/op     4343843 ops/s
+ours               random find-hit            830 ns/op     1204892 ops/s
+ours               random find-miss           562 ns/op     1778491 ops/s
+ours               random find-hit-par10      210 ns/op     4761130 ops/s
+ours-coll4         random insert              869 ns/op     1150889 ops/s
+ours-coll4         random settle              239 ns/op     4190292 ops/s
+ours-coll4         random find-hit            811 ns/op     1233562 ops/s
+ours-coll4         random find-miss           559 ns/op     1788804 ops/s
+ours-coll4         random find-hit-par10      213 ns/op     4694354 ops/s
+pebble             random insert             1573 ns/op      635742 ops/s
+pebble             random settle             2821 ns/op      354501 ops/s
+pebble             random find-hit           2569 ns/op      389307 ops/s
+pebble             random find-miss          2292 ns/op      436351 ops/s
+pebble             random find-hit-par10      526 ns/op     1902796 ops/s
+pebble-coll4       random insert             1614 ns/op      619454 ops/s
+pebble-coll4       random settle             2651 ns/op      377285 ops/s
+pebble-coll4       random find-hit           2714 ns/op      368514 ops/s
+pebble-coll4       random find-miss          2354 ns/op      424852 ops/s
+pebble-coll4       random find-hit-par10      586 ns/op     1705597 ops/s
+sqlite-c           random insert            15147 ns/op       66021 ops/s
+sqlite-c           random settle                1 ns/op  1167485074 ops/s
+sqlite-c           random find-hit           3075 ns/op      325225 ops/s
+sqlite-c           random find-miss          2798 ns/op      357358 ops/s
+sqlite-c           random find-hit-par10     2289 ns/op      436899 ops/s
+sqlite-c-tables4   random insert            15036 ns/op       66506 ops/s
+sqlite-c-tables4   random settle                1 ns/op  1177163037 ops/s
+sqlite-c-tables4   random find-hit           3138 ns/op      318645 ops/s
+sqlite-c-tables4   random find-miss          2864 ns/op      349124 ops/s
+sqlite-c-tables4   random find-hit-par10     2136 ns/op      468260 ops/s
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss find-hit-par10       disk
+ours                          914            230            830            562            210      154MB
+ours-coll4                    869            239            811            559            213      154MB
+pebble                       1573           2821           2569           2292            526      200MB
+pebble-coll4                 1614           2651           2714           2354            586      201MB
+sqlite-c                    15147              1           3075           2798           2289      134MB
+sqlite-c-tables4            15036              1           3138           2864           2136      134MB
+

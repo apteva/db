@@ -1,0 +1,45 @@
+ours               seq    insert              199 ns/op     5036784 ops/s
+ours               seq    settle              720 ns/op     1389520 ops/s
+ours               seq    find-hit           1042 ns/op      959309 ops/s
+ours               seq    find-miss           972 ns/op     1028581 ops/s
+ours               seq    scan                 46 ns/op    21871270 ops/s
+ours               seq    find-hit-par10      230 ns/op     4339209 ops/s
+ours               seq    insert              176 ns/op  (rep 2)
+ours               seq    settle              550 ns/op  (rep 2)
+ours               seq    find-hit           1043 ns/op  (rep 2)
+ours               seq    find-miss           939 ns/op  (rep 2)
+ours               seq    scan                 48 ns/op  (rep 2)
+ours               seq    find-hit-par10      229 ns/op  (rep 2)
+pebble             seq    insert              681 ns/op     1467460 ops/s
+pebble             seq    settle             2129 ns/op      469708 ops/s
+pebble             seq    find-hit           2674 ns/op      373954 ops/s
+pebble             seq    find-miss          2712 ns/op      368765 ops/s
+pebble             seq    scan                 57 ns/op    17530981 ops/s
+pebble             seq    find-hit-par10      769 ns/op     1300307 ops/s
+pebble             seq    insert              712 ns/op  (rep 2)
+pebble             seq    settle             1823 ns/op  (rep 2)
+pebble             seq    find-hit           2614 ns/op  (rep 2)
+pebble             seq    find-miss          2255 ns/op  (rep 2)
+pebble             seq    scan                 59 ns/op  (rep 2)
+pebble             seq    find-hit-par10      549 ns/op  (rep 2)
+sqlite-c           seq    insert            11030 ns/op       90658 ops/s
+sqlite-c           seq    settle                0 ns/op  2441752006 ops/s
+sqlite-c           seq    find-hit           3025 ns/op      330600 ops/s
+sqlite-c           seq    find-miss          2736 ns/op      365492 ops/s
+sqlite-c           seq    scan                118 ns/op     8466092 ops/s
+sqlite-c           seq    find-hit-par10     2732 ns/op      366001 ops/s
+sqlite-c           seq    insert             8803 ns/op  (rep 2)
+sqlite-c           seq    settle                0 ns/op  (rep 2)
+sqlite-c           seq    find-hit           3313 ns/op  (rep 2)
+sqlite-c           seq    find-miss          2799 ns/op  (rep 2)
+sqlite-c           seq    scan                119 ns/op  (rep 2)
+sqlite-c           seq    find-hit-par10     2664 ns/op  (rep 2)
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=seq (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours                          176            550           1042            939             46            229      128MB
+pebble                        681           1823           2614           2255             57            549      138MB
+sqlite-c                     8803              0           3025           2736            118           2664      135MB
+
