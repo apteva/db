@@ -1,0 +1,66 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: vet and test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go version
+      - name: vet
+        run: go vet ./...
+      - name: build
+        run: go build ./...
+      - name: unit tests
+        run: go test -count=1 -timeout 20m ./...
+      - name: benchmark harness builds
+        # its own module: Pebble and the SQLite bindings stay out of the engine's graph
+        run: cd bench && go vet ./... && go build ./...
+
+  race:
+    name: race detector (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: race pass
+        run: go test -race -count=1 -timeout 45m .
+
+  fuzz:
+    name: fuzz smoke (ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: documents
+        run: go test -run='^$' -fuzz='^FuzzDocument$' -fuzztime=45s .
+      - name: pipelines
+        run: go test -run='^$' -fuzz='^FuzzPipeline$' -fuzztime=45s .
+      - name: pages
+        run: go test -run='^$' -fuzz='^FuzzPage$' -fuzztime=45s .
