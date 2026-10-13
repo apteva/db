@@ -504,6 +504,12 @@ func (db *DB) Close() error {
 	if e := db.pager.close(); err == nil {
 		err = e
 	}
+	if db.dirLock != nil {
+		if e := db.dirLock.Close(); err == nil {
+			err = e
+		}
+		db.dirLock = nil
+	}
 	return err
 }
 
@@ -536,8 +542,15 @@ func (db *DB) crash() {
 	db.cond.Broadcast()
 	db.wal.close()
 	db.pager.close()
+	if db.dirLock != nil {
+		db.dirLock.Close()
+		db.dirLock = nil
+	}
 	db.mu.Unlock()
 }
+
+var renameCompactionFile = os.Rename
+var syncCompactionDirectory = syncRestoreDirectory
 
 // ---- compaction and backup, from a snapshot
 
@@ -665,6 +678,10 @@ func (db *DB) compact(ctx context.Context) error {
 	db.noteHold("swap-replay", t1)
 	t1 = time.Now()
 	ndb.wal.close()
+	if ndb.dirLock != nil {
+		ndb.dirLock.Close()
+		ndb.dirLock = nil
+	}
 	db.pager.close()
 	db.noteHold("swap-close", t1)
 	t1 = time.Now()
@@ -672,10 +689,14 @@ func (db *DB) compact(ctx context.Context) error {
 	// takes tens of milliseconds, so it happens after the lock is released
 	old := filepath.Join(db.dir, "data.old")
 	os.Remove(old)
-	if err := os.Rename(filepath.Join(db.dir, "data"), old); err != nil {
+	if err := renameCompactionFile(filepath.Join(db.dir, "data"), old); err != nil {
+		db.failed = err
+		ndb.closeQuiet()
 		return err
 	}
-	if err := os.Rename(filepath.Join(tmp, "data"), filepath.Join(db.dir, "data")); err != nil {
+	if err := renameCompactionFile(filepath.Join(tmp, "data"), filepath.Join(db.dir, "data")); err != nil {
+		db.failed = err
+		ndb.closeQuiet()
 		return err
 	}
 	db.noteHold("swap-rename", t1)
@@ -691,18 +712,27 @@ func (db *DB) compact(ctx context.Context) error {
 	db.cond.Broadcast()
 	db.noteHold("compact-swap-hold", t)
 	pg, warmLimit := db.pager, db.pager.hwm
+
 	db.mu.Unlock()
-	os.Remove(old)
-	os.RemoveAll(tmp)
-	if d, err := os.Open(db.dir); err == nil {
-		d.Sync()
-		d.Close()
+	// Publish both renames durably before removing the fallback or trimming logs.
+	publishErr := syncCompactionDirectory(db.dir)
+	if publishErr == nil {
+		os.Remove(old)
+		os.RemoveAll(tmp)
+		publishErr = syncCompactionDirectory(db.dir)
 	}
 	var warmErr error
-	if pg.limit == 0 {
+	if publishErr == nil && pg.limit == 0 {
 		warmErr = db.warmCompactedPages(pg, warmLimit)
 	}
-	db.mu.Lock() // matched by the deferred unlock
+	db.mu.Lock() // matched by deferred unlock
+	if publishErr != nil {
+		db.failed = publishErr
+		return publishErr
+	}
+	if warmErr != nil {
+		db.failed = warmErr
+	}
 	return warmErr
 }
 
@@ -814,6 +844,10 @@ func (db *DB) closeQuiet() {
 	db.closed = true
 	db.wal.close()
 	db.pager.close()
+	if db.dirLock != nil {
+		db.dirLock.Close()
+		db.dirLock = nil
+	}
 	db.mu.Unlock()
 }
 
@@ -823,6 +857,11 @@ func (db *DB) closeQuiet() {
 // ctx cancels the copy, which is then removed.
 func (db *DB) Backup(ctx context.Context, dir string) error {
 	ctx = orBackground(ctx)
+	absoluteDir, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	dir = absoluteDir
 	if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
 		return fmt.Errorf("aptevadb: backup directory %s is not empty", dir)
 	}

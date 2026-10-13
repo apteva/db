@@ -215,7 +215,7 @@ func (db *DB) loadIndexes() error {
 	err := db.scan(view{db, nil}, lo, hi, func(k, v []byte) bool {
 		var d indexDef
 
-		if len(k) <= 6 || len(k)-6 > 255 || json.Unmarshal(v, &d) != nil || d.ID == 0 || d.Field == "" || seenIDs[d.ID] || (d.Unique && db.readFormat != 0 && db.readFormat < 6) {
+		if len(k) <= 6 || len(k) > MaxKeySize || json.Unmarshal(v, &d) != nil || d.ID == 0 || d.Field == "" || seenIDs[d.ID] || (d.Unique && db.readFormat != 0 && db.readFormat < 6) {
 			invalid = ErrCorrupt
 			return false
 		}
@@ -347,7 +347,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if name == "" || !validCollectionName(name) || field == "" || !utf8.ValidString(field) {
+	if !validIndexName(name) || field == "" || !utf8.ValidString(field) {
 		return fmt.Errorf("%w: index name and field are required", ErrPipeline)
 	}
 	if err := c.check(); err != nil {

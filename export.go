@@ -88,6 +88,11 @@ func (db *DB) Export(ctx context.Context, w io.Writer) error {
 // directory. Failed/interrupted imports remain marked and cannot be opened.
 // The export is trusted local input, not an unbounded network endpoint.
 func Import(ctx context.Context, r io.Reader, destination string) error {
+	absoluteDestination, err := filepath.Abs(destination)
+	if err != nil {
+		return err
+	}
+	destination = absoluteDestination
 	ctx = orBackground(ctx)
 	if err := ctx.Err(); err != nil {
 		return err

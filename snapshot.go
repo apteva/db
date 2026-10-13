@@ -209,6 +209,9 @@ func (v view) root() uint32 {
 }
 
 func (v view) page(id uint32) (page, error) {
+	if v.db.failed != nil {
+		return nil, v.db.failed
+	}
 	if v.snap != nil {
 		if v.snap.closed {
 			return nil, ErrClosed

@@ -19,6 +19,7 @@ the migration.
   upgrades from 3–5 and a real format-5 compatibility fixture.
 - Typed document helpers, streaming filters and safe document updates.
 - Verified restore, lossless JSON-lines export/import, durable CLI defaults.
+- Stable directory locking protects recovery and compaction rename windows.
 - Concurrent JSON encoding fixed; short writes detected; WAL I/O failures sticky.
 - HTTP v1 server with authentication/TLS, deadlines, bounded requests/transactions;
   pooled Go client with streaming results and explicit uncertain-write errors.

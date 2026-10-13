@@ -64,6 +64,7 @@ reports ErrCommitUnknown for transport failures and never retries writes itself.
 | User key | 1–1,024 bytes |
 | Opaque value | up to 1 GiB |
 | Index entry | up to 1,024 encoded bytes, including value and primary key |
+| Index name | 1–1,018 UTF-8 bytes |
 | Named collections | IDs 1–65,535; IDs are not reused while a DB remains open |
 | Computed fields | define on empty collections; scalar outputs; checked arithmetic |
 | Computed collections | no chaining; scalar groups with integer sums/counts; 256 MiB staging |
@@ -84,3 +85,7 @@ snapshots, quarantined pages, stalls, indexes and lock durations. Health() expos
 fatal write state. `verify` checks tree structure plus secondary indexes. Compact
 reclaims space, but is refused while snapshots or an index build are open. Plan
 free space for a second data file during compaction/backup/restore.
+
+Directory ownership is protected by a persistent `LOCK` file before recovery or
+compaction cleanup starts, and remains held across data-file swaps. Do not remove
+that file while the database is open. The data-file lock is retained as well.

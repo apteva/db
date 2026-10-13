@@ -21,7 +21,7 @@ are not implemented. Protect the token accordingly. The daemon uses DurableOptio
 and gracefully stops requests, releases transaction snapshots and closes the DB.
 
 ```go
-remote, err := client.New("https://db.example.dev:5282", client.Options{Token: token})
+remote, err := client.New("https://db.example.com:5282", client.Options{Token: token})
 if err != nil { return err }
 defer remote.Close()
 err = remote.CreateCollection(ctx, "users")

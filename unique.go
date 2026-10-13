@@ -48,7 +48,7 @@ func (c *Collection) createUniqueIndex(ctx context.Context, name, field string) 
 	if c.snap != nil {
 		return ErrReadOnly
 	}
-	if name == "" || !validCollectionName(name) || field == "" || !utf8.ValidString(field) {
+	if !validIndexName(name) || field == "" || !utf8.ValidString(field) {
 		return fmt.Errorf("%w: invalid index name or field", ErrPipeline)
 	}
 	ctx = orBackground(ctx)

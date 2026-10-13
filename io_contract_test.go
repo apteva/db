@@ -32,6 +32,7 @@ func (f *failingWriteFile) WriteAt(b []byte, off int64) (int, error) {
 func TestWALIOFailureIsSticky(t *testing.T) {
 	for _, short := range []bool{false, true} {
 		original := openFile
+		t.Cleanup(func() { openFile = original })
 		enabled := &atomic.Bool{}
 		openFile = func(path string) (fileLike, error) {
 			f, err := original(path)

@@ -157,3 +157,7 @@ subsequent writes cannot acknowledge data after a failed flush. A failed write
 or sync may already have reached storage: its outcome can be unknown. Reopen and
 check application keys before deciding to retry. Network clients never retry
 writes automatically and report `client.ErrCommitUnknown` on transport failure.
+
+Directory ownership is protected by a persistent `LOCK` file before recovery or
+compaction cleanup starts, and remains held across data-file swaps. Do not remove
+that file while the database is open. The data-file lock is retained as well.

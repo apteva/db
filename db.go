@@ -76,6 +76,7 @@ const FormatVersion = 6
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
 	mu          treeMutex // tree structure; writers exclude every read lane
+	dirLock     *os.File  // remains locked across data-file swaps
 	dir         string
 	pager       *pager
 	wal         *wal
@@ -144,9 +145,17 @@ type meta struct {
 
 // Open opens or creates the database in dir.
 func Open(dir string, opts Options) (*DB, error) {
+	if dir == "" {
+		return nil, fmt.Errorf("%w: directory is required", ErrOptions)
+	}
 	if opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
 		return nil, ErrOptions
 	}
+	absoluteDir, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, err
+	}
+	dir = absoluteDir
 	if _, err := os.Lstat(filepath.Join(dir, restoreMarker)); err == nil {
 		return nil, ErrRestoreIncomplete
 	} else if !os.IsNotExist(err) {
@@ -165,23 +174,59 @@ func Open(dir string, opts Options) (*DB, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	// a compaction interrupted by a crash: its copy is discarded, and if
-	// the crash fell between the two renames of the swap the original,
-	// already renamed aside, is put back (the log still holds everything)
-	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
+	directoryLock, err := lockDirectory(dir)
+	if err != nil {
+		return nil, err
+	}
+	lockOwned := true
+	defer func() {
+		if lockOwned {
+			directoryLock.Close()
+		}
+	}()
+
 	dataPath, oldPath := filepath.Join(dir, "data"), filepath.Join(dir, "data.old")
-	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
-		if _, err := os.Stat(oldPath); err == nil {
-			if err := os.Rename(oldPath, dataPath); err != nil {
+	dataInfo, dataErr := os.Stat(dataPath)
+	if dataErr != nil && !os.IsNotExist(dataErr) {
+		return nil, dataErr
+	}
+	if os.IsNotExist(dataErr) {
+		if _, oldErr := os.Stat(oldPath); oldErr == nil {
+			version, err := formatVersionAt(oldPath)
+			if err != nil {
 				return nil, err
 			}
-			if d, err := os.Open(dir); err == nil {
-				d.Sync()
-				d.Close()
+			if version < 3 || version > FormatVersion {
+				return nil, ErrFormat
 			}
+			if err = os.Rename(oldPath, dataPath); err != nil {
+				return nil, err
+			}
+			if err = syncRestoreDirectory(dir); err != nil {
+				return nil, err
+			}
+			dataInfo, dataErr = os.Stat(dataPath)
+			if dataErr != nil {
+				return nil, dataErr
+			}
+		} else if !os.IsNotExist(oldErr) {
+			return nil, oldErr
 		}
 	}
-	os.Remove(oldPath)
+	if dataInfo == nil || dataInfo.Size() == 0 {
+		gens, err := walGens(dir)
+		if err != nil {
+			return nil, err
+		}
+		if len(gens) > 0 {
+			return nil, fmt.Errorf("%w: data file missing or empty with an existing WAL", ErrCorrupt)
+		}
+		if _, err = os.Stat(filepath.Join(dir, "compact.tmp")); err == nil {
+			return nil, fmt.Errorf("%w: reserved compaction path in an uninitialized directory", ErrCorrupt)
+		} else if !os.IsNotExist(err) {
+			return nil, err
+		}
+	}
 	f, err := openFile(filepath.Join(dir, "data"))
 	if err != nil {
 		return nil, err
@@ -209,7 +254,7 @@ func Open(dir string, opts Options) (*DB, error) {
 		f.Close()
 		return nil, err
 	}
-	db := &DB{dir: dir, pager: pg, wal: w, opts: opts, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
+	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
 		stop: make(chan struct{}), done: make(chan struct{}), ckptReq: make(chan ckptRequest, 16), ckptDone: make(chan struct{})}
 	db.cond = sync.NewCond(&db.mu)
 	if opts.MemtableBytes > 0 {
@@ -217,8 +262,10 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	st, err := f.Stat()
 	if err == nil {
-		if st.Size() < 2*PageSize {
+		if st.Size() == 0 {
 			err = db.create()
+		} else if st.Size() < 2*PageSize {
+			err = ErrCorrupt
 		} else {
 			err = db.recover()
 		}
@@ -255,6 +302,11 @@ func Open(dir string, opts Options) (*DB, error) {
 		pg.close()
 		return nil, err
 	}
+	// Cleanup only after validating/recovering an owned database. A rejected
+	// format/corrupt directory must keep its fallback and unfinished copy.
+	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
+	os.Remove(oldPath)
+	lockOwned = false
 	go db.flusher()
 	go db.checkpointer()
 	return db, nil
@@ -872,8 +924,10 @@ func (db *DB) readMeta() (meta, error) {
 // FormatVersionOf reports the on-disk format version of the database in
 // dir, read from its meta pages without opening it, so a file this build
 // refuses can still be identified. It does not take the database lock.
-func FormatVersionOf(dir string) (uint32, error) {
-	f, err := os.Open(filepath.Join(dir, "data"))
+func FormatVersionOf(dir string) (uint32, error) { return formatVersionAt(filepath.Join(dir, "data")) }
+
+func formatVersionAt(path string) (uint32, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return 0, err
 	}
@@ -970,7 +1024,7 @@ type Stats struct {
 func (db *DB) Stats() Stats {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
-	if db.closed {
+	if db.closed || db.failed != nil {
 		return Stats{}
 	}
 	s := Stats{HighWaterPages: int(db.pager.hwm), FreePages: len(db.pager.free), DirtyPages: db.pager.dirtyN,

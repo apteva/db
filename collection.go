@@ -831,3 +831,7 @@ func (c *Collection) String() string {
 func validCollectionName(name string) bool {
 	return len(name) <= 255 && utf8.ValidString(name) && strings.IndexByte(name, 0) < 0
 }
+
+func validIndexName(name string) bool {
+	return name != "" && len(name) <= MaxKeySize-6 && utf8.ValidString(name) && strings.IndexByte(name, 0) < 0
+}

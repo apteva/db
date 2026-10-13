@@ -17,6 +17,16 @@ const restoreMarker = ".restore-incomplete"
 // destination must not exist. A marker prevents Open from accepting an
 // interrupted restore. Existing directories are never overwritten.
 func Restore(ctx context.Context, backupDir, destination string) error {
+	absoluteDestination, err := filepath.Abs(destination)
+	if err != nil {
+		return err
+	}
+	destination = absoluteDestination
+	absoluteSource, err := filepath.Abs(backupDir)
+	if err != nil {
+		return err
+	}
+	backupDir = absoluteSource
 	ctx = orBackground(ctx)
 	if err := ctx.Err(); err != nil {
 		return err
