@@ -1,0 +1,10 @@
+{
+	"Path": "github.com/apteva/db",
+	"Version": "v0.2.0-alpha.4",
+	"Time": "2026-10-13T19:48:19Z",
+	"Dir": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/public-mod-cache/github.com/apteva/db@v0.2.0-alpha.4",
+	"GoMod": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/public-mod-cache/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.4.mod",
+	"GoVersion": "1.25",
+	"Sum": "h1:wFsuGsJcBM9JGH4/FVqc+9IaJ5oZvaBHlJ3hVuC2xXU=",
+	"GoModSum": "h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc="
+}

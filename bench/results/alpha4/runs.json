@@ -1,0 +1,465 @@
+[
+  {
+    "name": "numerics-alpha3-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921267.0947788,
+    "load_before": "21:54  up 7 days,  2:59, 1 user, load averages: 32.26 31.16 29.70",
+    "seconds": 3.742528200149536,
+    "exit": 0,
+    "load_after": "21:54  up 7 days,  2:59, 1 user, load averages: 32.56 31.24 29.73"
+  },
+  {
+    "name": "agg-alpha3-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-l0s1ztnx"
+    ],
+    "start": 1791921270.844237,
+    "load_before": "21:54  up 7 days,  2:59, 1 user, load averages: 32.56 31.24 29.73",
+    "seconds": 3.0402450561523438,
+    "exit": 0,
+    "load_after": "21:54  up 7 days,  2:59, 1 user, load averages: 30.99 30.93 29.64"
+  },
+  {
+    "name": "kv-alpha3-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-1478b0tt"
+    ],
+    "start": 1791921273.893398,
+    "load_before": "21:54  up 7 days,  2:59, 1 user, load averages: 30.99 30.93 29.64",
+    "seconds": 6.741660833358765,
+    "exit": 0,
+    "load_after": "21:54  up 7 days, 3 hrs, 1 user, load averages: 29.47 30.62 29.53"
+  },
+  {
+    "name": "numerics-alpha4-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921280.6428769,
+    "load_before": "21:54  up 7 days, 3 hrs, 1 user, load averages: 29.47 30.62 29.53",
+    "seconds": 4.316062927246094,
+    "exit": 0,
+    "load_after": "21:54  up 7 days, 3 hrs, 1 user, load averages: 28.87 30.47 29.49"
+  },
+  {
+    "name": "agg-alpha4-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-1ptauiuo"
+    ],
+    "start": 1791921284.9687119,
+    "load_before": "21:54  up 7 days, 3 hrs, 1 user, load averages: 28.87 30.47 29.49",
+    "seconds": 3.2788469791412354,
+    "exit": 0,
+    "load_after": "21:54  up 7 days, 3 hrs, 1 user, load averages: 27.28 30.12 29.37"
+  },
+  {
+    "name": "kv-alpha4-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-lvfgqtc_"
+    ],
+    "start": 1791921288.257594,
+    "load_before": "21:54  up 7 days, 3 hrs, 1 user, load averages: 27.28 30.12 29.37",
+    "seconds": 7.496078968048096,
+    "exit": 0,
+    "load_after": "21:54  up 7 days, 3 hrs, 1 user, load averages: 26.14 29.83 29.27"
+  },
+  {
+    "name": "numerics-alpha4-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921295.76161,
+    "load_before": "21:54  up 7 days, 3 hrs, 1 user, load averages: 26.14 29.83 29.27",
+    "seconds": 3.7930548191070557,
+    "exit": 0,
+    "load_after": "21:54  up 7 days, 3 hrs, 1 user, load averages: 25.25 29.59 29.19"
+  },
+  {
+    "name": "agg-alpha4-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-y27a3z5_"
+    ],
+    "start": 1791921299.5623,
+    "load_before": "21:54  up 7 days, 3 hrs, 1 user, load averages: 25.25 29.59 29.19",
+    "seconds": 2.575719118118286,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 25.25 29.59 29.19"
+  },
+  {
+    "name": "kv-alpha4-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-cugf2xlo"
+    ],
+    "start": 1791921302.144253,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 25.25 29.59 29.19",
+    "seconds": 7.04082989692688,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 24.12 29.19 29.05"
+  },
+  {
+    "name": "numerics-alpha3-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921309.1947079,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 24.12 29.19 29.05",
+    "seconds": 3.8212151527404785,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 23.79 29.04 29.00"
+  },
+  {
+    "name": "agg-alpha3-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-w18cj11k"
+    ],
+    "start": 1791921313.023542,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 23.79 29.04 29.00",
+    "seconds": 3.3085761070251465,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 23.79 29.04 29.00"
+  },
+  {
+    "name": "kv-alpha3-2",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-e9_804s4"
+    ],
+    "start": 1791921316.3381371,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 23.79 29.04 29.00",
+    "seconds": 6.40986967086792,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 22.84 28.75 28.90"
+  },
+  {
+    "name": "numerics-alpha3-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921322.760813,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 22.84 28.75 28.90",
+    "seconds": 3.7664451599121094,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 21.73 28.43 28.78"
+  },
+  {
+    "name": "agg-alpha3-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-tqai4v3k"
+    ],
+    "start": 1791921326.53391,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 21.73 28.43 28.78",
+    "seconds": 2.202756881713867,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 20.63 28.09 28.66"
+  },
+  {
+    "name": "kv-alpha3-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-hq166_1s"
+    ],
+    "start": 1791921328.7431822,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 20.63 28.09 28.66",
+    "seconds": 6.1405768394470215,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 19.22 27.67 28.51"
+  },
+  {
+    "name": "numerics-alpha4-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(Integers|Floats|RowCount)$/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921334.8982358,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 19.22 27.67 28.51",
+    "seconds": 3.7497031688690186,
+    "exit": 0,
+    "load_after": "21:55  up 7 days, 3 hrs, 1 user, load averages: 18.32 27.34 28.39"
+  },
+  {
+    "name": "agg-alpha4-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-agg",
+      "-n",
+      "100000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c",
+      "-reps",
+      "5",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-c947wi2o"
+    ],
+    "start": 1791921338.655618,
+    "load_before": "21:55  up 7 days, 3 hrs, 1 user, load averages: 18.32 27.34 28.39",
+    "seconds": 2.2228949069976807,
+    "exit": 0,
+    "load_after": "21:55  up 7 days,  3:01, 1 user, load averages: 18.32 27.34 28.39"
+  },
+  {
+    "name": "kv-alpha4-3",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-n",
+      "1000000",
+      "-vsize",
+      "100",
+      "-engines",
+      "ours",
+      "-par",
+      "10",
+      "-reps",
+      "1",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-k_hje_qu"
+    ],
+    "start": 1791921340.89143,
+    "load_before": "21:55  up 7 days,  3:01, 1 user, load averages: 18.32 27.34 28.39",
+    "seconds": 6.543083906173706,
+    "exit": 0,
+    "load_after": "21:55  up 7 days,  3:01, 1 user, load averages: 19.58 27.45 28.42"
+  },
+  {
+    "name": "new-feature",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics$/^(WideIntegers|NonNullCount)$/",
+      "-test.benchtime=1s",
+      "-test.count=3"
+    ],
+    "start": 1791921347.441165,
+    "load_before": "21:55  up 7 days,  3:01, 1 user, load averages: 19.58 27.45 28.42",
+    "seconds": 14.540747165679932,
+    "exit": 0,
+    "load_after": "21:56  up 7 days,  3:01, 1 user, load averages: 18.17 26.76 28.16"
+  },
+  {
+    "name": "join",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,sqlite-c",
+      "-reps",
+      "3",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-uwg1g8yy"
+    ],
+    "start": 1791921361.988681,
+    "load_before": "21:56  up 7 days,  3:01, 1 user, load averages: 18.17 26.76 28.16",
+    "seconds": 1.692990779876709,
+    "exit": 0,
+    "load_after": "21:56  up 7 days,  3:01, 1 user, load averages: 17.51 26.48 28.05"
+  },
+  {
+    "name": "computedcollections",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours,pebble,sqlite-c",
+      "-reps",
+      "3",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-hdri7la7"
+    ],
+    "start": 1791921363.6895301,
+    "load_before": "21:56  up 7 days,  3:01, 1 user, load averages: 17.51 26.48 28.05",
+    "seconds": 27.113849878311157,
+    "exit": 0,
+    "load_after": "21:56  up 7 days,  3:01, 1 user, load averages: 20.33 26.43 27.98"
+  },
+  {
+    "name": "computed",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,pebble,sqlite-c",
+      "-reps",
+      "3",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-n1v_53_y"
+    ],
+    "start": 1791921390.8116102,
+    "load_before": "21:56  up 7 days,  3:01, 1 user, load averages: 20.33 26.43 27.98",
+    "seconds": 14.59801173210144,
+    "exit": 0,
+    "load_after": "21:56  up 7 days,  3:02, 1 user, load averages: 23.11 26.69 28.05"
+  },
+  {
+    "name": "compat",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "3",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-a7tj42eh"
+    ],
+    "start": 1791921405.418186,
+    "load_before": "21:56  up 7 days,  3:02, 1 user, load averages: 23.11 26.69 28.05",
+    "seconds": 5.285063028335571,
+    "exit": 0,
+    "load_after": "21:56  up 7 days,  3:02, 1 user, load averages: 23.34 26.68 28.04"
+  },
+  {
+    "name": "wideindex",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha4-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "3",
+      "-dir",
+      "/var/folders/r2/k6jy4ktn58q06gk460b7ybqm0000gn/T/apteva-alpha4-bench-thf2mkvy"
+    ],
+    "start": 1791921410.709866,
+    "load_before": "21:56  up 7 days,  3:02, 1 user, load averages: 23.34 26.68 28.04",
+    "seconds": 19.93209195137024,
+    "exit": 0,
+    "load_after": "21:57  up 7 days,  3:02, 1 user, load averages: 24.98 26.82 28.05"
+  }
+]

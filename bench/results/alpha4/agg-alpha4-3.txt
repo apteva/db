@@ -1,0 +1,17 @@
+
+aggregation over 100000 documents (ms per query, best of 5; lower is better; ours = one core, ours-par = all cores)
+
+query                                                    ours     ours-par       pebble     sqlite-c
+group by region: sum, count                               8.9          1.7         13.0         27.6
+filter + group + sort + limit                            11.7          2.2         15.4         11.6
+range filter, global count + avg                          6.5          1.3         10.1          4.5
+group by customer (100k groups), top 10                  24.9         20.2         31.4         42.4
+indexed: one customer's orders, sum                       0.0            -            -          0.0
+indexed: 20 customers ($in), count                        0.0            -            -          0.0
+indexed: amount > 999.5 (0.05%), group by region          0.0            -            -          0.0
+load (seconds)                                           0.06         0.06         0.24         0.12
+build two indexes (seconds)                              0.19            -            -         0.08
+ours       load 0.06s  q1 8.9ms  q2 11.7ms  q3 6.5ms  q4 24.9ms
+ours-par   load 0.06s  q1 1.7ms  q2 2.2ms  q3 1.3ms  q4 20.2ms
+pebble     load 0.24s  q1 13.0ms  q2 15.4ms  q3 10.1ms  q4 31.4ms
+sqlite-c   load 0.12s  q1 27.6ms  q2 11.6ms  q3 4.5ms  q4 42.4ms

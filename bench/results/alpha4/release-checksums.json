@@ -1,0 +1,18 @@
+[
+  {
+    "archive": "aptevadb_0.2.0-alpha.4_darwin_amd64.tar.gz",
+    "sha256": "502eadd67e12defe9de8d83562adfd5bd20607eca8035ce337ee50074f09764b"
+  },
+  {
+    "archive": "aptevadb_0.2.0-alpha.4_darwin_arm64.tar.gz",
+    "sha256": "546cd5e6f2ce85137172254a3db3b6d43ca92fead52a8ae6771977b771247de8"
+  },
+  {
+    "archive": "aptevadb_0.2.0-alpha.4_linux_amd64.tar.gz",
+    "sha256": "ef468b481b6634b2d6f0d97fd0551e96f11dd2eede9ade06d4ff6b86f5aad898"
+  },
+  {
+    "archive": "aptevadb_0.2.0-alpha.4_linux_arm64.tar.gz",
+    "sha256": "818cf57e5edeec4d7d8b63f16b0e39d61419eaa065c54b1dc2a7ae73e5f31953"
+  }
+]

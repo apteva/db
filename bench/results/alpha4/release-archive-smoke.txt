@@ -1,0 +1,6 @@
+aptevadbctl 0.2.0-alpha.4 (format 9)
+AptevaDB 0.2.0-alpha.4 (format 9, HTTP v1)
+ok
+downloaded daemon / public client [map[_id:<nil> avg:9.223372036854776e+18 present:2 rows:4 sum:1.8446744073709552e+19]]
+remote maintained counter map[_id:<nil> n:3]
+downloaded daemon health/version and graceful shutdown PASS

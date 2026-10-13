@@ -1,0 +1,17 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/db
+cpu: Apple M1 Pro
+BenchmarkAggregationNumerics/WideIntegers/1-10         	     256	   4682623 ns/op	        46.83 ns/row	    5745 B/op	      89 allocs/op
+BenchmarkAggregationNumerics/WideIntegers/1-10         	     261	   4605748 ns/op	        46.06 ns/row	    5744 B/op	      89 allocs/op
+BenchmarkAggregationNumerics/WideIntegers/1-10         	     261	   4622158 ns/op	        46.22 ns/row	    5744 B/op	      89 allocs/op
+BenchmarkAggregationNumerics/WideIntegers/10-10        	    1112	   1086281 ns/op	        10.86 ns/row	   54834 B/op	     799 allocs/op
+BenchmarkAggregationNumerics/WideIntegers/10-10        	    1138	   1068309 ns/op	        10.68 ns/row	   54671 B/op	     799 allocs/op
+BenchmarkAggregationNumerics/WideIntegers/10-10        	    1076	   1089841 ns/op	        10.90 ns/row	   54656 B/op	     799 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/1-10         	     286	   4138021 ns/op	        41.38 ns/row	    4928 B/op	      72 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/1-10         	     284	   4157452 ns/op	        41.57 ns/row	    4928 B/op	      72 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/1-10         	     288	   4188745 ns/op	        41.89 ns/row	    4928 B/op	      72 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/10-10        	    1261	    975786 ns/op	         9.758 ns/row	   53119 B/op	     782 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/10-10        	    1184	   1007651 ns/op	        10.08 ns/row	   53106 B/op	     782 allocs/op
+BenchmarkAggregationNumerics/NonNullCount/10-10        	    1177	   1041236 ns/op	        10.41 ns/row	   53111 B/op	     782 allocs/op
+PASS

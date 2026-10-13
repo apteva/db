@@ -51,7 +51,13 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
-The [unreleased scan optimization report](bench/results/scan-optimization/VALIDATION.md)
+The [alpha.4 aggregation and release report](bench/results/alpha4/VALIDATION.md)
+records exact integer accumulation/parallel merges, non-null field counting,
+format-8 migration, public Go/client/CLI checks and all 24 benchmark processes.
+Serial integer SUM/AVG remained essentially flat; background activity affected
+parallel timings. All archive hashes and the downloaded daemon were verified.
+
+The [scan optimization report](bench/results/scan-optimization/VALIDATION.md)
 records roughly 22% lower cursor-scan time on `main`, 128 retained benchmark
 processes and Linux/macOS validation. Some other medians were slower on the busy
 workstation; the report includes all samples and does not claim universal improvement.

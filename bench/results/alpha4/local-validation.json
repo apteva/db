@@ -1,0 +1,8 @@
+{
+  "source": "bff9d0e956989bb566c48addb34377955a402f50",
+  "vet": "passed root and bench",
+  "build": "passed root and bench",
+  "targeted_race": "passed integer serial/parallel overflow, random exact model, non-null counting, format8 migration and HTTP client",
+  "stress": "CURSOR_STRESS=2m SOAK=2m go test -race -count=1 -run TestCursorStress|TestSoak -timeout 10m .: passed 250.798s",
+  "full_race": "go test -race -count=1 -timeout 45m ./... passed: root 350.759s, client 1.538s"
+}

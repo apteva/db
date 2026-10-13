@@ -1,0 +1,7 @@
+{
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "hardware": "Apple M1 Pro\n10\n17179869184\n",
+  "go": "go version go1.25.1 darwin/arm64\n",
+  "source": "bff9d0e956989bb566c48addb34377955a402f50",
+  "baseline": "26220edae0452a03a5cb5375016ca9eaf1e95209"
+}

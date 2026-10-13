@@ -1,0 +1,5 @@
+alpha.3 refuses format 9: aptevadb: unsupported file format version: file is format 9, this build reads 8
+Data/WAL SHA256 unchanged: {
+  "wal-00000001": "b5935459edbfb7a38951732d5083ad0e37dd0d493950d5f5db42a5923932e80a",
+  "data": "8672b4b0b16fcfa412c917088c57347bef2e2d862e7ccb0efbccdd37ed7c1e13"
+}

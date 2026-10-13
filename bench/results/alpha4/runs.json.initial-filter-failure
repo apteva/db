@@ -1,0 +1,17 @@
+[
+  {
+    "name": "numerics-alpha3-1",
+    "command": [
+      "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-13-alpha4-aggregation/alpha3-numerics.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkAggregationNumerics/(Integers|Floats|RowCount)/",
+      "-test.benchtime=500ms",
+      "-test.count=1"
+    ],
+    "start": 1791921244.737983,
+    "load_before": "21:54  up 7 days,  2:59, 1 user, load averages: 31.77 30.99 29.61",
+    "seconds": 4.447195053100586,
+    "exit": 1,
+    "load_after": "21:54  up 7 days,  2:59, 1 user, load averages: 32.43 31.14 29.67"
+  }
+]

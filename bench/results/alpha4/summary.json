@@ -1,0 +1,442 @@
+{
+  "alpha3": {
+    "Integers/1": {
+      "median_ns_row": 46.67,
+      "trials": [
+        {
+          "ns_row": 47.27,
+          "bytes": 5745,
+          "allocs": 89
+        },
+        {
+          "ns_row": 46.67,
+          "bytes": 5745,
+          "allocs": 89
+        },
+        {
+          "ns_row": 46.1,
+          "bytes": 5745,
+          "allocs": 89
+        }
+      ]
+    },
+    "Integers/10": {
+      "median_ns_row": 11.61,
+      "trials": [
+        {
+          "ns_row": 12.15,
+          "bytes": 55006,
+          "allocs": 799
+        },
+        {
+          "ns_row": 11.61,
+          "bytes": 54964,
+          "allocs": 799
+        },
+        {
+          "ns_row": 11.22,
+          "bytes": 55008,
+          "allocs": 799
+        }
+      ]
+    },
+    "Floats/1": {
+      "median_ns_row": 47.11,
+      "trials": [
+        {
+          "ns_row": 46.57,
+          "bytes": 5744,
+          "allocs": 89
+        },
+        {
+          "ns_row": 47.13,
+          "bytes": 5744,
+          "allocs": 89
+        },
+        {
+          "ns_row": 47.11,
+          "bytes": 5744,
+          "allocs": 89
+        }
+      ]
+    },
+    "Floats/10": {
+      "median_ns_row": 11.93,
+      "trials": [
+        {
+          "ns_row": 12.71,
+          "bytes": 54664,
+          "allocs": 799
+        },
+        {
+          "ns_row": 11.93,
+          "bytes": 54701,
+          "allocs": 799
+        },
+        {
+          "ns_row": 11.09,
+          "bytes": 54673,
+          "allocs": 799
+        }
+      ]
+    },
+    "RowCount/1": {
+      "median_ns_row": 22.75,
+      "trials": [
+        {
+          "ns_row": 22.57,
+          "bytes": 4864,
+          "allocs": 66
+        },
+        {
+          "ns_row": 23.18,
+          "bytes": 4864,
+          "allocs": 66
+        },
+        {
+          "ns_row": 22.75,
+          "bytes": 4864,
+          "allocs": 66
+        }
+      ]
+    },
+    "RowCount/10": {
+      "median_ns_row": 6.645,
+      "trials": [
+        {
+          "ns_row": 6.645,
+          "bytes": 52551,
+          "allocs": 758
+        },
+        {
+          "ns_row": 6.808,
+          "bytes": 52547,
+          "allocs": 758
+        },
+        {
+          "ns_row": 6.509,
+          "bytes": 52548,
+          "allocs": 758
+        }
+      ]
+    },
+    "kv": {
+      "random/insert": {
+        "median_ns_op": 764,
+        "trials": [
+          735,
+          794,
+          764
+        ]
+      },
+      "random/settle": {
+        "median_ns_op": 830,
+        "trials": [
+          1172,
+          830,
+          771
+        ]
+      },
+      "random/find-hit": {
+        "median_ns_op": 713,
+        "trials": [
+          653,
+          722,
+          713
+        ]
+      },
+      "random/find-miss": {
+        "median_ns_op": 483,
+        "trials": [
+          446,
+          503,
+          483
+        ]
+      },
+      "random/scan": {
+        "median_ns_op": 49,
+        "trials": [
+          48,
+          49,
+          49
+        ]
+      },
+      "random/find-hit-par10": {
+        "median_ns_op": 104,
+        "trials": [
+          104,
+          110,
+          103
+        ]
+      },
+      "seq/insert": {
+        "median_ns_op": 188,
+        "trials": [
+          188,
+          188,
+          181
+        ]
+      },
+      "seq/settle": {
+        "median_ns_op": 653,
+        "trials": [
+          806,
+          653,
+          562
+        ]
+      },
+      "seq/find-hit": {
+        "median_ns_op": 1014,
+        "trials": [
+          1061,
+          1014,
+          1013
+        ]
+      },
+      "seq/find-miss": {
+        "median_ns_op": 925,
+        "trials": [
+          925,
+          935,
+          901
+        ]
+      },
+      "seq/scan": {
+        "median_ns_op": 50,
+        "trials": [
+          49,
+          50,
+          50
+        ]
+      },
+      "seq/find-hit-par10": {
+        "median_ns_op": 158,
+        "trials": [
+          172,
+          158,
+          141
+        ]
+      }
+    }
+  },
+  "alpha4": {
+    "Integers/1": {
+      "median_ns_row": 46.73,
+      "trials": [
+        {
+          "ns_row": 53.15,
+          "bytes": 5745,
+          "allocs": 89
+        },
+        {
+          "ns_row": 46.73,
+          "bytes": 5745,
+          "allocs": 89
+        },
+        {
+          "ns_row": 46.64,
+          "bytes": 5745,
+          "allocs": 89
+        }
+      ]
+    },
+    "Integers/10": {
+      "median_ns_row": 12.71,
+      "trials": [
+        {
+          "ns_row": 19.49,
+          "bytes": 55181,
+          "allocs": 800
+        },
+        {
+          "ns_row": 12.71,
+          "bytes": 55069,
+          "allocs": 799
+        },
+        {
+          "ns_row": 10.8,
+          "bytes": 55011,
+          "allocs": 799
+        }
+      ]
+    },
+    "Floats/1": {
+      "median_ns_row": 46.93,
+      "trials": [
+        {
+          "ns_row": 52.34,
+          "bytes": 5744,
+          "allocs": 89
+        },
+        {
+          "ns_row": 46.93,
+          "bytes": 5744,
+          "allocs": 89
+        },
+        {
+          "ns_row": 45.78,
+          "bytes": 5744,
+          "allocs": 89
+        }
+      ]
+    },
+    "Floats/10": {
+      "median_ns_row": 12.87,
+      "trials": [
+        {
+          "ns_row": 30.06,
+          "bytes": 54763,
+          "allocs": 799
+        },
+        {
+          "ns_row": 12.87,
+          "bytes": 54664,
+          "allocs": 799
+        },
+        {
+          "ns_row": 10.57,
+          "bytes": 54649,
+          "allocs": 799
+        }
+      ]
+    },
+    "RowCount/1": {
+      "median_ns_row": 23.72,
+      "trials": [
+        {
+          "ns_row": 27.54,
+          "bytes": 4864,
+          "allocs": 66
+        },
+        {
+          "ns_row": 23.72,
+          "bytes": 4864,
+          "allocs": 66
+        },
+        {
+          "ns_row": 22.8,
+          "bytes": 4864,
+          "allocs": 66
+        }
+      ]
+    },
+    "RowCount/10": {
+      "median_ns_row": 7.826,
+      "trials": [
+        {
+          "ns_row": 10.63,
+          "bytes": 52547,
+          "allocs": 758
+        },
+        {
+          "ns_row": 7.826,
+          "bytes": 52555,
+          "allocs": 758
+        },
+        {
+          "ns_row": 6.023,
+          "bytes": 52549,
+          "allocs": 758
+        }
+      ]
+    },
+    "kv": {
+      "random/insert": {
+        "median_ns_op": 798,
+        "trials": [
+          739,
+          798,
+          803
+        ]
+      },
+      "random/settle": {
+        "median_ns_op": 1065,
+        "trials": [
+          1065,
+          1134,
+          830
+        ]
+      },
+      "random/find-hit": {
+        "median_ns_op": 720,
+        "trials": [
+          1101,
+          720,
+          717
+        ]
+      },
+      "random/find-miss": {
+        "median_ns_op": 504,
+        "trials": [
+          675,
+          504,
+          484
+        ]
+      },
+      "random/scan": {
+        "median_ns_op": 39,
+        "trials": [
+          40,
+          38,
+          39
+        ]
+      },
+      "random/find-hit-par10": {
+        "median_ns_op": 101,
+        "trials": [
+          116,
+          101,
+          98
+        ]
+      },
+      "seq/insert": {
+        "median_ns_op": 214,
+        "trials": [
+          236,
+          214,
+          191
+        ]
+      },
+      "seq/settle": {
+        "median_ns_op": 870,
+        "trials": [
+          919,
+          870,
+          821
+        ]
+      },
+      "seq/find-hit": {
+        "median_ns_op": 1045,
+        "trials": [
+          1045,
+          1076,
+          1033
+        ]
+      },
+      "seq/find-miss": {
+        "median_ns_op": 946,
+        "trials": [
+          946,
+          962,
+          927
+        ]
+      },
+      "seq/scan": {
+        "median_ns_op": 39,
+        "trials": [
+          39,
+          39,
+          38
+        ]
+      },
+      "seq/find-hit-par10": {
+        "median_ns_op": 150,
+        "trials": [
+          150,
+          164,
+          143
+        ]
+      }
+    }
+  }
+}
