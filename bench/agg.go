@@ -40,7 +40,7 @@ var aggQueries = []aggQuery{
 		`SELECT region, SUM(amount) AS total, AVG(amount), MAX(qty) FROM orders WHERE status = 'shipped' GROUP BY region ORDER BY total DESC LIMIT 3`},
 	{"range filter, global count + avg",
 		`[{"$match": {"amount": {"$gt": 500}}}, {"$group": {"_id": null, "n": {"$sum": 1}, "avg": {"$avg": "$amount"}}}]`,
-		`SELECT NULL, COUNT(*), AVG(amount) FROM orders WHERE amount > 500`},
+		`SELECT NULL, n, avg FROM (SELECT COUNT(*) AS n, AVG(amount) AS avg FROM orders WHERE amount > 500) WHERE n > 0`},
 	{"group by customer (100k groups), top 10",
 		`[{"$group": {"_id": "$customer", "total": {"$sum": "$amount"}}}, {"$sort": {"total": -1}}, {"$limit": 10}]`,
 		`SELECT customer, SUM(amount) AS total FROM orders GROUP BY customer ORDER BY total DESC LIMIT 10`},
@@ -50,7 +50,7 @@ var aggQueries = []aggQuery{
 var indexQueries = []aggQuery{
 	{"indexed: one customer's orders, sum",
 		`[{"$match": {"customer": "c012345"}}, {"$group": {"_id": null, "n": {"$sum": 1}, "total": {"$sum": "$amount"}}}]`,
-		`SELECT NULL, COUNT(*), SUM(amount) FROM orders WHERE customer = 'c012345'`},
+		`SELECT NULL, n, total FROM (SELECT COUNT(*) AS n, SUM(amount) AS total FROM orders WHERE customer = 'c012345') WHERE n > 0`},
 	{"indexed: 20 customers ($in), count",
 		`[{"$match": {"customer": {"$in": ["c000001","c000002","c000003","c000004","c000005","c000006","c000007","c000008","c000009","c000010","c000011","c000012","c000013","c000014","c000015","c000016","c000017","c000018","c000019","c000020"]}}}, {"$count": "n"}]`,
 		`SELECT NULL, COUNT(*) FROM orders WHERE customer IN ('c000001','c000002','c000003','c000004','c000005','c000006','c000007','c000008','c000009','c000010','c000011','c000012','c000013','c000014','c000015','c000016','c000017','c000018','c000019','c000020')`},
@@ -78,6 +78,15 @@ func runAggBench(dir string, n int, engines []string) {
 		rows[i] = row{int64(i), regions[rng.Intn(8)], statuses[rng.Intn(4)],
 			math.Round(rng.Float64()*100000) / 100, int64(1 + rng.Intn(20)), fmt.Sprintf("c%06d", rng.Intn(100000))}
 	}
+	// Pick a customer actually present at every requested fixture size.
+	localIndexQueries := append([]aggQuery(nil), indexQueries...)
+	if len(rows) > 0 {
+		for i := range localIndexQueries {
+			localIndexQueries[i].pipeline = strings.ReplaceAll(localIndexQueries[i].pipeline, "c012345", rows[0].customer)
+			localIndexQueries[i].sql = strings.ReplaceAll(localIndexQueries[i].sql, "c012345", rows[0].customer)
+		}
+	}
+	indexQueries := localIndexQueries
 	var b aptevadb.DocBuilder
 	encode := func(r row) []byte {
 		b.Reset()
@@ -237,8 +246,12 @@ func runAggBench(dir string, n int, engines []string) {
 				outs = append(outs, canon(out))
 			}
 			db.Close()
-		case "sqlite-c":
-			k, err := openSQLiteC(edir, false, n)
+		case "sqlite-c", "sqlite-go":
+			opener := openSQLiteC
+			if base == "sqlite-go" {
+				opener = openSQLiteGo
+			}
+			k, err := opener(edir, false, n)
 			if err != nil {
 				panic(err)
 			}
@@ -344,7 +357,7 @@ func runAggBench(dir string, n int, engines []string) {
 			if reference != nil {
 				for qi := range reference {
 					if msg := compareAgg(reference[qi], outs[qi]); msg != "" {
-						fmt.Fprintf(os.Stderr, "MISMATCH %s on %q: %s\n", name, allQueries[qi].name, msg)
+						panic(fmt.Sprintf("MISMATCH %s on %q: %s", name, allQueries[qi].name, msg))
 					}
 				}
 			}
@@ -352,7 +365,7 @@ func runAggBench(dir string, n int, engines []string) {
 		} else {
 			for qi := range outs {
 				if msg := compareAgg(reference[qi], outs[qi]); msg != "" {
-					fmt.Fprintf(os.Stderr, "MISMATCH %s on %q: %s\n", name, allQueries[qi].name, msg)
+					panic(fmt.Sprintf("MISMATCH %s on %q: %s", name, allQueries[qi].name, msg))
 				}
 			}
 		}

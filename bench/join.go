@@ -195,8 +195,12 @@ func runJoinBench(dir string, n int, engines []string) {
 				}
 			}
 			db.Close()
-		case "sqlite-c":
-			k, err := openSQLiteC(edir, false, n)
+		case "sqlite-c", "sqlite-go":
+			opener := openSQLiteC
+			if base == "sqlite-go" {
+				opener = openSQLiteGo
+			}
+			k, err := opener(edir, false, n)
 			if err != nil {
 				panic(err)
 			}
@@ -268,7 +272,7 @@ func runJoinBench(dir string, n int, engines []string) {
 			for pi := range outs {
 				for qi := range outs[pi] {
 					if msg := compareAgg(reference[pi][qi], outs[pi][qi]); msg != "" {
-						fmt.Fprintf(os.Stderr, "MISMATCH %s on %q (%s): %s\n", name, phases[pi].queries[qi].name, phases[pi].label, msg)
+						panic(fmt.Sprintf("MISMATCH %s on %q (%s): %s", name, phases[pi].queries[qi].name, phases[pi].label, msg))
 					}
 				}
 			}
