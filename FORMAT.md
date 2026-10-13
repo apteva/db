@@ -59,8 +59,9 @@ under child i is at least separator i-1 and below separator i.
 Cells are never split across pages. Ordinary inline values retain the
 `MaxCellSize = PageSize/4` threshold. Wider index keys may occupy a cell
 with a small inline value or an overflow pointer. Every cell plus its slot
-fits in half the usable page; splits include the incoming cell when
-choosing the cut, including the promoted internal separator.
+fits in half the usable page. Existing cuts are retained when the incoming
+cell fits; otherwise the cut includes the incoming cell size, including
+the promoted internal separator.
 
 ### Overflow pages
 

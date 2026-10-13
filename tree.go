@@ -8,7 +8,7 @@ import "bytes"
 func (db *DB) insertTree(key, val []byte) error {
 	db.treeGen++
 	ovf := false
-	if leafCellHdr+len(key)+len(val) > max(MaxCellSize, leafCellHdr+len(key)+overflowPtr) {
+	if leafCellHdr+len(key)+len(val) > MaxCellSize && (len(key) <= MaxCellSize-leafCellHdr-overflowPtr || len(val) > overflowPtr) {
 		ptr, err := db.spill(val)
 		if err != nil {
 			return err
@@ -122,7 +122,7 @@ func (db *DB) tryInsertLeaf(n *node, key, val []byte, ovf bool) (bool, error) {
 	return true, nil
 }
 
-// splitLeafInsert splits full leaf n and inserts key into the right half.
+// splitLeafInsert splits full leaf n and inserts key into its ordered half.
 func (db *DB) splitLeafInsert(n *node, key, val []byte, ovf, appending bool) ([]byte, uint32, error) {
 	p := db.writable(n)
 	rn := db.pager.alloc(pageLeaf, 0)
@@ -154,7 +154,26 @@ func (db *DB) splitLeafInsert(n *node, key, val []byte, ovf, appending bool) ([]
 			initPage(rn.data, pageLeaf, 0)
 		}
 	}
-	sep := db.splitPageInsert(p, rn.data, key, val, ovf, 0)
+	// Preserve the existing split and page geometry whenever the incoming
+	// cell fits. A wider cell may need a cut that includes its own size.
+	first := p.splitLeaf(rn.data, db.scratch)
+	sep := append(db.sepBufs[0][:0], first...)
+	db.sepBufs[0] = sep
+	target := p
+	if bytes.Compare(key, sep) >= 0 {
+		target = rn.data
+	}
+	if target.freeSpace() >= leafCellHdr+len(key)+len(val)+slotSize {
+		j, _ := target.searchLeaf(key)
+		target.insertLeafCell(j, key, val, ovf)
+		return sep, rn.id, nil
+	}
+	// Reconstitute the original page before choosing a size-aware split.
+	for i := 0; i < rn.data.numCells(); i++ {
+		p.appendRawCell(rn.data.rawCell(i))
+	}
+	initPage(rn.data, pageLeaf, 0)
+	sep = db.splitPageInsert(p, rn.data, key, val, ovf, 0)
 	return sep, rn.id, nil
 }
 
@@ -272,6 +291,24 @@ func (db *DB) insertInternal(n *node, idx int, sep []byte, right uint32) ([]byte
 	if p.freeSpace() < need {
 		lvl := int(p.level())
 		rn := db.pager.alloc(pageInternal, p.level())
+		if p.numCells() >= 3 {
+			promote := p.splitInternal(rn.data, db.scratch, db.sepBufs[lvl])
+			db.sepBufs[lvl] = promote
+			target := p
+			if bytes.Compare(sep, promote) > 0 {
+				target = rn.data
+			}
+			if target.freeSpace() >= need {
+				j := target.searchInternal(sep)
+				target.insertInternalCell(j, sep, right)
+				return promote, rn.id, true, nil
+			}
+			p.insertInternalCell(p.numCells(), promote, rn.data.leftChild())
+			for i := 0; i < rn.data.numCells(); i++ {
+				p.appendRawCell(rn.data.rawCell(i))
+			}
+			initPage(rn.data, pageInternal, p.level())
+		}
 		promote := db.splitPageInsert(p, rn.data, sep, nil, false, right)
 		db.sepBufs[lvl] = promote
 		return promote, rn.id, true, nil
@@ -457,7 +494,7 @@ type sortedInserter struct {
 
 func (si *sortedInserter) insert(key, val []byte) error {
 	db := si.db
-	if si.valid && leafCellHdr+len(key)+len(val) <= max(MaxCellSize, leafCellHdr+len(key)+overflowPtr) && (si.upper == nil || bytes.Compare(key, si.upper) < 0) {
+	if si.valid && (leafCellHdr+len(key)+len(val) <= MaxCellSize || len(key) > MaxCellSize-leafCellHdr-overflowPtr && len(val) <= overflowPtr) && (si.upper == nil || bytes.Compare(key, si.upper) < 0) {
 		ok, err := db.tryInsertLeaf(si.leaf, key, val, false)
 		if err != nil {
 			return err

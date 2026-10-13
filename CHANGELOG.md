@@ -14,8 +14,9 @@ the migration.
   of the 4,032-byte user-key limit. A 1,500-byte primary key and a 3,000-byte
   indexed ASCII string now fit, including encoding overhead. NUL escaping and
   every compound component count toward the encoded limit.
-- Split leaves and internal nodes with the incoming cell included, so mixed
-  small/large cells cannot overflow an insertion half. Empty wide index values
+- Retain existing leaf/internal cuts when the incoming cell fits; otherwise
+  include its size when choosing the split, so mixed small/large cells cannot
+  overflow an insertion half. Ordinary key validation keeps its fast path. Empty wide index values
   stay inline; tree traversal supports 32 levels for reduced fanout.
 - Format 8 permanently upgrades formats 3–7 before writes. Older binaries refuse
   the new format because their split algorithms assume smaller cells. Back up

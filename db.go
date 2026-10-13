@@ -505,16 +505,17 @@ func (b *Batch) UpsertJSON(key, doc []byte) error {
 }
 
 func (b *Batch) add(key, val []byte, del bool) error {
-	limit := MaxKeySize
-	if b.internal {
-		limit = MaxIndexKeySize
-	}
-	if len(key) == 0 || len(key) > limit {
-		return ErrKeySize
-	}
-	if b.internal {
-		// Collection prefixes do not count toward the public user-key limit.
-		if _, user, ok := splitKey(key); ok && (len(user) == 0 || len(user) > MaxKeySize) {
+	if len(key) == 0 || len(key) > MaxKeySize {
+		if !b.internal || len(key) == 0 {
+			return ErrKeySize
+		}
+		// Ordinary keys retain the original validation path. Only larger
+		// internal keys need collection-prefix or encoded-entry accounting.
+		if _, user, ok := splitKey(key); ok {
+			if len(user) == 0 || len(user) > MaxKeySize {
+				return ErrKeySize
+			}
+		} else if len(key) > MaxIndexKeySize {
 			return ErrKeySize
 		}
 	}

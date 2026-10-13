@@ -68,3 +68,5 @@ jobs:
         run: go test -run='^$' -fuzz='^FuzzPipeline$' -fuzztime=45s .
       - name: pages
         run: go test -run='^$' -fuzz='^FuzzPage$' -fuzztime=45s .
+      - name: wide page splits
+        run: go test -run='^$' -fuzz='^FuzzWidePageSplit$' -fuzztime=45s .
