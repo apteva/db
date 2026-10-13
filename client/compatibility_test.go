@@ -1,6 +1,7 @@
 package client_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"reflect"
@@ -10,6 +11,39 @@ import (
 	db "github.com/apteva/db"
 	"github.com/apteva/db/server"
 )
+
+func TestRemoteLargeCombinedIndexEntry(t *testing.T) {
+	_, remote, _ := fixture(t, server.Options{})
+	ctx := context.Background()
+	if err := remote.CreateCollection(ctx, "wide"); err != nil {
+		t.Fatal(err)
+	}
+	rows := remote.Collection("wide")
+	if err := rows.CreateCompoundIndex(ctx, "v", []db.IndexField{{Field: "v"}}, db.IndexOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	key := bytes.Repeat([]byte{'k'}, 1500)
+	value := strings.Repeat("v", 3000)
+	if err := rows.InsertDocument(ctx, key, map[string]any{"v": value}); err != nil {
+		t.Fatal(err)
+	}
+	stats := db.QueryStats{}
+	cur, err := rows.Query(ctx, nil, db.QueryOptions{Sort: []db.IndexField{{Field: "v"}}, Stats: &stats})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cur.Close()
+	if !cur.Next() || !bytes.Equal(cur.Key(), key) {
+		t.Fatal("wide remote row", cur.Err())
+	}
+	var got map[string]any
+	if err := cur.Decode(&got); err != nil || got["v"] != value {
+		t.Fatal("wide remote document", err)
+	}
+	if cur.Next() || cur.Err() != nil || stats.Returned != 1 || stats.Plan.Access != "index-order" {
+		t.Fatal("wide remote query", cur.Err(), stats)
+	}
+}
 
 func TestRemoteCompatibilityFeatures(t *testing.T) {
 	_, remote, _ := fixture(t, server.Options{MaxQueryMemoryBytes: 4096})

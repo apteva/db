@@ -261,7 +261,7 @@ func (db *DB) computedTreeKeyLocked(start, end []byte) ([]byte, error) {
 		p page
 		i int
 	}
-	var stack [16]frame
+	var stack [maxTreeDepth]frame
 	depth := 0
 	p, err := v.page(v.root())
 	if err != nil {

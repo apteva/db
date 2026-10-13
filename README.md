@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.2.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.3.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
-runtime dependencies. The file format is 7; opening formats 3–6 upgrades them
+runtime dependencies. The file format is 8; opening formats 3–7 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.2
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.2
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.2
+go get github.com/apteva/db@v0.2.0-alpha.3
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.3
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.3
 ```
 
 ```go
@@ -119,7 +119,7 @@ backfill yet. Deleted documents do not prevent a schema change, even before a
 checkpoint. Dropping a collection drops its rules too.
 
 **Format migration:** opening a format-3 through format-6 database upgrades both
-metadata slots durably to format 7 before returning. Older binaries then refuse
+metadata slots durably to format 8 before returning. Older binaries then refuse
 to open it; keep a backup if you need to use one. Page, log and document layouts
 are unchanged; computed catalogs, group counters and unique constraints require the
 version bump. Other format versions are refused.

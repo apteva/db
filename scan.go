@@ -54,7 +54,7 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 		n   page
 		idx int
 	}
-	var stack [16]frame
+	var stack [maxTreeDepth]frame
 	for {
 		db.mu.RLock()
 		if db.closed {
@@ -274,7 +274,7 @@ func (db *DB) scanLeaves(v view, start, end []byte, fn func(lv leafView) bool) e
 		n   page
 		idx int
 	}
-	var stack [16]frame
+	var stack [maxTreeDepth]frame
 	for {
 		db.mu.RLock()
 		if db.closed {

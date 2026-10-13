@@ -55,7 +55,7 @@ func encodeIndexTuple(d indexDef, values []any) ([]byte, error) {
 			}
 		}
 	}
-	if len(k) > MaxKeySize {
+	if len(k) > MaxIndexKeySize {
 		return nil, ErrKeySize
 	}
 	return k, nil
@@ -214,7 +214,7 @@ func (c *IndexCursor) seekPosition(position []byte, forward bool) bool {
 	if c.closed {
 		return false
 	}
-	if !bytes.HasPrefix(position, indexPrefix(c.def.ID)) || len(position) > MaxKeySize || len(primaryKeyOfDef(c.def, position)) == 0 {
+	if !bytes.HasPrefix(position, indexPrefix(c.def.ID)) || len(position) > MaxIndexKeySize || len(primaryKeyOfDef(c.def, position)) == 0 {
 		c.err = ErrPipeline
 		c.valid = false
 		return false

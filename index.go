@@ -429,7 +429,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 		off := len(arena)
 		arena = encodeExactIndexValue(append(arena, pfx...), v)
 		arena = appendExactPrimaryKey(arena, k)
-		if len(arena)-off > MaxKeySize {
+		if len(arena)-off > MaxIndexKeySize {
 			cerr = ErrKeySize
 			arena = arena[:off]
 			return

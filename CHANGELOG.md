@@ -5,6 +5,22 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.3] - 2026-10-13
+
+- Fix reused cursor `SeekAfter`/`SeekBefore` after traversal to unrelated saved
+  positions. Random exclusive seeks discard the cached leaf position; sequential
+  reads retain the cache. Snapshot and binary-key ordering remain unchanged.
+- Raise complete encoded index entries from 4,032 to 8,160 bytes, independent
+  of the 4,032-byte user-key limit. A 1,500-byte primary key and a 3,000-byte
+  indexed ASCII string now fit, including encoding overhead. NUL escaping and
+  every compound component count toward the encoded limit.
+- Split leaves and internal nodes with the incoming cell included, so mixed
+  small/large cells cannot overflow an insertion half. Empty wide index values
+  stay inline; tree traversal supports 32 levels for reduced fanout.
+- Format 8 permanently upgrades formats 3–7 before writes. Older binaries refuse
+  the new format because their split algorithms assume smaller cells. Back up
+  using the original binary first. Logical export/import remains version 2.
+
 ## [0.2.0-alpha.2] - 2026-10-13
 
 - Preserve integers in typed map decoding; fix exact JSON integer filtering and

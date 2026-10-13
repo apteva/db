@@ -565,7 +565,7 @@ func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bo
 		}
 		plen := int(le.Uint32(hdr[:]))
 		crc := le.Uint32(hdr[4:])
-		if plen < 3 || plen > MaxValueSize+MaxKeySize+6 {
+		if plen < 3 || plen > MaxValueSize+MaxIndexKeySize+6 {
 			break
 		}
 		if plen > len(buf) {

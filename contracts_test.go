@@ -194,7 +194,7 @@ func TestBatchExpansionLimitAndOptions(t *testing.T) {
 	if err = database.DropIndex(bg, "v"); err != nil {
 		t.Fatal(err)
 	}
-	if err = database.InsertJSON([]byte("a"), []byte(`{"v":"`+strings.Repeat("x", MaxKeySize)+`"}`)); err != nil {
+	if err = database.InsertJSON([]byte("a"), []byte(`{"v":"`+strings.Repeat("x", MaxIndexKeySize)+`"}`)); err != nil {
 		t.Fatal(err)
 	}
 	if err = database.CreateIndex(bg, "long", "v"); !errors.Is(err, ErrKeySize) {

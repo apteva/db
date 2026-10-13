@@ -1,0 +1,11 @@
+{
+  "release": "v0.2.0-alpha.2",
+  "commit": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+  "format": 7,
+  "generator": "generate.go",
+  "sha256": {
+    "generate.go": "e63cd667ac0f05c45292e4b9be180dfd5441f689734daff79cd3dc3d3a97fce3",
+    "wal-00000001": "675cbb9571b252e10a20ced361b27d9575b5e973b29714d2c70891a7ab7a4caf",
+    "data": "7d9e703ff8c3a51eb0b7118b194f0ed28588c69246023768530b9858a557da5e"
+  }
+}

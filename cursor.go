@@ -7,9 +7,9 @@ import (
 
 // Cursor iterates keys in order, forwards or backwards, merging the tree
 // with the memtable at one snapshot taken when the cursor was created.
-// Close the cursor to release its view. Each step
-// re-descends the tree, so it costs a lookup rather than a pointer chase;
-// no lock is held between calls.
+// Close the cursor to release its view. Sequential steps reuse the current
+// leaf while its generation is unchanged; other movements descend the tree.
+// No lock is held between calls.
 type Cursor struct {
 	owned  *Snapshot
 	closed bool
@@ -81,6 +81,11 @@ func (c *Cursor) move(from []byte, fwd, incl bool) bool {
 	if err := c.c.check(); err != nil {
 		c.err, c.valid = err, false
 		return false
+	}
+	// The cached slot describes the last movement, not an arbitrary resume
+	// position. Sequential steps retain it; an unrelated exclusive seek descends.
+	if !incl && !bytes.Equal(from, c.ikey) {
+		c.leafID = 0
 	}
 	for {
 		tk, tv, tok, err := c.treeStep(from, fwd, incl)
@@ -225,7 +230,7 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 		n   page
 		idx int
 	}
-	var stack [16]frame
+	var stack [maxTreeDepth]frame
 	depth := 0
 	id := vw.root()
 	n, err := vw.page(id)

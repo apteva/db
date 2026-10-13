@@ -46,9 +46,9 @@ not repair arbitrary corruption. Keep verified backups on separate storage and
 regularly restore one into a disposable directory to check your recovery process.
 
 `aptevadbctl format ./data` reads metadata without opening or upgrading.
-Open upgrades formats 3–6 to 7 synchronously and permanently. Back up with the
+Open upgrades formats 3–7 to 8 synchronously and permanently. Back up with the
 original binary before upgrading; retain that binary for the original backup.
-Older binaries refuse the upgraded directory. Format 7 adds exact/compound index encodings and extended documents;
+Older binaries refuse the upgraded directory. Format 8 permits wider index cells; format 7 introduced exact/compound index encodings and extended documents;
 see FORMAT.md and the real historical fixture under testdata/format5.
 
 Short writes, disk-full errors and failed flushes are fatal to the current handle.
@@ -64,7 +64,7 @@ reports ErrCommitUnknown for transport failures and never retries writes itself.
 | User key | 1–4,032 bytes |
 | Binary document | up to 16 MiB, 4,096 fields, 16 nesting levels; strings/nested values use extended lengths when needed |
 | Opaque value | up to 1 GiB |
-| Index entry | up to 4,032 encoded bytes, including value and primary key |
+| Index entry | up to 8,160 encoded bytes (`MaxIndexKeySize`), including the index prefix, all components, escaped primary key, terminators and length suffix |
 | Index name | 1–4,026 UTF-8 bytes |
 | Named collections | IDs 1–65,535; IDs are not reused while a DB remains open |
 | Computed fields | define on empty collections; scalar outputs; checked arithmetic |

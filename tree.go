@@ -8,7 +8,7 @@ import "bytes"
 func (db *DB) insertTree(key, val []byte) error {
 	db.treeGen++
 	ovf := false
-	if leafCellHdr+len(key)+len(val) > MaxCellSize {
+	if leafCellHdr+len(key)+len(val) > max(MaxCellSize, leafCellHdr+len(key)+overflowPtr) {
 		ptr, err := db.spill(val)
 		if err != nil {
 			return err
@@ -154,15 +154,7 @@ func (db *DB) splitLeafInsert(n *node, key, val []byte, ovf, appending bool) ([]
 			initPage(rn.data, pageLeaf, 0)
 		}
 	}
-	first := p.splitLeaf(rn.data, db.scratch)
-	sep := append(db.sepBufs[0][:0], first...)
-	db.sepBufs[0] = sep
-	target := p
-	if bytes.Compare(key, sep) >= 0 {
-		target = rn.data
-	}
-	j, _ := target.searchLeaf(key)
-	target.insertLeafCell(j, key, val, ovf)
+	sep := db.splitPageInsert(p, rn.data, key, val, ovf, 0)
 	return sep, rn.id, nil
 }
 
@@ -253,8 +245,8 @@ func (db *DB) balanceLeaf(parent *node, idx int, child *node, need int) (bool, e
 		if db.debugVerify != nil {
 			db.debugVerify("after rebuild", lp, rp)
 		}
-		sepKey := append(db.sepBufs[15][:0], rp.leafKey(0)...)
-		db.sepBufs[15] = sepKey
+		sepKey := append(db.sepBufs[maxTreeDepth][:0], rp.leafKey(0)...)
+		db.sepBufs[maxTreeDepth] = sepKey
 		ppw := db.writable(parent)
 		rightID := ppw.child(sepCell + 1)
 		ppw.removeCell(sepCell)
@@ -280,14 +272,8 @@ func (db *DB) insertInternal(n *node, idx int, sep []byte, right uint32) ([]byte
 	if p.freeSpace() < need {
 		lvl := int(p.level())
 		rn := db.pager.alloc(pageInternal, p.level())
-		promote := p.splitInternal(rn.data, db.scratch, db.sepBufs[lvl])
+		promote := db.splitPageInsert(p, rn.data, sep, nil, false, right)
 		db.sepBufs[lvl] = promote
-		target := p
-		if bytes.Compare(sep, promote) > 0 {
-			target = rn.data
-		}
-		j := target.searchInternal(sep)
-		target.insertInternalCell(j, sep, right)
 		return promote, rn.id, true, nil
 	}
 	p.insertInternalCell(idx, sep, right)
@@ -471,7 +457,7 @@ type sortedInserter struct {
 
 func (si *sortedInserter) insert(key, val []byte) error {
 	db := si.db
-	if si.valid && leafCellHdr+len(key)+len(val) <= MaxCellSize && (si.upper == nil || bytes.Compare(key, si.upper) < 0) {
+	if si.valid && leafCellHdr+len(key)+len(val) <= max(MaxCellSize, leafCellHdr+len(key)+overflowPtr) && (si.upper == nil || bytes.Compare(key, si.upper) < 0) {
 		ok, err := db.tryInsertLeaf(si.leaf, key, val, false)
 		if err != nil {
 			return err

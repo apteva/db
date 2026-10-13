@@ -12,11 +12,17 @@ import (
 const (
 	// PageSize is the fixed on-disk and in-memory page size.
 	PageSize = 16384
-	// MaxCellSize bounds key+value so a page always holds at least three cells,
-	// which the split logic relies on.
+	// MaxCellSize is the inline-value threshold for ordinary keys.
 	MaxCellSize = PageSize / 4
 	// MaxKeySize bounds keys; lengths are stored as uint16.
 	MaxKeySize = MaxCellSize - 64
+	// MaxIndexKeySize bounds the complete encoded index entry, including its
+	// primary-key suffix. Each cell plus slot fits in half a usable page,
+	// so splitting with the incoming cell always fits in two pages.
+	MaxIndexKeySize = (PageSize-hdrSize)/2 - slotSize - leafCellHdr - overflowPtr
+	// With at least two children per internal node, 32 levels suffice for
+	// the entire uint32 page address space.
+	maxTreeDepth = 32
 
 	pageLeaf     byte = 1
 	pageInternal byte = 2

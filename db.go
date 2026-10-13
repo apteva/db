@@ -58,7 +58,7 @@ type Options struct {
 }
 
 var (
-	ErrKeySize       = errors.New("aptevadb: key must be 1..1024 bytes")
+	ErrKeySize       = errors.New("aptevadb: key or encoded index entry exceeds its size limit")
 	ErrCellSize      = errors.New("aptevadb: key+value too large")
 	ErrClosed        = errors.New("aptevadb: closed")
 	ErrIndexBuilding = errors.New("aptevadb: an index is being built")
@@ -67,11 +67,11 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.2"
+const Version = "0.2.0-alpha.3"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
-// formats 3 through 6 and upgrades them before returning; see FORMAT.md for the policy.
-const FormatVersion = 7
+// formats 3 through 7 and upgrades them before returning; see FORMAT.md for the policy.
+const FormatVersion = 8
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
@@ -91,7 +91,7 @@ type DB struct {
 	scratch       page
 	scratch2      []byte // two pages, for sibling balancing
 	cellSizes     []int  // reusable cell lengths for sibling balancing; writer lock held
-	sepBufs       [16][]byte
+	sepBufs       [maxTreeDepth + 1][]byte
 	ptrBuf        []byte
 	balances      uint64
 	merges        uint64
@@ -505,12 +505,16 @@ func (b *Batch) UpsertJSON(key, doc []byte) error {
 }
 
 func (b *Batch) add(key, val []byte, del bool) error {
-	if len(key) == 0 || len(key) > MaxKeySize {
-		// The public limit applies to user keys. Internal collection rows
-		// also carry a one/three-byte tag; reserved catalog/index keys retain
-		// their existing total-length limit.
-		_, user, ok := splitKey(key)
-		if !b.internal || !ok || len(user) == 0 || len(user) > MaxKeySize {
+	limit := MaxKeySize
+	if b.internal {
+		limit = MaxIndexKeySize
+	}
+	if len(key) == 0 || len(key) > limit {
+		return ErrKeySize
+	}
+	if b.internal {
+		// Collection prefixes do not count toward the public user-key limit.
+		if _, user, ok := splitKey(key); ok && (len(user) == 0 || len(user) > MaxKeySize) {
 			return ErrKeySize
 		}
 	}
@@ -901,7 +905,7 @@ func (db *DB) readMeta() (meta, error) {
 			continue
 		}
 		version := le.Uint32(buf[8:])
-		if version != FormatVersion && version != 3 && version != 4 && version != 5 && version != 6 {
+		if version != FormatVersion && version != 3 && version != 4 && version != 5 && version != 6 && version != 7 {
 			return meta{}, fmt.Errorf("%w: file is format %d, this build reads %d", ErrFormat, le.Uint32(buf[8:]), FormatVersion)
 		}
 		if version < FormatVersion {

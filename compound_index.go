@@ -168,7 +168,7 @@ func (c *Collection) createExactIndex(ctx context.Context, name string, fields [
 	err := db.computedScanLocked(ctx, c.pfx, c.end, func(key, doc []byte) error {
 		pk := key[len(c.pfx):]
 		return indexEntries(doc, d, pk, func(ek []byte, nullable bool) error {
-			if len(ek) > MaxKeySize {
+			if len(ek) > MaxIndexKeySize {
 				return ErrKeySize
 			}
 			if d.Unique && !(d.NullsDistinct && nullable) {

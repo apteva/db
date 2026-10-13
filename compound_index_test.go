@@ -403,7 +403,7 @@ func TestLargeKeysSplitRecoveryAndIndexLimitAtomicity(t *testing.T) {
 	indexed, err := d.Collection("indexed")
 	mustCompat(t, err)
 	mustCompat(t, indexed.CreateCompoundIndex(bg, "v", []IndexField{{Field: "v"}}))
-	if err := indexed.InsertDocument([]byte("long"), map[string]any{"v": strings.Repeat("x", MaxKeySize)}); !errors.Is(err, ErrKeySize) {
+	if err := indexed.InsertDocument([]byte("long"), map[string]any{"v": strings.Repeat("x", MaxIndexKeySize)}); !errors.Is(err, ErrKeySize) {
 		t.Fatal(err)
 	}
 	if _, found, err := indexed.Find([]byte("long"), nil); err != nil || found {

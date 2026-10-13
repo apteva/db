@@ -1,6 +1,6 @@
 # On-disk format
 
-Format version **7**, as `aptevadb.FormatVersion`. This document is the
+Format version **8**, as `aptevadb.FormatVersion`. This document is the
 contract for what a build writes and reads; the policy for changing it is at
 the end.
 
@@ -56,8 +56,11 @@ page u32`. An internal cell is `klen u16, child u32, key`; child i of the
 page (i ≥ 1) is cell i-1's child, child 0 is in the header, and every key
 under child i is at least separator i-1 and below separator i.
 
-Cells that do not fit are never split across pages; the largest cell is
-`PageSize/4`.
+Cells are never split across pages. Ordinary inline values retain the
+`MaxCellSize = PageSize/4` threshold. Wider index keys may occupy a cell
+with a small inline value or an overflow pointer. Every cell plus its slot
+fits in half the usable page; splits include the incoming cell when
+choosing the cut, including the promoted internal separator.
 
 ### Overflow pages
 
@@ -102,7 +105,11 @@ Every key in the tree carries a one-byte tag.
 | 0xFF | collection id 254 to 65535: `0xFF`, id u16 big-endian, then the user key |
 
 User keys are 1 to `MaxKeySize` (4032) bytes and may contain any byte.
-Values may be up to `MaxValueSize` (1 GiB).
+Values may be up to `MaxValueSize` (1 GiB). Complete encoded index keys
+are limited to `MaxIndexKeySize` (8160) bytes, including the index prefix,
+component encodings and escaped primary-key suffix. NUL bytes expand when
+escaped; the limit applies after encoding. Oversized entries fail atomically
+with `ErrKeySize`, on insertion, replacement and index backfill.
 
 Reserved keys:
 
@@ -178,9 +185,9 @@ checkpoint is dropped at close and after compaction.
 
 ## Compatibility policy
 
-- `Open` reads formats 3 through 7. Older supported formats are upgraded with
+- `Open` reads formats 3 through 8. Older supported formats are upgraded with
   two synchronous full checkpoints, replacing both alternating meta slots
-  before `Open` returns. Format 7 is durable before extended documents or new index encodings
+  before `Open` returns. Format 8 is durable before wider index cells
   can enter the WAL. Older binaries refuse it,
   including after a crash or a damaged newest meta page. This is a one-way
   upgrade; retain a backup for older binaries. Other versions are refused with
@@ -228,3 +235,8 @@ checkpoint is dropped at close and after compaction.
   encodings, nullable constraints and larger safe keys. No page or WAL record
   layouts change. Older writers refuse format 7. Export version 2 preserves the
   new catalogs; import version 1 remains supported.
+
+- Format 8 permits complete encoded index entries up to 8,160 bytes. Page and
+  WAL record layouts remain unchanged, but older split algorithms assume
+  smaller cells, so older writers must refuse the directory. User keys remain
+  limited to 4,032 bytes. Export/import stays at version 2.
