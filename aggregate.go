@@ -67,7 +67,7 @@ var (
 //
 // Stages: $match (equality, $eq $ne $gt $gte $lt $lte $in; an array field
 // matches when any element does), $group (_id as null, "$field" or an
-// object of "$field" refs; $sum $avg $min $max $count $first $last), $sort
+// object of "$field" refs; $sum $avg $min $max $count $countNonNull $first $last), $sort
 // (one or more keys, in order), $skip, $limit, $project (inclusion or
 // exclusion), $count, $unwind, $lookup (from/localField/foreignField/as).
 // Field references may be dotted paths into nested documents.
@@ -140,6 +140,7 @@ const (
 	accCount
 	accFirst
 	accLast
+	accCountNonNull
 )
 
 type accSpec struct {
@@ -503,6 +504,8 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 				a.op = accMax
 			case "$count":
 				a.op = accCount
+			case "$countNonNull":
+				a.op = accCountNonNull
 			case "$first":
 				a.op = accFirst
 			case "$last":
@@ -512,6 +515,8 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 			}
 			if f, ok := fieldRef(operand); ok {
 				a.field = f
+			} else if a.op == accCountNonNull {
+				return nil, fmt.Errorf("accumulator %s needs a nonempty \"$field\" reference", name)
 			} else if a.op == accCount {
 				a.c = value{k: kInt, i: 1}
 			} else {
@@ -618,7 +623,7 @@ type accState struct {
 	fsum     float64
 	hasFloat bool
 	count    int64
-	ext      scalar
+	ext      scalar // for SUM/AVG, ext.i holds the signed high limb of isum
 	hasExt   bool
 }
 
@@ -725,7 +730,7 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 		case accSum, accAvg:
 			switch v.k {
 			case kInt:
-				st.isum += v.i
+				st.addInteger(v.i)
 				st.count++
 			case kFloat:
 				st.fsum += v.f
@@ -734,6 +739,10 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 			}
 		case accCount:
 			st.count++
+		case accCountNonNull:
+			if v.k != kMissing && v.k != kNull {
+				st.count++
+			}
 		case accMin, accMax:
 			if v.k == kMissing || v.k == kNull {
 				continue
@@ -871,15 +880,19 @@ func (g *grouper) row(gs *groupState) map[string]any {
 func accValue(a *accSpec, st *accState) value {
 	switch a.op {
 	case accSum:
+		sum := st.integerSum()
 		if st.hasFloat {
-			return value{k: kFloat, f: st.fsum + float64(st.isum)}
+			return value{k: kFloat, f: st.fsum + sum.float64()}
 		}
-		return value{k: kInt, i: st.isum}
+		if sum.fitsInt64() {
+			return value{k: kInt, i: st.isum}
+		}
+		return value{k: kFloat, f: sum.float64()}
 	case accAvg:
 		if st.count > 0 {
-			return value{k: kFloat, f: (st.fsum + float64(st.isum)) / float64(st.count)}
+			return value{k: kFloat, f: (st.fsum + st.integerSum().float64()) / float64(st.count)}
 		}
-	case accCount:
+	case accCount, accCountNonNull:
 		return value{k: kInt, i: st.count}
 	default:
 		if st.hasExt {
@@ -924,10 +937,14 @@ func mergeState(spec *groupSpec, a, b *groupState) {
 	for i := range spec.accs {
 		x, y := &a.accs[i], &b.accs[i]
 		switch spec.accs[i].op {
-		case accSum, accAvg, accCount:
-			x.isum += y.isum
+		case accSum, accAvg:
+			sum := x.integerSum()
+			sum.merge(y.integerSum())
+			x.isum, x.ext.i = int64(sum.lo), int64(sum.hi)
 			x.fsum += y.fsum
 			x.hasFloat = x.hasFloat || y.hasFloat
+			x.count += y.count
+		case accCount, accCountNonNull:
 			x.count += y.count
 		case accMin, accMax:
 			if !y.hasExt {

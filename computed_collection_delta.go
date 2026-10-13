@@ -93,6 +93,10 @@ func (d *computedCollectionDelta) contribute(p *computedCollectionPlan, doc []by
 		if v.k == kMissing || v.k == kNull {
 			continue
 		}
+		if a.op == accCountNonNull {
+			g.sums[i].add(1, negative)
+			continue
+		}
 		if v.k != kInt {
 			return fmt.Errorf("%w: sum %q needs int64 values", ErrComputedCollection, a.name)
 		}

@@ -5,7 +5,21 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
-## [Unreleased]
+## [0.2.0-alpha.4] - 2026-10-13
+
+- Fix integer SUM/AVG overflow in serial aggregation and parallel shard merges.
+  Accumulate integer inputs exactly in signed 128 bits. SUM returns int64 when
+  the final total fits, otherwise float64; AVG returns float64. Cancellation
+  after intermediate overflow recovers exact integer totals. Float results
+  use IEEE-754 precision; maintained integer sums still reject final overflow.
+- Add `$countNonNull: "$field.path"` group accumulators, including maintained
+  computed collections. Count present non-null values of every type, including
+  zero/false/empty strings and containers; exclude missing and null. Existing
+  row-count operations retain their behavior.
+- Format 9 protects persisted non-null-count definitions from older writers.
+  Opening formats 3–8 upgrades both metadata slots durably before writes.
+  Back up with the original binary before this one-way upgrade. Page, document,
+  WAL and export layouts are unchanged; logical export/import stays version 2.
 
 - Speed up sequential cursors by reusing private value buffers and advancing
   known cached slots without repeated key comparisons. Arbitrary saved-position

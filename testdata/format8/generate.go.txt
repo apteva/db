@@ -1,0 +1,4 @@
+package main
+import("context";"fmt";"math";"os";db "github.com/apteva/db")
+func check(e error){if e!=nil{panic(e)}}
+func main(){d,e:=db.Open(os.Args[1],db.Options{Sync:true,SyncMode:db.SyncOS});check(e);defer d.Close();c,e:=d.Collection("source");check(e);for i:=0;i<2;i++{check(c.InsertDocument([]byte(fmt.Sprint(i)),map[string]any{"v":int64(math.MaxInt64)}))};check(c.InsertDocument([]byte("null"),map[string]any{"v":nil}));rows,e:=c.Aggregate(context.Background(),[]byte(`[{"$group":{"_id":null,"sum":{"$sum":"$v"},"avg":{"$avg":"$v"}}}]`));check(e);fmt.Println(rows);_,e=d.CreateComputedCollection(context.Background(),"counts","source",[]byte(`[{"$group": {"_id": null, "rows": {"$count": {}}}}]`));check(e);check(d.Checkpoint())}

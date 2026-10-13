@@ -110,7 +110,7 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				return nil, ErrComputedCollection
 			}
 			for ai, a := range p.group.accs {
-				if !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount) {
+				if !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount && a.op != accCountNonNull) {
 					return nil, ErrComputedCollection
 				}
 				if a.field != "" {

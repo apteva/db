@@ -229,3 +229,34 @@ Insert/Upsert remains an opaque byte API, so it does not validate document bytes
 Decode into map[string]any preserves int64 and float64 values directly, including
 large integers. Struct numeric fields honor their declared Go types; interface
 fields use json.Number. This avoids alpha.1 map decoding through float64.
+
+
+Aggregation preserves integer sums across serial processing and parallel merges.
+`$sum` returns `int64` when the final integer total fits and `float64` otherwise;
+`$avg` returns `float64` (or null when there are no numeric inputs). Integer
+subtotals use exact signed 128-bit accumulation, so cancellation after a large
+intermediate sum retains precision. Final floating results have IEEE-754
+precision. Both operators ignore missing, null and nonnumeric inputs.
+Maintained computed collections retain their stricter contract: stored sums
+require integer inputs and reject a final total outside int64 atomically.
+
+Use `$countNonNull: "$field.path"` for the equivalent of `COUNT(column)`.
+It excludes missing and null fields, and counts every other value once,
+including zero, false, empty strings, arrays and objects. `$count: {}` counts
+all rows, including those with missing/null fields. These are group accumulators;
+the existing `$count` stage also continues to count rows.
+
+```go
+rows, err := orders.Aggregate(ctx, []byte(`[
+  {"$group": {"_id": null,
+    "rows": {"$count": {}},
+    "priced": {"$countNonNull": "$amount"},
+    "total": {"$sum": "$amount"},
+    "mean": {"$avg": "$amount"}
+  }}
+]`))
+```
+
+The same non-null counter is supported in native computed collections and
+through the Go HTTP client. Opening an existing database upgrades formats 3–8
+to format 9; make a backup with the original binary before upgrading.

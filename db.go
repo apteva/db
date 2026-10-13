@@ -67,11 +67,11 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.3"
+const Version = "0.2.0-alpha.4"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
-// formats 3 through 7 and upgrades them before returning; see FORMAT.md for the policy.
-const FormatVersion = 8
+// formats 3 through 8 and upgrades them before returning; see FORMAT.md for the policy.
+const FormatVersion = 9
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
@@ -906,7 +906,7 @@ func (db *DB) readMeta() (meta, error) {
 			continue
 		}
 		version := le.Uint32(buf[8:])
-		if version != FormatVersion && version != 3 && version != 4 && version != 5 && version != 6 && version != 7 {
+		if version < 3 || version > FormatVersion {
 			return meta{}, fmt.Errorf("%w: file is format %d, this build reads %d", ErrFormat, le.Uint32(buf[8:]), FormatVersion)
 		}
 		if version < FormatVersion {

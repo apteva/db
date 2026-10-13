@@ -46,9 +46,9 @@ not repair arbitrary corruption. Keep verified backups on separate storage and
 regularly restore one into a disposable directory to check your recovery process.
 
 `aptevadbctl format ./data` reads metadata without opening or upgrading.
-Open upgrades formats 3–7 to 8 synchronously and permanently. Back up with the
+Open upgrades formats 3–8 to 9 synchronously and permanently. Back up with the
 original binary before upgrading; retain that binary for the original backup.
-Older binaries refuse the upgraded directory. Format 8 permits wider index cells; format 7 introduced exact/compound index encodings and extended documents;
+Older binaries refuse the upgraded directory. Format 9 adds non-null counts in maintained definitions; format 8 permits wider index cells; format 7 introduced exact/compound index encodings and extended documents;
 see FORMAT.md and the real historical fixture under testdata/format5.
 
 Short writes, disk-full errors and failed flushes are fatal to the current handle.

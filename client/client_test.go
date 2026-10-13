@@ -7,6 +7,7 @@ import (
 	"github.com/apteva/db/client"
 	"github.com/apteva/db/server"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,6 +16,27 @@ import (
 )
 
 const token = "test-only-token-32-bytes-123456789"
+
+func TestRemoteWideAggregationAndNonNullCount(t *testing.T) {
+	_, c, _ := fixture(t, server.Options{})
+	ctx := context.Background()
+	if err := c.CreateCollection(ctx, "numbers"); err != nil {
+		t.Fatal(err)
+	}
+	numbers := c.Collection("numbers")
+	for i, doc := range []string{`{"v":9223372036854775807}`, `{"v":9223372036854775807}`, `{"v":null}`, `{}`} {
+		if err := numbers.InsertJSON(ctx, []byte{byte('a' + i)}, []byte(doc)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rows, err := numbers.Aggregate(ctx, []byte(`[{"$group":{"_id":null,"sum":{"$sum":"$v"},"avg":{"$avg":"$v"},"rows":{"$count":{}},"present":{"$countNonNull":"$v"}}}]`))
+	if err != nil || len(rows) != 1 {
+		t.Fatal(rows, err)
+	}
+	if rows[0]["sum"] != float64(math.MaxInt64)*2 || rows[0]["avg"] != float64(math.MaxInt64) || rows[0]["rows"] != int64(4) || rows[0]["present"] != int64(2) {
+		t.Fatal(rows)
+	}
+}
 
 func fixture(t *testing.T, options server.Options) (*db.DB, *client.Client, *server.Server) {
 	t.Helper()

@@ -1,6 +1,6 @@
 # On-disk format
 
-Format version **8**, as `aptevadb.FormatVersion`. This document is the
+Format version **9**, as `aptevadb.FormatVersion`. This document is the
 contract for what a build writes and reads; the policy for changing it is at
 the end.
 
@@ -186,9 +186,9 @@ checkpoint is dropped at close and after compaction.
 
 ## Compatibility policy
 
-- `Open` reads formats 3 through 8. Older supported formats are upgraded with
+- `Open` reads formats 3 through 9. Older supported formats are upgraded with
   two synchronous full checkpoints, replacing both alternating meta slots
-  before `Open` returns. Format 8 is durable before wider index cells
+  before `Open` returns. Format 9 is durable before non-null-count definitions
   can enter the WAL. Older binaries refuse it,
   including after a crash or a damaged newest meta page. This is a one-way
   upgrade; retain a backup for older binaries. Other versions are refused with
@@ -241,3 +241,9 @@ checkpoint is dropped at close and after compaction.
   WAL record layouts remain unchanged, but older split algorithms assume
   smaller cells, so older writers must refuse the directory. User keys remain
   limited to 4,032 bytes. Export/import stays at version 2.
+
+- Format 9 permits `$countNonNull` in maintained computed-collection definitions.
+  Page/document/WAL layouts and export version 2 are unchanged. Older writers
+  reject the format before recovery so they cannot replay or update definitions
+  whose contribution semantics they do not support. Existing format-8 definitions
+  and rows retain their meaning; queries gain widened integer SUM/AVG accumulation.
