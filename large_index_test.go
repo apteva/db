@@ -263,3 +263,49 @@ func TestLargeIndexWALRecoveryAndBoundary(t *testing.T) {
 		t.Fatalf("boundary recovery: len=%d error=%v", len(cur.Position()), cur.Err())
 	}
 }
+
+func TestLargeIndexCursorSnapshotThroughMaintenance(t *testing.T) {
+	d, err := Open(t.TempDir(), Options{SyncMode: SyncOS, CacheBytes: 16 * PageSize, MemtableBytes: 128 << 10})
+	mustCompat(t, err)
+	defer d.Close()
+	c, err := d.Collection("wide_snapshot")
+	mustCompat(t, err)
+	mustCompat(t, c.CreateCompoundIndex(bg, "v", []IndexField{{Field: "v"}}))
+	keys := make([][]byte, 100)
+	values := make([]string, len(keys))
+	for i := range keys {
+		keys[i] = []byte(fmt.Sprintf("%04d", i) + strings.Repeat("k", 1496))
+		values[i] = fmt.Sprintf("%04d", i) + strings.Repeat("v", 2996)
+		mustCompat(t, c.InsertDocument(keys[i], map[string]any{"v": values[i]}))
+	}
+	mustCompat(t, d.Checkpoint())
+	cur, err := c.NewIndexCursor(bg, "v", IndexCursorOptions{})
+	mustCompat(t, err)
+	defer cur.Close()
+	var positions [][]byte
+	for ok := cur.First(); ok; ok = cur.Next() {
+		positions = append(positions, append([]byte(nil), cur.Position()...))
+	}
+	mustCompat(t, cur.Err())
+	if len(positions) != len(keys) {
+		t.Fatal(len(positions))
+	}
+	for i := range keys {
+		mustCompat(t, c.UpsertDocument(keys[i], map[string]any{"v": "changed" + values[i]}))
+	}
+	mustCompat(t, d.Checkpoint())
+	if err := d.Compact(bg); !errors.Is(err, ErrSnapshotsOpen) {
+		t.Fatal("compaction must preserve its active-snapshot contract", err)
+	}
+	mustCompat(t, c.DropIndex(bg, "v"))
+	if !cur.SeekAfter(positions[20]) || !bytes.Equal(cur.Key(), keys[21]) || string(docField(cur.Value(), "v").s) != values[21] {
+		t.Fatal("wide forward snapshot resume", cur.Err())
+	}
+	if !cur.SeekBefore(positions[80]) || !bytes.Equal(cur.Key(), keys[79]) || string(docField(cur.Value(), "v").s) != values[79] {
+		t.Fatal("wide reverse snapshot resume", cur.Err())
+	}
+	mustCompat(t, cur.Close())
+	mustCompat(t, d.Compact(bg))
+	mustCompat(t, d.Verify(bg))
+	mustCompat(t, d.VerifyIndexes(bg))
+}
