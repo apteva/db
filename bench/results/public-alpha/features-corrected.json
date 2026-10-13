@@ -1,0 +1,476 @@
+[
+  {
+    "case": "collections",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-coll4,pebble-coll4,sqlite-c-tables4",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-collections-r1-data"
+    ],
+    "seconds": 20.14673270797357,
+    "returncode": 0
+  },
+  {
+    "case": "batch",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-batch-r1-data"
+    ],
+    "seconds": 24.803931041969918,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-aggregate-r1-data"
+    ],
+    "seconds": 1.6347445419523865,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-join-r1-data"
+    ],
+    "seconds": 2.5962770419428125,
+    "returncode": 0
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-fields-r1-data"
+    ],
+    "seconds": 5.807939124992117,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-collections-r1-data"
+    ],
+    "seconds": 16.621996458037756,
+    "returncode": 0
+  },
+  {
+    "case": "durable",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-engines",
+      "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-r1-data"
+    ],
+    "seconds": 76.0894800000824,
+    "returncode": 0
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 1,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-batch-r1-data"
+    ],
+    "seconds": 4.348352875094861,
+    "returncode": 0
+  },
+  {
+    "case": "collections",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-coll4,pebble-coll4,sqlite-c-tables4",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-collections-r2-data"
+    ],
+    "seconds": 19.380927833961323,
+    "returncode": 0
+  },
+  {
+    "case": "batch",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-batch-r2-data"
+    ],
+    "seconds": 26.827436999999918,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-aggregate-r2-data"
+    ],
+    "seconds": 1.836393625009805,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-join-r2-data"
+    ],
+    "seconds": 3.1997569159138948,
+    "returncode": 0
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-fields-r2-data"
+    ],
+    "seconds": 6.752799208043143,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-collections-r2-data"
+    ],
+    "seconds": 17.367333083064295,
+    "returncode": 0
+  },
+  {
+    "case": "durable",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-engines",
+      "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-r2-data"
+    ],
+    "seconds": 74.50042783399113,
+    "returncode": 0
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 2,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-batch-r2-data"
+    ],
+    "seconds": 5.124212334048934,
+    "returncode": 0
+  },
+  {
+    "case": "collections",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-coll4,pebble-coll4,sqlite-c-tables4",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-collections-r3-data"
+    ],
+    "seconds": 23.56597341701854,
+    "returncode": 0
+  },
+  {
+    "case": "batch",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-batch-r3-data"
+    ],
+    "seconds": 24.7331800829852,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-aggregate-r3-data"
+    ],
+    "seconds": 1.786653249990195,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-join-r3-data"
+    ],
+    "seconds": 2.623928750050254,
+    "returncode": 0
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-fields-r3-data"
+    ],
+    "seconds": 6.227728042053059,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-computed-collections-r3-data"
+    ],
+    "seconds": 17.534822750021704,
+    "returncode": 0
+  },
+  {
+    "case": "durable",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-engines",
+      "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-r3-data"
+    ],
+    "seconds": 75.61832166707609,
+    "returncode": 0
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 3,
+    "command": [
+      "<output>/feature-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/corrected-durable-batch-r3-data"
+    ],
+    "seconds": 4.000163958990015,
+    "returncode": 0
+  }
+]

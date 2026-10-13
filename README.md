@@ -51,8 +51,9 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
-Historical benchmark results are under `bench/results/`. They describe their
-original builds, settings and hardware, not the current alpha. The separate
+The [public-alpha validation report](bench/results/public-alpha/VALIDATION.md)
+retains 30 resource and 24 feature trials against Pebble and both SQLite bindings.
+Other historical results under `bench/results/` describe their original builds. The separate
 `bench` module compares SQLite and Pebble without adding engine dependencies.
 KV comparisons use `Upsert` (matching the other engines' replacement behavior);
 `Insert` now performs a duplicate-key check. See [BENCHMARKS.md](BENCHMARKS.md).
@@ -138,12 +139,12 @@ batches maintain the stored results and their indexes in the same transaction.
 Computed fields on the source are evaluated first.
 
 ```go
-totals, err := db.CreateComputedCollection(ctx, "paid_totals", "orders", []byte(`[
+totals, err := database.CreateComputedCollection(ctx, "paid_totals", "orders", []byte(`[
   {"$match": {"paid": true}},
   {"$group": {"_id": "$customer", "total": {"$sum": "$amount"}, "n": {"$count": {}}}}
 ]`))
 if err != nil { return err }
-key, err := aptevadb.ComputedGroupKey(int64(42))
+key, err := db.ComputedGroupKey(int64(42))
 if err != nil { return err }
 doc, found, err := totals.Find(key, nil) // current total for customer 42
 ```
@@ -279,8 +280,8 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
 
 * **Batches** (`db.go`, `Batch`): many inserts, one log write, one flush.
   Log records carry a continuation flag, so a batch replays all-or-nothing.
-* **Documents and aggregation** (`doc.go`, `scan.go`, `aggregate.go`). Flat JSON objects are stored in a typed binary encoding
-  and read back with `InsertJSON`/`FindJSON`. `Scan` walks the tree in key order,
+* **Documents and aggregation** (`doc.go`, `scan.go`, `aggregate.go`). JSON objects are stored in a typed binary encoding
+  and read back with `InsertJSON`/`FindJSON`. `Scan` walks the tree in key order through one consistent snapshot,
   holding the reader lock one leaf at a time. `Aggregate` runs a MongoDB-style
   pipeline: `$match` (`$eq $ne $gt $gte $lt $lte $in`), `$group` (`_id` null,
   `"$field"` or composite; `$sum $avg $min $max $count $first $last`), `$sort`,
@@ -289,8 +290,8 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   referenced field from each document in a single walk. `AggregateParallel`
   splits the tree into key ranges at internal separators (`ShardBounds`), runs
   a `$match`/`$group` prefix on one goroutine per range and merges the
-  accumulators, which SQLite cannot do for a single query. Nested documents and
-  arrays are not supported yet.
+  accumulators. Nested documents and arrays are supported, with dotted paths
+  and `$unwind` for array expansion.
 
 * **Delete** removes a key through the same log, memtable and tree paths;
   emptied leaves are unlinked, leaves under a quarter full merge into a
@@ -316,10 +317,11 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   suffix of unsynced writes and may tear the first lost one, per inode. After
   each recovery every acknowledged write must be present, an in-flight batch
   must be all-or-nothing, and `Verify` must pass. `CRASH_ROUNDS=300 go test
-  -run Crash ./engine` runs a longer soak. Fuzz targets cover documents, the
-  pipeline parser and page operations (`go test -fuzz FuzzDocument ./engine`).
+  -run Crash .` runs a longer soak. Fuzz targets cover documents, the
+  pipeline parser and page operations (`go test -run '^$' -fuzz '^FuzzDocument$' -fuzztime 30s .`).
 * **Tooling**: `cmd/aptevadbctl` with `stats`, `verify`, `get`, `dump`, `agg`,
-  `compact`, `backup`.
+  `compact`, `backup`, `restore`, `export`, `import`, `collections`, `version`
+  and `format`.
 * **Background checkpoints** (`checkpoint.go`). A checkpoint folds the
   frozen memtable into the tree in small locked chunks, then captures the dirty
   set under the lock in memory only (final page ids, patched parents, free list,
@@ -333,7 +335,7 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   last few records and two renames; the copy's meta points back into the shared
   log so nothing is flushed under the lock. With 64MB cache and 16MB memtable,
   the longest single write wait during checkpoints and compactions measured 4 to
-  6 ms.
+  6 ms in historical runs; see BENCHMARKS.md for current validation.
 * **Snapshots** (`snapshot.go`). `Snapshot()` pins the root and memtable;
   a page modified afterwards is copied first and its old version kept in the
   snapshot's overlay; page ids it may reference are quarantined, not reused.
@@ -351,8 +353,9 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   a leading `$match` (equality, `$in`, ranges) in one pass over the entries,
   takes the most selective candidate, and reads through it only while it
   names at most an eighth of the collection, then re-checks every predicate
-  on the fetched document. `VerifyIndexes` cross-checks entries and
-  documents.
+  on the fetched document. Unique index creation instead stages and validates
+  the whole index before publishing it atomically. `VerifyIndexes` cross-checks
+  entries, documents and unique constraints.
 * **Execution**. `Aggregate` runs on every core by default: a `$match`/`$group`
   (or `$count`) pipeline without a window is split into key-range shards of
   the tree, or into shards of an index's primary keys, and the per-shard
@@ -370,7 +373,8 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   `Scan`, cursors, batches, indexes, aggregation, snapshots); the `DB` methods
   address the default collection. A batch spans collections through
   `Batch.With`, and commits as one log record group. `DropCollection` removes
-  indexes, keys and catalog entry in bounded batches.
+  indexes, keys and catalog entry in one atomic WAL group. Staging is capped at
+  256 MiB; cancellation or a staging-limit error leaves the collection intact.
 * **`$lookup` joins** (`lookup.go`). The equality form
   (`from`/`localField`/`foreignField`/`as`), read through the same snapshot as
   the source. A `$lookup` unwound on its own field joins in the streaming pass,

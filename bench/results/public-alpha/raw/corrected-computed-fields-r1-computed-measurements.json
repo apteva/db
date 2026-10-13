@@ -1,0 +1,289 @@
+[
+  {
+    "engine": "ours-native",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 1025.31916
+  },
+  {
+    "engine": "ours-native",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 784.98416
+  },
+  {
+    "engine": "ours-native",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 255.710625,
+    "disk_bytes": 7602192
+  },
+  {
+    "engine": "ours-native",
+    "phase": "read-derived-10",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 44.50625
+  },
+  {
+    "engine": "ours-native",
+    "phase": "read-derived-32",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 35.75
+  },
+  {
+    "engine": "ours-native",
+    "phase": "index-build+verify",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 1498.17666
+  },
+  {
+    "engine": "ours-native",
+    "phase": "indexed-filter",
+    "trial": 1,
+    "ops": 20,
+    "ns_per_op": 37556.25
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 514.50832
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 348.52584
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 243.7025,
+    "disk_bytes": 7602192
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "read-derived-10",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 45.55458
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "read-derived-32",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 38.309585
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "index-build+verify",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 1575.07918
+  },
+  {
+    "engine": "ours-manual",
+    "phase": "indexed-filter",
+    "trial": 1,
+    "ops": 20,
+    "ns_per_op": 35125
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 388.97166
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 249.16916
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 260.983335,
+    "disk_bytes": 4964368
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "read-derived-10",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 39.46104
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "read-derived-32",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 43.46
+  },
+  {
+    "engine": "ours-readtime",
+    "phase": "derive-filter-scan",
+    "trial": 1,
+    "ops": 20,
+    "ns_per_op": 3250160.45
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 1405.5325
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 903.93916
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 1359.71875,
+    "disk_bytes": 10506319
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "read-derived-10",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 710.24917
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "read-derived-32",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 721.76396
+  },
+  {
+    "engine": "pebble-readtime",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 1142.61834
+  },
+  {
+    "engine": "pebble-readtime",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 420.83
+  },
+  {
+    "engine": "pebble-readtime",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 1365.219375,
+    "disk_bytes": 6977659
+  },
+  {
+    "engine": "pebble-readtime",
+    "phase": "read-derived-10",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 754.4075
+  },
+  {
+    "engine": "pebble-readtime",
+    "phase": "read-derived-32",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 919.80208
+  },
+  {
+    "engine": "sqlite-c",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 4872.04918
+  },
+  {
+    "engine": "sqlite-c",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 7058.695
+  },
+  {
+    "engine": "sqlite-c",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 1821.757085,
+    "disk_bytes": 4034560
+  },
+  {
+    "engine": "sqlite-c",
+    "phase": "index-build",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 444.76668
+  },
+  {
+    "engine": "sqlite-c",
+    "phase": "indexed-filter",
+    "trial": 1,
+    "ops": 20,
+    "ns_per_op": 26252.05
+  },
+  {
+    "engine": "sqlite-go",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 4900.20332
+  },
+  {
+    "engine": "sqlite-go",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 6974.34418
+  },
+  {
+    "engine": "sqlite-go",
+    "phase": "read-derived",
+    "trial": 1,
+    "ops": 200000,
+    "ns_per_op": 2447.01083,
+    "disk_bytes": 4034560
+  },
+  {
+    "engine": "sqlite-go",
+    "phase": "index-build",
+    "trial": 1,
+    "ops": 50000,
+    "ns_per_op": 713.63332
+  },
+  {
+    "engine": "sqlite-go",
+    "phase": "indexed-filter",
+    "trial": 1,
+    "ops": 20,
+    "ns_per_op": 46989.55
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-10-13T11:56:40.910890+00:00",
+  "source_revision": "f97b8944dbf5119e72c89bf92e330816da8a48d4",
+  "source_status": "",
+  "binary_sha256": "1af4d3b32ea1aa24064d712362a6cf9ff615414807dfd181fcf16974f3a35cb9",
+  "go": "go version go1.25.1 darwin/arm64",
+  "method": "Serial fresh processes. Three outer repetitions per feature. Retain every output; resource runner retains all trials. Aggregation/join query timings are the legacy best-of-five inner timing and labeled as such. No concurrent local builds/tests.",
+  "feature_source_revision": "f4aab14371aff8119df8d727c606fad3a4d7c59d",
+  "feature_binary_sha256": "dfd8fee6a5cbe31e5d86c6732cbbf1680c4f076dcd563b9eb9221b1daf4c1e67",
+  "feature_started_at": "2026-10-13T12:23:07.403466+00:00",
+  "feature_harness_note": "Post-tag changes affect only benchmark fixtures and engine selection; library code matches the alpha tag.",
+  "finished_at": "2026-10-13T12:30:51.915136+00:00"
+}

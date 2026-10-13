@@ -1,0 +1,416 @@
+[
+  {
+    "engine": "ours-native",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 1778.2625
+  },
+  {
+    "engine": "ours-native",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 2149.12915
+  },
+  {
+    "engine": "ours-native",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 1144.729
+  },
+  {
+    "engine": "ours-native",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 69546.791
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 128.429583
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-par10",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 19.638458
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-par32",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 24.354834
+  },
+  {
+    "engine": "ours-native",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 78208,
+    "disk_bytes": 8795213
+  },
+  {
+    "engine": "ours-query",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 401.9
+  },
+  {
+    "engine": "ours-query",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 214.3271
+  },
+  {
+    "engine": "ours-query",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 331.5835
+  },
+  {
+    "engine": "ours-query",
+    "phase": "backfill",
+    "trial": 1,
+    "ops": 18000,
+    "ns_per_op": 776.1342777777778
+  },
+  {
+    "engine": "ours-query",
+    "phase": "projection-backfill",
+    "trial": 1,
+    "ops": 18000,
+    "ns_per_op": 723.0995555555555
+  },
+  {
+    "engine": "ours-query",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 21,
+    "ns_per_op": 2260468.285714286
+  },
+  {
+    "engine": "ours-query",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 25388.792
+  },
+  {
+    "engine": "ours-query",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 148083,
+    "disk_bytes": 8277982
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 4482.0042
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 4191.2646
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 1513.604
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 95544.917
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 1297.757584
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "point-par10",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 798.314958
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "point-par32",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 857.683
+  },
+  {
+    "engine": "pebble-manual",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 122125,
+    "disk_bytes": 1213247
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 1793.82705
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 1067.31875
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 419.896
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 21,
+    "ns_per_op": 1751799.619047619
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 50,
+    "ns_per_op": 1394743.32
+  },
+  {
+    "engine": "pebble-query",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 110667,
+    "disk_bytes": 1563430
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 3499.2854
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 5121.07705
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 3628.4375
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 185154.292
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 1642.762208
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "point-par10",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 1115.964333
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "point-par32",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 1256.384375
+  },
+  {
+    "engine": "sqlite-c-native",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 86750,
+    "disk_bytes": 684032
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 1918.1167
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 2185.1625
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 1714.646
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 21,
+    "ns_per_op": 827829.3333333334
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 2691.791
+  },
+  {
+    "engine": "sqlite-c-query",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 99000,
+    "disk_bytes": 1042600
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 4114.4396
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 5763.3167
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 3923.5625
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 127154.459
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 2115.06875
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "point-par10",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 2879.902125
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "point-par32",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 3188.886625
+  },
+  {
+    "engine": "sqlite-go-native",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 120166,
+    "disk_bytes": 684032
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 2577.14375
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 2638.4479
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 1640.75
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 21,
+    "ns_per_op": 1315908.7142857143
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 4246.875
+  },
+  {
+    "engine": "sqlite-go-query",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 90250,
+    "disk_bytes": 1042600
+  }
+]

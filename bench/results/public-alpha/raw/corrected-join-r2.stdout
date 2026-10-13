@@ -1,0 +1,23 @@
+
+joins: 5000 users, 50000 orders (ms per query, best of 5; lower is better; ours = one core, ours-par = all cores)
+
+no secondary indexes
+query                                                        ours     ours-par     sqlite-c    sqlite-go
+orders JOIN users, group by country: count, sum               9.0          3.0         21.7         35.7
+shipped orders of FR users: count, avg                        7.8          4.0          4.1          6.8
+top 10 spenders (existing users only)                         8.1         16.3         20.3         33.4
+one user's orders (point join)                                3.6          4.0          1.3          2.4
+users with no orders (anti-join)                              5.8          5.7         21.0         46.2
+
+with indexes
+query                                                        ours     ours-par     sqlite-c    sqlite-go
+orders JOIN users, group by country: count, sum               8.8          3.1         14.1         25.9
+shipped orders of FR users: count, avg                        1.1          1.6          0.7          1.2
+top 10 spenders (existing users only)                         7.7          5.7         13.9         23.0
+one user's orders (point join)                                0.0          0.0          0.0          0.0
+users with no orders (anti-join)                              2.2          1.8          2.2          5.8
+indexed: orders > 999.9 JOIN users, by country                0.0          0.0         12.7          0.0
+indexed: FR users JOIN their orders, per user                 1.0          1.0          0.8          1.4
+
+load both collections (seconds)                              0.05         0.04         0.04         0.04
+build indexes (seconds)                                      0.16         0.20         0.04         0.09

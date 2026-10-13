@@ -1,0 +1,22 @@
+ours       load 0.03s index 0.13s  8.5ms  1.0ms  7.4ms  0.0ms  2.1ms  0.0ms  1.0ms
+ours-par   load 0.03s index 0.13s  2.7ms  0.7ms  4.4ms  0.0ms  1.8ms  0.0ms  0.9ms
+sqlite-c   load 0.04s index 0.04s  13.2ms  0.6ms  12.3ms  0.0ms  2.1ms  11.8ms  0.8ms
+sqlite-go  load 0.03s index 0.09s  25.8ms  1.3ms  23.2ms  0.0ms  5.7ms  0.0ms  1.5ms
+        2.54 real         2.52 user         0.17 sys
+            74547200  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               13057  page reclaims
+                 250  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 834  signals received
+                1404  voluntary context switches
+                8438  involuntary context switches
+         30947987990  instructions retired
+          8416735282  cycles elapsed
+            41943832  peak memory footprint

@@ -1,0 +1,17 @@
+
+keys=250000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours-batch1000                545            502            599            288             53             68       39MB
+pebble-batch1000             1099           3075           1992           1748             50            551       31MB
+sqlite-c-txn1000            14597             25           2535           2296            133           2386       33MB
+sqlite-go-txn1000           17142             60           4081           3138             97           6904       33MB
+
+workload=seq (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours-batch1000                151            405            845            672             46            118       32MB
+pebble-batch1000              498           2425           1747           1619             46            483       30MB
+sqlite-c-txn1000             1580             58           2455           2088            113           2098       34MB
+sqlite-go-txn1000            1950             22           3386           3206             94           6874       34MB
+

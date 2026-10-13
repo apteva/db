@@ -20,3 +20,17 @@ validation. Drops and staged atomic work have a 256 MiB limit; CacheBytes is not
 total-process-memory cap. The server uses one full-access token and has no
 replication or per-user permissions. Benchmarks do not establish a universal
 speed or memory advantage over other engines.
+
+Release verification passed unit/vet/build, race and fuzz checks on Linux/macOS,
+plus the release stress/soak runs. All four downloaded archives matched SHA256SUMS;
+the native commands, tagged-module embedded/remote CRUD, Go command installations
+and daemon shutdown were verified.
+
+[Completed benchmark report](https://github.com/apteva/db/blob/main/bench/results/public-alpha/VALIDATION.md):
+30 resource trials and 24 feature trials, all successful. Raw observations and
+settings are in the repository and validation evidence attachment. The library
+uses the tagged source; subsequent fixture corrections affect benchmarks only.
+The bounded-cache memory result remains worse than Pebble. See the
+[current README](https://github.com/apteva/db/blob/main/README.md) and
+[usage contracts](https://github.com/apteva/db/blob/main/USAGE.md) for corrected
+examples and design notes.

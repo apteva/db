@@ -1,0 +1,54 @@
+ours-coll4         random insert              601 ns/op     1664666 ops/s
+ours-coll4         random settle              521 ns/op     1919963 ops/s
+ours-coll4         random find-hit            581 ns/op     1722138 ops/s
+ours-coll4         random find-miss           324 ns/op     3086113 ops/s
+ours-coll4         random scan                 54 ns/op    18517604 ops/s
+ours-coll4         random find-hit-par10       89 ns/op    11207223 ops/s
+pebble-coll4       random insert             1505 ns/op      664239 ops/s
+pebble-coll4       random settle             4442 ns/op      225118 ops/s
+pebble-coll4       random find-hit           2388 ns/op      418804 ops/s
+pebble-coll4       random find-miss          1793 ns/op      557754 ops/s
+pebble-coll4       random scan                 48 ns/op    20748753 ops/s
+pebble-coll4       random find-hit-par10      557 ns/op     1793741 ops/s
+sqlite-c-tables4   random insert            37947 ns/op       26352 ops/s
+sqlite-c-tables4   random settle               28 ns/op    35697284 ops/s
+sqlite-c-tables4   random find-hit           2634 ns/op      379696 ops/s
+sqlite-c-tables4   random find-miss          2291 ns/op      436438 ops/s
+sqlite-c-tables4   random scan                126 ns/op     7938062 ops/s
+sqlite-c-tables4   random find-hit-par10     2271 ns/op      440247 ops/s
+ours-coll4         seq    insert              324 ns/op     3085788 ops/s
+ours-coll4         seq    settle              502 ns/op     1990273 ops/s
+ours-coll4         seq    find-hit            740 ns/op     1351094 ops/s
+ours-coll4         seq    find-miss           608 ns/op     1643580 ops/s
+ours-coll4         seq    scan                 49 ns/op    20303469 ops/s
+ours-coll4         seq    find-hit-par10      111 ns/op     8983071 ops/s
+pebble-coll4       seq    insert             1011 ns/op      989018 ops/s
+pebble-coll4       seq    settle             3553 ns/op      281433 ops/s
+pebble-coll4       seq    find-hit           2300 ns/op      434740 ops/s
+pebble-coll4       seq    find-miss          1898 ns/op      526933 ops/s
+pebble-coll4       seq    scan                 52 ns/op    19315833 ops/s
+pebble-coll4       seq    find-hit-par10      615 ns/op     1625767 ops/s
+sqlite-c-tables4   seq    insert            14424 ns/op       69327 ops/s
+sqlite-c-tables4   seq    settle               14 ns/op    70165591 ops/s
+sqlite-c-tables4   seq    find-hit           2702 ns/op      370098 ops/s
+sqlite-c-tables4   seq    find-miss          2674 ns/op      373971 ops/s
+sqlite-c-tables4   seq    scan                123 ns/op     8144605 ops/s
+sqlite-c-tables4   seq    find-hit-par10     2144 ns/op      466476 ops/s
+       23.51 real        12.18 user        12.74 sys
+           570621952  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              107854  page reclaims
+                 399  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                1030  signals received
+                9648  voluntary context switches
+              299567  involuntary context switches
+        159506186815  instructions retired
+         75058005730  cycles elapsed
+           586056904  peak memory footprint

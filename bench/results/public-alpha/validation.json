@@ -1,0 +1,3336 @@
+{
+  "complete": true,
+  "metadata": {
+    "started_at": "2026-10-13T11:56:40.910890+00:00",
+    "source_revision": "f97b8944dbf5119e72c89bf92e330816da8a48d4",
+    "source_status": "",
+    "binary_sha256": "1af4d3b32ea1aa24064d712362a6cf9ff615414807dfd181fcf16974f3a35cb9",
+    "go": "go version go1.25.1 darwin/arm64",
+    "method": "Serial fresh processes. Three outer repetitions per feature. Retain every output; resource runner retains all trials. Aggregation/join query timings are the legacy best-of-five inner timing and labeled as such. No concurrent local builds/tests.",
+    "feature_source_revision": "f4aab14371aff8119df8d727c606fad3a4d7c59d",
+    "feature_binary_sha256": "dfd8fee6a5cbe31e5d86c6732cbbf1680c4f076dcd563b9eb9221b1daf4c1e67",
+    "feature_started_at": "2026-10-13T12:23:07.403466+00:00",
+    "feature_harness_note": "Post-tag changes affect only benchmark fixtures and engine selection; library code matches the alpha tag.",
+    "finished_at": "2026-10-13T12:30:51.915136+00:00"
+  },
+  "resources": [
+    {
+      "profile": "bounded64",
+      "workload": "random",
+      "engine": "ours",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 956760064,
+        "min": 949665792,
+        "max": 1015267328
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 666780944,
+        "min": 651625792,
+        "max": 669795648
+      },
+      "disk_bytes": {
+        "median": 133840912,
+        "min": 133840912,
+        "max": 133840912
+      },
+      "load_cpu_seconds": 2.565693,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 1610999.9999999944,
+          "wall_ns_per_op": 58930875
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 741.4410000000001,
+          "wall_ns_per_op": 741.557541
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 1733.826,
+          "wall_ns_per_op": 493.755375
+        },
+        "scan": {
+          "cpu_ns_per_op": 48.00800000000005,
+          "wall_ns_per_op": 48.033375
+        },
+        "settle": {
+          "cpu_ns_per_op": 888.7349999999999,
+          "wall_ns_per_op": 1283.916
+        },
+        "close": {
+          "cpu_ns_per_op": 1862999.9999990598,
+          "wall_ns_per_op": 16315625
+        },
+        "insert": {
+          "cpu_ns_per_op": 1612.911,
+          "wall_ns_per_op": 1030.085416
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 1399.99999995144,
+          "wall_ns_per_op": 495.8
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 483.988,
+          "wall_ns_per_op": 475.356917
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "random",
+      "engine": "pebble",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 343736320,
+        "min": 330153984,
+        "max": 367804416
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 330384272,
+        "min": 329139112,
+        "max": 354419600
+      },
+      "disk_bytes": {
+        "median": 148928833,
+        "min": 148928450,
+        "max": 148931908
+      },
+      "load_cpu_seconds": 4.849595,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 4796999.999999989,
+          "wall_ns_per_op": 86083125
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 8498.386,
+          "wall_ns_per_op": 8542.574958
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 22186.865,
+          "wall_ns_per_op": 3984.769416
+        },
+        "scan": {
+          "cpu_ns_per_op": 98.98500000000077,
+          "wall_ns_per_op": 99.049958
+        },
+        "settle": {
+          "cpu_ns_per_op": 2363.823,
+          "wall_ns_per_op": 4682.199916
+        },
+        "close": {
+          "cpu_ns_per_op": 504000.0000011702,
+          "wall_ns_per_op": 9443792
+        },
+        "insert": {
+          "cpu_ns_per_op": 2737.602,
+          "wall_ns_per_op": 1564.574
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 400.0000000559112,
+          "wall_ns_per_op": 95.8
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 8198.126999999999,
+          "wall_ns_per_op": 8316.101042
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "random",
+      "engine": "sqlite-c",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 980533248,
+        "min": 953712640,
+        "max": 1030914048
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 1216431688,
+        "min": 1216005728,
+        "max": 1216497200
+      },
+      "disk_bytes": {
+        "median": 140115968,
+        "min": 140115968,
+        "max": 140115968
+      },
+      "load_cpu_seconds": 23.548485,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 2281000.000000019,
+          "wall_ns_per_op": 5402666
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 3669.881000000002,
+          "wall_ns_per_op": 3675.128583
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 14486.681000000004,
+          "wall_ns_per_op": 2583.560875
+        },
+        "scan": {
+          "cpu_ns_per_op": 179.44999999999743,
+          "wall_ns_per_op": 183.829875
+        },
+        "settle": {
+          "cpu_ns_per_op": 4.315000000000069,
+          "wall_ns_per_op": 4.286625
+        },
+        "close": {
+          "cpu_ns_per_op": 65501000.00000292,
+          "wall_ns_per_op": 86450792
+        },
+        "insert": {
+          "cpu_ns_per_op": 23545.599,
+          "wall_ns_per_op": 25506.637667
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 11562099.999999909,
+          "wall_ns_per_op": 11559962.5
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 3582.459000000002,
+          "wall_ns_per_op": 3873.176083
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "random",
+      "engine": "sqlite-go",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 1478148096,
+        "min": 1478017024,
+        "max": 1481031680
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 1599407952,
+        "min": 1599194960,
+        "max": 1599571768
+      },
+      "disk_bytes": {
+        "median": 140115968,
+        "min": 140115968,
+        "max": 140115968
+      },
+      "load_cpu_seconds": 43.168544999999995,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 2761000.0000000033,
+          "wall_ns_per_op": 4926666
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 4957.912999999998,
+          "wall_ns_per_op": 5099.469292
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 31835.978,
+          "wall_ns_per_op": 12154.65225
+        },
+        "scan": {
+          "cpu_ns_per_op": 157.25800000000234,
+          "wall_ns_per_op": 159.347875
+        },
+        "settle": {
+          "cpu_ns_per_op": 4.151000000000238,
+          "wall_ns_per_op": 4.148
+        },
+        "close": {
+          "cpu_ns_per_op": 818999.9999999031,
+          "wall_ns_per_op": 812458
+        },
+        "insert": {
+          "cpu_ns_per_op": 43165.78,
+          "wall_ns_per_op": 45188.440708
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 27233999.99999998,
+          "wall_ns_per_op": 28181733.4
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 4624.214999999999,
+          "wall_ns_per_op": 4723.416125
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "seq",
+      "engine": "ours",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 801357824,
+        "min": 687734784,
+        "max": 890634240
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 542114992,
+        "min": 522486984,
+        "max": 675972392
+      },
+      "disk_bytes": {
+        "median": 133840912,
+        "min": 133840912,
+        "max": 133840912
+      },
+      "load_cpu_seconds": 1.6148509999999998,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 1656000.0000000081,
+          "wall_ns_per_op": 59232833
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 985.7040000000001,
+          "wall_ns_per_op": 984.107625
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 1944.252,
+          "wall_ns_per_op": 516.763208
+        },
+        "scan": {
+          "cpu_ns_per_op": 47.899000000000136,
+          "wall_ns_per_op": 47.907666
+        },
+        "settle": {
+          "cpu_ns_per_op": 792.3929999999999,
+          "wall_ns_per_op": 1432.078208
+        },
+        "close": {
+          "cpu_ns_per_op": 1573000.0000000466,
+          "wall_ns_per_op": 15484042
+        },
+        "insert": {
+          "cpu_ns_per_op": 808.687,
+          "wall_ns_per_op": 481.948792
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 599.99999995064,
+          "wall_ns_per_op": 387.5
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 904.215,
+          "wall_ns_per_op": 903.695333
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "seq",
+      "engine": "pebble",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 336969728,
+        "min": 329269248,
+        "max": 339279872
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 323666808,
+        "min": 322601848,
+        "max": 335381416
+      },
+      "disk_bytes": {
+        "median": 144492774,
+        "min": 144487662,
+        "max": 144497034
+      },
+      "load_cpu_seconds": 2.481572,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 6077999.999999982,
+          "wall_ns_per_op": 98359916
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 8444.493,
+          "wall_ns_per_op": 8500.243208000002
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 22092.007000000005,
+          "wall_ns_per_op": 4440.778292
+        },
+        "scan": {
+          "cpu_ns_per_op": 97.51199999999915,
+          "wall_ns_per_op": 97.952667
+        },
+        "settle": {
+          "cpu_ns_per_op": 1419.169,
+          "wall_ns_per_op": 2806.284875
+        },
+        "close": {
+          "cpu_ns_per_op": 558999.999999088,
+          "wall_ns_per_op": 7610375
+        },
+        "insert": {
+          "cpu_ns_per_op": 1062.403,
+          "wall_ns_per_op": 699.260875
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 499.99999980343546,
+          "wall_ns_per_op": 66.7
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 8014.461000000001,
+          "wall_ns_per_op": 8164.828792
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "seq",
+      "engine": "sqlite-c",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 995131392,
+        "min": 992165888,
+        "max": 1022361600
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 1216153184,
+        "min": 1216054880,
+        "max": 1216890488
+      },
+      "disk_bytes": {
+        "median": 141418496,
+        "min": 141418496,
+        "max": 141418496
+      },
+      "load_cpu_seconds": 13.623071,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 1674000.0000000158,
+          "wall_ns_per_op": 3228959
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 3976.4060000000004,
+          "wall_ns_per_op": 4143.445833000001
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 15322.090000000002,
+          "wall_ns_per_op": 2185.463959
+        },
+        "scan": {
+          "cpu_ns_per_op": 158.37199999999908,
+          "wall_ns_per_op": 160.917917
+        },
+        "settle": {
+          "cpu_ns_per_op": 4.192999999999891,
+          "wall_ns_per_op": 5.12325
+        },
+        "close": {
+          "cpu_ns_per_op": 38781999.99999943,
+          "wall_ns_per_op": 39627875
+        },
+        "insert": {
+          "cpu_ns_per_op": 13617.444,
+          "wall_ns_per_op": 14957.143542
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 12746699.999999933,
+          "wall_ns_per_op": 12927166.7
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 3687.6860000000006,
+          "wall_ns_per_op": 3747.616
+        }
+      }
+    },
+    {
+      "profile": "bounded64",
+      "workload": "seq",
+      "engine": "sqlite-go",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 1482375168,
+        "min": 1480835072,
+        "max": 1489797120
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 1599539000,
+        "min": 1599162168,
+        "max": 1599735608
+      },
+      "disk_bytes": {
+        "median": 141418496,
+        "min": 141418496,
+        "max": 141418496
+      },
+      "load_cpu_seconds": 16.108702,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 2388999.9999999884,
+          "wall_ns_per_op": 2936917
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 4994.539000000001,
+          "wall_ns_per_op": 5160.0955
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 32056.43,
+          "wall_ns_per_op": 8852.130042
+        },
+        "scan": {
+          "cpu_ns_per_op": 145.62400000000153,
+          "wall_ns_per_op": 145.815709
+        },
+        "settle": {
+          "cpu_ns_per_op": 3.6370000000003344,
+          "wall_ns_per_op": 3.616875
+        },
+        "close": {
+          "cpu_ns_per_op": 1082000.0000002494,
+          "wall_ns_per_op": 1471750
+        },
+        "insert": {
+          "cpu_ns_per_op": 16105.302000000001,
+          "wall_ns_per_op": 20775.681625
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 21600299.999999706,
+          "wall_ns_per_op": 21763575
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 4690.704999999999,
+          "wall_ns_per_op": 4789.337667
+        }
+      }
+    },
+    {
+      "profile": "ours-default",
+      "workload": "random",
+      "engine": "ours",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 338968576,
+        "min": 338296832,
+        "max": 411926528
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 317490112,
+        "min": 317015000,
+        "max": 390513672
+      },
+      "disk_bytes": {
+        "median": 133857296,
+        "min": 133857296,
+        "max": 133857296
+      },
+      "load_cpu_seconds": 1.4740700000000002,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 1776999.9999999835,
+          "wall_ns_per_op": 42812750
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 732.1780000000001,
+          "wall_ns_per_op": 744.665625
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 738.1859999999999,
+          "wall_ns_per_op": 93.575625
+        },
+        "scan": {
+          "cpu_ns_per_op": 46.34999999999989,
+          "wall_ns_per_op": 46.417584
+        },
+        "settle": {
+          "cpu_ns_per_op": 614.1500000000001,
+          "wall_ns_per_op": 2283.81175
+        },
+        "close": {
+          "cpu_ns_per_op": 1668999.9999999206,
+          "wall_ns_per_op": 30129375
+        },
+        "insert": {
+          "cpu_ns_per_op": 859.076,
+          "wall_ns_per_op": 950.373167
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 600.0000000283555,
+          "wall_ns_per_op": 454.2
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 463.7429999999997,
+          "wall_ns_per_op": 478.564083
+        }
+      }
+    },
+    {
+      "profile": "ours-default",
+      "workload": "seq",
+      "engine": "ours",
+      "repetitions": 3,
+      "process_peak_rss_bytes": {
+        "median": 316784640,
+        "min": 313720832,
+        "max": 318799872
+      },
+      "process_peak_memory_footprint_bytes": {
+        "median": 295289744,
+        "min": 292176808,
+        "max": 304464832
+      },
+      "disk_bytes": {
+        "median": 133857296,
+        "min": 133857296,
+        "max": 133857296
+      },
+      "load_cpu_seconds": 0.6104699999999998,
+      "phases": {
+        "open": {
+          "cpu_ns_per_op": 1364999.9999999912,
+          "wall_ns_per_op": 43776834
+        },
+        "find-hit": {
+          "cpu_ns_per_op": 975.9639999999998,
+          "wall_ns_per_op": 974.195208
+        },
+        "find-hit-par10": {
+          "cpu_ns_per_op": 1066.2230000000002,
+          "wall_ns_per_op": 158.491334
+        },
+        "scan": {
+          "cpu_ns_per_op": 47.98099999999994,
+          "wall_ns_per_op": 47.892042
+        },
+        "settle": {
+          "cpu_ns_per_op": 392.01499999999993,
+          "wall_ns_per_op": 571.510167
+        },
+        "close": {
+          "cpu_ns_per_op": 1566999.999999874,
+          "wall_ns_per_op": 25378083
+        },
+        "insert": {
+          "cpu_ns_per_op": 219.064,
+          "wall_ns_per_op": 182.247084
+        },
+        "readers-close": {
+          "cpu_ns_per_op": 1799.9999999851468,
+          "wall_ns_per_op": 2525
+        },
+        "find-miss": {
+          "cpu_ns_per_op": 883.3350000000004,
+          "wall_ns_per_op": 883.798125
+        }
+      }
+    }
+  ],
+  "feature_trials": [
+    {
+      "case": "collections",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-coll4,pebble-coll4,sqlite-c-tables4",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-collections-r1-data"
+      ],
+      "seconds": 20.14673270797357,
+      "returncode": 0
+    },
+    {
+      "case": "batch",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-batch-r1-data"
+      ],
+      "seconds": 24.803931041969918,
+      "returncode": 0
+    },
+    {
+      "case": "aggregate",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-aggregate-r1-data"
+      ],
+      "seconds": 1.6347445419523865,
+      "returncode": 0
+    },
+    {
+      "case": "join",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-join-r1-data"
+      ],
+      "seconds": 2.5962770419428125,
+      "returncode": 0
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-fields-r1-data"
+      ],
+      "seconds": 5.807939124992117,
+      "returncode": 0
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-collections-r1-data"
+      ],
+      "seconds": 16.621996458037756,
+      "returncode": 0
+    },
+    {
+      "case": "durable",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-engines",
+        "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-r1-data"
+      ],
+      "seconds": 76.0894800000824,
+      "returncode": 0
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 1,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-batch-r1-data"
+      ],
+      "seconds": 4.348352875094861,
+      "returncode": 0
+    },
+    {
+      "case": "collections",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-coll4,pebble-coll4,sqlite-c-tables4",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-collections-r2-data"
+      ],
+      "seconds": 19.380927833961323,
+      "returncode": 0
+    },
+    {
+      "case": "batch",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-batch-r2-data"
+      ],
+      "seconds": 26.827436999999918,
+      "returncode": 0
+    },
+    {
+      "case": "aggregate",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-aggregate-r2-data"
+      ],
+      "seconds": 1.836393625009805,
+      "returncode": 0
+    },
+    {
+      "case": "join",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-join-r2-data"
+      ],
+      "seconds": 3.1997569159138948,
+      "returncode": 0
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-fields-r2-data"
+      ],
+      "seconds": 6.752799208043143,
+      "returncode": 0
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-collections-r2-data"
+      ],
+      "seconds": 17.367333083064295,
+      "returncode": 0
+    },
+    {
+      "case": "durable",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-engines",
+        "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-r2-data"
+      ],
+      "seconds": 74.50042783399113,
+      "returncode": 0
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 2,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-batch-r2-data"
+      ],
+      "seconds": 5.124212334048934,
+      "returncode": 0
+    },
+    {
+      "case": "collections",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-coll4,pebble-coll4,sqlite-c-tables4",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-collections-r3-data"
+      ],
+      "seconds": 23.56597341701854,
+      "returncode": 0
+    },
+    {
+      "case": "batch",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-batch-r3-data"
+      ],
+      "seconds": 24.7331800829852,
+      "returncode": 0
+    },
+    {
+      "case": "aggregate",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-aggregate-r3-data"
+      ],
+      "seconds": 1.786653249990195,
+      "returncode": 0
+    },
+    {
+      "case": "join",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-join-r3-data"
+      ],
+      "seconds": 2.623928750050254,
+      "returncode": 0
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-fields-r3-data"
+      ],
+      "seconds": 6.227728042053059,
+      "returncode": 0
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-computed-collections-r3-data"
+      ],
+      "seconds": 17.534822750021704,
+      "returncode": 0
+    },
+    {
+      "case": "durable",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-engines",
+        "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-r3-data"
+      ],
+      "seconds": 75.61832166707609,
+      "returncode": 0
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 3,
+      "command": [
+        "<output>/feature-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/corrected-durable-batch-r3-data"
+      ],
+      "seconds": 4.000163958990015,
+      "returncode": 0
+    }
+  ],
+  "feature_measurements": [
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 558.0,
+      "min_ns_per_op": 532.0,
+      "max_ns_per_op": 599.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 72.0,
+      "min_ns_per_op": 68.0,
+      "max_ns_per_op": 85.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 288.0,
+      "min_ns_per_op": 284.0,
+      "max_ns_per_op": 304.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 556.0,
+      "min_ns_per_op": 545.0,
+      "max_ns_per_op": 592.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 51.0,
+      "min_ns_per_op": 50.0,
+      "max_ns_per_op": 53.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 502.0,
+      "min_ns_per_op": 444.0,
+      "max_ns_per_op": 539.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 650.0,
+      "min_ns_per_op": 605.0,
+      "max_ns_per_op": 845.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 88.0,
+      "min_ns_per_op": 80.0,
+      "max_ns_per_op": 118.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 589.0,
+      "min_ns_per_op": 504.0,
+      "max_ns_per_op": 672.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 151.0,
+      "min_ns_per_op": 140.0,
+      "max_ns_per_op": 225.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 48.0,
+      "min_ns_per_op": 46.0,
+      "max_ns_per_op": 48.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 405.0,
+      "min_ns_per_op": 385.0,
+      "max_ns_per_op": 445.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 2015.0,
+      "min_ns_per_op": 1992.0,
+      "max_ns_per_op": 2152.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 551.0,
+      "min_ns_per_op": 495.0,
+      "max_ns_per_op": 2041.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 1748.0,
+      "min_ns_per_op": 1720.0,
+      "max_ns_per_op": 2035.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 1099.0,
+      "min_ns_per_op": 1040.0,
+      "max_ns_per_op": 1163.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 51.0,
+      "min_ns_per_op": 50.0,
+      "max_ns_per_op": 127.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 3165.0,
+      "min_ns_per_op": 3075.0,
+      "max_ns_per_op": 3185.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 2034.0,
+      "min_ns_per_op": 1747.0,
+      "max_ns_per_op": 2054.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 490.0,
+      "min_ns_per_op": 483.0,
+      "max_ns_per_op": 583.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 1801.0,
+      "min_ns_per_op": 1619.0,
+      "max_ns_per_op": 1818.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 450.0,
+      "min_ns_per_op": 434.0,
+      "max_ns_per_op": 498.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 53.0,
+      "min_ns_per_op": 46.0,
+      "max_ns_per_op": 53.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 2674.0,
+      "min_ns_per_op": 2425.0,
+      "max_ns_per_op": 2909.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 2532.0,
+      "min_ns_per_op": 2497.0,
+      "max_ns_per_op": 2535.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 2386.0,
+      "min_ns_per_op": 2256.0,
+      "max_ns_per_op": 2949.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 2296.0,
+      "min_ns_per_op": 2187.0,
+      "max_ns_per_op": 2929.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 14597.0,
+      "min_ns_per_op": 13596.0,
+      "max_ns_per_op": 14666.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 130.0,
+      "min_ns_per_op": 126.0,
+      "max_ns_per_op": 133.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 25.0,
+      "min_ns_per_op": 23.0,
+      "max_ns_per_op": 27.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 2471.0,
+      "min_ns_per_op": 2455.0,
+      "max_ns_per_op": 2500.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 2098.0,
+      "min_ns_per_op": 2030.0,
+      "max_ns_per_op": 2255.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 2117.0,
+      "min_ns_per_op": 2088.0,
+      "max_ns_per_op": 2238.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 1580.0,
+      "min_ns_per_op": 1549.0,
+      "max_ns_per_op": 1658.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 113.0,
+      "min_ns_per_op": 113.0,
+      "max_ns_per_op": 115.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 41.0,
+      "min_ns_per_op": 35.0,
+      "max_ns_per_op": 58.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 4081.0,
+      "min_ns_per_op": 3248.0,
+      "max_ns_per_op": 4662.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 6904.0,
+      "min_ns_per_op": 6189.0,
+      "max_ns_per_op": 7855.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 3172.0,
+      "min_ns_per_op": 3138.0,
+      "max_ns_per_op": 3636.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 17142.0,
+      "min_ns_per_op": 15830.0,
+      "max_ns_per_op": 21244.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 101.0,
+      "min_ns_per_op": 97.0,
+      "max_ns_per_op": 105.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 60.0,
+      "min_ns_per_op": 21.0,
+      "max_ns_per_op": 105.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 3567.0,
+      "min_ns_per_op": 3386.0,
+      "max_ns_per_op": 3808.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 6874.0,
+      "min_ns_per_op": 6677.0,
+      "max_ns_per_op": 7011.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 3199.0,
+      "min_ns_per_op": 3157.0,
+      "max_ns_per_op": 3206.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 2162.0,
+      "min_ns_per_op": 1950.0,
+      "max_ns_per_op": 2174.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 92.0,
+      "min_ns_per_op": 89.0,
+      "max_ns_per_op": 94.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 27.0,
+      "min_ns_per_op": 22.0,
+      "max_ns_per_op": 72.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 486.0,
+      "min_ns_per_op": 467.0,
+      "max_ns_per_op": 581.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 89.0,
+      "min_ns_per_op": 75.0,
+      "max_ns_per_op": 112.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 289.0,
+      "min_ns_per_op": 289.0,
+      "max_ns_per_op": 324.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 601.0,
+      "min_ns_per_op": 592.0,
+      "max_ns_per_op": 639.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 52.0,
+      "min_ns_per_op": 50.0,
+      "max_ns_per_op": 54.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 521.0,
+      "min_ns_per_op": 394.0,
+      "max_ns_per_op": 2422.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 622.0,
+      "min_ns_per_op": 616.0,
+      "max_ns_per_op": 740.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 111.0,
+      "min_ns_per_op": 94.0,
+      "max_ns_per_op": 123.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 608.0,
+      "min_ns_per_op": 501.0,
+      "max_ns_per_op": 610.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 315.0,
+      "min_ns_per_op": 312.0,
+      "max_ns_per_op": 324.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 49.0,
+      "min_ns_per_op": 49.0,
+      "max_ns_per_op": 50.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "ours-coll4",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 526.0,
+      "min_ns_per_op": 502.0,
+      "max_ns_per_op": 596.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 2143.0,
+      "min_ns_per_op": 2033.0,
+      "max_ns_per_op": 2388.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 537.0,
+      "min_ns_per_op": 531.0,
+      "max_ns_per_op": 557.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 1767.0,
+      "min_ns_per_op": 1761.0,
+      "max_ns_per_op": 1793.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 1663.0,
+      "min_ns_per_op": 1505.0,
+      "max_ns_per_op": 1734.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 49.0,
+      "min_ns_per_op": 48.0,
+      "max_ns_per_op": 51.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 4442.0,
+      "min_ns_per_op": 3742.0,
+      "max_ns_per_op": 7726.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 2146.0,
+      "min_ns_per_op": 2033.0,
+      "max_ns_per_op": 2300.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 540.0,
+      "min_ns_per_op": 483.0,
+      "max_ns_per_op": 615.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 1785.0,
+      "min_ns_per_op": 1778.0,
+      "max_ns_per_op": 1898.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 1011.0,
+      "min_ns_per_op": 941.0,
+      "max_ns_per_op": 1072.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 52.0,
+      "min_ns_per_op": 50.0,
+      "max_ns_per_op": 53.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "pebble-coll4",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 3553.0,
+      "min_ns_per_op": 2964.0,
+      "max_ns_per_op": 4340.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "find-hit",
+      "median_ns_per_op": 2634.0,
+      "min_ns_per_op": 2545.0,
+      "max_ns_per_op": 2925.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 2184.0,
+      "min_ns_per_op": 2128.0,
+      "max_ns_per_op": 2271.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "find-miss",
+      "median_ns_per_op": 2262.0,
+      "min_ns_per_op": 2168.0,
+      "max_ns_per_op": 2291.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 22246.0,
+      "min_ns_per_op": 21739.0,
+      "max_ns_per_op": 37947.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "scan",
+      "median_ns_per_op": 126.0,
+      "min_ns_per_op": 125.0,
+      "max_ns_per_op": 126.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "random",
+      "phase": "settle",
+      "median_ns_per_op": 32.0,
+      "min_ns_per_op": 28.0,
+      "max_ns_per_op": 41.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "find-hit",
+      "median_ns_per_op": 2493.0,
+      "min_ns_per_op": 2484.0,
+      "max_ns_per_op": 2702.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "median_ns_per_op": 2205.0,
+      "min_ns_per_op": 2144.0,
+      "max_ns_per_op": 2371.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "find-miss",
+      "median_ns_per_op": 2204.0,
+      "min_ns_per_op": 2170.0,
+      "max_ns_per_op": 2674.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 13819.0,
+      "min_ns_per_op": 13051.0,
+      "max_ns_per_op": 14424.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "scan",
+      "median_ns_per_op": 122.0,
+      "min_ns_per_op": 119.0,
+      "max_ns_per_op": 123.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "collections",
+      "engine": "sqlite-c-tables4",
+      "workload": "seq",
+      "phase": "settle",
+      "median_ns_per_op": 13.0,
+      "min_ns_per_op": 11.0,
+      "max_ns_per_op": 14.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 1118.0415,
+      "min_ns_per_op": 928.1665,
+      "max_ns_per_op": 1144.729,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 78208,
+      "min_ns_per_op": 68292,
+      "max_ns_per_op": 86500,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 1741.70625,
+      "min_ns_per_op": 1686.16455,
+      "max_ns_per_op": 1778.2625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "point-par10",
+      "median_ns_per_op": 19.638458,
+      "min_ns_per_op": 18.376167,
+      "max_ns_per_op": 24.98075,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "point-par32",
+      "median_ns_per_op": 23.063041,
+      "min_ns_per_op": 19.49225,
+      "max_ns_per_op": 24.354834,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 128.429583,
+      "min_ns_per_op": 127.47275,
+      "max_ns_per_op": 130.308959,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 68174.791,
+      "min_ns_per_op": 67081.667,
+      "max_ns_per_op": 69546.791,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 2098.44375,
+      "min_ns_per_op": 2068.3167,
+      "max_ns_per_op": 2149.12915,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "backfill",
+      "median_ns_per_op": 488.4421111111111,
+      "min_ns_per_op": 363.06483333333335,
+      "max_ns_per_op": 776.1342777777778,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 258.7085,
+      "min_ns_per_op": 235.0835,
+      "max_ns_per_op": 331.5835,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 133125,
+      "min_ns_per_op": 129958,
+      "max_ns_per_op": 148083,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 401.9,
+      "min_ns_per_op": 383.1604,
+      "max_ns_per_op": 621.4896,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 15998.708,
+      "min_ns_per_op": 15517.625,
+      "max_ns_per_op": 25388.792,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "projection-backfill",
+      "median_ns_per_op": 487.7800555555556,
+      "min_ns_per_op": 281.6666666666667,
+      "max_ns_per_op": 723.0995555555555,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 1878454.3333333333,
+      "min_ns_per_op": 1449732.142857143,
+      "max_ns_per_op": 2260468.285714286,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "ours-query",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 214.3271,
+      "min_ns_per_op": 198.23125,
+      "max_ns_per_op": 233.8625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 1651.646,
+      "min_ns_per_op": 1513.604,
+      "max_ns_per_op": 1716.2915,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 123666,
+      "min_ns_per_op": 122125,
+      "max_ns_per_op": 166875,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 4502.1,
+      "min_ns_per_op": 4482.0042,
+      "max_ns_per_op": 4624.5896,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "point-par10",
+      "median_ns_per_op": 798.314958,
+      "min_ns_per_op": 785.877125,
+      "max_ns_per_op": 1127.293083,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "point-par32",
+      "median_ns_per_op": 836.812083,
+      "min_ns_per_op": 823.325875,
+      "max_ns_per_op": 857.683,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 1288.487125,
+      "min_ns_per_op": 1260.582541,
+      "max_ns_per_op": 1297.757584,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 95544.917,
+      "min_ns_per_op": 91987.542,
+      "max_ns_per_op": 97185.083,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 3733.9708,
+      "min_ns_per_op": 3680.5604,
+      "max_ns_per_op": 4191.2646,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 443.792,
+      "min_ns_per_op": 419.896,
+      "max_ns_per_op": 544.875,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 110667,
+      "min_ns_per_op": 100625,
+      "max_ns_per_op": 113709,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 1665.4479,
+      "min_ns_per_op": 1654.3208,
+      "max_ns_per_op": 1793.82705,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 1381785,
+      "min_ns_per_op": 1360721.68,
+      "max_ns_per_op": 1394743.32,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 1747740.0952380951,
+      "min_ns_per_op": 1738763.9047619049,
+      "max_ns_per_op": 1751799.619047619,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "pebble-query",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 991.0479,
+      "min_ns_per_op": 949.5604,
+      "max_ns_per_op": 1067.31875,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 3405,
+      "min_ns_per_op": 3308.7085,
+      "max_ns_per_op": 3628.4375,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 84916,
+      "min_ns_per_op": 77000,
+      "max_ns_per_op": 86750,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 3272.225,
+      "min_ns_per_op": 3253.4333,
+      "max_ns_per_op": 3499.2854,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "point-par10",
+      "median_ns_per_op": 1115.964333,
+      "min_ns_per_op": 1056.981667,
+      "max_ns_per_op": 1172.9715,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "point-par32",
+      "median_ns_per_op": 1236.909583,
+      "min_ns_per_op": 1233.412625,
+      "max_ns_per_op": 1256.384375,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 1429.517791,
+      "min_ns_per_op": 1418.569125,
+      "max_ns_per_op": 1642.762208,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 181973.75,
+      "min_ns_per_op": 178712.625,
+      "max_ns_per_op": 185154.292,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-native",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 4308.56455,
+      "min_ns_per_op": 4181.1854,
+      "max_ns_per_op": 5121.07705,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 1478.417,
+      "min_ns_per_op": 1411.6665,
+      "max_ns_per_op": 1714.646,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 99000,
+      "min_ns_per_op": 64375,
+      "max_ns_per_op": 101334,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 1977.7354,
+      "min_ns_per_op": 1918.1167,
+      "max_ns_per_op": 2151.16665,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 2691.791,
+      "min_ns_per_op": 2451.208,
+      "max_ns_per_op": 2805.625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 827829.3333333334,
+      "min_ns_per_op": 811545.619047619,
+      "max_ns_per_op": 938470.2380952381,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-c-query",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 2185.1625,
+      "min_ns_per_op": 2022.7104,
+      "max_ns_per_op": 2393.8271,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 3967.0415,
+      "min_ns_per_op": 3923.5625,
+      "max_ns_per_op": 4841.833,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 120166,
+      "min_ns_per_op": 93542,
+      "max_ns_per_op": 127542,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 4114.4396,
+      "min_ns_per_op": 3945.6,
+      "max_ns_per_op": 4183.33125,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "point-par10",
+      "median_ns_per_op": 2783.17425,
+      "min_ns_per_op": 2640.0375,
+      "max_ns_per_op": 2879.902125,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "point-par32",
+      "median_ns_per_op": 3188.886625,
+      "min_ns_per_op": 3144.234292,
+      "max_ns_per_op": 3202.936542,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 2005.7035,
+      "min_ns_per_op": 1960.653666,
+      "max_ns_per_op": 2115.06875,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 100831.542,
+      "min_ns_per_op": 98067.959,
+      "max_ns_per_op": 127154.459,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-native",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 5763.3167,
+      "min_ns_per_op": 5396.65,
+      "max_ns_per_op": 5884.95835,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "delete",
+      "median_ns_per_op": 1827.8125,
+      "min_ns_per_op": 1640.75,
+      "max_ns_per_op": 1852.9375,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "disk",
+      "median_ns_per_op": 90250,
+      "min_ns_per_op": 71084,
+      "max_ns_per_op": 108500,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 2648.89165,
+      "min_ns_per_op": 2577.14375,
+      "max_ns_per_op": 4404.98335,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "point-query",
+      "median_ns_per_op": 4246.875,
+      "min_ns_per_op": 4233.375,
+      "max_ns_per_op": 4645.75,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "query-all",
+      "median_ns_per_op": 1359394.8095238095,
+      "min_ns_per_op": 1315908.7142857143,
+      "max_ns_per_op": 1417720.238095238,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-collections",
+      "engine": "sqlite-go-query",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 2485.5083,
+      "min_ns_per_op": 2465.19375,
+      "max_ns_per_op": 2638.4479,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "index-build+verify",
+      "median_ns_per_op": 1575.07918,
+      "min_ns_per_op": 1502.93084,
+      "max_ns_per_op": 1782.0325,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "indexed-filter",
+      "median_ns_per_op": 36614.55,
+      "min_ns_per_op": 35125,
+      "max_ns_per_op": 43414.6,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 580.565,
+      "min_ns_per_op": 514.50832,
+      "max_ns_per_op": 623.83084,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 271.2925,
+      "min_ns_per_op": 243.7025,
+      "max_ns_per_op": 318.35125,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "read-derived-10",
+      "median_ns_per_op": 45.55458,
+      "min_ns_per_op": 38.880625,
+      "max_ns_per_op": 53.264375,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "read-derived-32",
+      "median_ns_per_op": 38.309585,
+      "min_ns_per_op": 34.70104,
+      "max_ns_per_op": 46.29896,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-manual",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 340.5525,
+      "min_ns_per_op": 333.3825,
+      "max_ns_per_op": 348.52584,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "index-build+verify",
+      "median_ns_per_op": 1498.17666,
+      "min_ns_per_op": 1448.81166,
+      "max_ns_per_op": 1702.385,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "indexed-filter",
+      "median_ns_per_op": 37556.25,
+      "min_ns_per_op": 36064.55,
+      "max_ns_per_op": 42687.5,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 939.495,
+      "min_ns_per_op": 902.91,
+      "max_ns_per_op": 1025.31916,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 255.710625,
+      "min_ns_per_op": 255.200625,
+      "max_ns_per_op": 274.35021,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "read-derived-10",
+      "median_ns_per_op": 44.50625,
+      "min_ns_per_op": 38.691455,
+      "max_ns_per_op": 55.843335,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "read-derived-32",
+      "median_ns_per_op": 35.75,
+      "min_ns_per_op": 32.879165,
+      "max_ns_per_op": 45.20958,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-native",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 765.80166,
+      "min_ns_per_op": 721.10166,
+      "max_ns_per_op": 784.98416,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "derive-filter-scan",
+      "median_ns_per_op": 3253777.05,
+      "min_ns_per_op": 3250160.45,
+      "max_ns_per_op": 3385733.35,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 388.97166,
+      "min_ns_per_op": 386.01916,
+      "max_ns_per_op": 393.65666,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 291.91083,
+      "min_ns_per_op": 260.983335,
+      "max_ns_per_op": 298.04146,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "read-derived-10",
+      "median_ns_per_op": 51.5375,
+      "min_ns_per_op": 39.46104,
+      "max_ns_per_op": 66.560625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "read-derived-32",
+      "median_ns_per_op": 45.21896,
+      "min_ns_per_op": 43.46,
+      "max_ns_per_op": 49.849375,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "ours-readtime",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 239.6775,
+      "min_ns_per_op": 211.99334,
+      "max_ns_per_op": 249.16916,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 1566.38584,
+      "min_ns_per_op": 1405.5325,
+      "max_ns_per_op": 1706.52582,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 1570.57958,
+      "min_ns_per_op": 1359.71875,
+      "max_ns_per_op": 1735.721665,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "read-derived-10",
+      "median_ns_per_op": 792.92479,
+      "min_ns_per_op": 710.24917,
+      "max_ns_per_op": 797.932915,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "read-derived-32",
+      "median_ns_per_op": 776.27146,
+      "min_ns_per_op": 721.76396,
+      "max_ns_per_op": 786.01271,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-manual",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 903.93916,
+      "min_ns_per_op": 881.285,
+      "max_ns_per_op": 920.85834,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-readtime",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 1178.10418,
+      "min_ns_per_op": 1142.61834,
+      "max_ns_per_op": 1637.3575,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-readtime",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 1373.090415,
+      "min_ns_per_op": 1365.219375,
+      "max_ns_per_op": 1542.98625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-readtime",
+      "workload": "fixture",
+      "phase": "read-derived-10",
+      "median_ns_per_op": 743.726045,
+      "min_ns_per_op": 718.26521,
+      "max_ns_per_op": 754.4075,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-readtime",
+      "workload": "fixture",
+      "phase": "read-derived-32",
+      "median_ns_per_op": 786.31729,
+      "min_ns_per_op": 747.735205,
+      "max_ns_per_op": 919.80208,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "pebble-readtime",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 420.83,
+      "min_ns_per_op": 419.56334,
+      "max_ns_per_op": 1321.81584,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-c",
+      "workload": "fixture",
+      "phase": "index-build",
+      "median_ns_per_op": 624.37334,
+      "min_ns_per_op": 444.76668,
+      "max_ns_per_op": 635.58834,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-c",
+      "workload": "fixture",
+      "phase": "indexed-filter",
+      "median_ns_per_op": 32818.75,
+      "min_ns_per_op": 26252.05,
+      "max_ns_per_op": 36133.35,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-c",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 4872.04918,
+      "min_ns_per_op": 4839.9175,
+      "max_ns_per_op": 5030.30834,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-c",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 2038.472915,
+      "min_ns_per_op": 1821.757085,
+      "max_ns_per_op": 2131.213125,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-c",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 8735.06916,
+      "min_ns_per_op": 7058.695,
+      "max_ns_per_op": 8962.12832,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-go",
+      "workload": "fixture",
+      "phase": "index-build",
+      "median_ns_per_op": 712.55666,
+      "min_ns_per_op": 672.0175,
+      "max_ns_per_op": 713.63332,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-go",
+      "workload": "fixture",
+      "phase": "indexed-filter",
+      "median_ns_per_op": 49762.5,
+      "min_ns_per_op": 46989.55,
+      "max_ns_per_op": 49845.85,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-go",
+      "workload": "fixture",
+      "phase": "insert",
+      "median_ns_per_op": 5439.125,
+      "min_ns_per_op": 4900.20332,
+      "max_ns_per_op": 6217.1625,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-go",
+      "workload": "fixture",
+      "phase": "read-derived",
+      "median_ns_per_op": 2742.939585,
+      "min_ns_per_op": 2447.01083,
+      "max_ns_per_op": 2814.23604,
+      "repetitions": 3
+    },
+    {
+      "feature": "computed-fields",
+      "engine": "sqlite-go",
+      "workload": "fixture",
+      "phase": "upsert",
+      "median_ns_per_op": 7659.24084,
+      "min_ns_per_op": 6974.34418,
+      "max_ns_per_op": 8000.33584,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 4312189.0,
+      "min_ns_per_op": 4157507.0,
+      "max_ns_per_op": 4357557.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 505341.0,
+      "min_ns_per_op": 501759.0,
+      "max_ns_per_op": 528824.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 113136.0,
+      "min_ns_per_op": 93887.0,
+      "max_ns_per_op": 121813.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 4558788.0,
+      "min_ns_per_op": 4469877.0,
+      "max_ns_per_op": 4783864.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 487784.0,
+      "min_ns_per_op": 473879.0,
+      "max_ns_per_op": 513111.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 96092.0,
+      "min_ns_per_op": 86993.0,
+      "max_ns_per_op": 113867.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 4515467.0,
+      "min_ns_per_op": 4417400.0,
+      "max_ns_per_op": 4836612.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 906322.0,
+      "min_ns_per_op": 902974.0,
+      "max_ns_per_op": 1004253.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 190603.0,
+      "min_ns_per_op": 172973.0,
+      "max_ns_per_op": 200093.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 4640833.0,
+      "min_ns_per_op": 4241739.0,
+      "max_ns_per_op": 5677604.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 861911.0,
+      "min_ns_per_op": 861497.0,
+      "max_ns_per_op": 900888.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 180076.0,
+      "min_ns_per_op": 174967.0,
+      "max_ns_per_op": 197947.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 4730909.0,
+      "min_ns_per_op": 4576830.0,
+      "max_ns_per_op": 4909860.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 4348003.0,
+      "min_ns_per_op": 4311956.0,
+      "max_ns_per_op": 5000909.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 4365037.0,
+      "min_ns_per_op": 4326792.0,
+      "max_ns_per_op": 4598733.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 4647813.0,
+      "min_ns_per_op": 4462918.0,
+      "max_ns_per_op": 4725879.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 4024908.0,
+      "min_ns_per_op": 3980754.0,
+      "max_ns_per_op": 4246812.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 4137715.0,
+      "min_ns_per_op": 3860156.0,
+      "max_ns_per_op": 4574945.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 4813979.0,
+      "min_ns_per_op": 4773757.0,
+      "max_ns_per_op": 4924070.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 3963630.0,
+      "min_ns_per_op": 3856654.0,
+      "max_ns_per_op": 4729542.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 4487840.0,
+      "min_ns_per_op": 4057969.0,
+      "max_ns_per_op": 4819221.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 4485819.0,
+      "min_ns_per_op": 4296913.0,
+      "max_ns_per_op": 4573863.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 4251871.0,
+      "min_ns_per_op": 4010959.0,
+      "max_ns_per_op": 4346929.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 4538947.0,
+      "min_ns_per_op": 4080837.0,
+      "max_ns_per_op": 5012244.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 5530.0,
+      "min_ns_per_op": 4977.0,
+      "max_ns_per_op": 5543.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 5808.0,
+      "min_ns_per_op": 5024.0,
+      "max_ns_per_op": 5829.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 5682.0,
+      "min_ns_per_op": 5276.0,
+      "max_ns_per_op": 6281.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 5327.0,
+      "min_ns_per_op": 5239.0,
+      "max_ns_per_op": 5339.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 5229.0,
+      "min_ns_per_op": 4977.0,
+      "max_ns_per_op": 5675.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 6429.0,
+      "min_ns_per_op": 5124.0,
+      "max_ns_per_op": 7774.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 7497.0,
+      "min_ns_per_op": 6195.0,
+      "max_ns_per_op": 7544.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 5319.0,
+      "min_ns_per_op": 4977.0,
+      "max_ns_per_op": 5421.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 5723.0,
+      "min_ns_per_op": 5526.0,
+      "max_ns_per_op": 6504.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 7446.0,
+      "min_ns_per_op": 7058.0,
+      "max_ns_per_op": 8746.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 5464.0,
+      "min_ns_per_op": 4937.0,
+      "max_ns_per_op": 6552.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 5880.0,
+      "min_ns_per_op": 5619.0,
+      "max_ns_per_op": 8257.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "median_ns_per_op": 15052.0,
+      "min_ns_per_op": 14792.0,
+      "max_ns_per_op": 17805.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "median_ns_per_op": 28232.0,
+      "min_ns_per_op": 23881.0,
+      "max_ns_per_op": 31131.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "median_ns_per_op": 39784.0,
+      "min_ns_per_op": 31739.0,
+      "max_ns_per_op": 41479.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "median_ns_per_op": 6093.0,
+      "min_ns_per_op": 5995.0,
+      "max_ns_per_op": 10186.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "median_ns_per_op": 15490.0,
+      "min_ns_per_op": 14843.0,
+      "max_ns_per_op": 21894.0,
+      "repetitions": 3
+    },
+    {
+      "feature": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "median_ns_per_op": 25037.0,
+      "min_ns_per_op": 21476.0,
+      "max_ns_per_op": 36923.0,
+      "repetitions": 3
+    }
+  ]
+}

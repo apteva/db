@@ -1,0 +1,123 @@
+{
+  "started_at": "2026-10-13T11:56:41.101972+00:00",
+  "n": 1000000,
+  "reps": 3,
+  "readers": 10,
+  "value_bytes": 100,
+  "cache_mb": 64,
+  "ours_cache_mb": 64,
+  "workloads": [
+    "random",
+    "seq"
+  ],
+  "cpu": "Apple M1 Pro",
+  "logical_cpus": "10",
+  "memory_bytes": "17179869184",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428",
+  "go": "go version go1.25.1 darwin/arm64",
+  "git_head": "f97b8944dbf5119e72c89bf92e330816da8a48d4",
+  "git_status": "",
+  "binary_sha256": "1af4d3b32ea1aa24064d712362a6cf9ff615414807dfd181fcf16974f3a35cb9",
+  "background_initial": {
+    "at": "2026-10-13T11:56:41.225739+00:00",
+    "summed_cpu_percent": 188.1,
+    "top": [
+      {
+        "pid": 503,
+        "cpu_percent": 38.0,
+        "command": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+      },
+      {
+        "pid": 68385,
+        "cpu_percent": 18.0,
+        "command": "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "pid": 787,
+        "cpu_percent": 16.2,
+        "command": "/System/Library/CoreServices/Dock.app/Contents/MacOS/Dock"
+      },
+      {
+        "pid": 68372,
+        "cpu_percent": 14.0,
+        "command": "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "pid": 52554,
+        "cpu_percent": 11.7,
+        "command": "<home>/.apteva/bin/apteva-server"
+      },
+      {
+        "pid": 639,
+        "cpu_percent": 11.1,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 54074,
+        "cpu_percent": 9.6,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.98/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)"
+      },
+      {
+        "pid": 77796,
+        "cpu_percent": 9.4,
+        "command": "/usr/libexec/sysmond"
+      }
+    ],
+    "swap": "vm.swapusage: total = 5120.00M  used = 4256.62M  free = 863.38M  (encrypted)\nkern.memorystatus_vm_pressure_level: 1",
+    "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     6233.\nPages active:                                 226243.\nPages inactive:                               226622.\nPages speculative:                              1079.\nPages throttled:                                   0.\nPages wired down:                             211753.\nPages purgeable:                                1261.\n\"Translation faults\":                    18733002091.\nPages copy-on-write:                       552034031.\nPages zero filled:                        9214218254.\nPages reactivated:                        4574891942.\nPages purged:                              246804949.\nFile-backed pages:                            136933.\nAnonymous pages:                              317011.\nPages stored in compressor:                   701400.\nPages occupied by compressor:                 335555.\nDecompressions:                           4957087612.\nCompressions:                             5520669558.\nPageins:                                   919294600.\nPageouts:                                    4971090.\nSwapins:                                    26603791.\nSwapouts:                                   32001856."
+  },
+  "profiles": {
+    "bounded64": "64 MiB Pebble/SQLite cache setting (SQLite per connection); 64 MiB AptevaDB cache (0=default/unlimited); Pebble additionally has 64 MiB memtable",
+    "ours-default": "AptevaDB default unlimited page cache; comparison to its bounded64 setting"
+  },
+  "method": "Serial fresh subprocesses/directories; deterministic rotated trial order; retain all observations, report median/min/max. Async writes. Workload fixtures included in process RSS. No cold OS-cache claim.",
+  "finished_at": "2026-10-13T12:09:10.361240+00:00",
+  "background_final": {
+    "at": "2026-10-13T12:09:10.405697+00:00",
+    "summed_cpu_percent": 110.3,
+    "top": [
+      {
+        "pid": 72616,
+        "cpu_percent": 29.9,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.98/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)"
+      },
+      {
+        "pid": 503,
+        "cpu_percent": 25.8,
+        "command": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+      },
+      {
+        "pid": 56486,
+        "cpu_percent": 10.7,
+        "command": "<home>/.apteva/apps/instances/0.7.0/bin"
+      },
+      {
+        "pid": 34309,
+        "cpu_percent": 6.7,
+        "command": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      },
+      {
+        "pid": 60469,
+        "cpu_percent": 5.3,
+        "command": "/Applications/Telegram.app/Contents/MacOS/Telegram"
+      },
+      {
+        "pid": 34315,
+        "cpu_percent": 5.0,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.98/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper"
+      },
+      {
+        "pid": 52554,
+        "cpu_percent": 3.6,
+        "command": "<home>/.apteva/bin/apteva-server"
+      },
+      {
+        "pid": 54074,
+        "cpu_percent": 3.5,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.98/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)"
+      }
+    ],
+    "swap": "vm.swapusage: total = 7168.00M  used = 6121.62M  free = 1046.38M  (encrypted)\nkern.memorystatus_vm_pressure_level: 1",
+    "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    30052.\nPages active:                                 218819.\nPages inactive:                               214351.\nPages speculative:                              3402.\nPages throttled:                                   0.\nPages wired down:                             210239.\nPages purgeable:                                5991.\n\"Translation faults\":                    18784374481.\nPages copy-on-write:                       553653484.\nPages zero filled:                        9233354719.\nPages reactivated:                        4589553646.\nPages purged:                              247678018.\nFile-backed pages:                            156531.\nAnonymous pages:                              280041.\nPages stored in compressor:                   674455.\nPages occupied by compressor:                 330622.\nDecompressions:                           4975616419.\nCompressions:                             5541707753.\nPageins:                                   920239710.\nPageouts:                                    4973373.\nSwapins:                                    26766013.\nSwapouts:                                   32283148."
+  }
+}

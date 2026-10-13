@@ -30,3 +30,17 @@ and ranges. State source revision, compiler, OS/CPU, key/value sizes, caches,
 memtables, readers and sync policy. Record background load; do not benchmark beside
 builds, tests or soak runs. Historical results under bench/results refer to their
 original builds. They do not establish release performance or a universal lead.
+
+## Public-alpha measurements
+
+See [the completed alpha report](bench/results/public-alpha/VALIDATION.md) and
+[raw observations and methodology](bench/results/public-alpha/README.md). The
+release engine passed all 30 resource trials; the corrected feature harness passed
+all 24 trials. Post-tag fixture fixes add SQLite Go aggregation/join support,
+match empty-aggregate semantics, choose an existing indexed customer and fail
+on result mismatches. These changes do not alter the released library.
+
+The bounded-cache profile uses more peak memory than Pebble. Default AptevaDB
+uses less memory than its bounded profile on this fixture, but the profiles have
+different cache/memtable strategies. These tests ran with background applications
+and swapping, and do not prove performance without regressions or a universal lead.
