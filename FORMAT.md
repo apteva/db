@@ -10,6 +10,7 @@ A database is a directory:
 
 | File | Contents |
 |---|---|
+| `LOCK` | stable directory ownership across recovery and compaction swaps; never remove while open |
 | `data` | fixed-size pages; pages 0 and 1 are the two meta pages |
 | `wal-NNNNNNNN` | log generations, `NNNNNNNN` a zero-padded decimal generation number |
 | `compact.tmp/` | a compaction's copy while it runs; removed at the next open |

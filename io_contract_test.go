@@ -55,6 +55,10 @@ func TestWALIOFailureIsSticky(t *testing.T) {
 		if err = db.Checkpoint(); err != nil {
 			t.Fatal(err)
 		}
+		// Own the flush scheduling: otherwise the automatic kick may already
+		// have started the write before the explicit flushAsync call below.
+		db.stopFlusher()
+		t.Cleanup(db.crash)
 		enabled.Store(true)
 		if err = db.Upsert([]byte("lost"), bytes.Repeat([]byte("x"), 2<<20)); err != nil {
 			t.Fatal(err)
