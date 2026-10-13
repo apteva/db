@@ -187,15 +187,19 @@ func (p *computedCollectionPlan) projectDoc(doc []byte) ([]byte, error) {
 		return doc, nil
 	}
 	n, dir, _ := docDir(doc)
-	contentEnd := len(doc) - 1 - 2*n
+	contentEnd := docContentEnd(doc, n, dir)
 	out := make([]byte, 0, len(doc))
-	var offsets [255]uint16
+	var smallOffsets [32]uint32
+	offsets := smallOffsets[:]
+	if n > len(offsets) {
+		offsets = make([]uint32, n)
+	}
 	count := 0
 	for i := 0; i < n; i++ {
-		off := int(le.Uint16(dir[2*i:]))
+		off := docOffset(dir, n, i)
 		end := contentEnd
 		if i+1 < n {
-			end = int(le.Uint16(dir[2*(i+1):]))
+			end = docOffset(dir, n, i+1)
 		}
 		name := string(doc[off+1 : off+1+int(doc[off])])
 		keep := true
@@ -211,15 +215,12 @@ func (p *computedCollectionPlan) projectDoc(doc []byte) ([]byte, error) {
 			keep = x
 		}
 		if keep {
-			offsets[count] = uint16(len(out))
+			offsets[count] = uint32(len(out))
 			count++
 			out = append(out, doc[off:end]...)
 		}
 	}
-	for _, off := range offsets[:count] {
-		out = le.AppendUint16(out, off)
-	}
-	return append(out, byte(count)), nil
+	return sealDocument(out, offsets[:count]), nil
 }
 
 // ComputedGroupKey returns the primary key used by a grouped computed

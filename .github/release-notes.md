@@ -1,36 +1,30 @@
-AptevaDB's first public alpha under `github.com/apteva/db`.
+AptevaDB alpha.2 fixes the first-user precision/document bugs and adds generic
+Database-app engine capabilities.
 
-- Embedded Go document/key-value engine and optional authenticated HTTP v1 server.
-- Go remote driver in `github.com/apteva/db/client` with pooled connections,
-  streaming filters, explicit transaction conflicts and no automatic write retries.
-- Create-only Insert, explicit Upsert/Replace, consistent scans/cursors/catalogs,
-  and atomic collection/index drops across cancellation and crash recovery.
-- Optimistic serializable transactions, native unique indexes, stored computed
-  fields/collections, aggregation, verified backup/restore and logical export/import.
-- Durable server/CLI defaults; concurrent JSON encoding and sticky WAL I/O failures fixed.
+- Exact integer filtering, mixed numeric comparisons and integer-preserving map
+  decoding. Hash/index joins also preserve large integers and signed zero.
+- Extended documents up to 16 MiB/4,096 fields, large strings/nested values/arrays;
+  compact small-document encodings remain unchanged. Valid alpha.1 wrapped root
+  offset directories are reconstructed safely; corrupted payloads are refused.
+- Native scalar compound indexes with mixed ASC/DESC directions, exact numeric
+  ordering and snapshot index cursors with prefix/range/seek/reverse traversal.
+- Logical $and/$or, literal $prefix, ordered query pages, index hints, ExplainQuery
+  and query statistics. Fallback pages use bounded selection heaps.
+- Optional NullsDistinct/Sparse uniqueness, configurable shared query-memory
+  budgets, 4,032-byte keys/index entries, and 32 MiB server/driver frames.
+- Embedded/remote API parity for compound indexes, filters, ordering, plans and
+  budgets. Schemas, patch-style upserts, permissions and pagination signing
+  remain adapter responsibilities.
 
-Install the Go module at this tag, or download the CLI/server archive for Linux or
-macOS on amd64/arm64. Check each archive against SHA256SUMS before use. See README,
-USAGE, OPERATIONS, SERVER and DURABILITY in the archive/repository.
+Format 7 permanently upgrades formats 3–6 before writes. Back up with the original
+binary first. Existing legacy indexes stay readable and are checked exactly;
+rebuild under a new name to use ordered cursors. Logical exports write version 2;
+Import reads versions 1 and 2. Map decoding now preserves int64 values directly.
 
-This is an alpha. Format 6 upgrades formats 3–5 permanently: back up with the
-original binary before upgrading. Old Insert callers must migrate to Upsert for
-replacement; cursors must now be closed. Transactions use database-wide conflict
-validation. Drops and staged atomic work have a 256 MiB limit; CacheBytes is not a
-total-process-memory cap. The server uses one full-access token and has no
-replication or per-user permissions. Benchmarks do not establish a universal
-speed or memory advantage over other engines.
-
-Release verification passed unit/vet/build, race and fuzz checks on Linux/macOS,
-plus the release stress/soak runs. All four downloaded archives matched SHA256SUMS;
-the native commands, tagged-module embedded/remote CRUD, Go command installations
-and daemon shutdown were verified.
-
-[Completed benchmark report](https://github.com/apteva/db/blob/main/bench/results/public-alpha/VALIDATION.md):
-30 resource trials and 24 feature trials, all successful. Raw observations and
-settings are in the repository and validation evidence attachment. The library
-uses the tagged source; subsequent fixture corrections affect benchmarks only.
-The bounded-cache memory result remains worse than Pebble. See the
-[current README](https://github.com/apteva/db/blob/main/README.md) and
-[usage contracts](https://github.com/apteva/db/blob/main/USAGE.md) for corrected
-examples and design notes.
+Download the Linux/macOS amd64/arm64 CLI/server archive and verify SHA256SUMS, or
+install github.com/apteva/db@v0.2.0-alpha.2. See README/USAGE/OPERATIONS/SERVER for
+contracts and examples. This remains an alpha: one owning process, database-wide
+transaction conflicts, 256 MiB atomic staging, one full-access server token, no
+replication/per-user permissions. Query budgets cover accounted execution storage,
+not total RSS, page caches, snapshot versions or framing. Benchmark results report
+observations and do not establish a universal speed/memory lead.

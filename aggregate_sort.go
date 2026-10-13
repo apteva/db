@@ -192,6 +192,10 @@ func (p *Pipeline) finishGroup(ctx context.Context, pl *plan, g *grouper, e *env
 	if end, keep, skip, ok := p.sortWindow(pl.next); ok && !pl.countOnly {
 		refs, valid := g.sortRefs(p.stages[pl.next].sortKeys)
 		if valid {
+			cost := int64(min(keep, len(g.order))+1) * (32 + int64(len(p.stages[pl.next].sortKeys))*48)
+			if err := e.budget.reserve(cost); err != nil {
+				return nil, err
+			}
 			indices, valid, err := selectTop(ctx, len(g.order), keep, p.stages[pl.next].sortKeys, func(i int, dst []value) bool {
 				gs := g.order[i]
 				for j, ref := range refs {
@@ -223,6 +227,9 @@ func (p *Pipeline) finishGroup(ctx context.Context, pl *plan, g *grouper, e *env
 			}
 			if valid {
 				skip = min(skip, len(indices))
+				if err := e.budget.reserve(int64(len(indices)-skip) * (160 + int64(len(g.spec.accs)+len(g.spec.idFields))*80)); err != nil {
+					return nil, err
+				}
 				rows := make([]map[string]any, len(indices)-skip)
 				for i, index := range indices[skip:] {
 					rows[i] = g.row(g.order[index])
@@ -232,6 +239,9 @@ func (p *Pipeline) finishGroup(ctx context.Context, pl *plan, g *grouper, e *env
 				return p.finish(ctx, &next, rows, e)
 			}
 		}
+	}
+	if err := e.budget.reserve(int64(len(g.order)) * (160 + int64(len(g.spec.accs)+len(g.spec.idFields))*80)); err != nil {
+		return nil, err
 	}
 	return p.finish(ctx, pl, g.rows(), e)
 }

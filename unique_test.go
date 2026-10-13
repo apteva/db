@@ -1,6 +1,7 @@
 package db
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -161,8 +162,18 @@ func TestUniqueAndLegacySignedZero(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := database.indexDefs()[0]
+	// Simulate a persisted format-6 index rather than inserting an old key into
+	// a new exact index. The legacy definition and backfill must agree.
+	exactKey := exactEntryKey(d, value{k: kInt, i: 0}, []byte("a"))
+	d.Encoding = 0
+	database.idx.mu.Lock()
+	database.idx.defs[0] = d
+	database.idx.mu.Unlock()
 	b := database.NewBatch()
 	b.internal = true
+	b.add(exactKey, nil, true)
+	meta, _ := json.Marshal(d)
+	b.add(catalogKey(0, d.Name), meta, false)
 	b.add(indexEntryKey(d.ID, value{k: kInt, i: 0}, []byte("a")), nil, true)
 	b.add(legacyZeroEntryKey(d.ID, []byte("a")), nil, false)
 	if err = b.Commit(); err != nil {

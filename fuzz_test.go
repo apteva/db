@@ -11,6 +11,8 @@ import (
 func FuzzDocument(f *testing.F) {
 	f.Add([]byte(`{"a":1,"b":"x","c":null,"d":true,"e":2.5,"n":{"x":[1,"y",{"z":false}]}}`))
 	f.Add([]byte(`{}`))
+	f.Add([]byte(`{"big":9007199254740993}`))
+	f.Add([]byte(`{"s":"` + strings.Repeat("x", 80000) + `"}`))
 	f.Add([]byte(`[1,2]`))
 	f.Fuzz(func(t *testing.T, data []byte) {
 		if _, err := DecodeDocument(data); err == nil {

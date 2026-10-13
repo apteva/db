@@ -669,12 +669,12 @@ func TestComputedFieldsDocumentLimits(t *testing.T) {
 		t.Fatal(err)
 	}
 	var d DocBuilder
-	d.String("s", strings.Repeat("x", 33000))
+	d.String("s", strings.Repeat("x", MaxDocumentSize/2))
 	if _, err = p.apply(d.Bytes()); !errors.Is(err, ErrComputedField) {
 		t.Fatal(err)
 	}
 	d.Reset()
-	for i := 0; i < 255; i++ {
+	for i := 0; i < MaxDocumentFields; i++ {
 		d.Null(fmt.Sprint(i))
 	}
 	if _, err = p.apply(d.Bytes()); !errors.Is(err, ErrComputedField) {

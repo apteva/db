@@ -79,3 +79,21 @@ Callbacks/queries have a 30-second server deadline by default; the default clien
 has a 35-second overall request timeout. HTTP body/header/idle/write timeouts must
 also be used by embedders (`handler.NewHTTPServer` supplies them). Stop the HTTP
 listener before closing the handler or underlying DB.
+
+## Alpha.2 query/index additions
+
+The Go driver exposes CreateCompoundIndex and ExplainQuery, and Query accepts
+Sort, Hint, KeyDescending and MaxMemoryBytes. QueryOptions.Stats is filled from
+the terminal stream frame. Fields serialize as `{ "field":"created", "desc":true }`.
+IndexOptions includes NullsDistinct and Sparse. Typed document/large-integer
+behavior matches the embedded API.
+
+HTTP create_index accepts `fields`, `nulls_distinct` and `sparse`; explain accepts
+the query filter/sort/hint/budget. Streaming query requests accept `sort`, `hint`,
+`key_descending` and `max_memory_bytes`; the terminal frame includes `query_stats`.
+The server caps requested working memory at Options.MaxQueryMemoryBytes (64 MiB
+by default). Its frame/request limit is now 32 MiB, allowing base64 encoding of
+16 MiB documents. Query row payloads are capped at 16 MiB. Memory budgets exclude
+transport encoding/decoding and snapshot/page-cache storage. The embedded physical
+IndexCursor API is available to adapters in the owning process; remote clients
+use the ordered streaming Query API.

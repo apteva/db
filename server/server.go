@@ -25,6 +25,7 @@ import (
 type Options struct {
 	Token                                                    string
 	MaxRequestBytes                                          int64
+	MaxQueryMemoryBytes                                      int64
 	MaxConcurrentRequests, MaxTransactions, MaxAggregateRows int
 	RequestTimeout, TransactionTTL                           time.Duration
 }
@@ -50,6 +51,9 @@ func New(database *db.DB, opts Options) (*Server, error) {
 	if database == nil || len(opts.Token) < 16 {
 		return nil, errors.New("aptevadb: server requires a database and a token of at least 16 bytes")
 	}
+	if opts.MaxQueryMemoryBytes == 0 {
+		opts.MaxQueryMemoryBytes = db.DefaultQueryMemoryBytes
+	}
 	if opts.MaxRequestBytes == 0 {
 		opts.MaxRequestBytes = protocol.MaxBodyBytes
 	}
@@ -68,7 +72,7 @@ func New(database *db.DB, opts Options) (*Server, error) {
 	if opts.TransactionTTL == 0 {
 		opts.TransactionTTL = time.Minute
 	}
-	if opts.MaxRequestBytes < 1 || opts.MaxConcurrentRequests < 1 || opts.MaxTransactions < 1 || opts.MaxAggregateRows < 1 || opts.RequestTimeout < 1 || opts.TransactionTTL < 1 {
+	if opts.MaxQueryMemoryBytes < 1 || opts.MaxRequestBytes < 1 || opts.MaxConcurrentRequests < 1 || opts.MaxTransactions < 1 || opts.MaxAggregateRows < 1 || opts.RequestTimeout < 1 || opts.TransactionTTL < 1 {
 		return nil, protocol.ErrBadRequest
 	}
 	s := &Server{db: database, opts: opts, token: sha256.Sum256([]byte(opts.Token)), slots: make(chan struct{}, opts.MaxConcurrentRequests), sessions: map[string]*session{}, stop: make(chan struct{}), done: make(chan struct{})}
@@ -301,16 +305,25 @@ func (s *Server) execute(ctx context.Context, r protocol.Request) (protocol.Resp
 	case "indexes":
 		out.Indexes = c.ListIndexes()
 	case "create_index":
-		err = c.CreateIndex(ctx, r.Name, r.Field, db.IndexOptions{Unique: r.Unique})
+		options := db.IndexOptions{Unique: r.Unique, NullsDistinct: r.NullsDistinct, Sparse: r.Sparse}
+		if len(r.Fields) > 0 {
+			err = c.CreateCompoundIndex(ctx, r.Name, r.Fields, options)
+		} else {
+			err = c.CreateIndex(ctx, r.Name, r.Field, options)
+		}
 	case "drop_index":
 		err = c.DropIndex(ctx, r.Name)
 	case "computed_fields":
 		err = c.DefineComputedFields(ctx, r.Definitions)
+	case "explain":
+		var plan db.QueryPlan
+		plan, err = c.ExplainQuery(ctx, r.Filter, s.queryOptions(r, nil))
+		out.Plan = &plan
 	case "aggregate":
 		var p *db.Pipeline
 		p, err = db.ParsePipeline(r.Pipeline)
 		if err == nil {
-			p.SetLimits(db.Limits{MaxRows: s.opts.MaxAggregateRows, MaxGroups: s.opts.MaxAggregateRows})
+			p.SetLimits(db.Limits{MaxRows: s.opts.MaxAggregateRows, MaxGroups: s.opts.MaxAggregateRows, MaxBytes: s.opts.MaxQueryMemoryBytes})
 			out.Rows, err = c.Run(ctx, p)
 		}
 	default:
@@ -394,7 +407,8 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request, req protocol.Requ
 	w.Header().Set("Content-Type", "application/x-ndjson")
 	encoder := json.NewEncoder(w)
 	var writeErr error
-	err = c.Query(r.Context(), req.Filter, db.QueryOptions{Skip: req.Skip, Limit: req.Limit}, func(key, doc []byte) bool {
+	stats := db.QueryStats{}
+	err = c.Query(r.Context(), req.Filter, s.queryOptions(req, &stats), func(key, doc []byte) bool {
 		if len(doc) > protocol.MaxBodyBytes/2 {
 			writeErr = db.ErrLimit
 			return false
@@ -411,7 +425,7 @@ func (s *Server) query(w http.ResponseWriter, r *http.Request, req protocol.Requ
 	if writeErr != nil {
 		err = writeErr
 	}
-	_ = encoder.Encode(protocol.Response{Done: true, Error: protocol.FromError(err)})
+	_ = encoder.Encode(protocol.Response{Done: true, Error: protocol.FromError(err), QueryStats: &stats})
 }
 
 // NewHTTPServer supplies transport timeouts. ServeTLS is required for remote
@@ -421,4 +435,12 @@ func (s *Server) NewHTTPServer(address string) *http.Server {
 }
 func (s *Server) String() string {
 	return fmt.Sprintf("AptevaDB HTTP v1 (%d request slots)", cap(s.slots))
+}
+
+func (s *Server) queryOptions(r protocol.Request, stats *db.QueryStats) db.QueryOptions {
+	memory := r.MaxMemoryBytes
+	if memory == 0 || memory > s.opts.MaxQueryMemoryBytes {
+		memory = s.opts.MaxQueryMemoryBytes
+	}
+	return db.QueryOptions{Skip: r.Skip, Limit: r.Limit, Sort: r.Sort, Hint: r.Hint, KeyDescending: r.KeyDescending, MaxMemoryBytes: memory, Stats: stats}
 }

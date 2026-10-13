@@ -44,3 +44,21 @@ The bounded-cache profile uses more peak memory than Pebble. Default AptevaDB
 uses less memory than its bounded profile on this fixture, but the profiles have
 different cache/memtable strategies. These tests ran with background applications
 and swapping, and do not prove performance without regressions or a universal lead.
+
+## Compatibility feature workload
+
+```sh
+cd bench
+go build -o aptevadb-bench .
+./aptevadb-bench -compat -n 50000 -reps 3
+```
+
+This workload checks exact ordered results above 2^53 against an independent
+integer model. It compares native compound pages/cursors with Pebble application
+indexes and equivalent typed SQLite C/Go indexes, includes nullable unique-index
+builds, measures a bounded fallback sort and memory-limit rejection, and compares
+80 KB binary document reads/writes across all engines. Native/SQLite/Pebble loads
+use 1,000-record batches/transactions; the large-value phase uses individual async
+writes for each engine. Pebble index maintenance is application work; it does not
+provide the native schema/constraint API. Every result and repetition is retained;
+Go allocation metrics exclude native/C/mapped allocations and are not RSS.

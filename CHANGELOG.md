@@ -5,6 +5,30 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.2] - 2026-10-13
+
+- Preserve integers in typed map decoding; fix exact JSON integer filtering and
+  mixed int64/float64 comparisons, including
+  large integers in scans, indexes and hash/index lookup joins.
+- Extended document lengths/offsets: up to 16 MiB, 4,096 fields, large strings,
+  nested values and arrays. Small documents retain their compact encoding.
+  Valid alpha.1 documents with wrapped offset directories can be read safely;
+  corrupted payloads are refused rather than guessed.
+- Native scalar compound indexes with mixed ASC/DESC components; exact numeric
+  ordering and escaped primary-key tie ordering. Snapshot index cursors support
+  bounds, prefix ranges, reverse traversal and seek positions.
+- Logical $and/$or and case-sensitive literal $prefix filters, QueryOptions.Sort,
+  index hints, ExplainQuery and examined/returned/working-memory statistics.
+- Optional NullsDistinct and Sparse unique constraints; atomic updates/swaps,
+  schema export/import, snapshots and crash replay preserve the options.
+- 4,032-byte user/index keys; expanded document support in computed fields and
+  projected collections. The server/driver frame limit is now 32 MiB.
+- Configurable query working-memory budgets; sorted pages use a bounded heap
+  when an ordered index cannot serve them. Parallel aggregations share a budget.
+- Format 7 permanently upgrades formats 3–6 before new writes; existing legacy
+  index encodings remain readable and are rechecked exactly. Rebuild an old
+  index to use ordered cursors. Logical export version 2; Import accepts 1/2.
+
 ## [0.2.0-alpha.1] - 2026-10-13
 
 - Module/repository renamed to `github.com/apteva/db`; Go package `db`.

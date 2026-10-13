@@ -18,18 +18,26 @@ var ErrDuplicateKey = errors.New("aptevadb: duplicate unique index value")
 // indexed; null is a value. Multikey uniqueness is across documents, not within
 // one array. Integers compare exactly; mixed int/float comparisons use
 // the engine's numeric semantics. Non-finite floating-point values are refused.
-type IndexOptions struct{ Unique bool }
+type IndexOptions struct {
+	Unique        bool
+	NullsDistinct bool
+	Sparse        bool
+}
 
 // IndexInfo describes a persisted secondary index.
 type IndexInfo struct {
-	Name, Field string
-	Unique      bool
+	Name, Field   string
+	Unique        bool
+	Fields        []IndexField
+	NullsDistinct bool
+	Sparse        bool
+	Encoding      uint8
 }
 
 func (c *Collection) ListIndexes() []IndexInfo {
 	var out []IndexInfo
 	for _, d := range c.indexDefs() {
-		out = append(out, IndexInfo{d.Name, d.Field, d.Unique})
+		out = append(out, IndexInfo{Name: d.Name, Field: d.Field, Unique: d.Unique, Fields: append([]IndexField(nil), d.Fields...), NullsDistinct: d.NullsDistinct, Sparse: d.Sparse, Encoding: d.Encoding})
 	}
 	return out
 }
@@ -168,6 +176,12 @@ func (db *DB) validateUniqueDocumentsLocked(pending map[string][]byte, defs []in
 	}
 	for _, d := range defs {
 		if !d.Unique {
+			continue
+		}
+		if d.Encoding == 2 {
+			if err := db.validateExactUniqueLocked(pending, d); err != nil {
+				return err
+			}
 			continue
 		}
 		owners := map[string][]uniqueOwner{}

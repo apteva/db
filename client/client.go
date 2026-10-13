@@ -198,7 +198,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts d
 	if err != nil {
 		return err
 	}
-	r.Name, r.Field, r.Unique = name, field, opts.Unique
+	r.Name, r.Field, r.Unique, r.NullsDistinct, r.Sparse = name, field, opts.Unique, opts.NullsDistinct, opts.Sparse
 	_, err = c.client.call(ctx, r)
 	return err
 }
@@ -275,7 +275,7 @@ func (c *Client) send(ctx context.Context, path string, req protocol.Request) (*
 }
 func mutation(op string) bool {
 	switch op {
-	case "get", "collections", "indexes", "stats", "aggregate", "begin", "rollback":
+	case "get", "collections", "indexes", "stats", "aggregate", "begin", "rollback", "explain":
 		return false
 	}
 	return true
@@ -349,6 +349,7 @@ type Cursor struct {
 	row     protocol.Response
 	err     error
 	closed  bool
+	stats   *db.QueryStats
 }
 
 func (c *Collection) Query(ctx context.Context, filter []byte, opts db.QueryOptions) (*Cursor, error) {
@@ -356,7 +357,7 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts db.QueryOpti
 	if err != nil {
 		return nil, err
 	}
-	r.Filter, r.Skip, r.Limit = filter, opts.Skip, opts.Limit
+	r.Filter, r.Skip, r.Limit, r.Sort, r.Hint, r.KeyDescending, r.MaxMemoryBytes = filter, opts.Skip, opts.Limit, opts.Sort, opts.Hint, opts.KeyDescending, opts.MaxMemoryBytes
 	response, err := c.client.send(ctx, "/v1/query", r)
 	if err != nil {
 		return nil, err
@@ -374,7 +375,7 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts db.QueryOpti
 	}
 	scanner := bufio.NewScanner(response.Body)
 	scanner.Buffer(make([]byte, 64<<10), protocol.MaxBodyBytes)
-	return &Cursor{body: response.Body, scanner: scanner}, nil
+	return &Cursor{body: response.Body, scanner: scanner, stats: opts.Stats}, nil
 }
 func (c *Cursor) Next() bool {
 	if c.closed {
@@ -394,12 +395,18 @@ func (c *Cursor) Next() bool {
 		c.Close()
 		return false
 	}
+	if c.row.QueryStats != nil && c.stats != nil {
+		*c.stats = *c.row.QueryStats
+	}
 	if c.row.Error != nil {
 		c.err = c.row.Error
 		c.Close()
 		return false
 	}
 	if c.row.Done {
+		if c.stats != nil && c.row.QueryStats != nil {
+			*c.stats = *c.row.QueryStats
+		}
 		c.Close()
 		return false
 	}
@@ -506,4 +513,29 @@ func (b *Batch) Commit(ctx context.Context) error {
 	_, err := b.client.call(ctx, protocol.Request{Op: "batch", Operations: b.operations})
 	b.operations = nil
 	return err
+}
+
+func (c *Collection) CreateCompoundIndex(ctx context.Context, name string, fields []db.IndexField, opts db.IndexOptions) error {
+	r, err := c.request("create_index")
+	if err != nil {
+		return err
+	}
+	r.Name, r.Fields, r.Unique, r.NullsDistinct, r.Sparse = name, fields, opts.Unique, opts.NullsDistinct, opts.Sparse
+	_, err = c.client.call(ctx, r)
+	return err
+}
+func (c *Collection) ExplainQuery(ctx context.Context, filter []byte, opts db.QueryOptions) (db.QueryPlan, error) {
+	r, err := c.request("explain")
+	if err != nil {
+		return db.QueryPlan{}, err
+	}
+	r.Filter, r.Skip, r.Limit, r.Sort, r.Hint, r.KeyDescending, r.MaxMemoryBytes = filter, opts.Skip, opts.Limit, opts.Sort, opts.Hint, opts.KeyDescending, opts.MaxMemoryBytes
+	out, err := c.client.call(ctx, r)
+	if err != nil {
+		return db.QueryPlan{}, err
+	}
+	if out.Plan == nil {
+		return db.QueryPlan{}, ErrProtocol
+	}
+	return *out.Plan, nil
 }

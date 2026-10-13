@@ -36,7 +36,7 @@ func (db *DB) Export(ctx context.Context, w io.Writer) error {
 	}
 	defer s.Close()
 	encoder := json.NewEncoder(w)
-	if err = encoder.Encode(exportRecord{Kind: "header", Version: 1}); err != nil {
+	if err = encoder.Encode(exportRecord{Kind: "header", Version: 2}); err != nil {
 		return err
 	}
 	names := make([]string, 0, len(s.collections))
@@ -125,7 +125,7 @@ func Import(ctx context.Context, r io.Reader, destination string) error {
 	}()
 	decoder := json.NewDecoder(r)
 	var rec exportRecord
-	if err = decoder.Decode(&rec); err != nil || rec.Kind != "header" || rec.Version != 1 {
+	if err = decoder.Decode(&rec); err != nil || rec.Kind != "header" || (rec.Version != 1 && rec.Version != 2) {
 		return fmt.Errorf("aptevadb: invalid export header")
 	}
 	schemas := map[string]exportRecord{}
@@ -207,7 +207,13 @@ func Import(ctx context.Context, r io.Reader, destination string) error {
 					return err
 				}
 				for _, index := range schema.Indexes {
-					if err = c.CreateIndex(ctx, index.Name, index.Field, IndexOptions{Unique: index.Unique}); err != nil {
+					options := IndexOptions{Unique: index.Unique, NullsDistinct: index.NullsDistinct, Sparse: index.Sparse}
+					if len(index.Fields) > 0 {
+						err = c.CreateCompoundIndex(ctx, index.Name, index.Fields, options)
+					} else {
+						err = c.CreateIndex(ctx, index.Name, index.Field, options)
+					}
+					if err != nil {
 						return err
 					}
 				}

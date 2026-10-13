@@ -46,9 +46,9 @@ not repair arbitrary corruption. Keep verified backups on separate storage and
 regularly restore one into a disposable directory to check your recovery process.
 
 `aptevadbctl format ./data` reads metadata without opening or upgrading.
-Open upgrades formats 3–5 to 6 synchronously and permanently. Back up with the
+Open upgrades formats 3–6 to 7 synchronously and permanently. Back up with the
 original binary before upgrading; retain that binary for the original backup.
-Older binaries refuse the upgraded directory. Format 6 also enforces uniqueness;
+Older binaries refuse the upgraded directory. Format 7 adds exact/compound index encodings and extended documents;
 see FORMAT.md and the real historical fixture under testdata/format5.
 
 Short writes, disk-full errors and failed flushes are fatal to the current handle.
@@ -61,18 +61,19 @@ reports ErrCommitUnknown for transport failures and never retries writes itself.
 
 | Resource | Alpha contract |
 |---|---|
-| User key | 1–1,024 bytes |
+| User key | 1–4,032 bytes |
+| Binary document | up to 16 MiB, 4,096 fields, 16 nesting levels; strings/nested values use extended lengths when needed |
 | Opaque value | up to 1 GiB |
-| Index entry | up to 1,024 encoded bytes, including value and primary key |
-| Index name | 1–1,018 UTF-8 bytes |
+| Index entry | up to 4,032 encoded bytes, including value and primary key |
+| Index name | 1–4,026 UTF-8 bytes |
 | Named collections | IDs 1–65,535; IDs are not reused while a DB remains open |
 | Computed fields | define on empty collections; scalar outputs; checked arithmetic |
 | Computed collections | no chaining; scalar groups with integer sums/counts; 256 MiB staging |
 | Transaction write/maintenance staging | 256 MiB, including computed/index expansion |
-| Aggregation | default 1,048,576 groups and materialized rows; configurable per pipeline |
-| Default server | 16 MiB request/response frames; 32 concurrent requests; 64 transactions |
+| Aggregation | default 1,048,576 groups/rows and 64 MiB retained working-memory budget; configurable per pipeline |
+| Default server | 32 MiB request/response frames; 32 concurrent requests; 64 transactions |
 | Default server transaction | expires after 60 seconds, releasing its snapshot |
-| Default server aggregation | at most 10,000 groups/rows |
+| Default server aggregation | at most 10,000 groups/rows and 64 MiB query working memory |
 
 CacheBytes is a logical page-cache target, **not** a total resident-memory limit.
 Memtables, WAL buffers, metadata, retained snapshots, query results, mmap pages and
@@ -89,3 +90,15 @@ free space for a second data file during compaction/backup/restore.
 Directory ownership is protected by a persistent `LOCK` file before recovery or
 compaction cleanup starts, and remains held across data-file swaps. Do not remove
 that file while the database is open. The data-file lock is retained as well.
+
+QueryOptions.MaxMemoryBytes and Limits.MaxBytes account for retained execution data,
+including row maps, group slabs, index candidates, join tables and sort buffers.
+They exclude page caches, pinned snapshot versions, the current input document,
+request/response framing and caller-owned values, and are not hard process-RSS
+limits. Ordered compound-index pages stream; fallback sorts with Limit retain
+only Skip+Limit candidates. Raise a pipeline budget explicitly or reduce workers
+for large-cardinality parallel groups. Close snapshots and cursors promptly.
+
+Logical exports now write version 2, preserving compound directions and nullable
+constraints; Import still reads version 1. Older binaries reject version-2 exports
+instead of silently losing new index contracts.

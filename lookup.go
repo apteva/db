@@ -16,6 +16,7 @@ import (
 type env struct {
 	ctx    context.Context
 	c      *Collection
+	budget *memoryBudget
 	count  int // documents the source yields when index-driven, else -1
 	mu     sync.Mutex
 	tables map[string]*lookupTable
@@ -100,7 +101,14 @@ func joinKeyOf(dst []byte, v value) (joinKey, bool) {
 	case kDoc, kArray:
 		return joinKey{}, false
 	case kInt, kFloat:
-		bits := math.Float64bits(v.num())
+		if v.k == kInt && compareIntFloat(v.i, float64(v.i)) != 0 {
+			return joinKey{str: encodeExactIndexValue(dst[:0], v)}, true
+		}
+		number := v.num()
+		if number == 0 {
+			number = 0
+		}
+		bits := math.Float64bits(number)
 		if bits&(1<<63) != 0 {
 			bits = ^bits
 		} else {
@@ -262,11 +270,12 @@ func (lk *lookupExec) tableKey() string {
 // predicates and window over src and collects the local join values, giving
 // up as soon as there are more than smallOuter of them or the pass has
 // examined prePassBudget documents without finishing.
-func (pl *plan) preScan(ctx context.Context, src Source) func() ([]value, bool) {
+func (pl *plan) preScan(ctx context.Context, src Source, budget *memoryBudget) func() ([]value, bool) {
 	return func() ([]value, bool) {
 		vals := make([]value, len(pl.need))
 		hints := make([]int, len(pl.need))
 		var keys []value
+		reserved := int64(0)
 		seen, emitted, examined, done := 0, 0, 0, true
 		err := src(func(_, val []byte) bool {
 			examined++
@@ -294,10 +303,17 @@ func (pl *plan) preScan(ctx context.Context, src Source) func() ([]value, bool) 
 				return false
 			}
 			v := vals[pl.join.localIdx]
+			cost := int64(len(v.s))*2 + 96
+			if err := budget.reserve(cost); err != nil {
+				done = false
+				return false
+			}
+			reserved += cost
 			keys = append(keys, toScalar(v).view())
 			return true
 		})
 		if err != nil || !done {
+			_ = budget.reserve(-reserved)
 			return nil, false
 		}
 		return keys, true
@@ -360,10 +376,30 @@ func (lk *lookupExec) foreignKeys(doc []byte, kb []byte, fn func(k joinKey)) []b
 		return kb
 	}
 	var seen []joinKey
+	count, _, _ := arrayHeader(v.s)
+	var numeric map[uint64]bool
+	var textual map[string]bool
+	if count > 16 {
+		numeric = map[uint64]bool{}
+		textual = map[string]bool{}
+	}
 	walkArray(v.s, func(e value) bool {
 		k, ok := joinKeyOf(kb, e)
 		if !ok {
 			return true
+		}
+		if numeric != nil {
+			if k.isNum {
+				if numeric[k.num] {
+					return true
+				}
+				numeric[k.num] = true
+			} else {
+				if textual[string(k.str)] {
+					return true
+				}
+				textual[string(k.str)] = true
+			}
 		}
 		if !k.isNum {
 			// keep this key's bytes: the next element needs its own buffer
@@ -374,7 +410,9 @@ func (lk *lookupExec) foreignKeys(doc []byte, kb []byte, fn func(k joinKey)) []b
 				return true
 			}
 		}
-		seen = append(seen, k)
+		if numeric == nil {
+			seen = append(seen, k)
+		}
 		fn(k)
 		return true
 	})
@@ -390,6 +428,7 @@ func (lk *lookupExec) buildTable() (*lookupTable, error) {
 		t.nrows, t.srows = map[uint64][]*frow{}, map[string][]*frow{}
 	}
 	var kb []byte
+	keyWorking := int64(0)
 	var lerr error
 	var fr *frow
 	ctx := lk.e.ctx
@@ -407,8 +446,32 @@ func (lk *lookupExec) buildTable() (*lookupTable, error) {
 			return false
 		}
 		fr = nil
+		foreign := pathValue(value{k: kDoc, s: doc}, lk.spec.foreignField)
+		required := int64(len(foreign.s))*2 + 128
+		if foreign.k == kArray {
+			count, _, valid := arrayHeader(foreign.s)
+			if !valid {
+				lerr = ErrDocument
+				return false
+			}
+			required += int64(count) * 64
+		}
+		if required > keyWorking {
+			if err := lk.e.budget.reserve(required - keyWorking); err != nil {
+				lerr = err
+				return false
+			}
+			keyWorking = required
+		}
 		kb = lk.foreignKeys(doc, kb, func(k joinKey) {
 			if lk.filter != nil && !lk.filter.has(k) {
+				return
+			}
+			if lerr != nil {
+				return
+			}
+			if err := lk.e.budget.reserve(int64(len(k.str)) + 80); err != nil {
+				lerr = err
 				return
 			}
 			if countOnly {
@@ -416,12 +479,23 @@ func (lk *lookupExec) buildTable() (*lookupTable, error) {
 				return
 			}
 			if fr == nil {
+				cost := int64(512 + len(lk.fneed)*96)
+				if lk.keepDoc {
+					cost += int64(len(doc))
+				}
+				for _, field := range lk.fneed {
+					cost += int64(len(pathValue(value{k: kDoc, s: doc}, field).s))
+				}
+				if err := lk.e.budget.reserve(cost); err != nil {
+					lerr = err
+					return
+				}
 				fr = lk.row(doc)
 			}
 			t.add(k, fr)
 		})
 		t.n++
-		return true
+		return lerr == nil
 	})
 	if err == nil {
 		err = lerr
@@ -551,16 +625,20 @@ func (lk *lookupExec) probeOne(v value, fn func(fr *frow) bool) error {
 	if lk.lo == nil {
 		lk.lo = indexPrefix(lk.idx.ID)
 	}
-	lk.lo = encodeIndexValue(lk.lo[:6], v)
+	lk.lo = indexScalarPrefix(lk.idx, lk.lo[:6], v)
 	lk.hi = prefixEndInto(lk.hi, lk.lo)
+	if lk.idx.Encoding != 2 && v.isNum() && v.num() == 0 {
+		lk.lo = legacyZeroPrefix(lk.idx.ID)
+	}
 	lk.e.c.db.idx.mu.Lock()
 	lk.e.c.db.idx.scans++
 	lk.e.c.db.idx.mu.Unlock()
-	n, err := lk.probeEntries(lk.lo, lk.hi, !lk.entryOnly())
+	entryOnly := lk.entryOnly() && !(v.isNum() && lk.idx.Encoding != 2)
+	n, err := lk.probeEntries(lk.lo, lk.hi, !entryOnly)
 	if err != nil {
 		return err
 	}
-	if lk.entryOnly() {
+	if entryOnly {
 		// one entry per matching document: no document read needed
 		for ; n > 0; n-- {
 			if !fn(&emptyRow) {
@@ -580,6 +658,15 @@ func (lk *lookupExec) probeOne(v value, fn func(fr *frow) bool) error {
 		}
 		lk.dbuf = doc
 		if _, _, ok := docDir(doc); !ok {
+			continue
+		}
+		matches := false
+		indexedValues(doc, lk.spec.foreignField, func(candidate value) {
+			if compareValues(candidate, v) == 0 {
+				matches = true
+			}
+		})
+		if !matches {
 			continue
 		}
 		if !fn(lk.row(doc)) {
@@ -604,7 +691,7 @@ func (lk *lookupExec) probeEntries(lo, hi []byte, keep bool) (int, error) {
 	take := func(k []byte) {
 		n++
 		if keep {
-			if pk := primaryKeyOf(k); pk != nil {
+			if pk := primaryKeyOfDef(lk.idx, k); pk != nil {
 				lk.pkoffs = append(lk.pkoffs, len(lk.pkbuf), len(lk.pkbuf)+len(pk))
 				lk.pkbuf = append(lk.pkbuf, pk...)
 			}

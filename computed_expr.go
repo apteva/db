@@ -191,7 +191,7 @@ func computedLiteral(x any) (value, error) {
 	case bool:
 		return value{k: kBool, i: int64(b2u(v))}, nil
 	case string:
-		if len(v) > 65535 {
+		if len(v) > MaxDocumentSize {
 			return value{}, ErrComputedField
 		}
 		return value{k: kString, s: []byte(v)}, nil
@@ -348,7 +348,7 @@ func (e *computedExpr) eval(doc []byte, fields []value) (value, error) {
 				return value{}, fmt.Errorf("%w: concat needs strings", ErrComputedField)
 			}
 			n += len(v.s)
-			if n > 65535 {
+			if n > MaxDocumentSize {
 				return value{}, fmt.Errorf("%w: string too long", ErrComputedField)
 			}
 			parts[i] = v.s

@@ -16,7 +16,7 @@ const (
 	// which the split logic relies on.
 	MaxCellSize = PageSize / 4
 	// MaxKeySize bounds keys; lengths are stored as uint16.
-	MaxKeySize = 1024
+	MaxKeySize = MaxCellSize - 64
 
 	pageLeaf     byte = 1
 	pageInternal byte = 2

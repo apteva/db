@@ -45,6 +45,7 @@ type reader interface {
 type opener func(dir string) (kv, error)
 
 var (
+	flagCompatibility       = flag.Bool("compat", false, "exact integers, compound indexes, ordered pages, logical/prefix filters, nullable uniqueness and large documents")
 	flagN                   = flag.Int("n", 1_000_000, "keys per workload")
 	flagVal                 = flag.Int("vsize", 100, "value size in bytes")
 	flagEngines             = flag.String("engines", "ours,pebble,sqlite-c,sqlite-go", "comma list")
@@ -94,6 +95,10 @@ func main() {
 		}
 		dir = d
 		defer os.RemoveAll(dir)
+	}
+	if *flagCompatibility {
+		runCompatibilityBench(dir, *flagN, *flagReps)
+		return
 	}
 	if *flagAgg {
 		runAggBench(dir, *flagN, strings.Split(*flagEngines, ","))

@@ -116,3 +116,116 @@ retaining a result array. Aggregation supports group/sort/lookup and materialize
 results under Pipeline Limits. SetLimits before sharing a compiled pipeline;
 mutating the package-level DefaultLimits during concurrent execution is unsafe.
 Snapshot queries preserve that snapshot's catalog and row versions.
+
+## Compound indexes and ordered pages
+
+Create indexes once during application setup. Field order matters; each component
+can independently ascend or descend:
+
+```go
+err := orders.CreateCompoundIndex(ctx, "tenant_created", []db.IndexField{
+    {Field: "tenant"},
+    {Field: "created", Desc: true},
+})
+```
+
+Compound indexes support scalar fields only. Missing values become null unless
+Sparse is set. Arrays/objects in a compound component reject the write atomically;
+ordinary CreateIndex retains its scalar/multikey behavior. New numeric indexes
+order int64 values exactly, including adjacent values above 2^53. Mixed integer
+and float comparisons retain all integer bits; finite numerically equal values
+share an index key.
+
+```go
+stats := db.QueryStats{}
+opts := db.QueryOptions{
+    Sort: []db.IndexField{{Field: "created", Desc: true}},
+    Limit: 100,
+    MaxMemoryBytes: 8 << 20,
+    Stats: &stats,
+}
+filter := []byte(`{"$and":[{"tenant":"acme"},{"status":{"$prefix":"paid."}}]}`)
+plan, err := orders.ExplainQuery(ctx, filter, opts)
+if err != nil { return err }
+err = orders.Query(ctx, filter, opts, func(key, encoded []byte) bool {
+    // Consume each borrowed row; decode only what your application needs.
+    return true
+})
+```
+
+Query returns primary-key order by default. Sort specifies lexicographic field
+order; ties use ascending primary keys, or descending keys with KeyDescending.
+An equality-bound leading index prefix can be omitted from Sort. A matching
+compound index streams ordered pages; other sorts retain a bounded heap of
+Skip+Limit rows, or the complete result when Limit is zero. Deep Skip still costs
+work and retained space for a fallback sort. For reverse use of an existing
+index, request the opposite field directions and KeyDescending=true; otherwise
+create the desired directions explicitly to preserve ascending key ties.
+
+Hint selects a compatible compound index. Hint="$natural" forces a collection
+scan for diagnostics/comparisons. A sparse index cannot be hinted when it would
+omit matching missing values. Unknown/incompatible hints fail. ExplainQuery
+reports access, index, equality prefix, reverse traversal, memory budget and
+whether sorting is required. QueryStats records examined/returned rows and
+accounted retained query memory. Explain may count bounded index candidates for
+ordinary scalar indexes; it does not execute the result query.
+
+```go
+cur, err := orders.NewIndexCursor(ctx, "tenant_created", db.IndexCursorOptions{
+    Prefix: []any{"acme"},
+})
+if err != nil { return err }
+defer cur.Close()
+for ok := cur.First(); ok; ok = cur.Next() {
+    // cur.Key() is the primary key; cur.Value() is the stored document.
+    // cur.Position() is an unsigned opaque index position for SeekAfter.
+}
+if err := cur.Err(); err != nil { return err }
+```
+
+Index cursors expose First/Last, Next/Prev, Seek(tuple), SeekAfter/SeekBefore and
+bounds in physical index order. Upper is exclusive unless UpperInclusive is true;
+Lower is inclusive unless LowerExclusive is true. Partial tuples bound the whole
+matching prefix. Compound cursors yield each document once; ordinary multikey
+cursors yield physical entries and may repeat a document. Positions belong to
+one index ID; an index dropped/recreated has a different ID. Signing, binding a
+position to a filter/tenant and pagination across separate live snapshots belong
+to the adapter. Snapshot cursors keep their original rows/catalogs through writes
+and drops. Legacy format-6 indexes stay readable, but must be rebuilt under a new
+name (then dropped) to use exact ordered cursors.
+
+## Logical and literal-prefix filters
+
+$and/$or accept nonempty arrays of filter objects and can nest to 32 levels.
+Other fields at the same level combine with AND. $prefix matches literal,
+case-sensitive string bytes; punctuation, percent signs and underscores have no
+pattern meaning. Arrays in ordinary queries match if any scalar element matches.
+Integer filter literals outside int64 are rejected; explicit decimals use finite
+float64. Malformed filters and trailing JSON return ErrPipeline.
+
+## Nullable uniqueness and budgets
+
+IndexOptions{Unique:true, NullsDistinct:true} permits repeated null tuples, matching
+common SQL nullable-unique behavior. Any null/missing compound component exempts
+that tuple from uniqueness while retaining its ordered entry. The default remains
+NullsDistinct=false: null is a constrained value. Ordinary indexes omit missing
+fields; compound indexes normalize missing to null. Sparse=true omits a compound
+tuple whenever any component is missing, but still indexes explicit nulls. These
+options persist through snapshots, restart, backup and logical export/import.
+
+QueryOptions.MaxMemoryBytes and Pipeline.SetLimits(db.Limits{MaxBytes: ...})
+select retained working-memory budgets; zero selects 64 MiB. Parallel aggregation
+workers share one budget. A limit error is ErrLimit, never partial writes.
+Budgets include accounted execution storage and exclude page caches, snapshot
+versions, the current borrowed input document, transport framing and caller
+allocations. They are not process RSS limits; see OPERATIONS.md.
+
+Documents now support 16 MiB encoded size, 4,096 fields, large strings/nested values
+and up to 1,048,576 array elements, with nesting capped at 16. DocBuilder/ArrayBuilder
+Bytes returns nil when a limit is exceeded; check Err() when using builders
+manually. Typed/JSON write helpers return ErrDocument before persistence. Raw
+Insert/Upsert remains an opaque byte API, so it does not validate document bytes.
+
+Decode into map[string]any preserves int64 and float64 values directly, including
+large integers. Struct numeric fields honor their declared Go types; interface
+fields use json.Number. This avoids alpha.1 map decoding through float64.

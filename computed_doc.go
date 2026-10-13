@@ -10,19 +10,19 @@ import (
 // Validate the complete document (including unused fields) before evaluating,
 // so a bad input cannot be partly written or interpreted differently on reads.
 func validateComputedDoc(doc []byte, depth int) error {
-	if depth > maxNesting || len(doc) > 65535 {
+	if depth > maxNesting || len(doc) > MaxDocumentSize {
 		return ErrDocument
 	}
 	n, dir, ok := docDir(doc)
 	if !ok {
 		return ErrDocument
 	}
-	content := doc[:len(doc)-1-2*n]
+	content := doc[:docContentEnd(doc, n, dir)]
 	end := 0
 	var small [16][]byte
 	names := small[:0]
 	for i := 0; i < n; i++ {
-		off := int(le.Uint16(dir[2*i:]))
+		off := docOffset(dir, n, i)
 		if off != end || off >= len(content) {
 			return ErrDocument
 		}
@@ -68,7 +68,10 @@ func validateComputedValue(v value, depth int) error {
 		if depth+1 > maxNesting || len(v.s) < 2 {
 			return ErrDocument
 		}
-		n, p := int(le.Uint16(v.s)), 2
+		n, p, ok := arrayHeader(v.s)
+		if !ok {
+			return ErrDocument
+		}
 		for i := 0; i < n; i++ {
 			if p >= len(v.s) {
 				return ErrDocument
@@ -122,25 +125,32 @@ func (p *computedPlan) applyInto(doc, dst []byte) ([]byte, error) {
 	// discarded: the stored value is always derived from the source fields.
 	// Keep offsets on the stack. Passing them through DocBuilder methods
 	// makes the compiler move the temporary directory to the heap.
-	var offsets [255]uint16
+	var smallOffsets [32]uint32
+	offsets := smallOffsets[:]
+	n, dir, _ := docDir(doc)
+	if n+len(p.fields) > MaxDocumentFields {
+		return nil, ErrComputedField
+	}
+	if n+len(p.fields) > len(offsets) {
+		offsets = make([]uint32, n+len(p.fields))
+	}
 	count := 0
 	if cap(dst) < len(doc)+32*len(p.fields) {
 		dst = make([]byte, 0, len(doc)+32*len(p.fields))
 	}
 	out := dst[:0]
-	n, dir, _ := docDir(doc)
-	contentEnd := len(doc) - 1 - 2*n
+	contentEnd := docContentEnd(doc, n, dir)
 	for i := 0; i < n; i++ {
-		off := int(le.Uint16(dir[2*i:]))
+		off := docOffset(dir, n, i)
 		end := contentEnd
 		if i+1 < n {
-			end = int(le.Uint16(dir[2*(i+1):]))
+			end = docOffset(dir, n, i+1)
 		}
 		name := doc[off+1 : off+1+int(doc[off])]
 		if _, computed := p.byName[string(name)]; computed {
 			continue
 		}
-		offsets[count] = uint16(len(out))
+		offsets[count] = uint32(len(out))
 		count++
 		out = append(out, doc[off:end]...)
 	}
@@ -149,10 +159,10 @@ func (p *computedPlan) applyInto(doc, dst []byte) ([]byte, error) {
 	}
 	for i, f := range p.fields {
 		v := values[i]
-		if len(out) > 65535 {
+		if len(out) > MaxDocumentSize {
 			return nil, fmt.Errorf("%w: computed document too large", ErrComputedField)
 		}
-		offsets[count] = uint16(len(out))
+		offsets[count] = uint32(len(out))
 		count++
 		out = append(out, byte(len(f.name)))
 		out = append(out, f.name...)
@@ -168,21 +178,22 @@ func (p *computedPlan) applyInto(doc, dst []byte) ([]byte, error) {
 			out = append(out, tFloat)
 			out = le.AppendUint64(out, math.Float64bits(v.f))
 		case kString:
-			if len(v.s) > 65535 {
+			if len(v.s) > MaxDocumentSize {
 				return nil, fmt.Errorf("%w: string too long", ErrComputedField)
 			}
-			out = append(out, tString)
-			out = le.AppendUint16(out, uint16(len(v.s)))
+			if len(v.s) > 65535 {
+				out = le.AppendUint32(append(out, tLongString), uint32(len(v.s)))
+			} else {
+				out = le.AppendUint16(append(out, tString), uint16(len(v.s)))
+			}
 			out = append(out, v.s...)
 		default:
 			return nil, ErrComputedField
 		}
 	}
-	if len(out)+2*count+1 > 65535 {
-		return nil, fmt.Errorf("%w: computed document too large", ErrComputedField)
+	out = sealDocument(out, offsets[:count])
+	if len(out) > MaxDocumentSize {
+		return nil, fmt.Errorf("%w: document too large", ErrComputedField)
 	}
-	for _, off := range offsets[:count] {
-		out = le.AppendUint16(out, off)
-	}
-	return append(out, byte(count)), nil
+	return out, nil
 }

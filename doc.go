@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
+	"math/bits"
 	"sort"
 	"strings"
 )
@@ -21,24 +23,33 @@ import (
 // The trailer lets a reader jump to the i-th entry without walking earlier
 // ones. Fields are stored in the order given; EncodeJSON sorts them by name.
 const (
-	tNull   byte = 1
-	tBool   byte = 2
-	tInt    byte = 3
-	tFloat  byte = 4
-	tString byte = 5
-	tDoc    byte = 6
-	tArray  byte = 7
+	tNull       byte = 1
+	tBool       byte = 2
+	tInt        byte = 3
+	tFloat      byte = 4
+	tString     byte = 5
+	tDoc        byte = 6
+	tArray      byte = 7
+	tLongString byte = 8
+	tLongDoc    byte = 9
+	tLongArray  byte = 10
 
-	maxNesting = 16
+	maxNesting        = 16
+	MaxDocumentSize   = 16 << 20
+	MaxDocumentFields = 4096
+	maxArrayElements  = 1 << 20
+	wideDocumentMagic = 0x31445741
+	wideArrayMagic    = 0x31415741
 )
 
 var ErrDocument = errors.New("aptevadb: malformed document")
 
 // DocBuilder encodes flat documents with no per-field allocation.
 type DocBuilder struct {
-	buf    []byte
-	offs   []uint16
-	sealed bool
+	buf     []byte
+	offs    []uint32
+	invalid bool
+	sealed  bool
 }
 
 // Reset starts a new document, reusing the buffer.
@@ -46,10 +57,15 @@ func (b *DocBuilder) Reset() {
 	b.buf = b.buf[:0]
 	b.offs = b.offs[:0]
 	b.sealed = false
+	b.invalid = false
 }
 
 func (b *DocBuilder) head(name string, t byte) {
-	b.offs = append(b.offs, uint16(len(b.buf)))
+	if b.sealed || len(name) > 255 || len(b.offs) >= MaxDocumentFields {
+		b.invalid = true
+		return
+	}
+	b.offs = append(b.offs, uint32(len(b.buf)))
 	b.buf = append(b.buf, byte(len(name)))
 	b.buf = append(b.buf, name...)
 	b.buf = append(b.buf, t)
@@ -76,53 +92,111 @@ func (b *DocBuilder) Float(name string, v float64) {
 	b.buf = le.AppendUint64(b.buf, math.Float64bits(v))
 }
 
-func (b *DocBuilder) String(name string, v string) {
-	b.head(name, tString)
-	b.buf = le.AppendUint16(b.buf, uint16(len(v)))
-	b.buf = append(b.buf, v...)
+func (b *DocBuilder) variable(name string, t byte, data []byte) {
+	if (t == tDoc || t == tArray) && len(data) == 0 {
+		b.invalid = true
+		return
+	}
+	if len(data) > MaxDocumentSize {
+		b.invalid = true
+		return
+	}
+	if len(data) > 65535 {
+		b.head(name, t+3)
+		b.buf = le.AppendUint32(b.buf, uint32(len(data)))
+	} else {
+		b.head(name, t)
+		b.buf = le.AppendUint16(b.buf, uint16(len(data)))
+	}
+	b.buf = append(b.buf, data...)
 }
-
-// Doc adds a nested document (bytes from another DocBuilder).
-func (b *DocBuilder) Doc(name string, sub []byte) {
-	b.head(name, tDoc)
-	b.buf = le.AppendUint16(b.buf, uint16(len(sub)))
-	b.buf = append(b.buf, sub...)
-}
-
-// Array adds an array (bytes from an ArrayBuilder).
-func (b *DocBuilder) Array(name string, arr []byte) {
-	b.head(name, tArray)
-	b.buf = le.AppendUint16(b.buf, uint16(len(arr)))
-	b.buf = append(b.buf, arr...)
-}
+func (b *DocBuilder) String(name string, v string)  { b.variable(name, tString, []byte(v)) }
+func (b *DocBuilder) Doc(name string, sub []byte)   { b.variable(name, tDoc, sub) }
+func (b *DocBuilder) Array(name string, arr []byte) { b.variable(name, tArray, arr) }
 
 // ArrayBuilder encodes array elements: [count u16] then type+payload each.
 type ArrayBuilder struct {
-	buf []byte
-	n   int
+	buf     []byte
+	n       int
+	sealed  bool
+	invalid bool
 }
 
-func (a *ArrayBuilder) Reset()      { a.buf = append(a.buf[:0], 0, 0); a.n = 0 }
-func (a *ArrayBuilder) Null()       { a.buf = append(a.buf, tNull); a.n++ }
-func (a *ArrayBuilder) Bool(v bool) { a.buf = append(a.buf, tBool, b2u(v)); a.n++ }
-func (a *ArrayBuilder) Int(v int64) { a.buf = le.AppendUint64(append(a.buf, tInt), uint64(v)); a.n++ }
+func (a *ArrayBuilder) Reset() {
+	a.buf = append(a.buf[:0], 0, 0)
+	a.n = 0
+	a.sealed = false
+	a.invalid = false
+}
+func (a *ArrayBuilder) unseal() {
+	if len(a.buf) == 0 {
+		a.buf = append(a.buf, 0, 0)
+	}
+	if a.sealed {
+		if a.n > 65535 {
+			copy(a.buf[2:], a.buf[10:])
+			a.buf = a.buf[:len(a.buf)-8]
+		}
+		a.sealed = false
+	}
+}
+func (a *ArrayBuilder) Null()       { a.unseal(); a.buf = append(a.buf, tNull); a.n++ }
+func (a *ArrayBuilder) Bool(v bool) { a.unseal(); a.buf = append(a.buf, tBool, b2u(v)); a.n++ }
+func (a *ArrayBuilder) Int(v int64) {
+	a.unseal()
+	a.buf = le.AppendUint64(append(a.buf, tInt), uint64(v))
+	a.n++
+}
 func (a *ArrayBuilder) Float(v float64) {
+	a.unseal()
 	a.buf = le.AppendUint64(append(a.buf, tFloat), math.Float64bits(v))
 	a.n++
 }
-func (a *ArrayBuilder) String(v string) {
-	a.buf = append(le.AppendUint16(append(a.buf, tString), uint16(len(v))), v...)
+func (a *ArrayBuilder) variable(t byte, data []byte) {
+	a.unseal()
+	if (t == tDoc || t == tArray) && len(data) == 0 {
+		a.invalid = true
+		return
+	}
+	if len(data) > MaxDocumentSize {
+		a.invalid = true
+		return
+	}
+	if len(data) > 65535 {
+		a.buf = le.AppendUint32(append(a.buf, t+3), uint32(len(data)))
+	} else {
+		a.buf = le.AppendUint16(append(a.buf, t), uint16(len(data)))
+	}
+	a.buf = append(a.buf, data...)
 	a.n++
 }
-func (a *ArrayBuilder) Doc(sub []byte) {
-	a.buf = append(le.AppendUint16(append(a.buf, tDoc), uint16(len(sub))), sub...)
-	a.n++
+func (a *ArrayBuilder) String(v string)  { a.variable(tString, []byte(v)) }
+func (a *ArrayBuilder) Doc(sub []byte)   { a.variable(tDoc, sub) }
+func (a *ArrayBuilder) Array(arr []byte) { a.variable(tArray, arr) }
+func (a *ArrayBuilder) Bytes() []byte {
+	if len(a.buf) == 0 {
+		a.buf = append(a.buf, 0, 0)
+	}
+	if a.invalid || a.n > maxArrayElements || len(a.buf) > MaxDocumentSize || len(a.buf) < 2 {
+		return nil
+	}
+	if !a.sealed {
+		if a.n > 65535 {
+			a.buf = append(a.buf, make([]byte, 8)...)
+			copy(a.buf[10:], a.buf[2:len(a.buf)-8])
+			clear(a.buf[:2])
+			le.PutUint32(a.buf[2:], wideArrayMagic)
+			le.PutUint32(a.buf[6:], uint32(a.n))
+		} else {
+			le.PutUint16(a.buf, uint16(a.n))
+		}
+		a.sealed = true
+	}
+	if len(a.buf) > MaxDocumentSize {
+		return nil
+	}
+	return a.buf
 }
-func (a *ArrayBuilder) Array(arr []byte) {
-	a.buf = append(le.AppendUint16(append(a.buf, tArray), uint16(len(arr))), arr...)
-	a.n++
-}
-func (a *ArrayBuilder) Bytes() []byte { le.PutUint16(a.buf, uint16(a.n)); return a.buf }
 
 func b2u(v bool) byte {
 	if v {
@@ -132,13 +206,31 @@ func b2u(v bool) byte {
 }
 
 // Bytes seals and returns the encoded document; valid until the next Reset.
-func (b *DocBuilder) Bytes() []byte {
-	if !b.sealed {
-		for _, o := range b.offs {
-			b.buf = le.AppendUint16(b.buf, o)
+func sealDocument(buf []byte, offsets []uint32) []byte {
+	n := len(offsets)
+	if len(buf)+2*n+1 <= 65535 && n <= 255 {
+		for _, o := range offsets {
+			buf = le.AppendUint16(buf, uint16(o))
 		}
-		b.buf = append(b.buf, byte(len(b.offs)))
+		return append(buf, byte(n))
+	}
+	for _, o := range offsets {
+		buf = le.AppendUint32(buf, o)
+	}
+	buf = le.AppendUint32(buf, uint32(n))
+	buf = le.AppendUint32(buf, wideDocumentMagic)
+	return append(buf, 0)
+}
+func (b *DocBuilder) Bytes() []byte {
+	if b.invalid {
+		return nil
+	}
+	if !b.sealed {
+		b.buf = sealDocument(b.buf, b.offs)
 		b.sealed = true
+	}
+	if len(b.buf) > MaxDocumentSize {
+		return nil
 	}
 	return b.buf
 }
@@ -156,14 +248,25 @@ func EncodeJSON(dst []byte, src []byte) ([]byte, error) {
 	if err := encodeMap(&b, m, 0); err != nil {
 		return nil, err
 	}
-	return b.Bytes(), nil
+	if m == nil {
+		return nil, ErrDocument
+	}
+	var trailing any
+	if err := dec.Decode(&trailing); err != io.EOF {
+		return nil, ErrDocument
+	}
+	encoded := b.Bytes()
+	if encoded == nil {
+		return nil, fmt.Errorf("%w: document exceeds limits", ErrDocument)
+	}
+	return encoded, nil
 }
 
 func encodeMap(b *DocBuilder, m map[string]any, depth int) error {
 	if depth > maxNesting {
 		return fmt.Errorf("%w: nesting too deep", ErrDocument)
 	}
-	if len(m) > 255 {
+	if len(m) > MaxDocumentFields {
 		return fmt.Errorf("%w: too many fields", ErrDocument)
 	}
 	names := make([]string, 0, len(m))
@@ -184,7 +287,9 @@ func encodeMap(b *DocBuilder, m map[string]any, depth int) error {
 		case json.Number:
 			if i, err := v.Int64(); err == nil {
 				b.Int(k, i)
-			} else if f, err := v.Float64(); err == nil {
+			} else if !strings.ContainsAny(string(v), ".eE") {
+				return fmt.Errorf("%w: integer outside int64", ErrDocument)
+			} else if f, err := v.Float64(); err == nil && !math.IsInf(f, 0) && !math.IsNaN(f) {
 				b.Float(k, f)
 			} else {
 				return fmt.Errorf("%w: bad number %q", ErrDocument, v)
@@ -196,7 +301,7 @@ func encodeMap(b *DocBuilder, m map[string]any, depth int) error {
 		case int:
 			b.Int(k, int64(v))
 		case string:
-			if len(v) > 65535 {
+			if len(v) > MaxDocumentSize {
 				return fmt.Errorf("%w: string too long", ErrDocument)
 			}
 			b.String(k, v)
@@ -205,7 +310,7 @@ func encodeMap(b *DocBuilder, m map[string]any, depth int) error {
 			if err := encodeMap(&sub, v, depth+1); err != nil {
 				return err
 			}
-			if len(sub.Bytes()) > 65535 {
+			if sub.Bytes() == nil {
 				return fmt.Errorf("%w: nested document too large", ErrDocument)
 			}
 			b.Doc(k, sub.Bytes())
@@ -214,7 +319,7 @@ func encodeMap(b *DocBuilder, m map[string]any, depth int) error {
 			if err := encodeArray(&arr, v, depth+1); err != nil {
 				return err
 			}
-			if len(arr.Bytes()) > 65535 {
+			if arr.Bytes() == nil {
 				return fmt.Errorf("%w: array too large", ErrDocument)
 			}
 			b.Array(k, arr.Bytes())
@@ -229,7 +334,7 @@ func encodeArray(a *ArrayBuilder, list []any, depth int) error {
 	if depth > maxNesting {
 		return fmt.Errorf("%w: nesting too deep", ErrDocument)
 	}
-	if len(list) > 65535 {
+	if len(list) > maxArrayElements {
 		return fmt.Errorf("%w: array too long", ErrDocument)
 	}
 	a.Reset()
@@ -242,7 +347,9 @@ func encodeArray(a *ArrayBuilder, list []any, depth int) error {
 		case json.Number:
 			if i, err := v.Int64(); err == nil {
 				a.Int(i)
-			} else if f, err := v.Float64(); err == nil {
+			} else if !strings.ContainsAny(string(v), ".eE") {
+				return fmt.Errorf("%w: integer outside int64", ErrDocument)
+			} else if f, err := v.Float64(); err == nil && !math.IsInf(f, 0) && !math.IsNaN(f) {
 				a.Float(f)
 			} else {
 				return fmt.Errorf("%w: bad number %q", ErrDocument, v)
@@ -307,15 +414,89 @@ func (v value) num() float64 {
 
 // docDir returns the field count and the offset table of a document.
 func docDir(doc []byte) (n int, dir []byte, ok bool) {
-	if len(doc) < 1 {
+	if len(doc) < 1 || len(doc) > MaxDocumentSize {
 		return 0, nil, false
 	}
 	n = int(doc[len(doc)-1])
-	d := len(doc) - 1 - 2*n
+	trailer, width := 1, 2
+	if n == 0 && len(doc) > 1 {
+		if len(doc) < 9 || le.Uint32(doc[len(doc)-5:]) != wideDocumentMagic {
+			return 0, nil, false
+		}
+		n = int(le.Uint32(doc[len(doc)-9:]))
+		trailer, width = 9, 4
+		if n == 0 || n > MaxDocumentFields {
+			return 0, nil, false
+		}
+	}
+	d := len(doc) - trailer - width*n
 	if d < 0 {
 		return 0, nil, false
 	}
-	return n, doc[d : len(doc)-1], true
+	dir = doc[d : len(doc)-trailer]
+	// Alpha.1 could accept a valid payload larger than 64 KiB and wrap its
+	// offset table. Reconstruct only when the complete entries validate and
+	// every original offset agrees modulo 65536; never guess payload lengths.
+	if width == 2 && len(doc) > 65535 {
+		converted := make([]byte, 0, 4*n)
+		off := 0
+		content := doc[:d]
+		for i := 0; i < n; i++ {
+			if off >= len(content) || le.Uint16(dir[2*i:]) != uint16(off) {
+				return 0, nil, false
+			}
+			p := off + 1 + int(content[off])
+			if p >= len(content) {
+				return 0, nil, false
+			}
+			_, next, valid := decodePayload(content, content[p], p+1)
+			if !valid {
+				return 0, nil, false
+			}
+			converted = le.AppendUint32(converted, uint32(off))
+			off = next
+		}
+		if off != len(content) {
+			return 0, nil, false
+		}
+		dir = converted
+	}
+	return n, dir, true
+}
+func docOffset(dir []byte, n, i int) int {
+	if len(dir) == 2*n {
+		return int(le.Uint16(dir[2*i:]))
+	}
+	return int(le.Uint32(dir[4*i:]))
+}
+func docContentEnd(doc []byte, n int, dir []byte) int {
+	trailer := 1
+	if doc[len(doc)-1] == 0 && n > 0 {
+		trailer = 9
+	}
+	width := 2
+	if trailer == 9 {
+		width = 4
+	}
+	return len(doc) - trailer - width*n
+}
+func arrayHeader(arr []byte) (n, p int, ok bool) {
+	if len(arr) < 2 || len(arr) > MaxDocumentSize {
+		return 0, 0, false
+	}
+	n = int(le.Uint16(arr))
+	p = 2
+	if n == 0 && len(arr) > 2 {
+		if len(arr) < 10 || le.Uint32(arr[2:]) != wideArrayMagic {
+			return 0, 0, false
+		}
+		n = int(le.Uint32(arr[6:]))
+		p = 10
+		if n <= 65535 || n > maxArrayElements {
+			return 0, 0, false
+		}
+	}
+	return n, p, true
 }
 
 // decodePayload reads a typed payload at p; returns the value and the
@@ -342,20 +523,29 @@ func decodePayload(doc []byte, t byte, p int) (v value, next int, ok bool) {
 		}
 		v.k, v.f = kFloat, math.Float64frombits(le.Uint64(doc[p:]))
 		p += 8
-	case tString, tDoc, tArray:
-		if p+2 > len(doc) {
+	case tString, tDoc, tArray, tLongString, tLongDoc, tLongArray:
+		width := 2
+		if t >= tLongString {
+			width = 4
+		}
+		if p+width > len(doc) {
 			return v, 0, false
 		}
-		sl := int(le.Uint16(doc[p:]))
-		p += 2
+		sl := 0
+		if width == 2 {
+			sl = int(le.Uint16(doc[p:]))
+		} else {
+			sl = int(le.Uint32(doc[p:]))
+		}
+		p += width
 		if p+sl > len(doc) {
 			return v, 0, false
 		}
 		v.s = doc[p : p+sl]
 		switch t {
-		case tString:
+		case tString, tLongString:
 			v.k = kString
-		case tDoc:
+		case tDoc, tLongDoc:
 			v.k = kDoc
 		default:
 			v.k = kArray
@@ -369,7 +559,7 @@ func decodePayload(doc []byte, t byte, p int) (v value, next int, ok bool) {
 
 // decodeEntry reads the field entry starting at off.
 func decodeEntry(doc []byte, off int) (name []byte, v value, ok bool) {
-	if off >= len(doc) {
+	if off < 0 || off >= len(doc) {
 		return nil, v, false
 	}
 	nl := int(doc[off])
@@ -384,11 +574,10 @@ func decodeEntry(doc []byte, off int) (name []byte, v value, ok bool) {
 
 // walkArray calls fn for each element; fn returns false to stop.
 func walkArray(arr []byte, fn func(v value) bool) error {
-	if len(arr) < 2 {
+	n, p, valid := arrayHeader(arr)
+	if !valid {
 		return ErrDocument
 	}
-	n := int(le.Uint16(arr))
-	p := 2
 	for i := 0; i < n; i++ {
 		if p >= len(arr) {
 			return ErrDocument
@@ -412,7 +601,7 @@ func walkDoc(doc []byte, fn func(name []byte, v value) bool) error {
 		return ErrDocument
 	}
 	for i := 0; i < n; i++ {
-		name, v, ok := decodeEntry(doc, int(le.Uint16(dir[2*i:])))
+		name, v, ok := decodeEntry(doc, docOffset(dir, n, i))
 		if !ok {
 			return ErrDocument
 		}
@@ -438,9 +627,15 @@ func docField(doc []byte, name string) value {
 
 // DecodeDocument converts a binary document into a map.
 func DecodeDocument(doc []byte) (map[string]any, error) {
+	if err := validateComputedDoc(doc, 0); err != nil {
+		return nil, err
+	}
+	return decodeDocumentTrusted(doc)
+}
+func decodeDocumentTrusted(doc []byte) (map[string]any, error) {
 	m := map[string]any{}
 	err := walkDoc(doc, func(n []byte, v value) bool {
-		m[string(n)] = v.any()
+		m[string(n)] = v.anyTrusted()
 		return true
 	})
 	return m, err
@@ -583,7 +778,13 @@ func compareValues(a, b value) int {
 			}
 			return 0
 		}
-		x, y := a.num(), b.num()
+		if a.k == kInt {
+			return compareIntFloat(a.i, b.f)
+		}
+		if b.k == kInt {
+			return -compareIntFloat(b.i, a.f)
+		}
+		x, y := a.f, b.f
 		switch {
 		case x < y:
 			return -1
@@ -642,3 +843,88 @@ func (db *DB) UpsertJSON(key, doc []byte) error { return db.def.UpsertJSON(key, 
 
 // ReplaceJSON replaces an existing JSON document in the default collection.
 func (db *DB) ReplaceJSON(key, doc []byte) error { return db.def.ReplaceJSON(key, doc) }
+
+func compareIntFloat(i int64, f float64) int {
+	if math.IsNaN(f) {
+		return 1
+	}
+	if f >= 0x1p63 {
+		return -1
+	}
+	if f < -0x1p63 {
+		return 1
+	}
+	whole := int64(f)
+	if i < whole {
+		return -1
+	}
+	if i > whole {
+		return 1
+	}
+	if float64(whole) < f {
+		return -1
+	}
+	if float64(whole) > f {
+		return 1
+	}
+	return 0
+}
+
+// numericParts normalizes finite int64/float64 values without losing integer bits.
+func numericParts(v value) (negative bool, exponent uint16, significand uint64) {
+	if v.k == kInt {
+		n := uint64(v.i)
+		if v.i < 0 {
+			negative = true
+			n = -n
+		}
+		if n == 0 {
+			return false, 0, 0
+		}
+		length := bits.Len64(n)
+		return negative, uint16(length - 1 + 1075), n << uint(64-length)
+	}
+	raw := math.Float64bits(v.f)
+	negative = raw>>63 != 0
+	raw &= math.MaxInt64
+	exp := int(raw >> 52)
+	fraction := raw & ((1 << 52) - 1)
+	if exp == 0 {
+		if fraction == 0 {
+			return false, 0, 0
+		}
+		length := bits.Len64(fraction)
+		return negative, uint16(length), fraction << uint(64-length)
+	}
+	if exp == 2047 {
+		return negative, 2099, fraction
+	}
+	return negative, uint16(exp - 1023 + 1075), (fraction | (1 << 52)) << 11
+}
+
+func (v value) anyTrusted() any {
+	switch v.k {
+	case kDoc:
+		m, _ := decodeDocumentTrusted(v.s)
+		return m
+	case kArray:
+		out := []any{}
+		_ = walkArray(v.s, func(e value) bool { out = append(out, e.anyTrusted()); return true })
+		return out
+	}
+	return v.any()
+}
+
+// Err reports invalid builder state or an encoding that exceeds document limits.
+func (b *DocBuilder) Err() error {
+	if b.invalid || len(b.offs) > MaxDocumentFields || len(b.buf) > MaxDocumentSize {
+		return ErrDocument
+	}
+	return nil
+}
+func (a *ArrayBuilder) Err() error {
+	if a.invalid || a.n > maxArrayElements || len(a.buf) > MaxDocumentSize {
+		return ErrDocument
+	}
+	return nil
+}

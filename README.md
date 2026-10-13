@@ -1,18 +1,18 @@
 # AptevaDB
 
 A Go document and key-value database with named collections, atomic transactions,
-unique indexes, snapshots, aggregation, stored computed fields and computed
+scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.1.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.2.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
-runtime dependencies. The file format is 6; opening formats 3–5 upgrades them
+runtime dependencies. The file format is 7; opening formats 3–6 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.1
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.1
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.1
+go get github.com/apteva/db@v0.2.0-alpha.2
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.2
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.2
 ```
 
 ```go
@@ -51,7 +51,7 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
-The [public-alpha validation report](bench/results/public-alpha/VALIDATION.md)
+The [alpha.1 validation report](bench/results/public-alpha/VALIDATION.md)
 retains 30 resource and 24 feature trials against Pebble and both SQLite bindings.
 Other historical results under `bench/results/` describe their original builds. The separate
 `bench` module compares SQLite and Pebble without adding engine dependencies.
@@ -106,8 +106,8 @@ Missing and null inputs propagate null. Other type mismatches fail with
 `ErrComputedField`; integer-only arithmetic preserves int64 precision and
 rejects overflow, and floating arithmetic rejects non-finite results. Integer
 literals outside int64 are rejected. Explicit floating literals use float64.
-Configured collections accept validated binary documents up to 65,535 bytes,
-with unique field names, at most 255 total fields and nesting up to 16 levels.
+Configured collections accept validated binary documents up to 16 MiB,
+with unique field names, at most 4,096 total fields and nesting up to 16 levels.
 Definitions allow at most 64 outputs, 64 KiB of input/canonical JSON, 1,024 expression nodes
 and expression depth 32. Outputs are scalars, not nested document/array fields.
 
@@ -116,8 +116,8 @@ Installing, replacing or removing definitions requires an empty collection
 backfill yet. Deleted documents do not prevent a schema change, even before a
 checkpoint. Dropping a collection drops its rules too.
 
-**Format migration:** opening a format-3, format-4 or format-5 database upgrades both
-metadata slots durably to format 6 before returning. Older binaries then refuse
+**Format migration:** opening a format-3 through format-6 database upgrades both
+metadata slots durably to format 7 before returning. Older binaries then refuse
 to open it; keep a backup if you need to use one. Page, log and document layouts
 are unchanged; computed catalogs, group counters and unique constraints require the
 version bump. Other format versions are refused.
@@ -163,7 +163,7 @@ batch to exceed int64 temporarily if its final totals fit. Zero-sum groups
 remain present until their last matching member is deleted. Missing and null
 IDs share a key; integral floats normalize to int64. `ComputedGroupKey` accepts
 nil, bool, int, int64, finite float64, string and valid scalar `json.Number`.
-Integer IDs remain distinct above 2^53. Encoded IDs are limited to 1,018 bytes.
+Integer IDs remain distinct above 2^53. Encoded IDs are limited to 4,026 bytes.
 
 Computed collections are read-only: direct inserts, deletes and computed-field
 definitions return `ErrComputedCollectionReadOnly`. Their ordinary indexes,

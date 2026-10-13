@@ -528,8 +528,15 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
 	if q, from, ok := c.reorder(p, &pl); ok {
 		return from.Run(ctx, q)
 	}
-	e := &env{ctx: ctx, c: c, count: -1}
-	if ip, ok := c.indexPlan(pl.preds); ok {
+	budget, err := p.limits.budget()
+	if err != nil {
+		return nil, err
+	}
+	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
+	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
+		if err := budget.reserve(ip.memory); err != nil {
+			return nil, err
+		}
 		e.count = ip.count
 		return p.run(ctx, srcSpec{src: c.rangesSource(ctx, ip)}, e)
 	}
@@ -546,6 +553,12 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
 // this collection's fields under a synthetic name; results are identical.
 func (c *Collection) reorder(p *Pipeline, pl *plan) (*Pipeline, *Collection, bool) {
 	jp := pl.join
+	if pl.limits.MaxBytes > 0 && pl.limits.MaxBytes < DefaultQueryMemoryBytes {
+		return nil, nil, false
+	}
+	if hasLogical(pl.preds) || (jp != nil && hasLogical(jp.post)) {
+		return nil, nil, false
+	}
 	if jp == nil || pl.group == nil || pl.countOnly || jp.preserve || pl.skip > 0 || pl.limit >= 0 || jp.wholeIdx >= 0 || c.db.noReorder {
 		return nil, nil, false
 	}
@@ -655,8 +668,15 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
 	if q, from, ok := c.reorder(p, &pl); ok {
 		return from.RunParallel(ctx, q, shards)
 	}
-	e := &env{ctx: ctx, c: c, count: -1}
-	if ip, ok := c.indexPlan(pl.preds); ok {
+	budget, err := p.limits.budget()
+	if err != nil {
+		return nil, err
+	}
+	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
+	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
+		if err := budget.reserve(ip.memory); err != nil {
+			return nil, err
+		}
 		e.count = ip.count
 		if !pl.shards() {
 			return p.run(ctx, srcSpec{src: c.rangesSource(ctx, ip)}, e)
@@ -712,7 +732,7 @@ func (c *Collection) indexDefs() []indexDef {
 // indexOn returns the collection's index on field, if any.
 func (c *Collection) indexOn(field string) (indexDef, bool) {
 	for _, d := range c.visibleIndexDefs() {
-		if d.Coll == c.id && d.Field == field {
+		if d.Coll == c.id && d.Field == field && len(d.Fields) <= 1 && (len(d.Fields) == 0 || !d.Fields[0].Desc) {
 			return d, true
 		}
 	}

@@ -11,7 +11,7 @@ import (
 	"sort"
 )
 
-const MaxBodyBytes = 16 << 20
+const MaxBodyBytes = 32 << 20
 
 var ErrBadRequest = errors.New("aptevadb: bad request")
 var ErrUnauthorized = errors.New("aptevadb: unauthorized")
@@ -25,23 +25,32 @@ type Operation struct {
 	Value      []byte `json:"value,omitempty"`
 }
 type Request struct {
-	Op          string          `json:"op"`
-	Collection  string          `json:"collection,omitempty"`
-	Name        string          `json:"name,omitempty"`
-	Field       string          `json:"field,omitempty"`
-	Source      string          `json:"source,omitempty"`
-	Transaction string          `json:"transaction,omitempty"`
-	Key         []byte          `json:"key,omitempty"`
-	Value       []byte          `json:"value,omitempty"`
-	Unique      bool            `json:"unique,omitempty"`
-	Pipeline    json.RawMessage `json:"pipeline,omitempty"`
-	Definitions json.RawMessage `json:"definitions,omitempty"`
-	Filter      json.RawMessage `json:"filter,omitempty"`
-	Skip        int             `json:"skip,omitempty"`
-	Limit       int             `json:"limit,omitempty"`
-	Operations  []Operation     `json:"operations,omitempty"`
+	Op             string          `json:"op"`
+	Collection     string          `json:"collection,omitempty"`
+	Name           string          `json:"name,omitempty"`
+	Field          string          `json:"field,omitempty"`
+	Source         string          `json:"source,omitempty"`
+	Transaction    string          `json:"transaction,omitempty"`
+	Key            []byte          `json:"key,omitempty"`
+	Value          []byte          `json:"value,omitempty"`
+	Fields         []db.IndexField `json:"fields,omitempty"`
+	NullsDistinct  bool            `json:"nulls_distinct,omitempty"`
+	Sparse         bool            `json:"sparse,omitempty"`
+	Sort           []db.IndexField `json:"sort,omitempty"`
+	Hint           string          `json:"hint,omitempty"`
+	KeyDescending  bool            `json:"key_descending,omitempty"`
+	MaxMemoryBytes int64           `json:"max_memory_bytes,omitempty"`
+	Unique         bool            `json:"unique,omitempty"`
+	Pipeline       json.RawMessage `json:"pipeline,omitempty"`
+	Definitions    json.RawMessage `json:"definitions,omitempty"`
+	Filter         json.RawMessage `json:"filter,omitempty"`
+	Skip           int             `json:"skip,omitempty"`
+	Limit          int             `json:"limit,omitempty"`
+	Operations     []Operation     `json:"operations,omitempty"`
 }
 type Response struct {
+	Plan        *db.QueryPlan    `json:"plan,omitempty"`
+	QueryStats  *db.QueryStats   `json:"query_stats,omitempty"`
 	Error       *Error           `json:"error,omitempty"`
 	Found       bool             `json:"found,omitempty"`
 	Value       []byte           `json:"value,omitempty"`
@@ -63,7 +72,7 @@ type Error struct {
 func (e *Error) Error() string { return e.Message }
 
 var codes = map[string]error{
-	"key_exists": db.ErrKeyExists, "not_found": db.ErrNotFound, "duplicate_key": db.ErrDuplicateKey, "unique_value": db.ErrUniqueValue, "conflict": db.ErrConflict, "closed": db.ErrClosed,
+	"key_exists": db.ErrKeyExists, "not_found": db.ErrNotFound, "duplicate_key": db.ErrDuplicateKey, "unique_value": db.ErrUniqueValue, "index_value": db.ErrIndexValue, "index_order": db.ErrIndexOrder, "conflict": db.ErrConflict, "closed": db.ErrClosed,
 	"collection_missing": db.ErrNoSuchCollection, "index_missing": db.ErrNoSuchIndex, "index_exists": db.ErrIndexExists, "read_only": db.ErrReadOnly,
 	"computed_read_only": db.ErrComputedCollectionReadOnly, "computed_dependency": db.ErrComputedCollectionDependency, "computed_limit": db.ErrComputedCollectionLimit,
 	"computed_exists": db.ErrComputedCollectionExists, "document": db.ErrDocument, "collection_name": db.ErrCollectionName,

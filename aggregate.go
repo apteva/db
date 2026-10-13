@@ -50,12 +50,13 @@ func splitPaths(need []string) []fieldPath {
 
 // Limits bound the memory an aggregation may use.
 type Limits struct {
-	MaxGroups int // distinct $group keys
-	MaxRows   int // materialised rows at any stage
+	MaxGroups int   // distinct $group keys
+	MaxRows   int   // materialised rows at any stage
+	MaxBytes  int64 // retained working memory; zero selects 64 MiB
 }
 
 // DefaultLimits apply to every parsed pipeline until SetLimits is called.
-var DefaultLimits = Limits{MaxGroups: 1 << 20, MaxRows: 1 << 20}
+var DefaultLimits = Limits{MaxGroups: 1 << 20, MaxRows: 1 << 20, MaxBytes: DefaultQueryMemoryBytes}
 
 var (
 	ErrPipeline = errors.New("aptevadb: bad pipeline")
@@ -82,7 +83,15 @@ type Pipeline struct {
 }
 
 // SetLimits overrides the memory limits for this pipeline.
-func (p *Pipeline) SetLimits(l Limits) { p.limits = l }
+func (p *Pipeline) SetLimits(l Limits) {
+	if l.MaxRows == 0 {
+		l.MaxRows = DefaultLimits.MaxRows
+	}
+	if l.MaxGroups == 0 {
+		l.MaxGroups = DefaultLimits.MaxGroups
+	}
+	p.limits = l
+}
 
 type stageKind uint8
 
@@ -108,13 +117,17 @@ const (
 	opLt
 	opLte
 	opIn
+	opPrefix
+	opAnd
+	opOr
 )
 
 type pred struct {
-	field string
-	op    predOp
-	v     value
-	in    []value
+	field    string
+	op       predOp
+	v        value
+	in       []value
+	children [][]pred
 }
 
 type accOp uint8
@@ -349,9 +362,46 @@ func parseStage(op string, body json.RawMessage) (stage, error) {
 	return stage{}, fmt.Errorf("unsupported stage %s", op)
 }
 
-func parseMatch(m map[string]any) ([]pred, error) {
+func parseMatch(m map[string]any) ([]pred, error) { nodes := 0; return parseMatchDepth(m, 0, &nodes) }
+func parseMatchDepth(m map[string]any, depth int, nodes *int) ([]pred, error) {
+	if depth > 32 {
+		return nil, errors.New("filter nesting limit")
+	}
+	*nodes += len(m)
+	if *nodes > 1024 {
+		return nil, errors.New("filter node limit")
+	}
 	var preds []pred
 	for field, cond := range m {
+		if field == "$and" || field == "$or" {
+			terms, ok := cond.([]any)
+			if !ok || len(terms) == 0 {
+				return nil, errors.New("logical operator needs a nonempty array")
+			}
+			pr := pred{op: opAnd}
+			if field == "$or" {
+				pr.op = opOr
+			}
+			for _, term := range terms {
+				object, ok := term.(map[string]any)
+				if !ok {
+					return nil, errors.New("logical terms must be objects")
+				}
+				children, err := parseMatchDepth(object, depth+1, nodes)
+				if err != nil {
+					return nil, err
+				}
+				pr.children = append(pr.children, children)
+			}
+			preds = append(preds, pr)
+			continue
+		}
+		if strings.HasPrefix(field, "$") || field == "" {
+			return nil, errors.New("invalid filter field")
+		}
+		if err := validateFilterNumbers(cond); err != nil {
+			return nil, err
+		}
 		ops, isOps := cond.(map[string]any)
 		if !isOps {
 			preds = append(preds, pred{field: field, op: opEq, v: valueOf(cond)})
@@ -372,6 +422,11 @@ func parseMatch(m map[string]any) ([]pred, error) {
 				op = opLt
 			case "$lte":
 				op = opLte
+			case "$prefix":
+				if _, ok := operand.(string); !ok {
+					return nil, errors.New("$prefix needs a literal string")
+				}
+				op = opPrefix
 			case "$in":
 				list, ok := operand.([]any)
 				if !ok {
@@ -495,23 +550,7 @@ func (p *pred) eval(v value) bool {
 
 func (p *pred) evalScalar(v value) bool {
 	if p.op >= opGt && p.op <= opLte && v.isNum() && p.v.isNum() {
-		var c int
-		if v.k == kInt && p.v.k == kInt {
-			switch {
-			case v.i < p.v.i:
-				c = -1
-			case v.i > p.v.i:
-				c = 1
-			}
-		} else {
-			x, y := v.num(), p.v.num()
-			switch {
-			case x < y:
-				c = -1
-			case x > y:
-				c = 1
-			}
-		}
+		c := compareValues(v, p.v)
 		switch p.op {
 		case opGt:
 			return c > 0
@@ -523,6 +562,8 @@ func (p *pred) evalScalar(v value) bool {
 		return c <= 0
 	}
 	switch p.op {
+	case opPrefix:
+		return v.k == kString && bytes.HasPrefix(v.s, p.v.s)
 	case opEq:
 		return compareValues(v, p.v) == 0
 	case opNe:
@@ -552,7 +593,7 @@ func (p *pred) evalScalar(v value) bool {
 
 func matchAll(preds []pred, get func(string) value) bool {
 	for i := range preds {
-		if !preds[i].eval(get(preds[i].field)) {
+		if !preds[i].matches(get) {
 			return false
 		}
 	}
@@ -598,15 +639,19 @@ type grouper struct {
 	ids    []scalar
 	accs   []accState
 	used   int
+	budget *memoryBudget
 }
 
 // Groups own query-local slabs: addresses remain stable through shard merges,
 // while large cardinalities do not allocate three objects for every group.
-func (g *grouper) allocGroup() *groupState {
+func (g *grouper) allocGroup() (*groupState, error) {
 	if g.used == len(g.states) {
 		n := 256
 		if g.states == nil {
 			n = 8
+		}
+		if err := g.budget.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
+			return nil, err
 		}
 		g.states = make([]groupState, n)
 		g.ids = make([]scalar, n*len(g.spec.idFields))
@@ -619,7 +664,7 @@ func (g *grouper) allocGroup() *groupState {
 	ni, na := len(g.spec.idFields), len(g.spec.accs)
 	gs.id = g.ids[i*ni : (i+1)*ni : (i+1)*ni]
 	gs.accs = g.accs[i*na : (i+1)*na : (i+1)*na]
-	return gs
+	return gs, nil
 }
 
 func newGrouper(spec *groupSpec, maxGroups int) *grouper {
@@ -656,6 +701,9 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 	var gs *groupState
 	if len(idIdx) == 0 {
 		if g.single == nil {
+			if err := g.budget.reserve(160 + int64(len(spec.accs))*80); err != nil {
+				return err
+			}
 			g.single = &groupState{accs: make([]accState, len(spec.accs))}
 			g.order = append(g.order, g.single)
 		}
@@ -691,18 +739,30 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 				continue
 			}
 			if !st.hasExt {
+				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+					return err
+				}
 				st.ext, st.hasExt = toScalar(v), true
 				continue
 			}
 			c := compareValues(v, st.ext.view())
 			if (a.op == accMin && c < 0) || (a.op == accMax && c > 0) {
+				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+					return err
+				}
 				st.ext = toScalar(v)
 			}
 		case accFirst:
 			if !st.hasExt {
+				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+					return err
+				}
 				st.ext, st.hasExt = toScalar(v), true
 			}
 		case accLast:
+			if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+				return err
+			}
 			st.ext, st.hasExt = toScalar(v), true
 		}
 	}
@@ -711,6 +771,24 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 
 // lookup finds or creates the group for the _id built from vals.
 func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
+	needed := 0
+	for _, ix := range idIdx {
+		v := vals[ix]
+		needed++
+		if v.k == kBool || v.isNum() {
+			needed += 8
+		} else if v.k == kString || v.k == kDoc || v.k == kArray {
+			needed += 4 + len(v.s)
+		}
+	}
+	if needed > cap(g.keyBuf) {
+		capacity := max(needed, 2*cap(g.keyBuf))
+		capacity = (capacity + 15) &^ 15
+		if err := g.budget.reserve(int64(capacity - cap(g.keyBuf))); err != nil {
+			return nil, err
+		}
+		g.keyBuf = make([]byte, 0, capacity)
+	}
 	kb := g.keyBuf[:0]
 	for _, ix := range idIdx {
 		v := vals[ix]
@@ -721,7 +799,7 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 		case kFloat:
 			kb = le.AppendUint64(kb, math.Float64bits(v.f))
 		case kString, kDoc, kArray:
-			kb = le.AppendUint16(kb, uint16(len(v.s)))
+			kb = le.AppendUint32(kb, uint32(len(v.s)))
 			kb = append(kb, v.s...)
 		}
 	}
@@ -731,7 +809,14 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 		if len(g.groups) >= g.max {
 			return nil, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
 		}
-		gs = g.allocGroup()
+		if err := g.budget.reserve(int64(len(kb)) + 160); err != nil {
+			return nil, err
+		}
+		var err error
+		gs, err = g.allocGroup()
+		if err != nil {
+			return nil, err
+		}
 		gs.key = string(kb)
 		off := 0
 		for i, ix := range idIdx {
@@ -741,8 +826,8 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 			case kBool, kInt, kFloat:
 				off += 9
 			case kString, kDoc, kArray:
-				s.s = gs.key[off+3 : off+3+len(v.s)]
-				off += 3 + len(v.s)
+				s.s = gs.key[off+5 : off+5+len(v.s)]
+				off += 5 + len(v.s)
 			default:
 				off++
 			}
@@ -947,6 +1032,7 @@ func (p *Pipeline) plan() plan {
 	local := func(f string) ref { return ref{0, index(&pl.need, f)} }
 	predRefs := make([]ref, len(pl.preds))
 	for j := range pl.preds {
+		predicateFields(pl.preds[j], func(f string) { local(f) })
 		predRefs[j] = local(pl.preds[j].field)
 	}
 	// a $lookup unwound on its own field joins in the stream
@@ -971,6 +1057,9 @@ func (p *Pipeline) plan() plan {
 	var postRefs []ref
 	if jp != nil {
 		for ; i < len(p.stages) && p.stages[i].kind == stMatch; i++ {
+			if hasLogical(p.stages[i].preds) {
+				break
+			}
 			for _, pr := range p.stages[i].preds {
 				jp.post = append(jp.post, pr)
 				postRefs = append(postRefs, resolve(pr.field))
@@ -1075,14 +1164,14 @@ func extractFields(doc []byte, need []fieldPath, vals []value, hints []int) {
 		var v value
 		found := false
 		if h := hints[j]; h < n {
-			name, hv, ok := decodeEntry(doc, int(le.Uint16(dir[2*h:])))
+			name, hv, ok := decodeEntry(doc, docOffset(dir, n, h))
 			if ok && len(name) == len(want) && string(name) == want {
 				v, found = hv, true
 			}
 		}
 		if !found {
 			for i := 0; i < n; i++ {
-				off := int(le.Uint16(dir[2*i:]))
+				off := docOffset(dir, n, i)
 				if off >= len(doc) {
 					break
 				}
@@ -1112,7 +1201,21 @@ func (pl *plan) shards() bool { return pl.group != nil && pl.skip == 0 && pl.lim
 
 func (pl *plan) matches(vals []value) bool {
 	for j := range pl.preds {
-		if !pl.preds[j].eval(vals[pl.predIdx[j]]) {
+		pr := &pl.preds[j]
+		matched := false
+		if pr.op == opAnd || pr.op == opOr {
+			matched = pr.matches(func(field string) value {
+				for i, name := range pl.need {
+					if name == field {
+						return vals[i]
+					}
+				}
+				return value{}
+			})
+		} else {
+			matched = pr.eval(vals[pl.predIdx[j]])
+		}
+		if !matched {
 			return false
 		}
 	}
@@ -1151,7 +1254,7 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 		if lk, err = e.lookup(pl.join.spec, pl.join.fneed, keepDoc, pl.limit, pl.limits); err != nil {
 			return err
 		}
-		if err = lk.prepare(pl.preScan(ctx, spec.source())); err != nil {
+		if err = lk.prepare(pl.preScan(ctx, spec.source(), e.budget)); err != nil {
 			return err
 		}
 	}
@@ -1269,6 +1372,7 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 // streamGroup runs the streaming prefix plus $group over one source.
 func (pl *plan) streamGroup(ctx context.Context, spec srcSpec, e *env, pre *lookupExec) (*grouper, error) {
 	g := newGrouper(pl.group, pl.limits.MaxGroups)
+	g.budget = e.budget
 	err := pl.stream(ctx, spec, e, false, pre, func(r *rec) error { return g.addVals(r.vals, pl.idIdx, pl.accIdx) })
 	return g, err
 }
@@ -1279,6 +1383,15 @@ func (pl *plan) streamRows(ctx context.Context, spec srcSpec, e *env) ([]map[str
 	err := pl.stream(ctx, spec, e, true, nil, func(r *rec) error {
 		if len(rows) >= pl.limits.MaxRows {
 			return fmt.Errorf("%w: more than %d rows", ErrLimit, pl.limits.MaxRows)
+		}
+		n, _, _ := docDir(r.doc)
+		cost := int64(len(r.doc))*2 + int64(n)*96 + 128
+		if pl.join != nil && r.fdoc != nil {
+			fn, _, _ := docDir(r.fdoc)
+			cost += int64(len(r.fdoc))*2 + int64(fn)*96 + 128
+		}
+		if err := e.budget.reserve(cost); err != nil {
+			return err
 		}
 		m, err := DecodeDocument(r.doc)
 		if err != nil {
@@ -1315,7 +1428,12 @@ func (p *Pipeline) finish(ctx context.Context, pl *plan, rows []map[string]any, 
 			return nil, err
 		}
 		if end, keep, skip, ok := p.sortWindow(i); ok {
+			scratchBytes := int64(min(keep, len(rows))+1) * (32 + int64(len(p.stages[i].sortKeys))*48)
+			if err := e.budget.reserve(scratchBytes); err != nil {
+				return nil, err
+			}
 			selected, valid, sortErr := topRows(ctx, rows, p.stages[i].sortKeys, keep, skip)
+			_ = e.budget.reserve(-scratchBytes)
 			if sortErr != nil {
 				return nil, sortErr
 			}
@@ -1353,6 +1471,13 @@ func orBackground(ctx context.Context) context.Context {
 func (p *Pipeline) run(ctx context.Context, spec srcSpec, e *env) ([]map[string]any, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if e.budget == nil {
+		var err error
+		e.budget, err = p.limits.budget()
+		if err != nil {
+			return nil, err
+		}
 	}
 	pl := p.plan()
 	if pl.group != nil {
@@ -1405,6 +1530,13 @@ func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	if e.budget == nil {
+		var err error
+		e.budget, err = p.limits.budget()
+		if err != nil {
+			return nil, err
+		}
+	}
 	if len(shards) == 0 {
 		return []map[string]any{}, nil
 	}
@@ -1424,7 +1556,7 @@ func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]
 			return nil, err
 		}
 		shared = lk
-		if err := lk.prepare(pl.preScan(ctx, concat(shards))); err != nil {
+		if err := lk.prepare(pl.preScan(ctx, concat(shards), e.budget)); err != nil {
 			return nil, err
 		}
 	}
@@ -1479,6 +1611,13 @@ func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]
 }
 
 func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[string]any, error) {
+	if e == nil {
+		budget, err := limits.budget()
+		if err != nil {
+			return nil, err
+		}
+		e = &env{ctx: context.Background(), budget: budget}
+	}
 	switch s.kind {
 	case stLookup:
 		lk, err := e.lookup(s.lookup, nil, true, len(rows), limits)
@@ -1501,8 +1640,16 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 		}
 		for _, r := range rows {
 			list := []any{}
+			var decodeErr error
 			err := lk.probe(rowField(r, s.lookup.localField), func(fr *frow) bool {
 				m, err := DecodeDocument(fr.doc)
+				if err == nil {
+					err = e.budget.reserve(valueMemory(m))
+				}
+				if err != nil {
+					decodeErr = err
+					return false
+				}
 				if err == nil {
 					list = append(list, m)
 				}
@@ -1510,6 +1657,9 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 			})
 			if err != nil {
 				return nil, err
+			}
+			if decodeErr != nil {
+				return nil, decodeErr
 			}
 			setRowField(r, s.lookup.as, list)
 		}
@@ -1524,13 +1674,20 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 		return out, nil
 	case stGroup:
 		g := newGrouper(s.group, limits.MaxGroups)
+		g.budget = e.budget
 		for _, r := range rows {
 			if err := g.add(func(f string) value { return rowField(r, f) }); err != nil {
 				return nil, err
 			}
 		}
+		if err := e.budget.reserve(int64(len(g.order)) * (160 + int64(len(g.spec.accs)+len(g.spec.idFields))*80)); err != nil {
+			return nil, err
+		}
 		return g.rows(), nil
 	case stSort:
+		if err := e.budget.reserve(int64(len(rows)) * (32 + int64(len(s.sortKeys))*48)); err != nil {
+			return nil, err
+		}
 		type keyed struct {
 			ks  []value
 			row map[string]any
@@ -1577,6 +1734,13 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 				inclusion = true
 			}
 		}
+		cost := int64(0)
+		for _, r := range rows {
+			cost += 128 + int64(len(r))*64
+		}
+		if err := e.budget.reserve(cost); err != nil {
+			return nil, err
+		}
 		out := make([]map[string]any, len(rows))
 		for i, r := range rows {
 			m := make(map[string]any, len(r))
@@ -1613,15 +1777,18 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 				if len(elems) == 0 && s.preserve {
 					out = append(out, r)
 				}
-				for _, e := range elems {
+				for _, element := range elems {
 					if len(out) >= limits.MaxRows {
 						return nil, fmt.Errorf("%w: more than %d rows", ErrLimit, limits.MaxRows)
+					}
+					if err := e.budget.reserve(128 + int64(len(r))*64); err != nil {
+						return nil, err
 					}
 					c := make(map[string]any, len(r))
 					for k, x := range r {
 						c[k] = x
 					}
-					setRowField(c, s.unwind, e)
+					setRowField(c, s.unwind, element)
 					out = append(out, c)
 				}
 			case v.k == kMissing || v.k == kNull:
@@ -1650,4 +1817,73 @@ func (db *DB) Aggregate(ctx context.Context, pipeline []byte) ([]map[string]any,
 // to shards key ranges at once.
 func (db *DB) AggregateParallel(ctx context.Context, pipeline []byte, shards int) ([]map[string]any, error) {
 	return db.def.AggregateParallel(ctx, pipeline, shards)
+}
+
+func (p *pred) matches(get func(string) value) bool {
+	if p.op == opAnd || p.op == opOr {
+		for _, children := range p.children {
+			matched := matchAll(children, get)
+			if p.op == opAnd && !matched {
+				return false
+			}
+			if p.op == opOr && matched {
+				return true
+			}
+		}
+		return p.op == opAnd
+	}
+	return p.eval(get(p.field))
+}
+func predicateFields(p pred, fn func(string)) {
+	if p.op == opAnd || p.op == opOr {
+		for _, children := range p.children {
+			for _, child := range children {
+				predicateFields(child, fn)
+			}
+		}
+	} else {
+		fn(p.field)
+	}
+}
+func hasLogical(preds []pred) bool {
+	for _, p := range preds {
+		if p.op == opAnd || p.op == opOr {
+			return true
+		}
+	}
+	return false
+}
+func flattenConjunction(preds []pred) []pred {
+	var out []pred
+	for _, p := range preds {
+		if p.op == opAnd {
+			for _, children := range p.children {
+				out = append(out, flattenConjunction(children)...)
+			}
+		} else if p.op != opOr {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+func validateFilterNumbers(v any) error {
+	switch x := v.(type) {
+	case json.Number:
+		if _, err := computedLiteral(x); err != nil {
+			return fmt.Errorf("%w: invalid number", ErrPipeline)
+		}
+	case map[string]any:
+		for _, item := range x {
+			if err := validateFilterNumbers(item); err != nil {
+				return err
+			}
+		}
+	case []any:
+		for _, item := range x {
+			if err := validateFilterNumbers(item); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

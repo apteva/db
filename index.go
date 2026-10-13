@@ -39,11 +39,15 @@ var (
 )
 
 type indexDef struct {
-	ID     uint32 `json:"id"`
-	Field  string `json:"field"`
-	Unique bool   `json:"unique,omitempty"`
-	Name   string `json:"-"`
-	Coll   uint32 `json:"-"` // owning collection, from the catalog key
+	ID            uint32       `json:"id"`
+	Field         string       `json:"field"`
+	Unique        bool         `json:"unique,omitempty"`
+	Fields        []IndexField `json:"fields,omitempty"`
+	Encoding      uint8        `json:"encoding,omitempty"`
+	NullsDistinct bool         `json:"nulls_distinct,omitempty"`
+	Sparse        bool         `json:"sparse,omitempty"`
+	Name          string       `json:"-"`
+	Coll          uint32       `json:"-"` // owning collection, from the catalog key
 }
 
 func catalogKey(coll uint32, name string) []byte {
@@ -160,6 +164,18 @@ func indexedValues(doc []byte, field string, fn func(v value)) {
 func indexOps(defs []indexDef, b *Batch, key, oldDoc, newDoc []byte) error {
 	var err error
 	for _, d := range defs {
+		if d.Encoding == 2 {
+			for _, change := range []struct {
+				doc []byte
+				del bool
+			}{{oldDoc, true}, {newDoc, false}} {
+				err = indexEntries(change.doc, d, key, func(ek []byte, _ bool) error { return b.add(ek, nil, change.del) })
+				if err != nil {
+					return err
+				}
+			}
+			continue
+		}
 		if oldDoc != nil {
 			indexedValues(oldDoc, d.Field, func(v value) {
 				if err == nil {
@@ -215,7 +231,7 @@ func (db *DB) loadIndexes() error {
 	err := db.scan(view{db, nil}, lo, hi, func(k, v []byte) bool {
 		var d indexDef
 
-		if len(k) <= 6 || len(k) > MaxKeySize || json.Unmarshal(v, &d) != nil || d.ID == 0 || d.Field == "" || seenIDs[d.ID] || (d.Unique && db.readFormat != 0 && db.readFormat < 6) {
+		if len(k) <= 6 || len(k) > MaxKeySize || json.Unmarshal(v, &d) != nil || d.ID == 0 || !validIndexDef(d) || seenIDs[d.ID] || (d.Unique && db.readFormat != 0 && db.readFormat < 6) || (db.readFormat != 0 && db.readFormat < 7 && (d.Encoding != 0 || len(d.Fields) > 0 || d.NullsDistinct || d.Sparse)) {
 			invalid = ErrCorrupt
 			return false
 		}
@@ -335,8 +351,8 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 	if len(opts) > 1 {
 		return ErrPipeline
 	}
-	if len(opts) == 1 && opts[0].Unique {
-		return c.createUniqueIndex(ctx, name, field)
+	if len(opts) == 1 && (opts[0].Unique || opts[0].NullsDistinct || opts[0].Sparse) {
+		return c.createExactIndex(ctx, name, []IndexField{{Field: field}}, opts[0], false)
 	}
 	if c.snap != nil {
 		return ErrReadOnly
@@ -361,7 +377,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 			return ErrIndexExists
 		}
 	}
-	def := indexDef{ID: db.idx.nextID, Field: field, Name: name, Coll: c.id}
+	def := indexDef{ID: db.idx.nextID, Field: field, Name: name, Coll: c.id, Encoding: 2}
 	db.idx.nextID++
 	db.idx.defs = withDef(db.idx.defs, def)
 	if db.idx.building == nil {
@@ -406,10 +422,13 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 	pfx := indexPrefix(def.ID)
 	var cerr error
 	add := func(k []byte, v value) {
+		if checkUniqueValue(v) != nil {
+			cerr = ErrIndexValue
+			return
+		}
 		off := len(arena)
-		arena = encodeIndexValue(append(arena, pfx...), v)
-		arena = append(arena, k...)
-		arena = binary.BigEndian.AppendUint16(arena, uint16(len(k)))
+		arena = encodeExactIndexValue(append(arena, pfx...), v)
+		arena = appendExactPrimaryKey(arena, k)
 		if len(arena)-off > MaxKeySize {
 			cerr = ErrKeySize
 			arena = arena[:off]
@@ -435,17 +454,31 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 		v := vals[0]
 		switch {
 		case v.k == kArray:
+			count, _, _ := arrayHeader(v.s)
+			var distinct map[string]bool
+			if count > 16 {
+				distinct = map[string]bool{}
+			}
 			var seen []value
 			walkArray(v.s, func(e value) bool {
 				if !indexable(e) {
 					return true
+				}
+				if distinct != nil {
+					key := string(encodeExactIndexValue(nil, e))
+					if distinct[key] {
+						return true
+					}
+					distinct[key] = true
 				}
 				for _, sv := range seen {
 					if compareValues(sv, e) == 0 && sv.k == e.k {
 						return true
 					}
 				}
-				seen = append(seen, e)
+				if distinct == nil {
+					seen = append(seen, e)
+				}
 				add(k, e)
 				return true
 			})
@@ -486,7 +519,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 		var last []byte
 		for _, r := range refs[start:min(len(refs), start+chunk)] {
 			ek := r.key(arena)
-			if _, skip := touched[string(primaryKeyOf(ek))]; skip {
+			if _, skip := touched[string(primaryKeyOfDef(def, ek))]; skip {
 				continue
 			}
 			if bytes.Equal(ek, last) {
@@ -557,9 +590,9 @@ type indexRange struct{ lo, hi []byte }
 func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 	pfx := indexPrefix(def.ID)
 	eq := func(v value) indexRange {
-		lo := encodeIndexValue(pfx, v)
+		lo := indexScalarPrefix(def, pfx, v)
 		hi := prefixEnd(lo)
-		if v.isNum() && v.num() == 0 {
+		if def.Encoding != 2 && v.isNum() && v.num() == 0 {
 			lo = legacyZeroPrefix(def.ID)
 		}
 		return indexRange{lo, hi}
@@ -567,7 +600,23 @@ func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 	tagEnd := func(v value) []byte { return prefixEnd(append(append([]byte(nil), pfx...), indexTag(v))) }
 	tagStart := func(v value) []byte { return append(append([]byte(nil), pfx...), indexTag(v)) }
 	switch p.op {
+	case opPrefix:
+		if p.v.k != kString {
+			return nil, false
+		}
+		lo := append(append([]byte(nil), pfx...), indexTag(p.v))
+		for _, b := range p.v.s {
+			if b == 0 {
+				lo = append(lo, 0, 0xff)
+			} else {
+				lo = append(lo, b)
+			}
+		}
+		return []indexRange{{lo, prefixEnd(lo)}}, true
 	case opEq:
+		if len(def.Fields) == 0 && p.v.k == kNull {
+			return nil, false
+		}
 		if !indexable(p.v) {
 			return nil, false
 		}
@@ -575,6 +624,9 @@ func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 	case opIn:
 		var rs []indexRange
 		for _, v := range p.in {
+			if len(def.Fields) == 0 && v.k == kNull {
+				return nil, false
+			}
 			if !indexable(v) {
 				return nil, false
 			}
@@ -589,14 +641,14 @@ func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 		v := eq(p.v)
 		switch p.op {
 		case opGt:
-			if p.v.isNum() {
+			if def.Encoding != 2 && p.v.isNum() {
 				return []indexRange{{v.lo, tagEnd(p.v)}}, true
 			}
 			return []indexRange{{v.hi, tagEnd(p.v)}}, true
 		case opGte:
 			return []indexRange{{v.lo, tagEnd(p.v)}}, true
 		case opLt:
-			if p.v.isNum() {
+			if def.Encoding != 2 && p.v.isNum() {
 				return []indexRange{{tagStart(p.v), v.hi}}, true
 			}
 			return []indexRange{{tagStart(p.v), v.lo}}, true
@@ -628,8 +680,10 @@ func (c *Collection) indexedSource(preds []pred) (src Source, count int, ok bool
 // name, each once, in entry order, collected during the counting pass so
 // the entries are read only once.
 type indexPlan struct {
-	pks   [][]byte
-	count int
+	pks    [][]byte
+	count  int
+	name   string
+	memory int64
 }
 
 // indexPlan picks one indexable predicate of a leading $match. Equality and
@@ -639,6 +693,10 @@ type indexPlan struct {
 // them past that. The executor still checks every predicate on each
 // document.
 func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
+	return c.indexPlanBudget(preds, DefaultQueryMemoryBytes)
+}
+func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, bool) {
+	preds = flattenConjunction(preds)
 	if len(preds) == 0 {
 		return indexPlan{}, false
 	}
@@ -659,7 +717,7 @@ func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 	var pkbuf []byte
 	for _, p := range preds {
 		for _, d := range defs {
-			if d.Field != p.field {
+			if len(d.Fields) > 1 || (len(d.Fields) == 1 && d.Fields[0].Desc) || d.Field != p.field {
 				continue
 			}
 			rs, ok := indexRangesFor(d, p)
@@ -679,7 +737,7 @@ func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 			over := false
 			for _, r := range rs {
 				err := c.rawScan(r.lo, r.hi, func(k, _ []byte) bool {
-					pk := primaryKeyOf(k)
+					pk := primaryKeyOfDef(d, k)
 					if pk == nil {
 						return true
 					}
@@ -689,7 +747,7 @@ func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 						}
 						seen[string(pk)] = struct{}{}
 					}
-					if len(offs)/2 >= limit {
+					if int64(len(pkbuf))+int64(len(offs))*8+int64(len(seen))*64+int64(len(pk))*2 > budget/2 || len(offs)/2 >= limit {
 						over = true
 						return false
 					}
@@ -712,7 +770,7 @@ func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 			for i := 0; i < len(offs); i += 2 {
 				pks = append(pks, flat[offs[i]:offs[i+1]:offs[i+1]])
 			}
-			best, found = indexPlan{pks: pks, count: len(pks)}, true
+			best, found = indexPlan{pks: pks, count: len(pks), name: d.Name, memory: int64(len(flat) + len(pks)*24)}, true
 		}
 	}
 	if !found {
@@ -796,6 +854,12 @@ func (db *DB) VerifyIndexes(ctx context.Context) error {
 		ok := c != nil
 		if !ok {
 			return fmt.Errorf("aptevadb: index %s belongs to unknown collection %d", d.Name, d.Coll)
+		}
+		if d.Encoding == 2 {
+			if err := verifyExactIndex(ctx, c, d); err != nil {
+				return err
+			}
+			continue
 		}
 		pfx := indexPrefix(d.ID)
 		entries := map[string]int{}

@@ -1,6 +1,6 @@
 # On-disk format
 
-Format version **6**, as `aptevadb.FormatVersion`. This document is the
+Format version **7**, as `aptevadb.FormatVersion`. This document is the
 contract for what a build writes and reads; the policy for changing it is at
 the end.
 
@@ -101,7 +101,7 @@ Every key in the tree carries a one-byte tag.
 | 0x02 to 0xFE | collection id 1 to 253: `0x01 + id` then the user key |
 | 0xFF | collection id 254 to 65535: `0xFF`, id u16 big-endian, then the user key |
 
-User keys are 1 to `MaxKeySize` (1024) bytes and may contain any byte.
+User keys are 1 to `MaxKeySize` (4032) bytes and may contain any byte.
 Values may be up to `MaxValueSize` (1 GiB).
 
 Reserved keys:
@@ -115,13 +115,23 @@ Reserved keys:
 | `0x00 'c' coll u32 BE name` | index catalog: JSON `{"id":n,"field":"path"}` |
 | `0x00 'i' index u32 BE, value encoding, primary key, pklen u16 BE` | index entry, empty value |
 
-The index value encoding orders like the executor's comparisons: a tag byte
+Legacy index definitions without an `encoding` property retain their original
+value and primary-key encoding. That legacy value encoding orders like the executor's comparisons: a tag byte
 that is the type's rank (null or missing 0, bool 1, number 2, string 3),
 then for bool one byte, for numbers the float64 bits big-endian with the
 sign bit flipped for positives and all bits inverted for negatives, and for
 strings the bytes with 0x00 escaped as `0x00 0xFF` and terminated by `0x00
-0x00`. Integers are indexed as float64: values beyond 2^53 may share an
-entry, and the executor re-checks the document.
+0x00`. Legacy integers use float64 buckets: values beyond 2^53 may share an entry;
+exact original-value checks prevent false matches. New indexes use `encoding:2`.
+Numeric values use a rank byte plus a sign category, normalized exponent u16BE
+and uint64BE significand; negatives invert exponent/significand. This represents
+all int64 bits and finite float64 values in one exact numeric order, canonicalizes
+signed zero, and gives numerically equal integer/float values the same key.
+Compound components concatenate their encodings; descending components invert
+every byte. The primary-key suffix escapes zero as `00 FF`, terminates with
+`00 00`, and ends in its encoded byte length u16BE. Index catalogs also preserve
+`fields:[{field,desc}]`, `nulls_distinct` and `sparse`. Existing legacy indexes are
+not silently rebuilt; ordered cursors require encoding 2.
 
 ## Documents
 
@@ -135,7 +145,15 @@ Types and payloads: 1 null (none), 2 bool (1 byte), 3 int (int64), 4 float
 (float64 bits), 5 string (length u16, bytes), 6 document (length u16, an
 encoded document), 7 array (length u16, an encoded array). An array is an
 element count u16 followed by `type u8, payload` per element. Nesting is
-limited to 16 levels. Values that do not decode as documents are ordinary
+limited to 16 levels. Format 7 keeps that encoding for small values/documents.
+An extended document has uint32LE offsets and a nine-byte footer:
+field count uint32LE, magic uint32LE `0x31445741`, zero marker. Tags 8/9/10
+encode strings/documents/arrays with uint32LE lengths. Large arrays use a zero
+uint16 count, magic uint32LE `0x31415741`, then count uint32LE and elements.
+Limits are 16 MiB encoded bytes, 4,096 fields and 1,048,576 array elements.
+A legacy root document larger than 65,535 bytes is readable only if sequential
+payload validation reconstructs every wrapped uint16 offset exactly. No payload
+lengths are inferred. Values that do not decode as documents are ordinary
 byte strings: they are stored, returned and iterated as such, and pipelines
 skip them.
 
@@ -160,10 +178,10 @@ checkpoint is dropped at close and after compaction.
 
 ## Compatibility policy
 
-- `Open` reads formats 3, 4, 5 and 6. Older supported formats are upgraded with
+- `Open` reads formats 3 through 7. Older supported formats are upgraded with
   two synchronous full checkpoints, replacing both alternating meta slots
-  before `Open` returns. Format 6 is durable before unique constraints
-  or new definitions can enter the WAL. Older binaries refuse it,
+  before `Open` returns. Format 7 is durable before extended documents or new index encodings
+  can enter the WAL. Older binaries refuse it,
   including after a crash or a damaged newest meta page. This is a one-way
   upgrade; retain a backup for older binaries. Other versions are refused with
   `ErrFormat`. `FormatVersionOf` and `aptevadbctl format <dir>` report a file's
@@ -205,3 +223,8 @@ checkpoint is dropped at close and after compaction.
 - What is not part of the contract: `Stats` fields, lock-hold names, the
   exact page fill or page numbering a given load produces, and the
   in-memory structures.
+
+- Format 7 adds extended document encodings, exact numeric/compound index
+  encodings, nullable constraints and larger safe keys. No page or WAL record
+  layouts change. Older writers refuse format 7. Export version 2 preserves the
+  new catalogs; import version 1 remains supported.

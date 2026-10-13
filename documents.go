@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"sort"
 	"sync"
 )
@@ -22,17 +23,34 @@ func Encode(document any) ([]byte, error) {
 	return EncodeJSON(nil, raw)
 }
 
-// Decode decodes a binary document into a struct/map using encoding/json rules.
+// Decode decodes a binary document. Maps preserve int64/float64 values;
+// typed fields use encoding/json rules, with json.Number in interface fields.
 func Decode(document []byte, out any) error {
 	m, err := DecodeDocument(document)
 	if err != nil {
 		return err
 	}
+	switch destination := out.(type) {
+	case *map[string]any:
+		if destination == nil {
+			return ErrDocument
+		}
+		*destination = m
+		return nil
+	case *any:
+		if destination == nil {
+			return ErrDocument
+		}
+		*destination = m
+		return nil
+	}
 	raw, err := json.Marshal(m)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(raw, out)
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	return decoder.Decode(out)
 }
 func (c *Collection) InsertDocument(key []byte, document any) error {
 	v, err := Encode(document)
@@ -92,7 +110,14 @@ func (c *TxCollection) FindDocument(key []byte, out any) (bool, error) {
 }
 
 // QueryOptions controls a key-ordered streaming query. Zero Limit is unlimited.
-type QueryOptions struct{ Skip, Limit int }
+type QueryOptions struct {
+	Skip, Limit    int
+	Sort           []IndexField
+	Hint           string
+	KeyDescending  bool
+	MaxMemoryBytes int64
+	Stats          *QueryStats
+}
 
 // Query streams documents matching a JSON filter (the $match syntax) in key
 // order. It uses an applicable index and one snapshot for the whole operation.
@@ -103,8 +128,8 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts QueryOptions
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if opts.Skip < 0 || opts.Limit < 0 {
-		return fmt.Errorf("%w: negative query window", ErrPipeline)
+	if err := validateQueryOptions(opts); err != nil {
+		return err
 	}
 	if c.snap == nil {
 		s, cc, err := c.readView()
@@ -114,19 +139,28 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts QueryOptions
 		defer s.Close()
 		return cc.Query(ctx, filter, opts, yield)
 	}
-	var match map[string]any
-	if len(filter) == 0 {
-		filter = []byte(`{}`)
-	}
-	if err := json.Unmarshal(filter, &match); err != nil || match == nil {
-		return fmt.Errorf("%w: filter must be an object", ErrPipeline)
-	}
-	preds, err := parseMatch(match)
+	preds, err := queryPredicates(filter)
 	if err != nil {
 		return err
 	}
+	access, err := c.chooseQueryAccess(preds, opts)
+	if err != nil {
+		return err
+	}
+	if len(opts.Sort) > 0 || opts.Hint != "" || opts.KeyDescending || access.info.Index != "" {
+		return c.queryAdvanced(ctx, preds, opts, access, yield)
+	}
+	stats := opts.Stats
+	if stats == nil {
+		stats = &QueryStats{}
+	}
+	*stats = QueryStats{Plan: access.info}
 	var src Source = c.Source(nil, nil)
-	if ip, ok := c.indexPlan(preds); ok {
+	budget, _ := queryBudget(opts)
+	if ip, ok := c.indexPlanBudget(preds, budget); ok {
+		stats.Plan.Access = "index-filter"
+		stats.Plan.Index = ip.name
+		stats.PeakMemoryBytes = ip.memory
 		sort.Slice(ip.pks, func(i, j int) bool { return bytes.Compare(ip.pks[i], ip.pks[j]) < 0 })
 		src = c.rangesSource(ctx, ip)
 	}
@@ -136,19 +170,19 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts QueryOptions
 		if cancelled = ctx.Err(); cancelled != nil {
 			return false
 		}
+		stats.Examined++
 		if _, _, ok := docDir(doc); !ok {
 			return true
 		}
-		for _, p := range preds {
-			if !p.eval(pathValue(value{k: kDoc, s: doc}, p.field)) {
-				return true
-			}
+		if !matchAll(preds, func(field string) value { return pathValue(value{k: kDoc, s: doc}, field) }) {
+			return true
 		}
 		if skipped < opts.Skip {
 			skipped++
 			return true
 		}
 		emitted++
+		stats.Returned++
 		return yield(key, doc) && (opts.Limit == 0 || emitted < opts.Limit)
 	})
 	if err != nil {
@@ -219,4 +253,25 @@ func (c *Collection) writeJSON(key, doc []byte, req writeRequirement) error {
 		return c.Upsert(key, enc)
 	}
 	return c.conditionalWrite(key, enc, req)
+}
+
+func queryPredicates(filter []byte) ([]pred, error) {
+	if len(filter) == 0 {
+		filter = []byte(`{}`)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(filter))
+	decoder.UseNumber()
+	var match map[string]any
+	if err := decoder.Decode(&match); err != nil || match == nil {
+		return nil, fmt.Errorf("%w: filter must be an object", ErrPipeline)
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return nil, ErrPipeline
+	}
+	preds, err := parseMatch(match)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrPipeline, err)
+	}
+	return preds, nil
 }
