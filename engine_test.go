@@ -873,7 +873,9 @@ func TestChecksumDetectsCorruption(t *testing.T) {
 	}
 	m := randKV(rand.New(rand.NewSource(71)), 20_000)
 	insertAll(t, db, m)
-	db.Checkpoint()
+	if err := db.Checkpoint(); err != nil {
+		t.Fatal(err)
+	}
 	if err := db.Verify(bg); err != nil {
 		t.Fatal(err)
 	}
@@ -891,15 +893,18 @@ func TestChecksumDetectsCorruption(t *testing.T) {
 	if err := db.Verify(bg); !errors.Is(err, ErrCorrupt) {
 		t.Fatalf("Verify did not detect the corrupt page: %v", err)
 	}
-	// pages are checksummed on their first read after open; simulate a reopen
-	// for this page by clearing its verified bit
+	// Pages are checksummed on their first load. Reset verification and
+	// explicitly evict the victim: random lookups do not guarantee that it
+	// leaves the clock cache, and resident pages intentionally skip rechecking.
 	db.mu.Lock()
+	db.pager.loadMu.Lock()
 	db.pager.verified[victim/64].Store(db.pager.verified[victim/64].Load() &^ (1 << (uint32(victim) % 64)))
-	db.mu.Unlock()
-	// once the page is evicted, reading it again must fail too
-	for k := range m {
-		db.Find([]byte(k), nil)
+	if db.pager.pages[victim].Swap(nil) != nil {
+		db.pager.resident.Add(-1)
 	}
+	db.pager.loadMu.Unlock()
+	db.mu.Unlock()
+	// Once the page is evicted, reading it again must fail too.
 	corrupt := false
 	err = db.Scan(nil, nil, func(k, v []byte) bool { return true })
 	corrupt = errors.Is(err, ErrCorrupt)
