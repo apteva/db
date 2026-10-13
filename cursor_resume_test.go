@@ -63,3 +63,47 @@ func TestIndexCursorResumeReusedPosition(t *testing.T) {
 		})
 	}
 }
+
+func TestCursorResumeAfterCollectionExhaustion(t *testing.T) {
+	d, err := Open(t.TempDir(), Options{MemtableBytes: -1})
+	mustCompat(t, err)
+	defer d.Close()
+	left := mustCollection(t, d, "left")
+	right := mustCollection(t, d, "right")
+	for _, c := range []*Collection{left, right} {
+		for i := 0; i < 50; i++ {
+			mustCompat(t, c.Upsert([]byte(fmt.Sprintf("%04d", i)), []byte("v")))
+		}
+	}
+	for _, c := range []*Collection{left, right} {
+		for _, forward := range []bool{true, false} {
+			cur := c.NewCursor()
+			ok := cur.First()
+			if !forward {
+				ok = cur.Last()
+			}
+			var position []byte
+			for ok {
+				position = append(position[:0], cur.ikey...)
+				if forward {
+					ok = cur.Next()
+				} else {
+					ok = cur.Prev()
+				}
+			}
+			mustCompat(t, cur.Err())
+			// Resume in the opposite direction at exactly the last valid key.
+			if !cur.move(position, !forward, false) {
+				t.Fatalf("%s forward=%v failed to resume", c.Name(), forward)
+			}
+			want := "0048"
+			if !forward {
+				want = "0001"
+			}
+			if string(cur.Key()) != want {
+				t.Fatalf("%s forward=%v resumed at %s, want %s", c.Name(), forward, cur.Key(), want)
+			}
+			cur.Close()
+		}
+	}
+}

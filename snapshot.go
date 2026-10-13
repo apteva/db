@@ -391,6 +391,7 @@ func (s *Snapshot) def() *Collection { return s.db.def.bound(s) }
 func (s *Snapshot) Find(key, dst []byte) ([]byte, bool, error) { return s.def().Find(key, dst) }
 
 // Scan iterates the default collection of the snapshot in key order.
+// Callback keys and values are read-only and valid only during fn.
 func (s *Snapshot) Scan(start, end []byte, fn func(key, val []byte) bool) error {
 	return s.def().Scan(start, end, fn)
 }

@@ -9,6 +9,7 @@ import (
 // key order at one snapshot; nil bounds are open. fn returns false to stop.
 // The snapshot is released before returning. Writers may run between leaves
 // and callbacks without changing the scan's view.
+// Callback keys and values are read-only and valid only during fn.
 func (db *DB) Scan(start, end []byte, fn func(key, val []byte) bool) error {
 	return db.def.Scan(start, end, fn)
 }
@@ -38,6 +39,9 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 			v = e.v
 		}
 		return fn(k, v)
+	}
+	if len(snap) == 0 {
+		emit = fn
 	}
 	drain := func() error {
 		for ; si < len(snap); si++ {
@@ -124,31 +128,37 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 		jEnd := nc
 		flat, cells = flat[:0], cells[:0]
 		for j := i; j < nc; j++ {
-			k := leaf.leafKey(j)
-			if end != nil && bytes.Compare(k, end) >= 0 {
-				jEnd = j // the range ends inside this leaf
+			// Inline keys and values are contiguous in the cell. Decode its
+			// header once and copy them together, avoiding repeated slot loads
+			// and two buffer growth checks for every row.
+			off, kl := leaf.slot(j), leaf.slotKlen(j)
+			if end != nil && bytes.Compare(leaf[off+leafCellHdr:off+leafCellHdr+kl], end) >= 0 {
+				jEnd = j
 				break
 			}
-			var val []byte
-			if leaf.leafIsOverflow(j) {
+			vl := int(le.Uint16(leaf[off+2:]))
+			ko := len(flat)
+			if vl == overflowMark {
 				full, err := v.leafValue(leaf, j, nil)
 				if err != nil {
 					db.mu.RUnlock()
 					return err
 				}
-				val = full
+				vl = len(full)
+				flat = append(flat, leaf[off+leafCellHdr:off+leafCellHdr+kl]...)
+				flat = append(flat, full...)
 			} else {
-				val = leaf.leafVal(j)
+				flat = append(flat, leaf[off+leafCellHdr:off+leafCellHdr+kl+vl]...)
 			}
-			cells = append(cells, cellRef{len(flat), len(k), len(flat) + len(k), len(val)})
-			flat = append(append(flat, k...), val...)
+			cells = append(cells, cellRef{ko, kl, vl})
 		}
 		// resume just past the last key of this leaf
 		curBuf = append(curBuf[:0], leaf.leafKey(nc-1)...)
 		curBuf = append(curBuf, 0)
 		db.mu.RUnlock()
 		for _, c := range cells {
-			if !emit(flat[c.ko:c.ko+c.kl], flat[c.vo:c.vo+c.vl]) {
+			vo := c.ko + c.kl
+			if !emit(flat[c.ko:vo], flat[vo:vo+c.vl]) {
 				return nil
 			}
 		}
@@ -161,7 +171,7 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 }
 
 // cellRef locates one copied cell in a scan's flat buffer.
-type cellRef struct{ ko, kl, vo, vl int }
+type cellRef struct{ ko, kl, vl int }
 
 // Source adapts a key range of the default collection to the aggregation
 // executor.

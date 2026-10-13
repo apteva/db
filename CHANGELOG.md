@@ -5,6 +5,18 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [Unreleased]
+
+- Speed up sequential cursors by reusing private value buffers and advancing
+  known cached slots without repeated key comparisons. Arbitrary saved-position
+  seeks retain cache validation; crossing a collection boundary clears the cache.
+- Copy inline scan keys and values together, use smaller cell references, and
+  bypass the memtable merge when empty. Preserve narrow-range bound checks,
+  snapshot consistency and reentrant callbacks.
+- Add mixed-size value isolation, exhausted-cursor resume regressions, and
+  correctness-checked scan/range/sustained-reader benchmarks. Clarify that raw
+  scan callback buffers are read-only and borrowed.
+
 ## [0.2.0-alpha.3] - 2026-10-13
 
 - Fix reused cursor `SeekAfter`/`SeekBefore` after traversal to unrelated saved

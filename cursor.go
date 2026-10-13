@@ -28,8 +28,7 @@ type Cursor struct {
 	leafID  uint32
 	leafIdx int
 	leafGen uint64
-	kbuf    []byte // key and value copied out of the cached leaf
-	vbuf    []byte
+	kbuf    []byte // key copied out of the cached leaf
 }
 
 // NewCursor returns a cursor over the default collection positioned
@@ -60,7 +59,7 @@ func (c *Cursor) Next() bool {
 	if !c.valid {
 		return false
 	}
-	return c.move(c.ikey, true, false)
+	return c.step(c.ikey, true, false)
 }
 
 // Prev moves to the preceding key.
@@ -68,12 +67,21 @@ func (c *Cursor) Prev() bool {
 	if !c.valid {
 		return false
 	}
-	return c.move(c.ikey, false, false)
+	return c.step(c.ikey, false, false)
 }
 
 // move finds the nearest key in direction fwd from `from` (inclusive when
 // incl), skipping tombstones.
 func (c *Cursor) move(from []byte, fwd, incl bool) bool {
+	// Only arbitrary seeks need to compare their position with the cached
+	// slot. Next and Prev already know they start at the current position.
+	if !incl && !bytes.Equal(from, c.ikey) {
+		c.leafID = 0
+	}
+	return c.step(from, fwd, incl)
+}
+
+func (c *Cursor) step(from []byte, fwd, incl bool) bool {
 	if c.closed || c.err != nil {
 		c.valid = false
 		return false
@@ -81,11 +89,6 @@ func (c *Cursor) move(from []byte, fwd, incl bool) bool {
 	if err := c.c.check(); err != nil {
 		c.err, c.valid = err, false
 		return false
-	}
-	// The cached slot describes the last movement, not an arbitrary resume
-	// position. Sequential steps retain it; an unrelated exclusive seek descends.
-	if !incl && !bytes.Equal(from, c.ikey) {
-		c.leafID = 0
 	}
 	for {
 		tk, tv, tok, err := c.treeStep(from, fwd, incl)
@@ -96,6 +99,7 @@ func (c *Cursor) move(from []byte, fwd, incl bool) bool {
 		mi := c.memNeighbour(from, fwd, incl)
 		var k, v []byte
 		var del bool
+		buffered := false
 		switch {
 		case !tok && mi < 0:
 			c.valid = false
@@ -104,10 +108,12 @@ func (c *Cursor) move(from []byte, fwd, incl bool) bool {
 			k, v = tk, tv
 		case !tok:
 			k, v, del = []byte(c.snap[mi].k), c.snap[mi].v, c.snap[mi].del
+			buffered = true
 		default:
 			cmp := bytes.Compare([]byte(c.snap[mi].k), tk)
 			if cmp == 0 || (fwd && cmp < 0) || (!fwd && cmp > 0) {
 				k, v, del = []byte(c.snap[mi].k), c.snap[mi].v, c.snap[mi].del
+				buffered = true
 			} else {
 				k, v = tk, tv
 			}
@@ -117,12 +123,19 @@ func (c *Cursor) move(from []byte, fwd, incl bool) bool {
 			continue
 		}
 		if !bytes.HasPrefix(k, c.c.pfx) {
+			c.leafID = 0    // the cached slot is outside the last returned position
 			c.valid = false // outside the collection: nothing further this way
 			return false
 		}
 		c.ikey = append(c.ikey[:0], k...)
 		c.key = append(c.key[:0], k[len(c.c.pfx):]...)
-		c.val = append(c.val[:0], v...)
+		if buffered {
+			// Buffered values belong to the snapshot and must remain private.
+			c.val = append(c.val[:0], v...)
+		} else {
+			// treeStep already copied the value out under the reader lock.
+			c.val = v
+		}
 		c.valid = true
 		return true
 	}
@@ -140,29 +153,39 @@ func (c *Cursor) treeStep(from []byte, fwd, incl bool) (k, v []byte, ok bool, er
 				nc := p.numCells()
 				i := c.leafIdx
 				if fwd {
-					for i < nc && bytes.Compare(p.leafKey(i), from) <= 0 {
+					if len(c.snap) == 0 {
+						// Without buffered entries the previous result is exactly
+						// this slot. Arbitrary seeks invalidate the cache in move.
 						i++
+					} else {
+						for i < nc && bytes.Compare(p.leafKey(i), from) <= 0 {
+							i++
+						}
 					}
 					if i >= 1 && i < nc {
-						c.vbuf, err = c.v.leafValue(p, i, c.vbuf[:0])
+						c.val, err = c.v.leafValue(p, i, c.val[:0])
 						c.kbuf = append(c.kbuf[:0], p.leafKey(i)...)
 						c.leafIdx = i
 						db.mu.RUnlock()
-						return c.kbuf, c.vbuf, err == nil, err
+						return c.kbuf, c.val, err == nil, err
 					}
 				} else {
 					if i >= nc {
 						i = nc - 1
 					}
-					for i >= 0 && bytes.Compare(p.leafKey(i), from) >= 0 {
+					if len(c.snap) == 0 {
 						i--
+					} else {
+						for i >= 0 && bytes.Compare(p.leafKey(i), from) >= 0 {
+							i--
+						}
 					}
 					if i >= 0 && i < nc-1 {
-						c.vbuf, err = c.v.leafValue(p, i, c.vbuf[:0])
+						c.val, err = c.v.leafValue(p, i, c.val[:0])
 						c.kbuf = append(c.kbuf[:0], p.leafKey(i)...)
 						c.leafIdx = i
 						db.mu.RUnlock()
-						return c.kbuf, c.vbuf, err == nil, err
+						return c.kbuf, c.val, err == nil, err
 					}
 				}
 			}
@@ -176,6 +199,11 @@ func (c *Cursor) treeStep(from []byte, fwd, incl bool) (k, v []byte, ok bool, er
 	var gen uint64
 	k, v, id, idx, gen, ok, err = db.treeNeighbour(c.v, from, fwd, incl)
 	if ok {
+		if v == nil {
+			// Empty boundary values must not discard the reusable private
+			// buffer and force another allocation on the next step.
+			v = c.val[:0]
+		}
 		c.leafID, c.leafIdx, c.leafGen = id, idx, gen
 	} else {
 		c.leafID = 0

@@ -10,7 +10,8 @@
 //
 // Close snapshots, transactions, cursors and Reader handles promptly. DB and
 // Collection are concurrency-safe; transactions, batches and cursors are owned
-// by one goroutine. Callback/cursor buffers are borrowed; copy retained bytes.
+// by one goroutine. Scan callback buffers are read-only. Callback/cursor buffers
+// are borrowed; copy retained bytes.
 // Format upgrades are one-way; back up before upgrading. Only Linux and macOS
 // are supported. See github.com/apteva/db/client for the remote Go driver.
 package db

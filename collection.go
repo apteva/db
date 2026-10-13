@@ -421,6 +421,7 @@ func (c *Collection) FindJSON(key []byte) ([]byte, bool, error) {
 
 // Scan calls fn for every key in [start, end) of the collection in key
 // order; nil bounds are open. fn returns false to stop.
+// Callback keys and values are read-only and valid only during fn.
 func (c *Collection) Scan(start, end []byte, fn func(key, val []byte) bool) error {
 	if c.snap == nil {
 		s, cc, err := c.readView()
