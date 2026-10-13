@@ -1,0 +1,106 @@
+[
+  {
+    "Engine": "ours",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 3369.9334,
+    "AllocatedBytesPerOp": 3824.6608
+  },
+  {
+    "Engine": "ours",
+    "Phase": "build-wide-index",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 12709.1208,
+    "AllocatedBytesPerOp": 41156.1896
+  },
+  {
+    "Engine": "ours",
+    "Phase": "ordered-100-row-page",
+    "Trial": 1,
+    "Ops": 100,
+    "NsPerOp": 271709.58,
+    "AllocatedBytesPerOp": 435273.92
+  },
+  {
+    "Engine": "ours",
+    "Phase": "reused-resume-100-row-page",
+    "Trial": 1,
+    "Ops": 100,
+    "NsPerOp": 244035.42,
+    "AllocatedBytesPerOp": 444135.04
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 6578.2125,
+    "AllocatedBytesPerOp": 19646.3152
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "build-wide-index",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 6265.6583,
+    "AllocatedBytesPerOp": 26517.2952
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "ordered-100-row-page",
+    "Trial": 1,
+    "Ops": 100,
+    "NsPerOp": 344431.25,
+    "AllocatedBytesPerOp": 162303.84
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 81919.8958,
+    "AllocatedBytesPerOp": 1600.088
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "build-wide-index",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 59418.175,
+    "AllocatedBytesPerOp": 0.0216
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "ordered-100-row-page",
+    "Trial": 1,
+    "Ops": 100,
+    "NsPerOp": 477451.67,
+    "AllocatedBytesPerOp": 155262.72
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 87677.0458,
+    "AllocatedBytesPerOp": 1536.9024
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "build-wide-index",
+    "Trial": 1,
+    "Ops": 10000,
+    "NsPerOp": 89121.425,
+    "AllocatedBytesPerOp": 0.9648
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "ordered-100-row-page",
+    "Trial": 1,
+    "Ops": 100,
+    "NsPerOp": 2742550.83,
+    "AllocatedBytesPerOp": 153630.88
+  }
+]

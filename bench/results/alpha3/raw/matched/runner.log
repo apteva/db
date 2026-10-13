@@ -1,0 +1,41 @@
+RUN native-million-alpha2-bench-r1
+DONE native-million-alpha2-bench-r1 7.51
+RUN native-million-alpha3-bench-r1
+DONE native-million-alpha3-bench-r1 6.78
+RUN native-million-alpha3-bench-r2
+DONE native-million-alpha3-bench-r2 8.02
+RUN native-million-alpha2-bench-r2
+DONE native-million-alpha2-bench-r2 6.59
+RUN native-million-alpha2-bench-r3
+DONE native-million-alpha2-bench-r3 7.48
+RUN native-million-alpha3-bench-r3
+DONE native-million-alpha3-bench-r3 6.38
+RUN native-million-alpha3-bench-r4
+DONE native-million-alpha3-bench-r4 6.35
+RUN native-million-alpha2-bench-r4
+DONE native-million-alpha2-bench-r4 6.37
+RUN native-million-alpha2-bench-r5
+DONE native-million-alpha2-bench-r5 7.01
+RUN native-million-alpha3-bench-r5
+DONE native-million-alpha3-bench-r5 6.24
+RUN native-million-alpha3-bench-r6
+DONE native-million-alpha3-bench-r6 7.66
+RUN native-million-alpha2-bench-r6
+DONE native-million-alpha2-bench-r6 6.7
+RUN native-million-alpha2-bench-r7
+DONE native-million-alpha2-bench-r7 6.57
+RUN native-million-alpha3-bench-r7
+DONE native-million-alpha3-bench-r7 6.58
+RUN compat-alpha2-bench-r1
+DONE compat-alpha2-bench-r1 2.95
+RUN compat-alpha3-bench-r1
+DONE compat-alpha3-bench-r1 1.56
+RUN compat-alpha3-bench-r2
+DONE compat-alpha3-bench-r2 1.51
+RUN compat-alpha2-bench-r2
+DONE compat-alpha2-bench-r2 1.5
+RUN compat-alpha2-bench-r3
+DONE compat-alpha2-bench-r3 1.51
+RUN compat-alpha3-bench-r3
+DONE compat-alpha3-bench-r3 1.5
+ALL COMPLETE

@@ -1,0 +1,66 @@
+ours               random insert              563 ns/op     1776399 ops/s
+ours               random settle              937 ns/op     1067439 ops/s
+ours               random find-hit            463 ns/op     2159800 ops/s
+ours               random find-miss           280 ns/op     3571044 ops/s
+ours               random scan                 50 ns/op    20041955 ops/s
+ours               random find-hit-par10       72 ns/op    13836904 ops/s
+pebble             random insert             1170 ns/op      854817 ops/s
+pebble             random settle             2685 ns/op      372447 ops/s
+pebble             random find-hit           1925 ns/op      519516 ops/s
+pebble             random find-miss          1710 ns/op      584957 ops/s
+pebble             random scan                 50 ns/op    20029710 ops/s
+pebble             random find-hit-par10      540 ns/op     1853009 ops/s
+sqlite-c           random insert            37009 ns/op       27020 ops/s
+sqlite-c           random settle               40 ns/op    25246362 ops/s
+sqlite-c           random find-hit           4259 ns/op      234771 ops/s
+sqlite-c           random find-miss          2419 ns/op      413311 ops/s
+sqlite-c           random scan                127 ns/op     7892130 ops/s
+sqlite-c           random find-hit-par10     2170 ns/op      460900 ops/s
+sqlite-go          random insert            34795 ns/op       28740 ops/s
+sqlite-go          random settle               30 ns/op    33764579 ops/s
+sqlite-go          random find-hit           3543 ns/op      282210 ops/s
+sqlite-go          random find-miss          3292 ns/op      303742 ops/s
+sqlite-go          random scan                 97 ns/op    10281613 ops/s
+sqlite-go          random find-hit-par10     6814 ns/op      146766 ops/s
+ours               seq    insert              183 ns/op     5457641 ops/s
+ours               seq    settle             1155 ns/op      865475 ops/s
+ours               seq    find-hit            636 ns/op     1571448 ops/s
+ours               seq    find-miss           576 ns/op     1735656 ops/s
+ours               seq    scan                 49 ns/op    20300171 ops/s
+ours               seq    find-hit-par10      121 ns/op     8245417 ops/s
+pebble             seq    insert              978 ns/op     1022015 ops/s
+pebble             seq    settle             3682 ns/op      271585 ops/s
+pebble             seq    find-hit           2109 ns/op      474081 ops/s
+pebble             seq    find-miss          1761 ns/op      567770 ops/s
+pebble             seq    scan                 50 ns/op    19981682 ops/s
+pebble             seq    find-hit-par10      641 ns/op     1559698 ops/s
+sqlite-c           seq    insert            15527 ns/op       64402 ops/s
+sqlite-c           seq    settle               27 ns/op    37623920 ops/s
+sqlite-c           seq    find-hit           2506 ns/op      399049 ops/s
+sqlite-c           seq    find-miss          2177 ns/op      459394 ops/s
+sqlite-c           seq    scan                114 ns/op     8792999 ops/s
+sqlite-c           seq    find-hit-par10     1805 ns/op      554165 ops/s
+sqlite-go          seq    insert            16994 ns/op       58846 ops/s
+sqlite-go          seq    settle                5 ns/op   184535892 ops/s
+sqlite-go          seq    find-hit           3358 ns/op      297805 ops/s
+sqlite-go          seq    find-miss          3052 ns/op      327673 ops/s
+sqlite-go          seq    scan                 91 ns/op    10931351 ops/s
+sqlite-go          seq    find-hit-par10     6548 ns/op      152710 ops/s
+       42.92 real        25.76 user        28.81 sys
+          1366065152  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              204436  page reclaims
+                1140  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                1673  signals received
+               12301  voluntary context switches
+             1299602  involuntary context switches
+        326886060253  instructions retired
+        164727210465  cycles elapsed
+          1115113152  peak memory footprint

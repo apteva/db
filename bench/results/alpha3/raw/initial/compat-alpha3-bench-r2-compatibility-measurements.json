@@ -1,0 +1,242 @@
+[
+  {
+    "Engine": "ours",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 130.18084,
+    "AllocatedBytesPerOp": 5.2792
+  },
+  {
+    "Engine": "ours",
+    "Phase": "build-compound",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 742.53166,
+    "AllocatedBytesPerOp": 345.07808
+  },
+  {
+    "Engine": "ours",
+    "Phase": "build-nullable-unique",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 404.63918,
+    "AllocatedBytesPerOp": 136.30768
+  },
+  {
+    "Engine": "ours",
+    "Phase": "compound-page",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 103515.3,
+    "AllocatedBytesPerOp": 9238.4
+  },
+  {
+    "Engine": "ours",
+    "Phase": "fallback-sort-page",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 5658851.4,
+    "AllocatedBytesPerOp": 128344.53333333334
+  },
+  {
+    "Engine": "ours",
+    "Phase": "ordered-cursor",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 26490.3,
+    "AllocatedBytesPerOp": 2144
+  },
+  {
+    "Engine": "ours",
+    "Phase": "memory-limit-rejection",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 3341.6666666666665,
+    "AllocatedBytesPerOp": 5968
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 858.69584,
+    "AllocatedBytesPerOp": 34.81024
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "build-compound",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 660.0175,
+    "AllocatedBytesPerOp": 49.54016
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "build-nullable-unique",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 89.2475,
+    "AllocatedBytesPerOp": 16
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "compound-page",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 235668.06666666668,
+    "AllocatedBytesPerOp": 3919.4666666666667
+  },
+  {
+    "Engine": "pebble-manual",
+    "Phase": "ordered-cursor",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 141073.6,
+    "AllocatedBytesPerOp": 1712.5333333333333
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 1970.36834,
+    "AllocatedBytesPerOp": 104.0816
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "build-compound",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 355.80582,
+    "AllocatedBytesPerOp": 0.00432
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "build-nullable-unique",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 222.37666,
+    "AllocatedBytesPerOp": 0.00432
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "compound-page",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 100786.13333333333,
+    "AllocatedBytesPerOp": 3376
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "ordered-cursor",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 70719.43333333333,
+    "AllocatedBytesPerOp": 3328
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "load",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 2142.92666,
+    "AllocatedBytesPerOp": 8.01216
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "build-compound",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 701.6075,
+    "AllocatedBytesPerOp": 0.02656
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "build-nullable-unique",
+    "Trial": 1,
+    "Ops": 50000,
+    "NsPerOp": 419.105,
+    "AllocatedBytesPerOp": 0.00288
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "compound-page",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 132612.5,
+    "AllocatedBytesPerOp": 1680
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "ordered-cursor",
+    "Trial": 1,
+    "Ops": 30,
+    "NsPerOp": 79862.5,
+    "AllocatedBytesPerOp": 1696
+  },
+  {
+    "Engine": "ours",
+    "Phase": "large-document-write",
+    "Trial": 1,
+    "Ops": 128,
+    "NsPerOp": 29009.765625,
+    "AllocatedBytesPerOp": 66171.4375
+  },
+  {
+    "Engine": "ours",
+    "Phase": "large-document-read",
+    "Trial": 1,
+    "Ops": 512,
+    "NsPerOp": 4638.833984375,
+    "AllocatedBytesPerOp": 304
+  },
+  {
+    "Engine": "pebble",
+    "Phase": "large-document-write",
+    "Trial": 1,
+    "Ops": 128,
+    "NsPerOp": 459286.4609375,
+    "AllocatedBytesPerOp": 36132.125
+  },
+  {
+    "Engine": "pebble",
+    "Phase": "large-document-read",
+    "Trial": 1,
+    "Ops": 512,
+    "NsPerOp": 14881.265625,
+    "AllocatedBytesPerOp": 216.625
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "large-document-write",
+    "Trial": 1,
+    "Ops": 128,
+    "NsPerOp": 422715.8203125,
+    "AllocatedBytesPerOp": 64
+  },
+  {
+    "Engine": "sqlite-c",
+    "Phase": "large-document-read",
+    "Trial": 1,
+    "Ops": 512,
+    "NsPerOp": 30176.595703125,
+    "AllocatedBytesPerOp": 208
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "large-document-write",
+    "Trial": 1,
+    "Ops": 128,
+    "NsPerOp": 496885.4140625,
+    "AllocatedBytesPerOp": 16
+  },
+  {
+    "Engine": "sqlite-go",
+    "Phase": "large-document-read",
+    "Trial": 1,
+    "Ops": 512,
+    "NsPerOp": 119596.02734375,
+    "AllocatedBytesPerOp": 176
+  }
+]

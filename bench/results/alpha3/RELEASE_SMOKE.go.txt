@@ -1,0 +1,40 @@
+package main
+
+import (
+ "bytes"
+ "context"
+ "errors"
+ "fmt"
+ "os"
+ "strings"
+
+ db "github.com/apteva/db"
+ "github.com/apteva/db/client"
+)
+
+func must(err error){if err!=nil{panic(err)}}
+func key(i int)[]byte{return []byte(fmt.Sprintf("%08d",i)+strings.Repeat("k",1492))}
+func value(i int)string{return fmt.Sprintf("%08d",i)+strings.Repeat("v",2992)}
+func main(){
+ ctx:=context.Background()
+ if len(os.Args)>1&&os.Args[1]=="remote"{
+  r,err:=client.New(os.Getenv("SMOKE_URL"),client.Options{Token:os.Getenv("APTEVADB_TOKEN")});must(err);defer r.Close()
+  must(r.CreateCollection(ctx,"wide"));c:=r.Collection("wide")
+  must(c.CreateCompoundIndex(ctx,"v",[]db.IndexField{{Field:"v"},{Field:"n",Desc:true}},db.IndexOptions{}))
+  for i:=0;i<20;i++{must(c.InsertDocument(ctx,key(i),map[string]any{"v":value(i),"n":int64(9007199254740993),"body":strings.Repeat("x",80000)}))}
+  stats:=db.QueryStats{};cur,err:=c.Query(ctx,nil,db.QueryOptions{Sort:[]db.IndexField{{Field:"v"},{Field:"n",Desc:true}},Stats:&stats});must(err)
+  n:=0;for cur.Next(){if !bytes.Equal(cur.Key(),key(n)){panic("remote key")};var got map[string]any;must(cur.Decode(&got));if got["v"]!=value(n)||got["n"]!=int64(9007199254740993)||len(got["body"].(string))!=80000{panic("remote payload")};n++};must(cur.Err());must(cur.Close());if n!=20||stats.Returned!=20||stats.Plan.Access!="index-order"{panic("remote count/plan")}
+  fmt.Println("remote tagged-driver wide index, large documents, precision and ordered stream PASS");return
+ }
+ if db.Version!="0.2.0-alpha.3"||db.FormatVersion!=8||db.MaxIndexKeySize!=8160{panic("wrong tagged module")}
+ dir:=os.Args[1];d,err:=db.Open(dir,db.Options{SyncMode:db.SyncOS});must(err);c,err:=d.Collection("wide");must(err)
+ must(c.CreateCompoundIndex(ctx,"v",[]db.IndexField{{Field:"v"},{Field:"n",Desc:true}}))
+ for i:=0;i<100;i++{must(c.InsertDocument(key(i),map[string]any{"v":value(i),"n":i}))}
+ cur,err:=c.NewIndexCursor(ctx,"v",db.IndexCursorOptions{});must(err);var positions [][]byte
+ for ok:=cur.First();ok;ok=cur.Next(){positions=append(positions,append([]byte(nil),cur.Position()...))};must(cur.Err());if len(positions)!=100{panic("cursor count")}
+ if !cur.SeekAfter(positions[20])||!bytes.Equal(cur.Key(),key(21)){panic("forward resume")}
+ if !cur.SeekBefore(positions[80])||!bytes.Equal(cur.Key(),key(79)){panic("reverse resume")};must(cur.Close())
+ if err:=c.InsertDocument([]byte("oversized"),map[string]any{"v":strings.Repeat("\x00",8160)});!errors.Is(err,db.ErrKeySize){panic("oversized write")}
+ must(d.VerifyIndexes(ctx));must(d.Close());d,err=db.Open(dir,db.Options{});must(err);must(d.Verify(ctx));must(d.VerifyIndexes(ctx));must(d.Close())
+ fmt.Println("embedded tagged-module wide index, cursor resumes, atomic limit and restart PASS")
+}

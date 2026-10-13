@@ -1,0 +1,3600 @@
+{
+  "complete": true,
+  "release": "v0.2.0-alpha.3",
+  "tag_commit": "26220edae0452a03a5cb5375016ca9eaf1e95209",
+  "library_source": "e975c28f1572dd91daf19aaae42aa7cd1b8c6c32",
+  "baseline_library": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+  "method": "Seven fresh paired 1M-key native trials with the identical current benchmark harness linked against both library revisions. Three current-harness 50K-document compatibility pairs. Three optimized 10K-row wide-index trials. Serial processes; default native cache, Pebble/SQLite 512 MiB cache setting (SQLite per connection), Pebble 64 MiB memtable. Background activity recorded. Earlier runs retained as preliminary.",
+  "machine": {
+    "started_at": "2026-10-13T15:54:40.077964+00:00",
+    "source_revision": "e975c28f1572dd91daf19aaae42aa7cd1b8c6c32",
+    "baseline_revision": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": "17179869184",
+    "go": "go version go1.25.1 darwin/arm64",
+    "method": "Serial fresh processes/directories; three outer trials; rotating paired order; identical current harness linked against both library revisions; no concurrent local builds/tests. Background workstation activity remains uncontrolled. Default native cache; Pebble/SQLite cache 512 MiB (SQLite per connection), Pebble memtable 64 MiB.",
+    "binaries": {
+      "alpha2-bench": "d9a8dffb5dec664e538d7a4e0c90ce6ac793388170b9d66a8b67ffeaef9b5a09",
+      "alpha3-bench": "4567a46d9c7636955520b5fd3481edbab7de531293120b31549a4ab89cba0695"
+    },
+    "finished_at": "2026-10-13T15:56:28.734089+00:00"
+  },
+  "native": [
+    {
+      "workload": "random",
+      "phase": "find-hit",
+      "alpha2_ns": {
+        "median": 673.0,
+        "min": 661.0,
+        "max": 759.0,
+        "samples": [
+          673.0,
+          662.0,
+          721.0,
+          676.0,
+          661.0,
+          661.0,
+          759.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 674.0,
+        "min": 653.0,
+        "max": 889.0,
+        "samples": [
+          674.0,
+          696.0,
+          656.0,
+          653.0,
+          692.0,
+          655.0,
+          889.0
+        ]
+      },
+      "change_percent": 0.14858841010401136
+    },
+    {
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "alpha2_ns": {
+        "median": 94.0,
+        "min": 84.0,
+        "max": 172.0,
+        "samples": [
+          94.0,
+          84.0,
+          121.0,
+          88.0,
+          106.0,
+          94.0,
+          172.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 87.0,
+        "min": 79.0,
+        "max": 99.0,
+        "samples": [
+          97.0,
+          99.0,
+          80.0,
+          87.0,
+          79.0,
+          91.0,
+          80.0
+        ]
+      },
+      "change_percent": -7.446808510638303
+    },
+    {
+      "workload": "random",
+      "phase": "find-miss",
+      "alpha2_ns": {
+        "median": 441.0,
+        "min": 414.0,
+        "max": 506.0,
+        "samples": [
+          427.0,
+          414.0,
+          439.0,
+          442.0,
+          441.0,
+          462.0,
+          506.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 436.0,
+        "min": 420.0,
+        "max": 484.0,
+        "samples": [
+          436.0,
+          484.0,
+          422.0,
+          452.0,
+          434.0,
+          448.0,
+          420.0
+        ]
+      },
+      "change_percent": -1.13378684807256
+    },
+    {
+      "workload": "random",
+      "phase": "insert",
+      "alpha2_ns": {
+        "median": 769.0,
+        "min": 750.0,
+        "max": 828.0,
+        "samples": [
+          828.0,
+          782.0,
+          785.0,
+          750.0,
+          763.0,
+          769.0,
+          765.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 747.0,
+        "min": 726.0,
+        "max": 823.0,
+        "samples": [
+          747.0,
+          754.0,
+          726.0,
+          744.0,
+          823.0,
+          782.0,
+          745.0
+        ]
+      },
+      "change_percent": -2.860858257477239
+    },
+    {
+      "workload": "random",
+      "phase": "scan",
+      "alpha2_ns": {
+        "median": 47.0,
+        "min": 46.0,
+        "max": 53.0,
+        "samples": [
+          46.0,
+          46.0,
+          46.0,
+          47.0,
+          47.0,
+          47.0,
+          53.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 48.0,
+        "samples": [
+          47.0,
+          47.0,
+          48.0,
+          48.0,
+          48.0,
+          47.0,
+          48.0
+        ]
+      },
+      "change_percent": 2.127659574468077
+    },
+    {
+      "workload": "random",
+      "phase": "settle",
+      "alpha2_ns": {
+        "median": 1049.0,
+        "min": 900.0,
+        "max": 1566.0,
+        "samples": [
+          1060.0,
+          1566.0,
+          1173.0,
+          900.0,
+          1049.0,
+          906.0,
+          972.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 946.0,
+        "min": 908.0,
+        "max": 1752.0,
+        "samples": [
+          931.0,
+          967.0,
+          908.0,
+          1119.0,
+          920.0,
+          946.0,
+          1752.0
+        ]
+      },
+      "change_percent": -9.818875119161108
+    },
+    {
+      "workload": "seq",
+      "phase": "find-hit",
+      "alpha2_ns": {
+        "median": 970.0,
+        "min": 938.0,
+        "max": 1080.0,
+        "samples": [
+          962.0,
+          938.0,
+          1080.0,
+          1061.0,
+          984.0,
+          968.0,
+          970.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 954.0,
+        "min": 937.0,
+        "max": 2275.0,
+        "samples": [
+          954.0,
+          980.0,
+          944.0,
+          937.0,
+          2275.0,
+          960.0,
+          944.0
+        ]
+      },
+      "change_percent": -1.6494845360824795
+    },
+    {
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "alpha2_ns": {
+        "median": 141.0,
+        "min": 127.0,
+        "max": 156.0,
+        "samples": [
+          150.0,
+          127.0,
+          130.0,
+          156.0,
+          133.0,
+          141.0,
+          144.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 136.0,
+        "min": 129.0,
+        "max": 158.0,
+        "samples": [
+          158.0,
+          130.0,
+          136.0,
+          141.0,
+          136.0,
+          131.0,
+          129.0
+        ]
+      },
+      "change_percent": -3.546099290780147
+    },
+    {
+      "workload": "seq",
+      "phase": "find-miss",
+      "alpha2_ns": {
+        "median": 877.0,
+        "min": 855.0,
+        "max": 922.0,
+        "samples": [
+          859.0,
+          886.0,
+          922.0,
+          881.0,
+          871.0,
+          855.0,
+          877.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 879.0,
+        "min": 865.0,
+        "max": 1093.0,
+        "samples": [
+          876.0,
+          877.0,
+          879.0,
+          865.0,
+          907.0,
+          881.0,
+          1093.0
+        ]
+      },
+      "change_percent": 0.22805017103761926
+    },
+    {
+      "workload": "seq",
+      "phase": "insert",
+      "alpha2_ns": {
+        "median": 201.0,
+        "min": 181.0,
+        "max": 586.0,
+        "samples": [
+          194.0,
+          187.0,
+          202.0,
+          586.0,
+          201.0,
+          181.0,
+          204.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 189.0,
+        "min": 183.0,
+        "max": 191.0,
+        "samples": [
+          184.0,
+          189.0,
+          183.0,
+          186.0,
+          190.0,
+          190.0,
+          191.0
+        ]
+      },
+      "change_percent": -5.970149253731338
+    },
+    {
+      "workload": "seq",
+      "phase": "scan",
+      "alpha2_ns": {
+        "median": 47.0,
+        "min": 47.0,
+        "max": 48.0,
+        "samples": [
+          47.0,
+          48.0,
+          47.0,
+          47.0,
+          48.0,
+          47.0,
+          47.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 49.0,
+        "min": 48.0,
+        "max": 50.0,
+        "samples": [
+          50.0,
+          49.0,
+          48.0,
+          49.0,
+          50.0,
+          50.0,
+          49.0
+        ]
+      },
+      "change_percent": 4.255319148936176
+    },
+    {
+      "workload": "seq",
+      "phase": "settle",
+      "alpha2_ns": {
+        "median": 824.0,
+        "min": 658.0,
+        "max": 1352.0,
+        "samples": [
+          789.0,
+          824.0,
+          962.0,
+          1352.0,
+          909.0,
+          745.0,
+          658.0
+        ]
+      },
+      "alpha3_ns": {
+        "median": 763.0,
+        "min": 733.0,
+        "max": 1018.0,
+        "samples": [
+          735.0,
+          733.0,
+          746.0,
+          829.0,
+          1018.0,
+          763.0,
+          832.0
+        ]
+      },
+      "change_percent": -7.402912621359226
+    }
+  ],
+  "features": [
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "build-compound",
+      "ns": {
+        "median": 725.92,
+        "min": 714.92916,
+        "max": 791.32332,
+        "samples": [
+          714.92916,
+          725.92,
+          791.32332
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 345.2168,
+        "min": 345.10672,
+        "max": 345.324,
+        "samples": [
+          345.2168,
+          345.10672,
+          345.324
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 385.81084,
+        "min": 377.43668,
+        "max": 393.01668,
+        "samples": [
+          393.01668,
+          385.81084,
+          377.43668
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 135.77728,
+        "min": 135.74832,
+        "max": 135.78304,
+        "samples": [
+          135.78304,
+          135.77728,
+          135.74832
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "compound-page",
+      "ns": {
+        "median": 98776.4,
+        "min": 96052.8,
+        "max": 343366.6666666667,
+        "samples": [
+          98776.4,
+          96052.8,
+          343366.6666666667
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 9238.4,
+        "min": 9238.4,
+        "max": 9238.4,
+        "samples": [
+          9238.4,
+          9238.4,
+          9238.4
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "fallback-sort-page",
+      "ns": {
+        "median": 5700426.4,
+        "min": 5698541.666666667,
+        "max": 5710690.266666667,
+        "samples": [
+          5698541.666666667,
+          5700426.4,
+          5710690.266666667
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 128344,
+        "min": 128344,
+        "max": 128344.53333333334,
+        "samples": [
+          128344,
+          128344.53333333334,
+          128344
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 5033.771484375,
+        "min": 4964.029296875,
+        "max": 5267.578125,
+        "samples": [
+          4964.029296875,
+          5033.771484375,
+          5267.578125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 304,
+        "min": 304,
+        "max": 304,
+        "samples": [
+          304,
+          304,
+          304
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 26988.9296875,
+        "min": 23058.9140625,
+        "max": 30447.5859375,
+        "samples": [
+          23058.9140625,
+          30447.5859375,
+          26988.9296875
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 66161.1875,
+        "min": 33380.5625,
+        "max": 66168.75,
+        "samples": [
+          33380.5625,
+          66168.75,
+          66161.1875
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "load",
+      "ns": {
+        "median": 141.70582,
+        "min": 137.64166,
+        "max": 143.21834,
+        "samples": [
+          141.70582,
+          143.21834,
+          137.64166
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 5.2888,
+        "min": 5.2792,
+        "max": 5.29264,
+        "samples": [
+          5.29264,
+          5.2888,
+          5.2792
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "memory-limit-rejection",
+      "ns": {
+        "median": 2941.6666666666665,
+        "min": 2743.0666666666666,
+        "max": 3393.0666666666666,
+        "samples": [
+          2743.0666666666666,
+          3393.0666666666666,
+          2941.6666666666665
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 5968,
+        "min": 5968,
+        "max": 5968,
+        "samples": [
+          5968,
+          5968,
+          5968
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "ours",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 24897.2,
+        "min": 23937.5,
+        "max": 25723.6,
+        "samples": [
+          25723.6,
+          24897.2,
+          23937.5
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 2144,
+        "min": 2144,
+        "max": 2144,
+        "samples": [
+          2144,
+          2144,
+          2144
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 19114.2578125,
+        "min": 17912.59765625,
+        "max": 19146.56640625,
+        "samples": [
+          17912.59765625,
+          19146.56640625,
+          19114.2578125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 216.890625,
+        "min": 216.703125,
+        "max": 216.890625,
+        "samples": [
+          216.703125,
+          216.890625,
+          216.890625
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 483676.7578125,
+        "min": 464988.609375,
+        "max": 487242.8359375,
+        "samples": [
+          464988.609375,
+          483676.7578125,
+          487242.8359375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 32291,
+        "min": 31972.5,
+        "max": 33889.625,
+        "samples": [
+          32291,
+          31972.5,
+          33889.625
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble-manual",
+      "phase": "build-compound",
+      "ns": {
+        "median": 699.2825,
+        "min": 675.57334,
+        "max": 1309.90666,
+        "samples": [
+          675.57334,
+          699.2825,
+          1309.90666
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 49.54656,
+        "min": 49.5408,
+        "max": 49.5584,
+        "samples": [
+          49.5408,
+          49.54656,
+          49.5584
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble-manual",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 91.55168,
+        "min": 90.68416,
+        "max": 102.22918,
+        "samples": [
+          91.55168,
+          90.68416,
+          102.22918
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "samples": [
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble-manual",
+      "phase": "compound-page",
+      "ns": {
+        "median": 239169.46666666667,
+        "min": 230658.33333333334,
+        "max": 345069.43333333335,
+        "samples": [
+          230658.33333333334,
+          239169.46666666667,
+          345069.43333333335
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3922.133333333333,
+        "min": 3918.4,
+        "max": 3922.133333333333,
+        "samples": [
+          3922.133333333333,
+          3918.4,
+          3922.133333333333
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble-manual",
+      "phase": "load",
+      "ns": {
+        "median": 948.87666,
+        "min": 927.76582,
+        "max": 2817.17416,
+        "samples": [
+          927.76582,
+          948.87666,
+          2817.17416
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 34.8064,
+        "min": 33.98304,
+        "max": 49.64464,
+        "samples": [
+          34.8064,
+          33.98304,
+          49.64464
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "pebble-manual",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 136516.66666666666,
+        "min": 136290.3,
+        "max": 143709.73333333334,
+        "samples": [
+          136516.66666666666,
+          136290.3,
+          143709.73333333334
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1712.5333333333333,
+        "min": 1712.5333333333333,
+        "max": 1712.5333333333333,
+        "samples": [
+          1712.5333333333333,
+          1712.5333333333333,
+          1712.5333333333333
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "build-compound",
+      "ns": {
+        "median": 350.32416,
+        "min": 349.92834,
+        "max": 354.1875,
+        "samples": [
+          350.32416,
+          354.1875,
+          349.92834
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "samples": [
+          0.00432,
+          0.00432,
+          0.00432
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 217.4075,
+        "min": 212.26666,
+        "max": 217.7475,
+        "samples": [
+          217.7475,
+          217.4075,
+          212.26666
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "samples": [
+          0.00432,
+          0.00432,
+          0.00432
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "compound-page",
+      "ns": {
+        "median": 98776.4,
+        "min": 98083.33333333333,
+        "max": 101537.5,
+        "samples": [
+          101537.5,
+          98776.4,
+          98083.33333333333
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3376,
+        "min": 3376,
+        "max": 3376,
+        "samples": [
+          3376,
+          3376,
+          3376
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 30018.23046875,
+        "min": 29313.556640625,
+        "max": 30111.572265625,
+        "samples": [
+          30018.23046875,
+          30111.572265625,
+          29313.556640625
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 208,
+        "min": 208,
+        "max": 208,
+        "samples": [
+          208,
+          208,
+          208
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 440282.8828125,
+        "min": 439198.5703125,
+        "max": 504097.984375,
+        "samples": [
+          439198.5703125,
+          440282.8828125,
+          504097.984375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 64,
+        "min": 64,
+        "max": 64,
+        "samples": [
+          64,
+          64,
+          64
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "load",
+      "ns": {
+        "median": 1859.52582,
+        "min": 1844.49,
+        "max": 13121.38332,
+        "samples": [
+          1859.52582,
+          1844.49,
+          13121.38332
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 104.08224,
+        "min": 104.08192,
+        "max": 104.08224,
+        "samples": [
+          104.08224,
+          104.08224,
+          104.08192
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-c",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 71550,
+        "min": 68491.66666666667,
+        "max": 75736.1,
+        "samples": [
+          75736.1,
+          68491.66666666667,
+          71550
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3328,
+        "min": 3328,
+        "max": 3328,
+        "samples": [
+          3328,
+          3328,
+          3328
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "build-compound",
+      "ns": {
+        "median": 726.03168,
+        "min": 721.37332,
+        "max": 751.87334,
+        "samples": [
+          726.03168,
+          721.37332,
+          751.87334
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.02656,
+        "min": 0.02656,
+        "max": 0.02656,
+        "samples": [
+          0.02656,
+          0.02656,
+          0.02656
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 415.2625,
+        "min": 414.8625,
+        "max": 418.64,
+        "samples": [
+          414.8625,
+          418.64,
+          415.2625
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00288,
+        "min": 0.00288,
+        "max": 0.00288,
+        "samples": [
+          0.00288,
+          0.00288,
+          0.00288
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "compound-page",
+      "ns": {
+        "median": 134906.93333333332,
+        "min": 129686.13333333333,
+        "max": 137812.5,
+        "samples": [
+          134906.93333333332,
+          129686.13333333333,
+          137812.5
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1680,
+        "min": 1680,
+        "max": 1680,
+        "samples": [
+          1680,
+          1680,
+          1680
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 117748.046875,
+        "min": 117189.533203125,
+        "max": 119437.662109375,
+        "samples": [
+          119437.662109375,
+          117189.533203125,
+          117748.046875
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 176,
+        "min": 176,
+        "max": 176,
+        "samples": [
+          176,
+          176,
+          176
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 507275.390625,
+        "min": 492957.6796875,
+        "max": 551371.09375,
+        "samples": [
+          507275.390625,
+          492957.6796875,
+          551371.09375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "samples": [
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "load",
+      "ns": {
+        "median": 2090.6425,
+        "min": 2039.79916,
+        "max": 2696.0375,
+        "samples": [
+          2090.6425,
+          2039.79916,
+          2696.0375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 8.01248,
+        "min": 8.01216,
+        "max": 8.01248,
+        "samples": [
+          8.01216,
+          8.01248,
+          8.01248
+        ]
+      }
+    },
+    {
+      "version": "alpha2",
+      "engine": "sqlite-go",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 79856.96666666666,
+        "min": 79315.3,
+        "max": 88200,
+        "samples": [
+          79856.96666666666,
+          79315.3,
+          88200
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1696,
+        "min": 1696,
+        "max": 1696,
+        "samples": [
+          1696,
+          1696,
+          1696
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "build-compound",
+      "ns": {
+        "median": 742.45666,
+        "min": 707.12668,
+        "max": 748.36584,
+        "samples": [
+          742.45666,
+          748.36584,
+          707.12668
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 345.22,
+        "min": 345.2136,
+        "max": 345.2232,
+        "samples": [
+          345.22,
+          345.2136,
+          345.2232
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 377.34832,
+        "min": 374.635,
+        "max": 380.99168,
+        "samples": [
+          380.99168,
+          374.635,
+          377.34832
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 135.74832,
+        "min": 135.74832,
+        "max": 135.74832,
+        "samples": [
+          135.74832,
+          135.74832,
+          135.74832
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "compound-page",
+      "ns": {
+        "median": 96425,
+        "min": 93047.23333333334,
+        "max": 99363.86666666667,
+        "samples": [
+          96425,
+          99363.86666666667,
+          93047.23333333334
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 9238.4,
+        "min": 9238.4,
+        "max": 9238.4,
+        "samples": [
+          9238.4,
+          9238.4,
+          9238.4
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "fallback-sort-page",
+      "ns": {
+        "median": 5634902.766666667,
+        "min": 5582156.933333334,
+        "max": 5721477.8,
+        "samples": [
+          5721477.8,
+          5582156.933333334,
+          5634902.766666667
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 128344,
+        "min": 128344,
+        "max": 128344.53333333334,
+        "samples": [
+          128344,
+          128344,
+          128344.53333333334
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 5024.658203125,
+        "min": 4694.41796875,
+        "max": 5099.689453125,
+        "samples": [
+          4694.41796875,
+          5099.689453125,
+          5024.658203125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 304,
+        "min": 304,
+        "max": 304,
+        "samples": [
+          304,
+          304,
+          304
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 31412.7578125,
+        "min": 24755.2109375,
+        "max": 33223.6328125,
+        "samples": [
+          33223.6328125,
+          31412.7578125,
+          24755.2109375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 131697.9375,
+        "min": 66161.375,
+        "max": 131739.1875,
+        "samples": [
+          131697.9375,
+          131739.1875,
+          66161.375
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "load",
+      "ns": {
+        "median": 137.16334,
+        "min": 136.75084,
+        "max": 137.41,
+        "samples": [
+          137.16334,
+          137.41,
+          136.75084
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 5.28112,
+        "min": 5.2792,
+        "max": 5.28304,
+        "samples": [
+          5.28112,
+          5.2792,
+          5.28304
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "memory-limit-rejection",
+      "ns": {
+        "median": 2695.8333333333335,
+        "min": 2647.2,
+        "max": 3540.3,
+        "samples": [
+          3540.3,
+          2647.2,
+          2695.8333333333335
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 5968,
+        "min": 5968,
+        "max": 5968,
+        "samples": [
+          5968,
+          5968,
+          5968
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 24530.566666666666,
+        "min": 23829.166666666668,
+        "max": 27744.433333333334,
+        "samples": [
+          27744.433333333334,
+          24530.566666666666,
+          23829.166666666668
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 2144,
+        "min": 2144,
+        "max": 2144,
+        "samples": [
+          2144,
+          2144,
+          2144
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 17397.869140625,
+        "min": 14051.1875,
+        "max": 17443.84765625,
+        "samples": [
+          14051.1875,
+          17397.869140625,
+          17443.84765625
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 216.875,
+        "min": 216.546875,
+        "max": 217.375,
+        "samples": [
+          216.875,
+          216.546875,
+          217.375
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 450280.921875,
+        "min": 402250.6484375,
+        "max": 457074.21875,
+        "samples": [
+          450280.921875,
+          402250.6484375,
+          457074.21875
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 31956.875,
+        "min": 29090,
+        "max": 35487.5,
+        "samples": [
+          35487.5,
+          29090,
+          31956.875
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "build-compound",
+      "ns": {
+        "median": 671.905,
+        "min": 617.86416,
+        "max": 752.6125,
+        "samples": [
+          671.905,
+          752.6125,
+          617.86416
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 49.57296,
+        "min": 49.53568,
+        "max": 49.59792,
+        "samples": [
+          49.59792,
+          49.57296,
+          49.53568
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 91.13084,
+        "min": 83.89334,
+        "max": 91.57584,
+        "samples": [
+          91.13084,
+          91.57584,
+          83.89334
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "samples": [
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "compound-page",
+      "ns": {
+        "median": 237259.73333333334,
+        "min": 229551.4,
+        "max": 247004.16666666666,
+        "samples": [
+          237259.73333333334,
+          247004.16666666666,
+          229551.4
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3922.133333333333,
+        "min": 3916.8,
+        "max": 3932.8,
+        "samples": [
+          3932.8,
+          3922.133333333333,
+          3916.8
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "load",
+      "ns": {
+        "median": 927.8425,
+        "min": 880.62834,
+        "max": 934.6175,
+        "samples": [
+          934.6175,
+          927.8425,
+          880.62834
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 34.79744,
+        "min": 33.96832,
+        "max": 50.57232,
+        "samples": [
+          33.96832,
+          34.79744,
+          50.57232
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 134725,
+        "min": 131687.5,
+        "max": 149743.03333333333,
+        "samples": [
+          149743.03333333333,
+          134725,
+          131687.5
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1712.5333333333333,
+        "min": 1712.5333333333333,
+        "max": 1712.5333333333333,
+        "samples": [
+          1712.5333333333333,
+          1712.5333333333333,
+          1712.5333333333333
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "build-compound",
+      "ns": {
+        "median": 357.2725,
+        "min": 353.17332,
+        "max": 362.8775,
+        "samples": [
+          362.8775,
+          357.2725,
+          353.17332
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "samples": [
+          0.00432,
+          0.00432,
+          0.00432
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 220.96916,
+        "min": 218.35418,
+        "max": 227.48334,
+        "samples": [
+          218.35418,
+          227.48334,
+          220.96916
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "samples": [
+          0.00432,
+          0.00432,
+          0.00432
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "compound-page",
+      "ns": {
+        "median": 107626.4,
+        "min": 97812.5,
+        "max": 108173.6,
+        "samples": [
+          107626.4,
+          108173.6,
+          97812.5
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3376,
+        "min": 3376,
+        "max": 3376,
+        "samples": [
+          3376,
+          3376,
+          3376
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 28586.83203125,
+        "min": 28530.4375,
+        "max": 28868.408203125,
+        "samples": [
+          28586.83203125,
+          28530.4375,
+          28868.408203125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 208,
+        "min": 208,
+        "max": 208,
+        "samples": [
+          208,
+          208,
+          208
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 434261.3984375,
+        "min": 409878.90625,
+        "max": 461914.0625,
+        "samples": [
+          409878.90625,
+          434261.3984375,
+          461914.0625
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 64,
+        "min": 64,
+        "max": 64,
+        "samples": [
+          64,
+          64,
+          64
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "load",
+      "ns": {
+        "median": 1926.72834,
+        "min": 1881.36166,
+        "max": 1992.9325,
+        "samples": [
+          1926.72834,
+          1881.36166,
+          1992.9325
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 104.08192,
+        "min": 104.08192,
+        "max": 104.08192,
+        "samples": [
+          104.08192,
+          104.08192,
+          104.08192
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 71811.1,
+        "min": 65277.8,
+        "max": 73280.56666666667,
+        "samples": [
+          73280.56666666667,
+          71811.1,
+          65277.8
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3328,
+        "min": 3328,
+        "max": 3328,
+        "samples": [
+          3328,
+          3328,
+          3328
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "build-compound",
+      "ns": {
+        "median": 731.12918,
+        "min": 715.89666,
+        "max": 735.14584,
+        "samples": [
+          735.14584,
+          731.12918,
+          715.89666
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.02656,
+        "min": 0.02656,
+        "max": 0.02656,
+        "samples": [
+          0.02656,
+          0.02656,
+          0.02656
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "build-nullable-unique",
+      "ns": {
+        "median": 412.88832,
+        "min": 405.67668,
+        "max": 424.38584,
+        "samples": [
+          412.88832,
+          424.38584,
+          405.67668
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.00288,
+        "min": 0.00288,
+        "max": 0.00288,
+        "samples": [
+          0.00288,
+          0.00288,
+          0.00288
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "compound-page",
+      "ns": {
+        "median": 135897.2,
+        "min": 129590.3,
+        "max": 137094.43333333332,
+        "samples": [
+          135897.2,
+          137094.43333333332,
+          129590.3
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1680,
+        "min": 1680,
+        "max": 1680,
+        "samples": [
+          1680,
+          1680,
+          1680
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "large-document-read",
+      "ns": {
+        "median": 118452.798828125,
+        "min": 116066.48828125,
+        "max": 120807.2109375,
+        "samples": [
+          116066.48828125,
+          120807.2109375,
+          118452.798828125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 176,
+        "min": 176,
+        "max": 176,
+        "samples": [
+          176,
+          176,
+          176
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "large-document-write",
+      "ns": {
+        "median": 489260.421875,
+        "min": 485779.296875,
+        "max": 528314.125,
+        "samples": [
+          485779.296875,
+          489260.421875,
+          528314.125
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "samples": [
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "load",
+      "ns": {
+        "median": 2126.89834,
+        "min": 2095.07,
+        "max": 2258.35084,
+        "samples": [
+          2126.89834,
+          2258.35084,
+          2095.07
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 8.01216,
+        "min": 8.01216,
+        "max": 8.01248,
+        "samples": [
+          8.01216,
+          8.01248,
+          8.01216
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "ordered-cursor",
+      "ns": {
+        "median": 84012.5,
+        "min": 79179.16666666667,
+        "max": 89350,
+        "samples": [
+          84012.5,
+          89350,
+          79179.16666666667
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1696,
+        "min": 1696,
+        "max": 1696,
+        "samples": [
+          1696,
+          1696,
+          1696
+        ]
+      }
+    }
+  ],
+  "wide": [
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "build-wide-index",
+      "ns": {
+        "median": 12709.1208,
+        "min": 12436.8417,
+        "max": 15785.6166,
+        "samples": [
+          12436.8417,
+          12709.1208,
+          15785.6166
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 41156.1848,
+        "min": 41156.1768,
+        "max": 41156.1896,
+        "samples": [
+          41156.1768,
+          41156.1896,
+          41156.1848
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "load",
+      "ns": {
+        "median": 3460.5459,
+        "min": 3369.9334,
+        "max": 3614.625,
+        "samples": [
+          3614.625,
+          3369.9334,
+          3460.5459
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 3824.6576,
+        "min": 3824.6512,
+        "max": 3824.6608,
+        "samples": [
+          3824.6576,
+          3824.6608,
+          3824.6512
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "ordered-100-row-page",
+      "ns": {
+        "median": 271709.58,
+        "min": 268574.16,
+        "max": 339747.08,
+        "samples": [
+          268574.16,
+          271709.58,
+          339747.08
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 435273.92,
+        "min": 435273.92,
+        "max": 435273.92,
+        "samples": [
+          435273.92,
+          435273.92,
+          435273.92
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "ours",
+      "phase": "reused-resume-100-row-page",
+      "ns": {
+        "median": 247663.34,
+        "min": 244035.42,
+        "max": 299624.59,
+        "samples": [
+          247663.34,
+          244035.42,
+          299624.59
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 444135.04,
+        "min": 444080,
+        "max": 444135.04,
+        "samples": [
+          444135.04,
+          444135.04,
+          444080
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "build-wide-index",
+      "ns": {
+        "median": 6141.975,
+        "min": 6141.3291,
+        "max": 6265.6583,
+        "samples": [
+          6141.975,
+          6265.6583,
+          6141.3291
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 26198.5048,
+        "min": 26043.364,
+        "max": 26517.2952,
+        "samples": [
+          26043.364,
+          26517.2952,
+          26198.5048
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "load",
+      "ns": {
+        "median": 6368.3625,
+        "min": 5936.85,
+        "max": 6578.2125,
+        "samples": [
+          6368.3625,
+          6578.2125,
+          5936.85
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 19667.0528,
+        "min": 19646.3152,
+        "max": 19757.136,
+        "samples": [
+          19757.136,
+          19646.3152,
+          19667.0528
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "pebble-manual",
+      "phase": "ordered-100-row-page",
+      "ns": {
+        "median": 344431.25,
+        "min": 340889.58,
+        "max": 345905.83,
+        "samples": [
+          340889.58,
+          344431.25,
+          345905.83
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 162303.84,
+        "min": 162303.84,
+        "max": 162317.52,
+        "samples": [
+          162317.52,
+          162303.84,
+          162303.84
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "build-wide-index",
+      "ns": {
+        "median": 51100.8083,
+        "min": 48570.7125,
+        "max": 59418.175,
+        "samples": [
+          48570.7125,
+          59418.175,
+          51100.8083
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.0216,
+        "min": 0.0216,
+        "max": 0.0216,
+        "samples": [
+          0.0216,
+          0.0216,
+          0.0216
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "load",
+      "ns": {
+        "median": 71360.4375,
+        "min": 71085.9792,
+        "max": 81919.8958,
+        "samples": [
+          71085.9792,
+          81919.8958,
+          71360.4375
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1600.088,
+        "min": 1600.088,
+        "max": 1600.088,
+        "samples": [
+          1600.088,
+          1600.088,
+          1600.088
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-c",
+      "phase": "ordered-100-row-page",
+      "ns": {
+        "median": 486818.75,
+        "min": 477451.67,
+        "max": 530823.75,
+        "samples": [
+          530823.75,
+          477451.67,
+          486818.75
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 155262.72,
+        "min": 155262.72,
+        "max": 155262.72,
+        "samples": [
+          155262.72,
+          155262.72,
+          155262.72
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "build-wide-index",
+      "ns": {
+        "median": 54395.725,
+        "min": 48593.7209,
+        "max": 89121.425,
+        "samples": [
+          48593.7209,
+          89121.425,
+          54395.725
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 0.9648,
+        "min": 0.9648,
+        "max": 0.9648,
+        "samples": [
+          0.9648,
+          0.9648,
+          0.9648
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "load",
+      "ns": {
+        "median": 87677.0458,
+        "min": 78993.3167,
+        "max": 91044.0959,
+        "samples": [
+          78993.3167,
+          87677.0458,
+          91044.0959
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 1536.9024,
+        "min": 1536.9024,
+        "max": 1536.904,
+        "samples": [
+          1536.9024,
+          1536.9024,
+          1536.904
+        ]
+      }
+    },
+    {
+      "version": "alpha3",
+      "engine": "sqlite-go",
+      "phase": "ordered-100-row-page",
+      "ns": {
+        "median": 1989246.67,
+        "min": 1895685,
+        "max": 2742550.83,
+        "samples": [
+          1895685,
+          2742550.83,
+          1989246.67
+        ]
+      },
+      "go_allocated_bytes": {
+        "median": 153630.88,
+        "min": 153630.72,
+        "max": 153630.88,
+        "samples": [
+          153630.88,
+          153630.88,
+          153630.72
+        ]
+      }
+    }
+  ],
+  "successful_fresh_processes": 64,
+  "runs": [
+    {
+      "case": "kv",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha2-bench-r1-data"
+      ],
+      "seconds": 44.8889647499891,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "kv",
+      "trial": 1,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha3-bench-r1-data"
+      ],
+      "seconds": 46.67413229099475,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha2-bench-r1-data"
+      ],
+      "seconds": 1.614718959084712,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha3-bench-r1-data"
+      ],
+      "seconds": 1.5733000829350203,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "wide",
+      "trial": 1,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/wide-alpha3-bench-r1-data"
+      ],
+      "seconds": 7.398793583037332,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "kv",
+      "trial": 2,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha3-bench-r2-data"
+      ],
+      "seconds": 61.324534666957334,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "kv",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha2-bench-r2-data"
+      ],
+      "seconds": 36.869841667008586,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha3-bench-r2-data"
+      ],
+      "seconds": 1.5673595000989735,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha2-bench-r2-data"
+      ],
+      "seconds": 1.4692893750034273,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "wide",
+      "trial": 2,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/wide-alpha3-bench-r2-data"
+      ],
+      "seconds": 5.518994707963429,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "kv",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha2-bench-r3-data"
+      ],
+      "seconds": 39.02100154198706,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "kv",
+      "trial": 3,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-alpha3-bench-r3-data"
+      ],
+      "seconds": 42.26997562497854,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha2-bench-r3-data"
+      ],
+      "seconds": 1.7907522498862818,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compat-alpha3-bench-r3-data"
+      ],
+      "seconds": 1.571148750022985,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "wide",
+      "trial": 3,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/alpha3-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/wide-alpha3-bench-r3-data"
+      ],
+      "seconds": 5.645179457962513,
+      "returncode": 0,
+      "series": "initial"
+    },
+    {
+      "case": "native-million",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r1-data"
+      ],
+      "seconds": 7.604373999987729,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 1,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r1-data"
+      ],
+      "seconds": 7.920528457965702,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 2,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r2-data"
+      ],
+      "seconds": 6.827427082927898,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r2-data"
+      ],
+      "seconds": 10.233661500038579,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r3-data"
+      ],
+      "seconds": 7.316960167023353,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 3,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r3-data"
+      ],
+      "seconds": 9.668967791949399,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 4,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r4-data"
+      ],
+      "seconds": 6.543125499971211,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 4,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r4-data"
+      ],
+      "seconds": 6.534304625005461,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 5,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r5-data"
+      ],
+      "seconds": 8.68300137494225,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 5,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r5-data"
+      ],
+      "seconds": 7.784286667010747,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 6,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r6-data"
+      ],
+      "seconds": 6.6382162920199335,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 6,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r6-data"
+      ],
+      "seconds": 6.721098209032789,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 7,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha2-bench-r7-data"
+      ],
+      "seconds": 7.503457249957137,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 7,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/native-million-alpha3-fast-bench-r7-data"
+      ],
+      "seconds": 6.764420542051084,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha2-bench-r1-data"
+      ],
+      "seconds": 40.40524470899254,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 1,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha3-fast-bench-r1-data"
+      ],
+      "seconds": 42.954088833066635,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha2-bench-r1-data"
+      ],
+      "seconds": 1.6703382909763604,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha3-fast-bench-r1-data"
+      ],
+      "seconds": 1.551438666996546,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "wide",
+      "trial": 1,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/wide-alpha3-fast-bench-r1-data"
+      ],
+      "seconds": 5.594384707976133,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 2,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha3-fast-bench-r2-data"
+      ],
+      "seconds": 37.49349479202647,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha2-bench-r2-data"
+      ],
+      "seconds": 41.045717583969235,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha3-fast-bench-r2-data"
+      ],
+      "seconds": 1.7144799169618636,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha2-bench-r2-data"
+      ],
+      "seconds": 1.6190327090444043,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "wide",
+      "trial": 2,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/wide-alpha3-fast-bench-r2-data"
+      ],
+      "seconds": 4.793591666035354,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha2-bench-r3-data"
+      ],
+      "seconds": 35.961218374897726,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "kv",
+      "trial": 3,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/kv-alpha3-fast-bench-r3-data"
+      ],
+      "seconds": 45.41144387493841,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/fast/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha2-bench-r3-data"
+      ],
+      "seconds": 1.6843251250684261,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/compat-alpha3-fast-bench-r3-data"
+      ],
+      "seconds": 1.5200002079363912,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "wide",
+      "trial": 3,
+      "binary": "alpha3-fast-bench",
+      "command": [
+        "<output>/fast/alpha3-fast-bench",
+        "-wideindex",
+        "-n",
+        "10000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/fast/wide-alpha3-fast-bench-r3-data"
+      ],
+      "seconds": 4.959095833008178,
+      "returncode": 0,
+      "series": "fast"
+    },
+    {
+      "case": "native-million",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r1-data"
+      ],
+      "seconds": 7.506824167096056,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 1,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r1-data"
+      ],
+      "seconds": 6.783033709041774,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 2,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r2-data"
+      ],
+      "seconds": 8.016875125002116,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r2-data"
+      ],
+      "seconds": 6.588226667023264,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r3-data"
+      ],
+      "seconds": 7.483891832991503,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 3,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r3-data"
+      ],
+      "seconds": 6.383913083001971,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 4,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r4-data"
+      ],
+      "seconds": 6.353084500064142,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 4,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r4-data"
+      ],
+      "seconds": 6.3729524170048535,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 5,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r5-data"
+      ],
+      "seconds": 7.014132749987766,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 5,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r5-data"
+      ],
+      "seconds": 6.235570207936689,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 6,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r6-data"
+      ],
+      "seconds": 7.655044791055843,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 6,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r6-data"
+      ],
+      "seconds": 6.70059600006789,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 7,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha2-bench-r7-data"
+      ],
+      "seconds": 6.567297041998245,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "native-million",
+      "trial": 7,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/native-million-alpha3-bench-r7-data"
+      ],
+      "seconds": 6.575258124968968,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha2-bench-r1-data"
+      ],
+      "seconds": 2.9536650410154834,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 1,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha3-bench-r1-data"
+      ],
+      "seconds": 1.5556018750648946,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha3-bench-r2-data"
+      ],
+      "seconds": 1.5091842920519412,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 2,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha2-bench-r2-data"
+      ],
+      "seconds": 1.4980841249926016,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha2-bench",
+      "command": [
+        "<output>/matched/alpha2-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha2-bench-r3-data"
+      ],
+      "seconds": 1.5108909999253228,
+      "returncode": 0,
+      "series": "matched"
+    },
+    {
+      "case": "compat",
+      "trial": 3,
+      "binary": "alpha3-bench",
+      "command": [
+        "<output>/matched/alpha3-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/matched/compat-alpha3-bench-r3-data"
+      ],
+      "seconds": 1.5013495410094038,
+      "returncode": 0,
+      "series": "matched"
+    }
+  ],
+  "release_checks": {
+    "exact_tag_ci": {
+      "run": 38426766854,
+      "conclusion": "success",
+      "attempt": 2
+    },
+    "release": {
+      "run": 38426766835,
+      "conclusion": "success"
+    },
+    "archives_sha256": {
+      "aptevadb_0.2.0-alpha.3_darwin_amd64.tar.gz": "af3093baad127987ca5db1da898d45d41087339b710dee9cc7e751a13354888e",
+      "aptevadb_0.2.0-alpha.3_linux_amd64.tar.gz": "97a0a52cf9d695faa2ecdcc48a3bbe9958c25832a7813f8d600eba00c2e0a8da",
+      "aptevadb_0.2.0-alpha.3_darwin_arm64.tar.gz": "d96c8c30e2a4e66503a13f93e1a76d73e5204f25144df949d64480b6a2d7ae6b",
+      "aptevadb_0.2.0-alpha.3_linux_arm64.tar.gz": "bad7bb974734eaf5794f7816a196728f0c11b79c5b8f50c4a505a5c3737ab2d1"
+    },
+    "fresh_go_proxy_consumer": "PASS",
+    "fresh_tagged_command_installs": "PASS",
+    "downloaded_daemon_tagged_driver": "PASS",
+    "graceful_shutdown": "PASS",
+    "older_writer_refusal_data_unchanged": "PASS",
+    "checksum_test_correction": {
+      "commit": "04a9fda831c911f9b01144af20c0cbe4420babd5",
+      "race_repetitions": 20,
+      "result": "PASS",
+      "original_failure": "Random lookups did not guarantee eviction of the deliberately corrupted resident page; validation occurs on first load."
+    }
+  }
+}

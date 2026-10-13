@@ -1,0 +1,59 @@
+RUN native-million-alpha2-bench-r1
+DONE native-million-alpha2-bench-r1 7.6
+RUN native-million-alpha3-fast-bench-r1
+DONE native-million-alpha3-fast-bench-r1 7.92
+RUN native-million-alpha3-fast-bench-r2
+DONE native-million-alpha3-fast-bench-r2 6.83
+RUN native-million-alpha2-bench-r2
+DONE native-million-alpha2-bench-r2 10.23
+RUN native-million-alpha2-bench-r3
+DONE native-million-alpha2-bench-r3 7.32
+RUN native-million-alpha3-fast-bench-r3
+DONE native-million-alpha3-fast-bench-r3 9.67
+RUN native-million-alpha3-fast-bench-r4
+DONE native-million-alpha3-fast-bench-r4 6.54
+RUN native-million-alpha2-bench-r4
+DONE native-million-alpha2-bench-r4 6.53
+RUN native-million-alpha2-bench-r5
+DONE native-million-alpha2-bench-r5 8.68
+RUN native-million-alpha3-fast-bench-r5
+DONE native-million-alpha3-fast-bench-r5 7.78
+RUN native-million-alpha3-fast-bench-r6
+DONE native-million-alpha3-fast-bench-r6 6.64
+RUN native-million-alpha2-bench-r6
+DONE native-million-alpha2-bench-r6 6.72
+RUN native-million-alpha2-bench-r7
+DONE native-million-alpha2-bench-r7 7.5
+RUN native-million-alpha3-fast-bench-r7
+DONE native-million-alpha3-fast-bench-r7 6.76
+RUN kv-alpha2-bench-r1
+DONE kv-alpha2-bench-r1 40.41
+RUN kv-alpha3-fast-bench-r1
+DONE kv-alpha3-fast-bench-r1 42.95
+RUN compat-alpha2-bench-r1
+DONE compat-alpha2-bench-r1 1.67
+RUN compat-alpha3-fast-bench-r1
+DONE compat-alpha3-fast-bench-r1 1.55
+RUN wide-alpha3-fast-bench-r1
+DONE wide-alpha3-fast-bench-r1 5.59
+RUN kv-alpha3-fast-bench-r2
+DONE kv-alpha3-fast-bench-r2 37.49
+RUN kv-alpha2-bench-r2
+DONE kv-alpha2-bench-r2 41.05
+RUN compat-alpha3-fast-bench-r2
+DONE compat-alpha3-fast-bench-r2 1.71
+RUN compat-alpha2-bench-r2
+DONE compat-alpha2-bench-r2 1.62
+RUN wide-alpha3-fast-bench-r2
+DONE wide-alpha3-fast-bench-r2 4.79
+RUN kv-alpha2-bench-r3
+DONE kv-alpha2-bench-r3 35.96
+RUN kv-alpha3-fast-bench-r3
+DONE kv-alpha3-fast-bench-r3 45.41
+RUN compat-alpha2-bench-r3
+DONE compat-alpha2-bench-r3 1.68
+RUN compat-alpha3-fast-bench-r3
+DONE compat-alpha3-fast-bench-r3 1.52
+RUN wide-alpha3-fast-bench-r3
+DONE wide-alpha3-fast-bench-r3 4.96
+ALL COMPLETE

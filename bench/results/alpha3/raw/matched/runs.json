@@ -1,0 +1,396 @@
+[
+  {
+    "case": "native-million",
+    "trial": 1,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r1-data"
+    ],
+    "seconds": 7.506824167096056,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r1-data"
+    ],
+    "seconds": 6.783033709041774,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r2-data"
+    ],
+    "seconds": 8.016875125002116,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 2,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r2-data"
+    ],
+    "seconds": 6.588226667023264,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 3,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r3-data"
+    ],
+    "seconds": 7.483891832991503,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r3-data"
+    ],
+    "seconds": 6.383913083001971,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 4,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r4-data"
+    ],
+    "seconds": 6.353084500064142,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 4,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r4-data"
+    ],
+    "seconds": 6.3729524170048535,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 5,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r5-data"
+    ],
+    "seconds": 7.014132749987766,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 5,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r5-data"
+    ],
+    "seconds": 6.235570207936689,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 6,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r6-data"
+    ],
+    "seconds": 7.655044791055843,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 6,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r6-data"
+    ],
+    "seconds": 6.70059600006789,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 7,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha2-bench-r7-data"
+    ],
+    "seconds": 6.567297041998245,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 7,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/native-million-alpha3-bench-r7-data"
+    ],
+    "seconds": 6.575258124968968,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 1,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha2-bench-r1-data"
+    ],
+    "seconds": 2.9536650410154834,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha3-bench-r1-data"
+    ],
+    "seconds": 1.5556018750648946,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha3-bench-r2-data"
+    ],
+    "seconds": 1.5091842920519412,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 2,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha2-bench-r2-data"
+    ],
+    "seconds": 1.4980841249926016,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 3,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/matched/alpha2-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha2-bench-r3-data"
+    ],
+    "seconds": 1.5108909999253228,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/matched/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/matched/compat-alpha3-bench-r3-data"
+    ],
+    "seconds": 1.5013495410094038,
+    "returncode": 0
+  }
+]

@@ -1,0 +1,30 @@
+ours               random insert              897 ns/op     1115172 ops/s
+ours               random settle             1004 ns/op      996453 ops/s
+ours               random find-hit            761 ns/op     1313617 ops/s
+ours               random find-miss           638 ns/op     1566776 ops/s
+ours               random scan                 47 ns/op    21064494 ops/s
+ours               random find-hit-par10      111 ns/op     8982295 ops/s
+ours               seq    insert              214 ns/op     4674293 ops/s
+ours               seq    settle              938 ns/op     1066449 ops/s
+ours               seq    find-hit           1089 ns/op      917867 ops/s
+ours               seq    find-miss           965 ns/op     1036154 ops/s
+ours               seq    scan                 49 ns/op    20284044 ops/s
+ours               seq    find-hit-par10      154 ns/op     6514439 ops/s
+        7.27 real         6.53 user         1.26 sys
+           482066432  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               97650  page reclaims
+                 493  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 379  signals received
+                9141  voluntary context switches
+               25071  involuntary context switches
+         35440340194  instructions retired
+         23650907125  cycles elapsed
+           480429136  peak memory footprint

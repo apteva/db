@@ -51,6 +51,11 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
+The [alpha.3 cursor and index validation report](bench/results/alpha3/VALIDATION.md)
+includes the two reported regressions, 8,160-byte encoded entries, matched-harness
+alpha.2 comparisons and large-entry results against Pebble and both SQLite bindings.
+Raw scans and some short write samples were slower; all measurements are retained.
+
 The [alpha.2 compatibility/speed report](bench/results/alpha2/VALIDATION.md) includes
 three repeats against Pebble/SQLite and paired alpha.1 comparisons. The
 [alpha.1 validation report](bench/results/public-alpha/VALIDATION.md)

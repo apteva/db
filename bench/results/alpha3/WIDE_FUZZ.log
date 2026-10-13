@@ -1,0 +1,12 @@
+fuzz: elapsed: 0s, gathering baseline coverage: 0/2 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 2/2 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 77387 (25795/sec), new interesting: 35 (total: 37)
+fuzz: elapsed: 6s, execs: 159642 (27418/sec), new interesting: 39 (total: 41)
+fuzz: elapsed: 9s, execs: 230785 (23707/sec), new interesting: 44 (total: 46)
+fuzz: elapsed: 12s, execs: 316087 (28442/sec), new interesting: 47 (total: 49)
+fuzz: elapsed: 15s, execs: 386197 (23361/sec), new interesting: 48 (total: 50)
+fuzz: elapsed: 18s, execs: 459876 (24565/sec), new interesting: 50 (total: 52)
+fuzz: elapsed: 21s, execs: 517538 (19182/sec), new interesting: 50 (total: 52)
+fuzz: elapsed: 21s, execs: 517538 (0/sec), new interesting: 50 (total: 52)
+PASS
+ok  	github.com/apteva/db	21.253s

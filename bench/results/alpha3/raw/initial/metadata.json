@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-10-13T15:28:49.966367+00:00",
+  "source_revision": "eeac6fe",
+  "baseline_revision": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+  "cpu": "Apple M1 Pro",
+  "memory_bytes": "17179869184",
+  "go": "go version go1.25.1 darwin/arm64",
+  "method": "Serial fresh processes/directories; three outer trials; rotating paired order; no concurrent local builds/tests. Background workstation activity remains uncontrolled. Default native cache; Pebble/SQLite cache 512 MiB (SQLite per connection), Pebble memtable 64 MiB.",
+  "binaries": {
+    "alpha2-bench": "2a4c71fc9396e5d894cdf5303151c2d4acc5bc763d4dc7809344e486aef0f5b5",
+    "alpha3-bench": "25de6125c59a99e61a314408a34361e474ea4a9aee2947ecc21e079b70bba42d"
+  },
+  "finished_at": "2026-10-13T15:33:53.771128+00:00"
+}

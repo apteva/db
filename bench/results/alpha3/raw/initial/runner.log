@@ -1,0 +1,31 @@
+RUN kv-alpha2-bench-r1
+DONE kv-alpha2-bench-r1 44.89
+RUN kv-alpha3-bench-r1
+DONE kv-alpha3-bench-r1 46.67
+RUN compat-alpha2-bench-r1
+DONE compat-alpha2-bench-r1 1.61
+RUN compat-alpha3-bench-r1
+DONE compat-alpha3-bench-r1 1.57
+RUN wide-alpha3-bench-r1
+DONE wide-alpha3-bench-r1 7.4
+RUN kv-alpha3-bench-r2
+DONE kv-alpha3-bench-r2 61.32
+RUN kv-alpha2-bench-r2
+DONE kv-alpha2-bench-r2 36.87
+RUN compat-alpha3-bench-r2
+DONE compat-alpha3-bench-r2 1.57
+RUN compat-alpha2-bench-r2
+DONE compat-alpha2-bench-r2 1.47
+RUN wide-alpha3-bench-r2
+DONE wide-alpha3-bench-r2 5.52
+RUN kv-alpha2-bench-r3
+DONE kv-alpha2-bench-r3 39.02
+RUN kv-alpha3-bench-r3
+DONE kv-alpha3-bench-r3 42.27
+RUN compat-alpha2-bench-r3
+DONE compat-alpha2-bench-r3 1.79
+RUN compat-alpha3-bench-r3
+DONE compat-alpha3-bench-r3 1.57
+RUN wide-alpha3-bench-r3
+DONE wide-alpha3-bench-r3 5.65
+ALL COMPLETE
