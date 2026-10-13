@@ -1,0 +1,1868 @@
+[
+  {
+    "case": "kv-baseline-bench",
+    "repetition": 1,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-baseline-bench-r1-data"
+    ],
+    "seconds": 8.378599124960601,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 262.8,
+      "top": [
+        [
+          69.3,
+          "StorageManagementService"
+        ],
+        [
+          50.7,
+          "git"
+        ],
+        [
+          24.2,
+          "apteva-server"
+        ],
+        [
+          14.6,
+          "Python"
+        ],
+        [
+          12.9,
+          "WindowServer"
+        ],
+        [
+          10.9,
+          "Codex (Renderer)"
+        ],
+        [
+          10.7,
+          "bin"
+        ],
+        [
+          7.5,
+          "WhatsApp"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-current-bench",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-current-bench-r1-data"
+    ],
+    "seconds": 7.998802916961722,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 251.3,
+      "top": [
+        [
+          56.8,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          47.6,
+          "StorageManagementService"
+        ],
+        [
+          38.7,
+          "git"
+        ],
+        [
+          19.8,
+          "fseventsd"
+        ],
+        [
+          18.3,
+          "sysmond"
+        ],
+        [
+          12.6,
+          "WindowServer"
+        ],
+        [
+          10.8,
+          "Codex (Renderer)"
+        ],
+        [
+          7.0,
+          "WhatsApp"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "compatibility",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-r1-data"
+    ],
+    "seconds": 1.868270333041437,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 217.6,
+      "top": [
+        [
+          37.6,
+          "git"
+        ],
+        [
+          31.3,
+          "StorageManagementService"
+        ],
+        [
+          30.7,
+          "fseventsd"
+        ],
+        [
+          24.2,
+          "Storage"
+        ],
+        [
+          19.6,
+          "WindowServer"
+        ],
+        [
+          19.0,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          8.3,
+          "Codex (Renderer)"
+        ],
+        [
+          7.7,
+          "Codex (Service)"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-comparison",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-comparison-r1-data"
+    ],
+    "seconds": 39.21511895803269,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 258.3,
+      "top": [
+        [
+          74.4,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          52.8,
+          "StorageManagementService"
+        ],
+        [
+          52.6,
+          "git"
+        ],
+        [
+          15.7,
+          "WindowServer"
+        ],
+        [
+          9.4,
+          "Python"
+        ],
+        [
+          8.5,
+          "Codex (Renderer)"
+        ],
+        [
+          6.9,
+          "Codex (Service)"
+        ],
+        [
+          6.8,
+          "WhatsApp"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "batch",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/batch-r1-data"
+    ],
+    "seconds": 25.092572750058025,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 291.7,
+      "top": [
+        [
+          72.0,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          63.3,
+          "StorageManagementService"
+        ],
+        [
+          28.9,
+          "Python"
+        ],
+        [
+          16.5,
+          "Codex (Renderer)"
+        ],
+        [
+          15.7,
+          "WindowServer"
+        ],
+        [
+          13.4,
+          "photolibraryd"
+        ],
+        [
+          8.2,
+          "WhatsApp"
+        ],
+        [
+          7.8,
+          "fseventsd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "aggregate",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-r1-data"
+    ],
+    "seconds": 1.925028584082611,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 381.3,
+      "top": [
+        [
+          55.3,
+          "StorageManagementService"
+        ],
+        [
+          39.1,
+          "git"
+        ],
+        [
+          37.1,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          21.4,
+          "Python"
+        ],
+        [
+          18.8,
+          "runningboardd"
+        ],
+        [
+          16.6,
+          "WindowServer"
+        ],
+        [
+          16.0,
+          "diskarbitrationd"
+        ],
+        [
+          13.8,
+          "softwareupdated"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "join",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-r1-data"
+    ],
+    "seconds": 2.9275907500414178,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 512.3000000000001,
+      "top": [
+        [
+          159.8,
+          "Codex (Renderer)"
+        ],
+        [
+          61.2,
+          "StorageManagementService"
+        ],
+        [
+          41.4,
+          "git"
+        ],
+        [
+          28.5,
+          "deleted"
+        ],
+        [
+          26.5,
+          "apteva-server"
+        ],
+        [
+          23.5,
+          "fseventsd"
+        ],
+        [
+          16.1,
+          "WindowServer"
+        ],
+        [
+          13.0,
+          "Finder"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-fields-r1-data"
+    ],
+    "seconds": 7.974223166005686,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 540.6,
+      "top": [
+        [
+          55.9,
+          "StorageManagementService"
+        ],
+        [
+          47.8,
+          "git"
+        ],
+        [
+          37.6,
+          "deleted"
+        ],
+        [
+          36.6,
+          "ReportCrashService"
+        ],
+        [
+          29.2,
+          "coreaudiod"
+        ],
+        [
+          28.3,
+          "apteva-server"
+        ],
+        [
+          25.4,
+          "WindowServer"
+        ],
+        [
+          25.3,
+          "nsattributedstringagent"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-r1-data"
+    ],
+    "seconds": 17.25071658298839,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 393.1,
+      "top": [
+        [
+          58.1,
+          "BackgroundShortcutRunner"
+        ],
+        [
+          40.0,
+          "ReportCrashService"
+        ],
+        [
+          33.7,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          32.7,
+          "StorageManagementService"
+        ],
+        [
+          31.0,
+          "deleted"
+        ],
+        [
+          27.2,
+          "Codex (Renderer)"
+        ],
+        [
+          23.8,
+          "apteva-server"
+        ],
+        [
+          22.6,
+          "WindowServer"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-r1-data"
+    ],
+    "seconds": 93.1697366660228,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 293.3,
+      "top": [
+        [
+          54.9,
+          "StorageManagementService"
+        ],
+        [
+          44.6,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          27.0,
+          "bin"
+        ],
+        [
+          21.6,
+          "WindowServer"
+        ],
+        [
+          14.8,
+          "apteva-server"
+        ],
+        [
+          13.6,
+          "bin"
+        ],
+        [
+          9.3,
+          "tccd"
+        ],
+        [
+          9.2,
+          "Storage"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 1,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-batch-r1-data"
+    ],
+    "seconds": 4.492893458926119,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 342.7,
+      "top": [
+        [
+          66.0,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          30.6,
+          "Codex (Renderer)"
+        ],
+        [
+          29.5,
+          "git"
+        ],
+        [
+          23.3,
+          "StorageManagementService"
+        ],
+        [
+          22.7,
+          "fseventsd"
+        ],
+        [
+          18.1,
+          "fileproviderd"
+        ],
+        [
+          17.8,
+          "WindowServer"
+        ],
+        [
+          16.1,
+          "bird"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-current-bench",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-current-bench-r2-data"
+    ],
+    "seconds": 5.907306125038303,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 394.6,
+      "top": [
+        [
+          74.0,
+          "Codex (Renderer)"
+        ],
+        [
+          48.5,
+          "Storage"
+        ],
+        [
+          39.8,
+          "fileproviderd"
+        ],
+        [
+          29.7,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          29.4,
+          "git"
+        ],
+        [
+          24.4,
+          "fseventsd"
+        ],
+        [
+          24.3,
+          "WindowServer"
+        ],
+        [
+          18.8,
+          "bin"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-baseline-bench",
+    "repetition": 2,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-baseline-bench-r2-data"
+    ],
+    "seconds": 6.460466208984144,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 256.5,
+      "top": [
+        [
+          46.8,
+          "git"
+        ],
+        [
+          30.0,
+          "Codex (Renderer)"
+        ],
+        [
+          29.7,
+          "fileproviderd"
+        ],
+        [
+          27.1,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          20.3,
+          "WindowServer"
+        ],
+        [
+          19.2,
+          "StorageManagementService"
+        ],
+        [
+          15.4,
+          "cloudd"
+        ],
+        [
+          13.8,
+          "apteva-server"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "compatibility",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-r2-data"
+    ],
+    "seconds": 1.4122301660245284,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 218.5,
+      "top": [
+        [
+          35.5,
+          "cloudd"
+        ],
+        [
+          25.7,
+          "fileproviderd"
+        ],
+        [
+          23.9,
+          "Codex (Renderer)"
+        ],
+        [
+          15.6,
+          "WindowServer"
+        ],
+        [
+          12.9,
+          "fseventsd"
+        ],
+        [
+          12.5,
+          "StorageManagementService"
+        ],
+        [
+          12.2,
+          "bin"
+        ],
+        [
+          11.2,
+          "ApplicationsStorageExtension"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-comparison",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-comparison-r2-data"
+    ],
+    "seconds": 32.46837129094638,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 303.2,
+      "top": [
+        [
+          60.2,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          34.4,
+          "StorageManagementService"
+        ],
+        [
+          27.9,
+          "Codex (Renderer)"
+        ],
+        [
+          25.5,
+          "fseventsd"
+        ],
+        [
+          22.4,
+          "fileproviderd"
+        ],
+        [
+          18.6,
+          "cloudd"
+        ],
+        [
+          15.9,
+          "apteva-server"
+        ],
+        [
+          13.6,
+          "WindowServer"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "batch",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/batch-r2-data"
+    ],
+    "seconds": 22.141627458971925,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 270.8,
+      "top": [
+        [
+          56.3,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          42.5,
+          "StorageManagementService"
+        ],
+        [
+          30.9,
+          "Storage"
+        ],
+        [
+          23.1,
+          "cloudd"
+        ],
+        [
+          17.5,
+          "WindowServer"
+        ],
+        [
+          11.3,
+          "trustd"
+        ],
+        [
+          8.4,
+          "Codex (Renderer)"
+        ],
+        [
+          8.3,
+          "fseventsd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "aggregate",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-r2-data"
+    ],
+    "seconds": 1.7327448750147596,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 429.40000000000003,
+      "top": [
+        [
+          120.9,
+          "com.piriform.ccleaner.services.xpc"
+        ],
+        [
+          61.7,
+          "StorageManagementService"
+        ],
+        [
+          58.8,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          51.1,
+          "git"
+        ],
+        [
+          29.1,
+          "trustd"
+        ],
+        [
+          13.8,
+          "mobileassetd"
+        ],
+        [
+          13.3,
+          "deleted"
+        ],
+        [
+          11.1,
+          "siriactionsd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "join",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-r2-data"
+    ],
+    "seconds": 3.0771870829630643,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 367.7,
+      "top": [
+        [
+          82.7,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          69.8,
+          "StorageManagementService"
+        ],
+        [
+          61.0,
+          "git"
+        ],
+        [
+          30.5,
+          "Codex (Renderer)"
+        ],
+        [
+          27.5,
+          "ChatGPT"
+        ],
+        [
+          14.1,
+          "deleted"
+        ],
+        [
+          13.9,
+          "mobileassetd"
+        ],
+        [
+          10.9,
+          "BackgroundShortcutRunner"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-fields-r2-data"
+    ],
+    "seconds": 5.963594457949512,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 415.5,
+      "top": [
+        [
+          102.9,
+          "Codex (Renderer)"
+        ],
+        [
+          77.2,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          60.8,
+          "StorageManagementService"
+        ],
+        [
+          53.2,
+          "git"
+        ],
+        [
+          19.6,
+          "Codex (Renderer)"
+        ],
+        [
+          10.0,
+          "bin"
+        ],
+        [
+          9.5,
+          "BackgroundShortcutRunner"
+        ],
+        [
+          9.2,
+          "codex"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-r2-data"
+    ],
+    "seconds": 17.778154458035715,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 433.2,
+      "top": [
+        [
+          149.7,
+          "Codex (Renderer)"
+        ],
+        [
+          51.8,
+          "StorageManagementService"
+        ],
+        [
+          41.9,
+          "git"
+        ],
+        [
+          39.2,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          24.4,
+          "fseventsd"
+        ],
+        [
+          14.1,
+          "sysmond"
+        ],
+        [
+          12.8,
+          "BackgroundShortcutRunner"
+        ],
+        [
+          12.6,
+          "ChatGPT"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-r2-data"
+    ],
+    "seconds": 77.5714339169208,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 332.6,
+      "top": [
+        [
+          64.3,
+          "StorageManagementService"
+        ],
+        [
+          57.9,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          53.2,
+          "git"
+        ],
+        [
+          42.6,
+          "Codex (Renderer)"
+        ],
+        [
+          20.6,
+          "WindowServer"
+        ],
+        [
+          15.3,
+          "remindd"
+        ],
+        [
+          14.7,
+          "accountsd"
+        ],
+        [
+          13.1,
+          "Codex (Service)"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 2,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-batch-r2-data"
+    ],
+    "seconds": 3.922428666963242,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 353.09999999999997,
+      "top": [
+        [
+          75.1,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          62.2,
+          "StorageManagementService"
+        ],
+        [
+          36.8,
+          "WindowServer"
+        ],
+        [
+          33.6,
+          "bin"
+        ],
+        [
+          33.4,
+          "Storage"
+        ],
+        [
+          19.2,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          16.7,
+          "sysmond"
+        ],
+        [
+          13.3,
+          "Google Chrome Helper"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-baseline-bench",
+    "repetition": 3,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-baseline-bench-r3-data"
+    ],
+    "seconds": 5.356698332936503,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 345.6,
+      "top": [
+        [
+          48.3,
+          "CommCenter"
+        ],
+        [
+          40.5,
+          "StorageManagementService"
+        ],
+        [
+          37.2,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          28.3,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          20.4,
+          "WindowServer"
+        ],
+        [
+          17.7,
+          "cloudd"
+        ],
+        [
+          16.4,
+          "callservicesd"
+        ],
+        [
+          10.5,
+          "apteva-server"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-current-bench",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-current-bench-r3-data"
+    ],
+    "seconds": 5.708504166104831,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 233.0,
+      "top": [
+        [
+          52.6,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          45.9,
+          "StorageManagementService"
+        ],
+        [
+          21.4,
+          "WindowServer"
+        ],
+        [
+          17.1,
+          "Google Chrome"
+        ],
+        [
+          12.4,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          11.8,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          10.4,
+          "Google Chrome Helper"
+        ],
+        [
+          7.6,
+          "bluetoothd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "compatibility",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-r3-data"
+    ],
+    "seconds": 1.4041598329786211,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 233.79999999999998,
+      "top": [
+        [
+          45.9,
+          "StorageManagementService"
+        ],
+        [
+          41.4,
+          "Storage"
+        ],
+        [
+          29.8,
+          "WindowServer"
+        ],
+        [
+          21.9,
+          "Google Chrome"
+        ],
+        [
+          19.0,
+          "Google Chrome Helper"
+        ],
+        [
+          17.4,
+          "airportd"
+        ],
+        [
+          12.3,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          4.5,
+          "loginwindow"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "kv-comparison",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/kv-comparison-r3-data"
+    ],
+    "seconds": 31.963759541977197,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 305.5,
+      "top": [
+        [
+          69.9,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          54.1,
+          "StorageManagementService"
+        ],
+        [
+          31.2,
+          "WindowServer"
+        ],
+        [
+          27.4,
+          "Google Chrome"
+        ],
+        [
+          17.7,
+          "Google Chrome Helper"
+        ],
+        [
+          16.1,
+          "apteva-server"
+        ],
+        [
+          12.1,
+          "bin"
+        ],
+        [
+          11.3,
+          "airportd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "batch",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-n",
+      "250000",
+      "-engines",
+      "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/batch-r3-data"
+    ],
+    "seconds": 22.596962916082703,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 322.2,
+      "top": [
+        [
+          69.9,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          50.4,
+          "StorageManagementService"
+        ],
+        [
+          38.9,
+          "WindowServer"
+        ],
+        [
+          23.3,
+          "apteva-server"
+        ],
+        [
+          15.6,
+          "Google Chrome"
+        ],
+        [
+          15.2,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          14.3,
+          "bin"
+        ],
+        [
+          13.3,
+          "ANECompilerService"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "aggregate",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-r3-data"
+    ],
+    "seconds": 1.6968050829600543,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 473.0,
+      "top": [
+        [
+          169.8,
+          "Codex (Renderer)"
+        ],
+        [
+          52.2,
+          "StorageManagementService"
+        ],
+        [
+          48.7,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          24.9,
+          "bin"
+        ],
+        [
+          22.8,
+          "WindowServer"
+        ],
+        [
+          20.7,
+          "apteva-server"
+        ],
+        [
+          15.0,
+          "Codex (Service)"
+        ],
+        [
+          13.5,
+          "ANECompilerService"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "join",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-r3-data"
+    ],
+    "seconds": 2.7490239999024197,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 283.4,
+      "top": [
+        [
+          78.7,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          73.1,
+          "StorageManagementService"
+        ],
+        [
+          17.9,
+          "Storage"
+        ],
+        [
+          17.2,
+          "WindowServer"
+        ],
+        [
+          11.1,
+          "ANECompilerService"
+        ],
+        [
+          11.0,
+          "Codex (Renderer)"
+        ],
+        [
+          9.2,
+          "com.apple.geod"
+        ],
+        [
+          8.2,
+          "Codex (Service)"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-fields",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-fields-r3-data"
+    ],
+    "seconds": 5.635649749892764,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 288.4,
+      "top": [
+        [
+          81.6,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          70.9,
+          "StorageManagementService"
+        ],
+        [
+          17.8,
+          "bin"
+        ],
+        [
+          15.3,
+          "Codex (Renderer)"
+        ],
+        [
+          13.3,
+          "WindowServer"
+        ],
+        [
+          8.8,
+          "ANECompilerService"
+        ],
+        [
+          7.9,
+          "Codex (Service)"
+        ],
+        [
+          7.7,
+          "apteva-server"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "computed-collections",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-r3-data"
+    ],
+    "seconds": 17.041687667020597,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 289.0,
+      "top": [
+        [
+          72.9,
+          "ApplicationsStorageExtension"
+        ],
+        [
+          63.7,
+          "StorageManagementService"
+        ],
+        [
+          30.8,
+          "Codex (Renderer)"
+        ],
+        [
+          21.7,
+          "WindowServer"
+        ],
+        [
+          11.9,
+          "bin"
+        ],
+        [
+          11.8,
+          "ANECompilerService"
+        ],
+        [
+          10.0,
+          "Codex (Service)"
+        ],
+        [
+          7.3,
+          "fileproviderd"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-r3-data"
+    ],
+    "seconds": 76.48609879205469,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 303.6,
+      "top": [
+        [
+          58.2,
+          "StorageManagementService"
+        ],
+        [
+          48.4,
+          "siriinferenced"
+        ],
+        [
+          28.4,
+          "Storage"
+        ],
+        [
+          27.8,
+          "WindowServer"
+        ],
+        [
+          22.7,
+          "apteva-server"
+        ],
+        [
+          22.6,
+          "duetexpertd"
+        ],
+        [
+          22.0,
+          "Google Chrome Helper (Renderer)"
+        ],
+        [
+          17.6,
+          "Google Chrome Helper"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "durable-batch",
+    "repetition": 3,
+    "binary": "current-bench",
+    "command": [
+      "<output>/current-bench",
+      "-durable",
+      "-n",
+      "20000",
+      "-engines",
+      "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/durable-batch-r3-data"
+    ],
+    "seconds": 4.100684291915968,
+    "returncode": 0,
+    "background": {
+      "summed_cpu_percent": 300.09999999999997,
+      "top": [
+        [
+          60.6,
+          "siriinferenced"
+        ],
+        [
+          48.3,
+          "StorageManagementService"
+        ],
+        [
+          39.4,
+          "Storage"
+        ],
+        [
+          37.8,
+          "git"
+        ],
+        [
+          37.3,
+          "node"
+        ],
+        [
+          28.3,
+          "WindowServer"
+        ],
+        [
+          16.3,
+          "WhatsApp"
+        ],
+        [
+          5.8,
+          "apteva-server"
+        ]
+      ]
+    }
+  }
+]

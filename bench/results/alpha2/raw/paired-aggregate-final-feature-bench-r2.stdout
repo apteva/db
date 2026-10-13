@@ -1,0 +1,13 @@
+
+aggregation over 50000 documents (ms per query, best of 5; lower is better; ours = one core, ours-par = all cores)
+
+query                                                    ours     ours-par
+group by region: sum, count                               7.2          2.5
+filter + group + sort + limit                             8.0          2.7
+range filter, global count + avg                          8.5          0.7
+group by customer (100k groups), top 10                  23.5         12.3
+indexed: one customer's orders, sum                       0.0            -
+indexed: 20 customers ($in), count                        0.0            -
+indexed: amount > 999.5 (0.05%), group by region          0.0            -
+load (seconds)                                           0.03         0.03
+build two indexes (seconds)                              0.14            -

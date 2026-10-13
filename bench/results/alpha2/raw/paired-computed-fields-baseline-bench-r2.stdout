@@ -1,0 +1,21 @@
+computed fields: n=50000 GOMAXPROCS=10 batch=1000 sync=off; native/manual/readtime; retain all trials
+ours-native        insert               trial=1 934.676 ns/op
+ours-native        upsert               trial=1 783.497 ns/op
+ours-native        read-derived         trial=1 282.796 ns/op
+ours-native        read-derived-10      trial=1 42.217 ns/op
+ours-native        read-derived-32      trial=1 34.013 ns/op
+ours-native        index-build+verify   trial=1 1354.413 ns/op
+ours-native        indexed-filter       trial=1 35835.450 ns/op
+ours-manual        insert               trial=1 599.364 ns/op
+ours-manual        upsert               trial=1 335.899 ns/op
+ours-manual        read-derived         trial=1 273.101 ns/op
+ours-manual        read-derived-10      trial=1 36.622 ns/op
+ours-manual        read-derived-32      trial=1 39.653 ns/op
+ours-manual        index-build+verify   trial=1 1369.491 ns/op
+ours-manual        indexed-filter       trial=1 40293.750 ns/op
+ours-readtime      insert               trial=1 418.289 ns/op
+ours-readtime      upsert               trial=1 248.321 ns/op
+ours-readtime      read-derived         trial=1 267.086 ns/op
+ours-readtime      read-derived-10      trial=1 50.400 ns/op
+ours-readtime      read-derived-32      trial=1 36.373 ns/op
+ours-readtime      derive-filter-scan   trial=1 3183979.200 ns/op

@@ -1,0 +1,116 @@
+[
+  {
+    "engine": "ours-native",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 1733.9146
+  },
+  {
+    "engine": "ours-native",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 2057.35
+  },
+  {
+    "engine": "ours-native",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 850.75
+  },
+  {
+    "engine": "ours-native",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 65606.083
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 129.615334
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-par10",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 20.132875
+  },
+  {
+    "engine": "ours-native",
+    "phase": "point-par32",
+    "trial": 1,
+    "ops": 1000000,
+    "ns_per_op": 20.952833
+  },
+  {
+    "engine": "ours-native",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 78000,
+    "disk_bytes": 8795213
+  },
+  {
+    "engine": "ours-query",
+    "phase": "insert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 369.01875
+  },
+  {
+    "engine": "ours-query",
+    "phase": "upsert",
+    "trial": 1,
+    "ops": 20000,
+    "ns_per_op": 191.6354
+  },
+  {
+    "engine": "ours-query",
+    "phase": "delete",
+    "trial": 1,
+    "ops": 2000,
+    "ns_per_op": 221.8125
+  },
+  {
+    "engine": "ours-query",
+    "phase": "backfill",
+    "trial": 1,
+    "ops": 18000,
+    "ns_per_op": 353.8611111111111
+  },
+  {
+    "engine": "ours-query",
+    "phase": "projection-backfill",
+    "trial": 1,
+    "ops": 18000,
+    "ns_per_op": 284.59027777777777
+  },
+  {
+    "engine": "ours-query",
+    "phase": "query-all",
+    "trial": 1,
+    "ops": 21,
+    "ns_per_op": 1567700.380952381
+  },
+  {
+    "engine": "ours-query",
+    "phase": "point-query",
+    "trial": 1,
+    "ops": 1000,
+    "ns_per_op": 18495.791
+  },
+  {
+    "engine": "ours-query",
+    "phase": "disk",
+    "trial": 1,
+    "ops": 1,
+    "ns_per_op": 139167,
+    "disk_bytes": 8458219
+  }
+]

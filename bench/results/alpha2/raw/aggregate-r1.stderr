@@ -1,0 +1,23 @@
+ours       load 0.04s  q1 4.4ms  q2 5.9ms  q3 3.0ms  q4 9.8ms
+ours-par   load 0.04s  q1 1.0ms  q2 1.3ms  q3 0.8ms  q4 9.5ms
+pebble     load 0.16s  q1 6.3ms  q2 7.6ms  q3 5.1ms  q4 12.4ms
+sqlite-c   load 0.05s  q1 13.5ms  q2 6.8ms  q3 2.3ms  q4 19.8ms
+sqlite-go  load 0.05s  q1 23.0ms  q2 9.6ms  q3 4.3ms  q4 37.3ms
+        1.91 real         1.60 user         0.21 sys
+           115900416  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               10771  page reclaims
+                 578  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 475  signals received
+                1407  voluntary context switches
+                5867  involuntary context switches
+         21764865979  instructions retired
+          5550654826  cycles elapsed
+            60621616  peak memory footprint

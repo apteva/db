@@ -1,0 +1,15 @@
+
+keys=20000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert   insert-par10   insert-par50       disk
+ours-sync-batch1000           5064           4929           5621        9MB
+pebble-sync-batch1000           8212           5302           6042        7MB
+sqlite-c-sync-txn1000          13545          19626          26184        8MB
+
+workload=seq (ns/op, lower is better)
+engine                     insert   insert-par10   insert-par50       disk
+ours-sync-batch1000           4128           5683           5482        9MB
+pebble-sync-batch1000           8489           6538           8212        7MB
+sqlite-c-sync-txn1000           7445          15753          23484        8MB
+

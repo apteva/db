@@ -28,3 +28,12 @@ transaction conflicts, 256 MiB atomic staging, one full-access server token, no
 replication/per-user permissions. Query budgets cover accounted execution storage,
 not total RSS, page caches, snapshot versions or framing. Benchmark results report
 observations and do not establish a universal speed/memory lead.
+
+[Completed validation report](https://github.com/apteva/db/blob/main/bench/results/alpha2/VALIDATION.md):
+three fresh repeats, exact independent result checks, corrected cache settings
+and paired alpha.1 comparisons. Median native 100-row indexed pages took 93 µs,
+physical cursors 25 µs and 80 KB raw document reads 4.6 µs on an Apple M1 Pro.
+Some inserts/index build and parallel-read samples were slower; all observations
+and limits are retained. Linux/macOS unit/race/fuzz/stress/soak and release checks
+passed; all four download checksums and fresh tagged-module/daemon feature checks
+were verified.

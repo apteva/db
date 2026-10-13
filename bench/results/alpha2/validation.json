@@ -1,0 +1,5454 @@
+{
+  "complete": true,
+  "metadata": {
+    "started_at": "2026-10-13T13:59:47.430796+00:00",
+    "source_revision": "177a74a8ae0a6998930aef5ec64aab9a7a00faff",
+    "go": "go version go1.25.1 darwin/arm64",
+    "binaries": {
+      "baseline-bench": "7789d25e01cda7eb35db778bfe28fd2a078879b2250edb894df8d229ccd7fabc",
+      "current-bench": "6a9a802533427500a92f2c16fbe4e4d1328efe527149438fac655b559f66da42",
+      "final-feature-bench": "2a4c71fc9396e5d894cdf5303151c2d4acc5bc763d4dc7809344e486aef0f5b5"
+    },
+    "method": "Serial fresh processes/directories. Three retained outer repetitions. Paired KV order alternates. Aggregation/join use legacy best-of-five inner times. No local builds/tests during measurements. Background activity recorded before each process.",
+    "finished_at": "2026-10-13T14:09:14.909517+00:00",
+    "final_feature_source": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+    "followup_started_at": "2026-10-13T14:21:44.419584+00:00",
+    "correction": "The initial compatibility passes used Pebble default cache. They are retained as preliminary; corrected comparisons set 512 MiB cache and 64 MiB memtable, matching the legacy comparison profile.",
+    "followup_finished_at": "2026-10-13T14:22:03.447627+00:00",
+    "machine": {
+      "cpu": "Apple M1 Pro",
+      "memory_bytes": 17179869184,
+      "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428"
+    }
+  },
+  "feature_measurements": [
+    {
+      "engine": "ours",
+      "phase": "build-compound",
+      "ns_per_op": {
+        "median": 707.59584,
+        "min": 655.83,
+        "max": 725.4625,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 345.11344,
+        "min": 345.11056,
+        "max": 345.22,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "build-nullable-unique",
+      "ns_per_op": {
+        "median": 374.5625,
+        "min": 369.45916,
+        "max": 377.56082,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 135.74832,
+        "min": 135.74832,
+        "max": 135.74832,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "compound-page",
+      "ns_per_op": {
+        "median": 92954.16666666667,
+        "min": 89073.6,
+        "max": 94983.33333333333,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 9238.4,
+        "min": 9238.4,
+        "max": 9238.4,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "fallback-sort-page",
+      "ns_per_op": {
+        "median": 5613095.833333333,
+        "min": 5516427.766666667,
+        "max": 5715779.166666667,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 128344,
+        "min": 128344,
+        "max": 128344,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "large-document-read",
+      "ns_per_op": {
+        "median": 4617.10546875,
+        "min": 4479.736328125,
+        "max": 4999.0234375,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 304,
+        "min": 304,
+        "max": 304,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "large-document-write",
+      "ns_per_op": {
+        "median": 22178.7109375,
+        "min": 21961.59375,
+        "max": 23537.4375,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 615.75,
+        "min": 611.5,
+        "max": 616.625,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "load",
+      "ns_per_op": {
+        "median": 131.87,
+        "min": 122.22334,
+        "max": 132.04,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 5.2888,
+        "min": 5.28112,
+        "max": 5.2888,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "memory-limit-rejection",
+      "ns_per_op": {
+        "median": 3236.133333333333,
+        "min": 3123.6,
+        "max": 3893.0666666666666,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 5968,
+        "min": 5968,
+        "max": 5968,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "ours",
+      "phase": "ordered-cursor",
+      "ns_per_op": {
+        "median": 24743.066666666666,
+        "min": 24045.833333333332,
+        "max": 26179.166666666668,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 2144,
+        "min": 2144,
+        "max": 2144,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble",
+      "phase": "large-document-read",
+      "ns_per_op": {
+        "median": 14517.0078125,
+        "min": 13301.025390625,
+        "max": 15943.197265625,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 216.8125,
+        "min": 216.484375,
+        "max": 217.25,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble",
+      "phase": "large-document-write",
+      "ns_per_op": {
+        "median": 373100.9140625,
+        "min": 368462.890625,
+        "max": 426043.9453125,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 27184.4375,
+        "min": 23938.625,
+        "max": 29704.375,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble-manual",
+      "phase": "build-compound",
+      "ns_per_op": {
+        "median": 573.98916,
+        "min": 565.42834,
+        "max": 623.72416,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 49.56496,
+        "min": 49.53312,
+        "max": 49.7192,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble-manual",
+      "phase": "build-nullable-unique",
+      "ns_per_op": {
+        "median": 89.25668,
+        "min": 87.6575,
+        "max": 89.40334,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble-manual",
+      "phase": "compound-page",
+      "ns_per_op": {
+        "median": 227565.3,
+        "min": 218694.43333333332,
+        "max": 269316.6666666667,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 3919.4666666666667,
+        "min": 3914.6666666666665,
+        "max": 3932.266666666667,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble-manual",
+      "phase": "load",
+      "ns_per_op": {
+        "median": 816.03834,
+        "min": 708.12584,
+        "max": 835.91332,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 34.86896,
+        "min": 34.8,
+        "max": 44.6432,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "pebble-manual",
+      "phase": "ordered-cursor",
+      "ns_per_op": {
+        "median": 135105.53333333333,
+        "min": 130544.46666666666,
+        "max": 151390.3,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 1712.5333333333333,
+        "min": 1712.5333333333333,
+        "max": 1712.5333333333333,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "build-compound",
+      "ns_per_op": {
+        "median": 395.37582,
+        "min": 356.86082,
+        "max": 400.78666,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "build-nullable-unique",
+      "ns_per_op": {
+        "median": 219.32582,
+        "min": 218.83666,
+        "max": 239.62,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 0.00432,
+        "min": 0.00432,
+        "max": 0.00432,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "compound-page",
+      "ns_per_op": {
+        "median": 100005.56666666667,
+        "min": 98606.96666666666,
+        "max": 107155.56666666667,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 3376,
+        "min": 3376,
+        "max": 3376,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "large-document-read",
+      "ns_per_op": {
+        "median": 28960.125,
+        "min": 28395.18359375,
+        "max": 35965.658203125,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 208,
+        "min": 208,
+        "max": 208,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "large-document-write",
+      "ns_per_op": {
+        "median": 326835.9375,
+        "min": 266571.2890625,
+        "max": 334785.484375,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 64,
+        "min": 64,
+        "max": 64,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "load",
+      "ns_per_op": {
+        "median": 1959.30666,
+        "min": 1655.2775,
+        "max": 2198.555,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 104.08192,
+        "min": 104.0816,
+        "max": 104.08192,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-c",
+      "phase": "ordered-cursor",
+      "ns_per_op": {
+        "median": 73291.66666666667,
+        "min": 69052.8,
+        "max": 80818.06666666667,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 3328,
+        "min": 3328,
+        "max": 3328,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "build-compound",
+      "ns_per_op": {
+        "median": 708.81918,
+        "min": 685.87,
+        "max": 791.21668,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 0.02656,
+        "min": 0.02656,
+        "max": 0.02656,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "build-nullable-unique",
+      "ns_per_op": {
+        "median": 406.37082,
+        "min": 397.345,
+        "max": 519.37918,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 0.00288,
+        "min": 0.00288,
+        "max": 0.00288,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "compound-page",
+      "ns_per_op": {
+        "median": 138159.73333333334,
+        "min": 137494.43333333332,
+        "max": 139709.73333333334,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 1680,
+        "min": 1680,
+        "max": 1680,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "large-document-read",
+      "ns_per_op": {
+        "median": 117703.6953125,
+        "min": 113975.1796875,
+        "max": 124006.8359375,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 176,
+        "min": 176,
+        "max": 176,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "large-document-write",
+      "ns_per_op": {
+        "median": 447893.234375,
+        "min": 423648.765625,
+        "max": 545419.921875,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 16,
+        "min": 16,
+        "max": 16,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "load",
+      "ns_per_op": {
+        "median": 1839.28918,
+        "min": 1803.5025,
+        "max": 2483.19834,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 8.01216,
+        "min": 8.01216,
+        "max": 8.01216,
+        "repetitions": 3
+      }
+    },
+    {
+      "engine": "sqlite-go",
+      "phase": "ordered-cursor",
+      "ns_per_op": {
+        "median": 82748.6,
+        "min": 81015.3,
+        "max": 87102.76666666666,
+        "repetitions": 3
+      },
+      "go_allocated_bytes_per_op": {
+        "median": 1696,
+        "min": 1696,
+        "max": 1696,
+        "repetitions": 3
+      }
+    }
+  ],
+  "paired_measurements": [
+    {
+      "feature": "kv",
+      "phase": "random/find-hit",
+      "baseline": {
+        "median": 656.0,
+        "min": 629.0,
+        "max": 678.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 660.0,
+        "min": 659.0,
+        "max": 702.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.6097560975609762
+    },
+    {
+      "feature": "kv",
+      "phase": "random/find-hit-par10",
+      "baseline": {
+        "median": 87.0,
+        "min": 75.0,
+        "max": 101.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 88.0,
+        "min": 80.0,
+        "max": 92.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 1.1494252873563315
+    },
+    {
+      "feature": "kv",
+      "phase": "random/find-miss",
+      "baseline": {
+        "median": 427.0,
+        "min": 353.0,
+        "max": 437.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 431.0,
+        "min": 423.0,
+        "max": 436.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.936768149882905
+    },
+    {
+      "feature": "kv",
+      "phase": "random/insert",
+      "baseline": {
+        "median": 763.0,
+        "min": 737.0,
+        "max": 766.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 764.0,
+        "min": 759.0,
+        "max": 783.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.1310615989515096
+    },
+    {
+      "feature": "kv",
+      "phase": "random/scan",
+      "baseline": {
+        "median": 46.0,
+        "min": 45.0,
+        "max": 47.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 48.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 4.347826086956519
+    },
+    {
+      "feature": "kv",
+      "phase": "random/settle",
+      "baseline": {
+        "median": 555.0,
+        "min": 470.0,
+        "max": 1926.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 665.0,
+        "min": 596.0,
+        "max": 1623.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 19.819819819819816
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/find-hit",
+      "baseline": {
+        "median": 952.0,
+        "min": 929.0,
+        "max": 957.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 941.0,
+        "min": 915.0,
+        "max": 967.0,
+        "repetitions": 3
+      },
+      "median_change_percent": -1.1554621848739455
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/find-hit-par10",
+      "baseline": {
+        "median": 136.0,
+        "min": 134.0,
+        "max": 148.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 150.0,
+        "min": 136.0,
+        "max": 163.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 10.294117647058831
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/find-miss",
+      "baseline": {
+        "median": 860.0,
+        "min": 817.0,
+        "max": 865.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 871.0,
+        "min": 824.0,
+        "max": 871.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 1.2790697674418539
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/insert",
+      "baseline": {
+        "median": 186.0,
+        "min": 184.0,
+        "max": 188.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 189.0,
+        "min": 185.0,
+        "max": 211.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 1.6129032258064502
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/scan",
+      "baseline": {
+        "median": 47.0,
+        "min": 47.0,
+        "max": 49.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 51.0,
+        "repetitions": 3
+      },
+      "median_change_percent": 2.127659574468077
+    },
+    {
+      "feature": "kv",
+      "phase": "seq/settle",
+      "baseline": {
+        "median": 1259.0,
+        "min": 484.0,
+        "max": 1352.0,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 592.0,
+        "min": 430.0,
+        "max": 1266.0,
+        "repetitions": 3
+      },
+      "median_change_percent": -52.97855440826053
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "insert",
+      "baseline": {
+        "median": 929.07418,
+        "min": 908.77416,
+        "max": 934.67584,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 999.925,
+        "min": 918.56166,
+        "max": 1021.27666,
+        "repetitions": 3
+      },
+      "median_change_percent": 7.625959425543405
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "upsert",
+      "baseline": {
+        "median": 755.62166,
+        "min": 744.48582,
+        "max": 783.49668,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 747.86582,
+        "min": 739.11666,
+        "max": 772.1775,
+        "repetitions": 3
+      },
+      "median_change_percent": -1.0264184327378856
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "read-derived",
+      "baseline": {
+        "median": 270.01646,
+        "min": 269.497915,
+        "max": 282.79604,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 273.414375,
+        "min": 253.801875,
+        "max": 274.849585,
+        "repetitions": 3
+      },
+      "median_change_percent": 1.2584103206152664
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "read-derived-10",
+      "baseline": {
+        "median": 38.0025,
+        "min": 33.916665,
+        "max": 42.216875,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 42.438955,
+        "min": 38.935625,
+        "max": 51.523125,
+        "repetitions": 3
+      },
+      "median_change_percent": 11.674113545161502
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "read-derived-32",
+      "baseline": {
+        "median": 32.85396,
+        "min": 32.096665,
+        "max": 34.013335,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 32.955205,
+        "min": 27.445,
+        "max": 39.938335,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.3081668085064937
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "index-build+verify",
+      "baseline": {
+        "median": 1354.41334,
+        "min": 1331.50084,
+        "max": 1399.59832,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 1454.53,
+        "min": 1364.07,
+        "max": 1482.32832,
+        "repetitions": 3
+      },
+      "median_change_percent": 7.391883780471331
+    },
+    {
+      "feature": "computed-fields",
+      "phase": "indexed-filter",
+      "baseline": {
+        "median": 36716.65,
+        "min": 35835.45,
+        "max": 36887.5,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 33731.25,
+        "min": 32122.95,
+        "max": 37675,
+        "repetitions": 3
+      },
+      "median_change_percent": -8.13091608303046
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "insert",
+      "baseline": {
+        "median": 1714.3646,
+        "min": 1646.74375,
+        "max": 1718.7354,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 1726.74375,
+        "min": 1678.29165,
+        "max": 1733.9146,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.7220838554412579
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "upsert",
+      "baseline": {
+        "median": 2103.86665,
+        "min": 2095.75415,
+        "max": 2163.19375,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 2118.82705,
+        "min": 2057.35,
+        "max": 2214.31665,
+        "repetitions": 3
+      },
+      "median_change_percent": 0.7110906957910057
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "delete",
+      "baseline": {
+        "median": 1002.6875,
+        "min": 892.4585,
+        "max": 1011.9795,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 850.75,
+        "min": 819.8125,
+        "max": 931.667,
+        "repetitions": 3
+      },
+      "median_change_percent": -15.153026241974688
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "query-all",
+      "baseline": {
+        "median": 67586.958,
+        "min": 66254.833,
+        "max": 67652.209,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 65606.083,
+        "min": 64977.542,
+        "max": 68028.875,
+        "repetitions": 3
+      },
+      "median_change_percent": -2.930853908234776
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "point-query",
+      "baseline": {
+        "median": 127.322167,
+        "min": 126.931791,
+        "max": 127.559792,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 129.615334,
+        "min": 127.180125,
+        "max": 130.618417,
+        "repetitions": 3
+      },
+      "median_change_percent": 1.8010744350589025
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "point-par10",
+      "baseline": {
+        "median": 19.202042,
+        "min": 18.708625,
+        "max": 19.428583,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 20.132875,
+        "min": 18.078833,
+        "max": 21.638875,
+        "repetitions": 3
+      },
+      "median_change_percent": 4.847572982081805
+    },
+    {
+      "feature": "computed-collections",
+      "phase": "point-par32",
+      "baseline": {
+        "median": 21.438375,
+        "min": 19.428833,
+        "max": 21.489666,
+        "repetitions": 3
+      },
+      "current": {
+        "median": 20.952833,
+        "min": 18.085875,
+        "max": 21.191041,
+        "repetitions": 3
+      },
+      "median_change_percent": -2.2648265085390196
+    }
+  ],
+  "legacy_measurements": [
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 545.0,
+        "min": 487.0,
+        "max": 557.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 73.0,
+        "min": 72.0,
+        "max": 75.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 315.0,
+        "min": 285.0,
+        "max": 317.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 560.0,
+        "min": 518.0,
+        "max": 571.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 52.0,
+        "min": 51.0,
+        "max": 52.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 181.0,
+        "min": 174.0,
+        "max": 413.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 689.0,
+        "min": 660.0,
+        "max": 780.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 99.0,
+        "min": 88.0,
+        "max": 221.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 603.0,
+        "min": 580.0,
+        "max": 927.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 140.0,
+        "min": 139.0,
+        "max": 148.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 50.0,
+        "min": 45.0,
+        "max": 95.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "ours-batch1000",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 122.0,
+        "min": 119.0,
+        "max": 846.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 1813.0,
+        "min": 1756.0,
+        "max": 1960.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 491.0,
+        "min": 487.0,
+        "max": 506.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 1649.0,
+        "min": 1503.0,
+        "max": 1690.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 854.0,
+        "min": 845.0,
+        "max": 957.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 54.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 2675.0,
+        "min": 2329.0,
+        "max": 2998.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2132.0,
+        "min": 2008.0,
+        "max": 2179.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 517.0,
+        "min": 510.0,
+        "max": 1094.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 1823.0,
+        "min": 1817.0,
+        "max": 2777.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 430.0,
+        "min": 414.0,
+        "max": 790.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 53.0,
+        "min": 50.0,
+        "max": 91.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "pebble-batch1000",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 2305.0,
+        "min": 2072.0,
+        "max": 3433.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2472.0,
+        "min": 2307.0,
+        "max": 2524.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 1865.0,
+        "min": 1797.0,
+        "max": 2093.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 2227.0,
+        "min": 2067.0,
+        "max": 2600.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 10303.0,
+        "min": 9850.0,
+        "max": 14778.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 131.0,
+        "min": 130.0,
+        "max": 134.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 26.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2544.0,
+        "min": 2480.0,
+        "max": 3273.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 2075.0,
+        "min": 2054.0,
+        "max": 2121.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 2295.0,
+        "min": 2217.0,
+        "max": 2363.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 1390.0,
+        "min": 1261.0,
+        "max": 1869.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 117.0,
+        "min": 117.0,
+        "max": 118.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-c-txn1000",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 12.0,
+        "min": 11.0,
+        "max": 27.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 3409.0,
+        "min": 3257.0,
+        "max": 3431.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 6596.0,
+        "min": 6494.0,
+        "max": 7394.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 3227.0,
+        "min": 3179.0,
+        "max": 3652.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 13186.0,
+        "min": 11884.0,
+        "max": 16231.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 102.0,
+        "min": 98.0,
+        "max": 152.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 19.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 3535.0,
+        "min": 3437.0,
+        "max": 3594.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 7059.0,
+        "min": 6946.0,
+        "max": 8816.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 3274.0,
+        "min": 3253.0,
+        "max": 3308.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 1851.0,
+        "min": 1716.0,
+        "max": 2855.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 92.0,
+        "min": 90.0,
+        "max": 95.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "batch",
+      "engine": "sqlite-go-txn1000",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 13.0,
+        "min": 12.0,
+        "max": 43.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4685638.0,
+        "min": 4631585.0,
+        "max": 6667613.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 546903.0,
+        "min": 441977.0,
+        "max": 614590.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 94068.0,
+        "min": 91953.0,
+        "max": 140712.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4473593.0,
+        "min": 4467820.0,
+        "max": 5684531.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 561015.0,
+        "min": 463520.0,
+        "max": 564804.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "ours-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 135730.0,
+        "min": 126751.0,
+        "max": 146123.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4610844.0,
+        "min": 4191595.0,
+        "max": 4782718.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 858738.0,
+        "min": 854429.0,
+        "max": 1025763.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 181993.0,
+        "min": 181758.0,
+        "max": 190496.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4321359.0,
+        "min": 4240755.0,
+        "max": 4674807.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 838552.0,
+        "min": 835430.0,
+        "max": 1022812.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "pebble-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 202701.0,
+        "min": 194242.0,
+        "max": 257356.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4702990.0,
+        "min": 4532623.0,
+        "max": 4946037.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 4808851.0,
+        "min": 4677839.0,
+        "max": 5084705.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 5113007.0,
+        "min": 4598918.0,
+        "max": 5156989.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4799982.0,
+        "min": 4331395.0,
+        "max": 4884574.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 4713763.0,
+        "min": 4488790.0,
+        "max": 4992288.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-c-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 4698051.0,
+        "min": 4139182.0,
+        "max": 4719938.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 4716006.0,
+        "min": 4472093.0,
+        "max": 11469089.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 4513666.0,
+        "min": 4412934.0,
+        "max": 5599499.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 4552334.0,
+        "min": 4349763.0,
+        "max": 5493364.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 5193478.0,
+        "min": 4126938.0,
+        "max": 5204553.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 4882213.0,
+        "min": 4224227.0,
+        "max": 5192840.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable",
+      "engine": "sqlite-go-sync",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 4806860.0,
+        "min": 4370596.0,
+        "max": 5160958.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 5064.0,
+        "min": 5033.0,
+        "max": 5793.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 6150.0,
+        "min": 4929.0,
+        "max": 6814.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 5923.0,
+        "min": 5621.0,
+        "max": 6052.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 5949.0,
+        "min": 4128.0,
+        "max": 5989.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 5683.0,
+        "min": 5362.0,
+        "max": 6202.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "ours-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 6849.0,
+        "min": 5482.0,
+        "max": 7084.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 8204.0,
+        "min": 6383.0,
+        "max": 8212.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 5302.0,
+        "min": 5082.0,
+        "max": 5788.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 5425.0,
+        "min": 5276.0,
+        "max": 6042.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 8036.0,
+        "min": 6887.0,
+        "max": 8489.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 5087.0,
+        "min": 5050.0,
+        "max": 6538.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "pebble-sync-batch1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 6778.0,
+        "min": 6123.0,
+        "max": 8212.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 13545.0,
+        "min": 12451.0,
+        "max": 16507.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 22596.0,
+        "min": 19626.0,
+        "max": 25337.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "random",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 33068.0,
+        "min": 26184.0,
+        "max": 39233.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 7838.0,
+        "min": 7445.0,
+        "max": 8911.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert-par10",
+      "ns_per_op": {
+        "median": 15584.0,
+        "min": 15116.0,
+        "max": 15753.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "durable-batch",
+      "engine": "sqlite-c-sync-txn1000",
+      "workload": "seq",
+      "phase": "insert-par50",
+      "ns_per_op": {
+        "median": 23484.0,
+        "min": 21085.0,
+        "max": 25230.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 656.0,
+        "min": 629.0,
+        "max": 678.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 87.0,
+        "min": 75.0,
+        "max": 101.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 427.0,
+        "min": 353.0,
+        "max": 437.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 763.0,
+        "min": 737.0,
+        "max": 766.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 46.0,
+        "min": 45.0,
+        "max": 47.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 555.0,
+        "min": 470.0,
+        "max": 1926.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 952.0,
+        "min": 929.0,
+        "max": 957.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 136.0,
+        "min": 134.0,
+        "max": 148.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 860.0,
+        "min": 817.0,
+        "max": 865.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 186.0,
+        "min": 184.0,
+        "max": 188.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 47.0,
+        "min": 47.0,
+        "max": 49.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 1259.0,
+        "min": 484.0,
+        "max": 1352.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 466.0,
+        "min": 462.0,
+        "max": 488.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 98.0,
+        "min": 87.0,
+        "max": 99.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 293.0,
+        "min": 285.0,
+        "max": 306.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 596.0,
+        "min": 591.0,
+        "max": 608.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 47.0,
+        "min": 46.0,
+        "max": 48.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 580.0,
+        "min": 557.0,
+        "max": 1195.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 678.0,
+        "min": 553.0,
+        "max": 682.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 102.0,
+        "min": 91.0,
+        "max": 104.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 541.0,
+        "min": 477.0,
+        "max": 568.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 177.0,
+        "min": 175.0,
+        "max": 180.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 46.0,
+        "min": 45.0,
+        "max": 47.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 589.0,
+        "min": 565.0,
+        "max": 1191.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2003.0,
+        "min": 1986.0,
+        "max": 2027.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 498.0,
+        "min": 495.0,
+        "max": 528.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 1770.0,
+        "min": 1726.0,
+        "max": 1779.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 1211.0,
+        "min": 1209.0,
+        "max": 1287.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 51.0,
+        "min": 48.0,
+        "max": 52.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 3019.0,
+        "min": 2324.0,
+        "max": 3023.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 1941.0,
+        "min": 1812.0,
+        "max": 2021.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 471.0,
+        "min": 459.0,
+        "max": 487.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 1701.0,
+        "min": 1688.0,
+        "max": 1803.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 869.0,
+        "min": 833.0,
+        "max": 872.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 49.0,
+        "min": 46.0,
+        "max": 51.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "pebble",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 2474.0,
+        "min": 1983.0,
+        "max": 2529.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2519.0,
+        "min": 2484.0,
+        "max": 2550.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 1914.0,
+        "min": 1821.0,
+        "max": 1926.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 2202.0,
+        "min": 1967.0,
+        "max": 2299.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 17154.0,
+        "min": 16163.0,
+        "max": 24473.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 131.0,
+        "min": 129.0,
+        "max": 136.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 14.0,
+        "min": 10.0,
+        "max": 29.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 2476.0,
+        "min": 2401.0,
+        "max": 2601.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 2114.0,
+        "min": 1876.0,
+        "max": 2121.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 2285.0,
+        "min": 2265.0,
+        "max": 2963.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 9913.0,
+        "min": 9904.0,
+        "max": 14266.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 117.0,
+        "min": 115.0,
+        "max": 120.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-c",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 2.0,
+        "min": 1.0,
+        "max": 17.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 3389.0,
+        "min": 3162.0,
+        "max": 3456.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 6776.0,
+        "min": 6266.0,
+        "max": 7048.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 3194.0,
+        "min": 3037.0,
+        "max": 3231.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 28178.0,
+        "min": 26838.0,
+        "max": 34460.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 102.0,
+        "min": 100.0,
+        "max": 103.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 16.0,
+        "min": 15.0,
+        "max": 105.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 3380.0,
+        "min": 3187.0,
+        "max": 3426.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 6657.0,
+        "min": 6551.0,
+        "max": 7200.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 3065.0,
+        "min": 3020.0,
+        "max": 3202.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 13622.0,
+        "min": 12849.0,
+        "max": 18217.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 90.0,
+        "min": 90.0,
+        "max": 95.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "engine": "sqlite-go",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 11.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 660.0,
+        "min": 659.0,
+        "max": 702.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 88.0,
+        "min": 80.0,
+        "max": 92.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 431.0,
+        "min": 423.0,
+        "max": 436.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 764.0,
+        "min": 759.0,
+        "max": 783.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 48.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "random",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 665.0,
+        "min": 596.0,
+        "max": 1623.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit",
+      "ns_per_op": {
+        "median": 941.0,
+        "min": 915.0,
+        "max": 967.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-hit-par10",
+      "ns_per_op": {
+        "median": 150.0,
+        "min": 136.0,
+        "max": 163.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "find-miss",
+      "ns_per_op": {
+        "median": 871.0,
+        "min": 824.0,
+        "max": 871.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "insert",
+      "ns_per_op": {
+        "median": 189.0,
+        "min": 185.0,
+        "max": 211.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "scan",
+      "ns_per_op": {
+        "median": 48.0,
+        "min": 47.0,
+        "max": 51.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "engine": "ours",
+      "workload": "seq",
+      "phase": "settle",
+      "ns_per_op": {
+        "median": 592.0,
+        "min": 430.0,
+        "max": 1266.0,
+        "repetitions": 3
+      }
+    }
+  ],
+  "aggregation_observations": [
+    {
+      "binary": "baseline-bench",
+      "query": "filter + group + sort + limit",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 5.7,
+        "min": 5.4,
+        "max": 5.7,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "filter + group + sort + limit",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 1.2,
+        "min": 1.1,
+        "max": 1.2,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "group by customer (100k groups), top 10",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 9.6,
+        "min": 9.4,
+        "max": 9.8,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "group by customer (100k groups), top 10",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 8.5,
+        "min": 7.7,
+        "max": 9.1,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "group by region: sum, count",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 4.0,
+        "min": 4.0,
+        "max": 4.3,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "group by region: sum, count",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 0.9,
+        "min": 0.9,
+        "max": 1.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "load (seconds)",
+      "engine": "ours",
+      "unit": "seconds",
+      "printed_time": {
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "load (seconds)",
+      "engine": "ours-par",
+      "unit": "seconds",
+      "printed_time": {
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "range filter, global count + avg",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 2.8,
+        "min": 2.7,
+        "max": 2.9,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "baseline-bench",
+      "query": "range filter, global count + avg",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 0.7,
+        "min": 0.7,
+        "max": 0.8,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "filter + group + sort + limit",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 5.6,
+        "min": 5.6,
+        "max": 8.0,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "filter + group + sort + limit",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 1.3,
+        "min": 1.2,
+        "max": 2.7,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "group by customer (100k groups), top 10",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 10.6,
+        "min": 8.8,
+        "max": 23.5,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "group by customer (100k groups), top 10",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 9.8,
+        "min": 9.5,
+        "max": 12.3,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "group by region: sum, count",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 4.4,
+        "min": 4.3,
+        "max": 7.2,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "group by region: sum, count",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 1.0,
+        "min": 1.0,
+        "max": 2.5,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "load (seconds)",
+      "engine": "ours",
+      "unit": "seconds",
+      "printed_time": {
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "load (seconds)",
+      "engine": "ours-par",
+      "unit": "seconds",
+      "printed_time": {
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "range filter, global count + avg",
+      "engine": "ours",
+      "unit": "ms",
+      "printed_time": {
+        "median": 3.0,
+        "min": 3.0,
+        "max": 8.5,
+        "repetitions": 3
+      }
+    },
+    {
+      "binary": "final-feature-bench",
+      "query": "range filter, global count + avg",
+      "engine": "ours-par",
+      "unit": "ms",
+      "printed_time": {
+        "median": 0.7,
+        "min": 0.7,
+        "max": 0.8,
+        "repetitions": 3
+      }
+    }
+  ],
+  "initial_runs": [
+    {
+      "case": "kv-baseline-bench",
+      "repetition": 1,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-baseline-bench-r1-data"
+      ],
+      "seconds": 8.378599124960601,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 262.8,
+        "top": [
+          [
+            69.3,
+            "StorageManagementService"
+          ],
+          [
+            50.7,
+            "git"
+          ],
+          [
+            24.2,
+            "apteva-server"
+          ],
+          [
+            14.6,
+            "Python"
+          ],
+          [
+            12.9,
+            "WindowServer"
+          ],
+          [
+            10.9,
+            "Codex (Renderer)"
+          ],
+          [
+            10.7,
+            "bin"
+          ],
+          [
+            7.5,
+            "WhatsApp"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-current-bench-r1-data"
+      ],
+      "seconds": 7.998802916961722,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 251.3,
+        "top": [
+          [
+            56.8,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            47.6,
+            "StorageManagementService"
+          ],
+          [
+            38.7,
+            "git"
+          ],
+          [
+            19.8,
+            "fseventsd"
+          ],
+          [
+            18.3,
+            "sysmond"
+          ],
+          [
+            12.6,
+            "WindowServer"
+          ],
+          [
+            10.8,
+            "Codex (Renderer)"
+          ],
+          [
+            7.0,
+            "WhatsApp"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "compatibility",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-r1-data"
+      ],
+      "seconds": 1.868270333041437,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 217.6,
+        "top": [
+          [
+            37.6,
+            "git"
+          ],
+          [
+            31.3,
+            "StorageManagementService"
+          ],
+          [
+            30.7,
+            "fseventsd"
+          ],
+          [
+            24.2,
+            "Storage"
+          ],
+          [
+            19.6,
+            "WindowServer"
+          ],
+          [
+            19.0,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            8.3,
+            "Codex (Renderer)"
+          ],
+          [
+            7.7,
+            "Codex (Service)"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-comparison-r1-data"
+      ],
+      "seconds": 39.21511895803269,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 258.3,
+        "top": [
+          [
+            74.4,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            52.8,
+            "StorageManagementService"
+          ],
+          [
+            52.6,
+            "git"
+          ],
+          [
+            15.7,
+            "WindowServer"
+          ],
+          [
+            9.4,
+            "Python"
+          ],
+          [
+            8.5,
+            "Codex (Renderer)"
+          ],
+          [
+            6.9,
+            "Codex (Service)"
+          ],
+          [
+            6.8,
+            "WhatsApp"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "batch",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/batch-r1-data"
+      ],
+      "seconds": 25.092572750058025,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 291.7,
+        "top": [
+          [
+            72.0,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            63.3,
+            "StorageManagementService"
+          ],
+          [
+            28.9,
+            "Python"
+          ],
+          [
+            16.5,
+            "Codex (Renderer)"
+          ],
+          [
+            15.7,
+            "WindowServer"
+          ],
+          [
+            13.4,
+            "photolibraryd"
+          ],
+          [
+            8.2,
+            "WhatsApp"
+          ],
+          [
+            7.8,
+            "fseventsd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "aggregate",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/aggregate-r1-data"
+      ],
+      "seconds": 1.925028584082611,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 381.3,
+        "top": [
+          [
+            55.3,
+            "StorageManagementService"
+          ],
+          [
+            39.1,
+            "git"
+          ],
+          [
+            37.1,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            21.4,
+            "Python"
+          ],
+          [
+            18.8,
+            "runningboardd"
+          ],
+          [
+            16.6,
+            "WindowServer"
+          ],
+          [
+            16.0,
+            "diskarbitrationd"
+          ],
+          [
+            13.8,
+            "softwareupdated"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "join",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/join-r1-data"
+      ],
+      "seconds": 2.9275907500414178,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 512.3000000000001,
+        "top": [
+          [
+            159.8,
+            "Codex (Renderer)"
+          ],
+          [
+            61.2,
+            "StorageManagementService"
+          ],
+          [
+            41.4,
+            "git"
+          ],
+          [
+            28.5,
+            "deleted"
+          ],
+          [
+            26.5,
+            "apteva-server"
+          ],
+          [
+            23.5,
+            "fseventsd"
+          ],
+          [
+            16.1,
+            "WindowServer"
+          ],
+          [
+            13.0,
+            "Finder"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-fields-r1-data"
+      ],
+      "seconds": 7.974223166005686,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 540.6,
+        "top": [
+          [
+            55.9,
+            "StorageManagementService"
+          ],
+          [
+            47.8,
+            "git"
+          ],
+          [
+            37.6,
+            "deleted"
+          ],
+          [
+            36.6,
+            "ReportCrashService"
+          ],
+          [
+            29.2,
+            "coreaudiod"
+          ],
+          [
+            28.3,
+            "apteva-server"
+          ],
+          [
+            25.4,
+            "WindowServer"
+          ],
+          [
+            25.3,
+            "nsattributedstringagent"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-collections-r1-data"
+      ],
+      "seconds": 17.25071658298839,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 393.1,
+        "top": [
+          [
+            58.1,
+            "BackgroundShortcutRunner"
+          ],
+          [
+            40.0,
+            "ReportCrashService"
+          ],
+          [
+            33.7,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            32.7,
+            "StorageManagementService"
+          ],
+          [
+            31.0,
+            "deleted"
+          ],
+          [
+            27.2,
+            "Codex (Renderer)"
+          ],
+          [
+            23.8,
+            "apteva-server"
+          ],
+          [
+            22.6,
+            "WindowServer"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-r1-data"
+      ],
+      "seconds": 93.1697366660228,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 293.3,
+        "top": [
+          [
+            54.9,
+            "StorageManagementService"
+          ],
+          [
+            44.6,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            27.0,
+            "bin"
+          ],
+          [
+            21.6,
+            "WindowServer"
+          ],
+          [
+            14.8,
+            "apteva-server"
+          ],
+          [
+            13.6,
+            "bin"
+          ],
+          [
+            9.3,
+            "tccd"
+          ],
+          [
+            9.2,
+            "Storage"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 1,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-batch-r1-data"
+      ],
+      "seconds": 4.492893458926119,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 342.7,
+        "top": [
+          [
+            66.0,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            30.6,
+            "Codex (Renderer)"
+          ],
+          [
+            29.5,
+            "git"
+          ],
+          [
+            23.3,
+            "StorageManagementService"
+          ],
+          [
+            22.7,
+            "fseventsd"
+          ],
+          [
+            18.1,
+            "fileproviderd"
+          ],
+          [
+            17.8,
+            "WindowServer"
+          ],
+          [
+            16.1,
+            "bird"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-current-bench-r2-data"
+      ],
+      "seconds": 5.907306125038303,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 394.6,
+        "top": [
+          [
+            74.0,
+            "Codex (Renderer)"
+          ],
+          [
+            48.5,
+            "Storage"
+          ],
+          [
+            39.8,
+            "fileproviderd"
+          ],
+          [
+            29.7,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            29.4,
+            "git"
+          ],
+          [
+            24.4,
+            "fseventsd"
+          ],
+          [
+            24.3,
+            "WindowServer"
+          ],
+          [
+            18.8,
+            "bin"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "repetition": 2,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-baseline-bench-r2-data"
+      ],
+      "seconds": 6.460466208984144,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 256.5,
+        "top": [
+          [
+            46.8,
+            "git"
+          ],
+          [
+            30.0,
+            "Codex (Renderer)"
+          ],
+          [
+            29.7,
+            "fileproviderd"
+          ],
+          [
+            27.1,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            20.3,
+            "WindowServer"
+          ],
+          [
+            19.2,
+            "StorageManagementService"
+          ],
+          [
+            15.4,
+            "cloudd"
+          ],
+          [
+            13.8,
+            "apteva-server"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "compatibility",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-r2-data"
+      ],
+      "seconds": 1.4122301660245284,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 218.5,
+        "top": [
+          [
+            35.5,
+            "cloudd"
+          ],
+          [
+            25.7,
+            "fileproviderd"
+          ],
+          [
+            23.9,
+            "Codex (Renderer)"
+          ],
+          [
+            15.6,
+            "WindowServer"
+          ],
+          [
+            12.9,
+            "fseventsd"
+          ],
+          [
+            12.5,
+            "StorageManagementService"
+          ],
+          [
+            12.2,
+            "bin"
+          ],
+          [
+            11.2,
+            "ApplicationsStorageExtension"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-comparison-r2-data"
+      ],
+      "seconds": 32.46837129094638,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 303.2,
+        "top": [
+          [
+            60.2,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            34.4,
+            "StorageManagementService"
+          ],
+          [
+            27.9,
+            "Codex (Renderer)"
+          ],
+          [
+            25.5,
+            "fseventsd"
+          ],
+          [
+            22.4,
+            "fileproviderd"
+          ],
+          [
+            18.6,
+            "cloudd"
+          ],
+          [
+            15.9,
+            "apteva-server"
+          ],
+          [
+            13.6,
+            "WindowServer"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "batch",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/batch-r2-data"
+      ],
+      "seconds": 22.141627458971925,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 270.8,
+        "top": [
+          [
+            56.3,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            42.5,
+            "StorageManagementService"
+          ],
+          [
+            30.9,
+            "Storage"
+          ],
+          [
+            23.1,
+            "cloudd"
+          ],
+          [
+            17.5,
+            "WindowServer"
+          ],
+          [
+            11.3,
+            "trustd"
+          ],
+          [
+            8.4,
+            "Codex (Renderer)"
+          ],
+          [
+            8.3,
+            "fseventsd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "aggregate",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/aggregate-r2-data"
+      ],
+      "seconds": 1.7327448750147596,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 429.40000000000003,
+        "top": [
+          [
+            120.9,
+            "com.piriform.ccleaner.services.xpc"
+          ],
+          [
+            61.7,
+            "StorageManagementService"
+          ],
+          [
+            58.8,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            51.1,
+            "git"
+          ],
+          [
+            29.1,
+            "trustd"
+          ],
+          [
+            13.8,
+            "mobileassetd"
+          ],
+          [
+            13.3,
+            "deleted"
+          ],
+          [
+            11.1,
+            "siriactionsd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "join",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/join-r2-data"
+      ],
+      "seconds": 3.0771870829630643,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 367.7,
+        "top": [
+          [
+            82.7,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            69.8,
+            "StorageManagementService"
+          ],
+          [
+            61.0,
+            "git"
+          ],
+          [
+            30.5,
+            "Codex (Renderer)"
+          ],
+          [
+            27.5,
+            "ChatGPT"
+          ],
+          [
+            14.1,
+            "deleted"
+          ],
+          [
+            13.9,
+            "mobileassetd"
+          ],
+          [
+            10.9,
+            "BackgroundShortcutRunner"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-fields-r2-data"
+      ],
+      "seconds": 5.963594457949512,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 415.5,
+        "top": [
+          [
+            102.9,
+            "Codex (Renderer)"
+          ],
+          [
+            77.2,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            60.8,
+            "StorageManagementService"
+          ],
+          [
+            53.2,
+            "git"
+          ],
+          [
+            19.6,
+            "Codex (Renderer)"
+          ],
+          [
+            10.0,
+            "bin"
+          ],
+          [
+            9.5,
+            "BackgroundShortcutRunner"
+          ],
+          [
+            9.2,
+            "codex"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-collections-r2-data"
+      ],
+      "seconds": 17.778154458035715,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 433.2,
+        "top": [
+          [
+            149.7,
+            "Codex (Renderer)"
+          ],
+          [
+            51.8,
+            "StorageManagementService"
+          ],
+          [
+            41.9,
+            "git"
+          ],
+          [
+            39.2,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            24.4,
+            "fseventsd"
+          ],
+          [
+            14.1,
+            "sysmond"
+          ],
+          [
+            12.8,
+            "BackgroundShortcutRunner"
+          ],
+          [
+            12.6,
+            "ChatGPT"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-r2-data"
+      ],
+      "seconds": 77.5714339169208,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 332.6,
+        "top": [
+          [
+            64.3,
+            "StorageManagementService"
+          ],
+          [
+            57.9,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            53.2,
+            "git"
+          ],
+          [
+            42.6,
+            "Codex (Renderer)"
+          ],
+          [
+            20.6,
+            "WindowServer"
+          ],
+          [
+            15.3,
+            "remindd"
+          ],
+          [
+            14.7,
+            "accountsd"
+          ],
+          [
+            13.1,
+            "Codex (Service)"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 2,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-batch-r2-data"
+      ],
+      "seconds": 3.922428666963242,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 353.09999999999997,
+        "top": [
+          [
+            75.1,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            62.2,
+            "StorageManagementService"
+          ],
+          [
+            36.8,
+            "WindowServer"
+          ],
+          [
+            33.6,
+            "bin"
+          ],
+          [
+            33.4,
+            "Storage"
+          ],
+          [
+            19.2,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            16.7,
+            "sysmond"
+          ],
+          [
+            13.3,
+            "Google Chrome Helper"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-baseline-bench",
+      "repetition": 3,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-baseline-bench-r3-data"
+      ],
+      "seconds": 5.356698332936503,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 345.6,
+        "top": [
+          [
+            48.3,
+            "CommCenter"
+          ],
+          [
+            40.5,
+            "StorageManagementService"
+          ],
+          [
+            37.2,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            28.3,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            20.4,
+            "WindowServer"
+          ],
+          [
+            17.7,
+            "cloudd"
+          ],
+          [
+            16.4,
+            "callservicesd"
+          ],
+          [
+            10.5,
+            "apteva-server"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-current-bench",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "1000000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-current-bench-r3-data"
+      ],
+      "seconds": 5.708504166104831,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 233.0,
+        "top": [
+          [
+            52.6,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            45.9,
+            "StorageManagementService"
+          ],
+          [
+            21.4,
+            "WindowServer"
+          ],
+          [
+            17.1,
+            "Google Chrome"
+          ],
+          [
+            12.4,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            11.8,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            10.4,
+            "Google Chrome Helper"
+          ],
+          [
+            7.6,
+            "bluetoothd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "compatibility",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-r3-data"
+      ],
+      "seconds": 1.4041598329786211,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 233.79999999999998,
+        "top": [
+          [
+            45.9,
+            "StorageManagementService"
+          ],
+          [
+            41.4,
+            "Storage"
+          ],
+          [
+            29.8,
+            "WindowServer"
+          ],
+          [
+            21.9,
+            "Google Chrome"
+          ],
+          [
+            19.0,
+            "Google Chrome Helper"
+          ],
+          [
+            17.4,
+            "airportd"
+          ],
+          [
+            12.3,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            4.5,
+            "loginwindow"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "kv-comparison",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours,pebble,sqlite-c,sqlite-go",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/kv-comparison-r3-data"
+      ],
+      "seconds": 31.963759541977197,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 305.5,
+        "top": [
+          [
+            69.9,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            54.1,
+            "StorageManagementService"
+          ],
+          [
+            31.2,
+            "WindowServer"
+          ],
+          [
+            27.4,
+            "Google Chrome"
+          ],
+          [
+            17.7,
+            "Google Chrome Helper"
+          ],
+          [
+            16.1,
+            "apteva-server"
+          ],
+          [
+            12.1,
+            "bin"
+          ],
+          [
+            11.3,
+            "airportd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "batch",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-n",
+        "250000",
+        "-engines",
+        "ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/batch-r3-data"
+      ],
+      "seconds": 22.596962916082703,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 322.2,
+        "top": [
+          [
+            69.9,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            50.4,
+            "StorageManagementService"
+          ],
+          [
+            38.9,
+            "WindowServer"
+          ],
+          [
+            23.3,
+            "apteva-server"
+          ],
+          [
+            15.6,
+            "Google Chrome"
+          ],
+          [
+            15.2,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            14.3,
+            "bin"
+          ],
+          [
+            13.3,
+            "ANECompilerService"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "aggregate",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/aggregate-r3-data"
+      ],
+      "seconds": 1.6968050829600543,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 473.0,
+        "top": [
+          [
+            169.8,
+            "Codex (Renderer)"
+          ],
+          [
+            52.2,
+            "StorageManagementService"
+          ],
+          [
+            48.7,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            24.9,
+            "bin"
+          ],
+          [
+            22.8,
+            "WindowServer"
+          ],
+          [
+            20.7,
+            "apteva-server"
+          ],
+          [
+            15.0,
+            "Codex (Service)"
+          ],
+          [
+            13.5,
+            "ANECompilerService"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "join",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-join",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/join-r3-data"
+      ],
+      "seconds": 2.7490239999024197,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 283.4,
+        "top": [
+          [
+            78.7,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            73.1,
+            "StorageManagementService"
+          ],
+          [
+            17.9,
+            "Storage"
+          ],
+          [
+            17.2,
+            "WindowServer"
+          ],
+          [
+            11.1,
+            "ANECompilerService"
+          ],
+          [
+            11.0,
+            "Codex (Renderer)"
+          ],
+          [
+            9.2,
+            "com.apple.geod"
+          ],
+          [
+            8.2,
+            "Codex (Service)"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-fields",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-fields-r3-data"
+      ],
+      "seconds": 5.635649749892764,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 288.4,
+        "top": [
+          [
+            81.6,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            70.9,
+            "StorageManagementService"
+          ],
+          [
+            17.8,
+            "bin"
+          ],
+          [
+            15.3,
+            "Codex (Renderer)"
+          ],
+          [
+            13.3,
+            "WindowServer"
+          ],
+          [
+            8.8,
+            "ANECompilerService"
+          ],
+          [
+            7.9,
+            "Codex (Service)"
+          ],
+          [
+            7.7,
+            "apteva-server"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "computed-collections",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/computed-collections-r3-data"
+      ],
+      "seconds": 17.041687667020597,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 289.0,
+        "top": [
+          [
+            72.9,
+            "ApplicationsStorageExtension"
+          ],
+          [
+            63.7,
+            "StorageManagementService"
+          ],
+          [
+            30.8,
+            "Codex (Renderer)"
+          ],
+          [
+            21.7,
+            "WindowServer"
+          ],
+          [
+            11.9,
+            "bin"
+          ],
+          [
+            11.8,
+            "ANECompilerService"
+          ],
+          [
+            10.0,
+            "Codex (Service)"
+          ],
+          [
+            7.3,
+            "fileproviderd"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-r3-data"
+      ],
+      "seconds": 76.48609879205469,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 303.6,
+        "top": [
+          [
+            58.2,
+            "StorageManagementService"
+          ],
+          [
+            48.4,
+            "siriinferenced"
+          ],
+          [
+            28.4,
+            "Storage"
+          ],
+          [
+            27.8,
+            "WindowServer"
+          ],
+          [
+            22.7,
+            "apteva-server"
+          ],
+          [
+            22.6,
+            "duetexpertd"
+          ],
+          [
+            22.0,
+            "Google Chrome Helper (Renderer)"
+          ],
+          [
+            17.6,
+            "Google Chrome Helper"
+          ]
+        ]
+      }
+    },
+    {
+      "case": "durable-batch",
+      "repetition": 3,
+      "binary": "current-bench",
+      "command": [
+        "<output>/current-bench",
+        "-durable",
+        "-n",
+        "20000",
+        "-engines",
+        "ours-sync-batch1000,pebble-sync-batch1000,sqlite-c-sync-txn1000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/durable-batch-r3-data"
+      ],
+      "seconds": 4.100684291915968,
+      "returncode": 0,
+      "background": {
+        "summed_cpu_percent": 300.09999999999997,
+        "top": [
+          [
+            60.6,
+            "siriinferenced"
+          ],
+          [
+            48.3,
+            "StorageManagementService"
+          ],
+          [
+            39.4,
+            "Storage"
+          ],
+          [
+            37.8,
+            "git"
+          ],
+          [
+            37.3,
+            "node"
+          ],
+          [
+            28.3,
+            "WindowServer"
+          ],
+          [
+            16.3,
+            "WhatsApp"
+          ],
+          [
+            5.8,
+            "apteva-server"
+          ]
+        ]
+      }
+    }
+  ],
+  "followup_runs": [
+    {
+      "case": "compatibility-corrected",
+      "repetition": 1,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-corrected-r1-data"
+      ],
+      "seconds": 1.8961079999571666,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-baseline-bench",
+      "repetition": 1,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-baseline-bench-r1-data"
+      ],
+      "seconds": 0.504994458053261,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-final-feature-bench",
+      "repetition": 1,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-final-feature-bench-r1-data"
+      ],
+      "seconds": 0.45273870904929936,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-baseline-bench",
+      "repetition": 1,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-baseline-bench-r1-data"
+      ],
+      "seconds": 1.2426395829534158,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-final-feature-bench",
+      "repetition": 1,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-final-feature-bench-r1-data"
+      ],
+      "seconds": 1.2562992500606924,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-baseline-bench",
+      "repetition": 1,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-baseline-bench-r1-data"
+      ],
+      "seconds": 0.551729999948293,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-final-feature-bench",
+      "repetition": 1,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-final-feature-bench-r1-data"
+      ],
+      "seconds": 0.6116729580098763,
+      "returncode": 0
+    },
+    {
+      "case": "compatibility-corrected",
+      "repetition": 2,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-corrected-r2-data"
+      ],
+      "seconds": 1.4586928749922663,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-final-feature-bench",
+      "repetition": 2,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-final-feature-bench-r2-data"
+      ],
+      "seconds": 0.8878500839928165,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-baseline-bench",
+      "repetition": 2,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-baseline-bench-r2-data"
+      ],
+      "seconds": 0.5046494579873979,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-final-feature-bench",
+      "repetition": 2,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-final-feature-bench-r2-data"
+      ],
+      "seconds": 1.3110098750330508,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-baseline-bench",
+      "repetition": 2,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-baseline-bench-r2-data"
+      ],
+      "seconds": 1.3039245000109076,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-final-feature-bench",
+      "repetition": 2,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-final-feature-bench-r2-data"
+      ],
+      "seconds": 0.5630065839504823,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-baseline-bench",
+      "repetition": 2,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-baseline-bench-r2-data"
+      ],
+      "seconds": 0.5537266669562086,
+      "returncode": 0
+    },
+    {
+      "case": "compatibility-corrected",
+      "repetition": 3,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-compat",
+        "-n",
+        "50000",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/compatibility-corrected-r3-data"
+      ],
+      "seconds": 1.3019830000121146,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-baseline-bench",
+      "repetition": 3,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-baseline-bench-r3-data"
+      ],
+      "seconds": 0.4472821659874171,
+      "returncode": 0
+    },
+    {
+      "case": "paired-aggregate-final-feature-bench",
+      "repetition": 3,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-agg",
+        "-n",
+        "50000",
+        "-engines",
+        "ours,ours-par",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-aggregate-final-feature-bench-r3-data"
+      ],
+      "seconds": 0.4494715839391574,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-baseline-bench",
+      "repetition": 3,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-baseline-bench-r3-data"
+      ],
+      "seconds": 1.2688676250400022,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-fields-final-feature-bench",
+      "repetition": 3,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computed",
+        "-n",
+        "50000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-fields-final-feature-bench-r3-data"
+      ],
+      "seconds": 1.244414541986771,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-baseline-bench",
+      "repetition": 3,
+      "binary": "baseline-bench",
+      "command": [
+        "<output>/baseline-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-baseline-bench-r3-data"
+      ],
+      "seconds": 0.5580570839811116,
+      "returncode": 0
+    },
+    {
+      "case": "paired-computed-collections-final-feature-bench",
+      "repetition": 3,
+      "binary": "final-feature-bench",
+      "command": [
+        "<output>/final-feature-bench",
+        "-computedcollections",
+        "-n",
+        "20000",
+        "-engines",
+        "ours",
+        "-reps",
+        "1",
+        "-par",
+        "10",
+        "-dir",
+        "<output>/paired-computed-collections-final-feature-bench-r3-data"
+      ],
+      "seconds": 0.5929130830336362,
+      "returncode": 0
+    }
+  ],
+  "release_verification": {
+    "version": "v0.2.0-alpha.2",
+    "format": 7,
+    "all_four_archives_sha256": "passed",
+    "native_version": "passed",
+    "go_proxy_and_installs": "passed",
+    "embedded_remote_new_features": "passed",
+    "graceful_shutdown": "passed",
+    "ci": "https://github.com/apteva/db/actions/runs/38412864116",
+    "release": "https://github.com/apteva/db/actions/runs/38412864233"
+  }
+}

@@ -1,0 +1,437 @@
+[
+  {
+    "case": "compatibility-corrected",
+    "repetition": 1,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-corrected-r1-data"
+    ],
+    "seconds": 1.8961079999571666,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-baseline-bench",
+    "repetition": 1,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-baseline-bench-r1-data"
+    ],
+    "seconds": 0.504994458053261,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-final-feature-bench",
+    "repetition": 1,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-final-feature-bench-r1-data"
+    ],
+    "seconds": 0.45273870904929936,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-baseline-bench",
+    "repetition": 1,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-baseline-bench-r1-data"
+    ],
+    "seconds": 1.2426395829534158,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-final-feature-bench",
+    "repetition": 1,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-final-feature-bench-r1-data"
+    ],
+    "seconds": 1.2562992500606924,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-baseline-bench",
+    "repetition": 1,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-baseline-bench-r1-data"
+    ],
+    "seconds": 0.551729999948293,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-final-feature-bench",
+    "repetition": 1,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-final-feature-bench-r1-data"
+    ],
+    "seconds": 0.6116729580098763,
+    "returncode": 0
+  },
+  {
+    "case": "compatibility-corrected",
+    "repetition": 2,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-corrected-r2-data"
+    ],
+    "seconds": 1.4586928749922663,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-final-feature-bench",
+    "repetition": 2,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-final-feature-bench-r2-data"
+    ],
+    "seconds": 0.8878500839928165,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-baseline-bench",
+    "repetition": 2,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-baseline-bench-r2-data"
+    ],
+    "seconds": 0.5046494579873979,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-final-feature-bench",
+    "repetition": 2,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-final-feature-bench-r2-data"
+    ],
+    "seconds": 1.3110098750330508,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-baseline-bench",
+    "repetition": 2,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-baseline-bench-r2-data"
+    ],
+    "seconds": 1.3039245000109076,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-final-feature-bench",
+    "repetition": 2,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-final-feature-bench-r2-data"
+    ],
+    "seconds": 0.5630065839504823,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-baseline-bench",
+    "repetition": 2,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-baseline-bench-r2-data"
+    ],
+    "seconds": 0.5537266669562086,
+    "returncode": 0
+  },
+  {
+    "case": "compatibility-corrected",
+    "repetition": 3,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compatibility-corrected-r3-data"
+    ],
+    "seconds": 1.3019830000121146,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-baseline-bench",
+    "repetition": 3,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-baseline-bench-r3-data"
+    ],
+    "seconds": 0.4472821659874171,
+    "returncode": 0
+  },
+  {
+    "case": "paired-aggregate-final-feature-bench",
+    "repetition": 3,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-engines",
+      "ours,ours-par",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-aggregate-final-feature-bench-r3-data"
+    ],
+    "seconds": 0.4494715839391574,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-baseline-bench",
+    "repetition": 3,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-baseline-bench-r3-data"
+    ],
+    "seconds": 1.2688676250400022,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-fields-final-feature-bench",
+    "repetition": 3,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-fields-final-feature-bench-r3-data"
+    ],
+    "seconds": 1.244414541986771,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-baseline-bench",
+    "repetition": 3,
+    "binary": "baseline-bench",
+    "command": [
+      "<output>/baseline-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-baseline-bench-r3-data"
+    ],
+    "seconds": 0.5580570839811116,
+    "returncode": 0
+  },
+  {
+    "case": "paired-computed-collections-final-feature-bench",
+    "repetition": 3,
+    "binary": "final-feature-bench",
+    "command": [
+      "<output>/final-feature-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/paired-computed-collections-final-feature-bench-r3-data"
+    ],
+    "seconds": 0.5929130830336362,
+    "returncode": 0
+  }
+]

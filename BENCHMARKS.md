@@ -62,3 +62,7 @@ use 1,000-record batches/transactions; the large-value phase uses individual asy
 writes for each engine. Pebble index maintenance is application work; it does not
 provide the native schema/constraint API. Every result and repetition is retained;
 Go allocation metrics exclude native/C/mapped allocations and are not RSS.
+
+The completed [alpha.2 report](bench/results/alpha2/VALIDATION.md) retains all
+comparisons and paired baseline observations. It uses the corrected compatibility
+cache settings, reports costs/ranges, and links the release/install checks.

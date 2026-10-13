@@ -1,0 +1,36 @@
+ours-sync-batch1000 random insert             5064 ns/op      197489 ops/s
+ours-sync-batch1000 random insert-par10       4929 ns/op      202898 ops/s
+ours-sync-batch1000 random insert-par50       5621 ns/op      177908 ops/s
+pebble-sync-batch1000 random insert             8212 ns/op      121770 ops/s
+pebble-sync-batch1000 random insert-par10       5302 ns/op      188610 ops/s
+pebble-sync-batch1000 random insert-par50       6042 ns/op      165499 ops/s
+sqlite-c-sync-txn1000 random insert            13545 ns/op       73830 ops/s
+sqlite-c-sync-txn1000 random insert-par10      19626 ns/op       50952 ops/s
+sqlite-c-sync-txn1000 random insert-par50      26184 ns/op       38191 ops/s
+ours-sync-batch1000 seq    insert             4128 ns/op      242235 ops/s
+ours-sync-batch1000 seq    insert-par10       5683 ns/op      175957 ops/s
+ours-sync-batch1000 seq    insert-par50       5482 ns/op      182428 ops/s
+pebble-sync-batch1000 seq    insert             8489 ns/op      117804 ops/s
+pebble-sync-batch1000 seq    insert-par10       6538 ns/op      152957 ops/s
+pebble-sync-batch1000 seq    insert-par50       8212 ns/op      121775 ops/s
+sqlite-c-sync-txn1000 seq    insert             7445 ns/op      134324 ops/s
+sqlite-c-sync-txn1000 seq    insert-par10      15753 ns/op       63480 ops/s
+sqlite-c-sync-txn1000 seq    insert-par50      23484 ns/op       42583 ops/s
+        3.88 real         0.73 user         1.03 sys
+            63930368  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                4499  page reclaims
+                 674  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 185  signals received
+                4215  voluntary context switches
+               53286  involuntary context switches
+         10309600880  instructions retired
+          4375965892  cycles elapsed
+            46727936  peak memory footprint

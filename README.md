@@ -51,7 +51,9 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
-The [alpha.1 validation report](bench/results/public-alpha/VALIDATION.md)
+The [alpha.2 compatibility/speed report](bench/results/alpha2/VALIDATION.md) includes
+three repeats against Pebble/SQLite and paired alpha.1 comparisons. The
+[alpha.1 validation report](bench/results/public-alpha/VALIDATION.md)
 retains 30 resource and 24 feature trials against Pebble and both SQLite bindings.
 Other historical results under `bench/results/` describe their original builds. The separate
 `bench` module compares SQLite and Pebble without adding engine dependencies.

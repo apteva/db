@@ -1,0 +1,16 @@
+{
+  "started_at": "2026-10-13T13:59:47.430796+00:00",
+  "source_revision": "177a74a8ae0a6998930aef5ec64aab9a7a00faff",
+  "go": "go version go1.25.1 darwin/arm64",
+  "binaries": {
+    "baseline-bench": "7789d25e01cda7eb35db778bfe28fd2a078879b2250edb894df8d229ccd7fabc",
+    "current-bench": "6a9a802533427500a92f2c16fbe4e4d1328efe527149438fac655b559f66da42",
+    "final-feature-bench": "2a4c71fc9396e5d894cdf5303151c2d4acc5bc763d4dc7809344e486aef0f5b5"
+  },
+  "method": "Serial fresh processes/directories. Three retained outer repetitions. Paired KV order alternates. Aggregation/join use legacy best-of-five inner times. No local builds/tests during measurements. Background activity recorded before each process.",
+  "finished_at": "2026-10-13T14:09:14.909517+00:00",
+  "final_feature_source": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+  "followup_started_at": "2026-10-13T14:21:44.419584+00:00",
+  "correction": "The initial compatibility passes used Pebble default cache. They are retained as preliminary; corrected comparisons set 512 MiB cache and 64 MiB memtable, matching the legacy comparison profile.",
+  "followup_finished_at": "2026-10-13T14:22:03.447627+00:00"
+}

@@ -1,0 +1,19 @@
+2026/10/13 16:00:04 Found 0 WALs
+        1.82 real         0.76 user         0.53 sys
+           170082304  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               15965  page reclaims
+                 303  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 274  signals received
+                2608  voluntary context switches
+                6688  involuntary context switches
+         14235008619  instructions retired
+          3986935828  cycles elapsed
+           136790856  peak memory footprint

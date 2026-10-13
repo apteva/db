@@ -1,0 +1,42 @@
+ours-sync          random insert          4685638 ns/op         213 ops/s
+ours-sync          random insert-par10     441977 ns/op        2263 ops/s
+ours-sync          random insert-par50      91953 ns/op       10875 ops/s
+pebble-sync        random insert          4191595 ns/op         239 ops/s
+pebble-sync        random insert-par10     854429 ns/op        1170 ops/s
+pebble-sync        random insert-par50     190496 ns/op        5249 ops/s
+sqlite-c-sync      random insert          4702990 ns/op         213 ops/s
+sqlite-c-sync      random insert-par10    4808851 ns/op         208 ops/s
+sqlite-c-sync      random insert-par50    4598918 ns/op         217 ops/s
+sqlite-go-sync     random insert          4472093 ns/op         224 ops/s
+sqlite-go-sync     random insert-par10    4513666 ns/op         222 ops/s
+sqlite-go-sync     random insert-par50    4349763 ns/op         230 ops/s
+ours-sync          seq    insert          4473593 ns/op         224 ops/s
+ours-sync          seq    insert-par10     564804 ns/op        1771 ops/s
+ours-sync          seq    insert-par50     146123 ns/op        6844 ops/s
+pebble-sync        seq    insert          4321359 ns/op         231 ops/s
+pebble-sync        seq    insert-par10     838552 ns/op        1193 ops/s
+pebble-sync        seq    insert-par50     194242 ns/op        5148 ops/s
+sqlite-c-sync      seq    insert          4331395 ns/op         231 ops/s
+sqlite-c-sync      seq    insert-par10    4488790 ns/op         223 ops/s
+sqlite-c-sync      seq    insert-par50    4719938 ns/op         212 ops/s
+sqlite-go-sync     seq    insert          5204553 ns/op         192 ops/s
+sqlite-go-sync     seq    insert-par10    5192840 ns/op         193 ops/s
+sqlite-go-sync     seq    insert-par50    4806860 ns/op         208 ops/s
+       77.53 real         1.05 user         3.65 sys
+            25477120  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                4469  page reclaims
+                1252  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                2032  signals received
+               69008  voluntary context switches
+              176895  involuntary context switches
+          7492976237  instructions retired
+         10737595091  cycles elapsed
+            18301696  peak memory footprint

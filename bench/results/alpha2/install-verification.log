@@ -1,0 +1,6 @@
+Release daemon health: {'version': '0.2.0-alpha.2', 'format': 7}
+Installed alpha.2 exact map decode, logical/prefix query, compound ordering, explain/stats and 80 KB document passed
+Tagged module 0.2.0-alpha.2: embedded and remote CRUD passed
+aptevadbctl 0.2.0-alpha.2 (format 7)
+AptevaDB 0.2.0-alpha.2 (format 7, HTTP v1)
+Tagged module and both command installations verified; graceful daemon shutdown passed.

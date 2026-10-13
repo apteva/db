@@ -1,0 +1,20 @@
+ours       load 0.03s  q1 4.4ms  q2 5.6ms  q3 3.0ms  q4 8.8ms
+ours-par   load 0.03s  q1 1.0ms  q2 1.3ms  q3 0.8ms  q4 9.8ms
+        0.44 real         0.56 user         0.06 sys
+            76546048  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                6773  page reclaims
+                 238  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 340  signals received
+                 452  voluntary context switches
+                2675  involuntary context switches
+          6115179198  instructions retired
+          1896243685  cycles elapsed
+            56722152  peak memory footprint

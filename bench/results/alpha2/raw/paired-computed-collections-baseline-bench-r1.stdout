@@ -1,0 +1,17 @@
+computed collections: n=20000 groups=1000 batch=1000 WAL on sync off GOMAXPROCS=10; exact checks, all trials
+ours-native          insert                 trial=1 1646.744 ns/op
+ours-native          upsert                 trial=1 2095.754 ns/op
+ours-native          delete                 trial=1 1002.688 ns/op
+ours-native          query-all              trial=1 66254.833 ns/op
+ours-native          point-query            trial=1 127.560 ns/op
+ours-native          point-par10            trial=1 19.202 ns/op
+ours-native          point-par32            trial=1 21.438 ns/op
+ours-native          disk                   trial=1 86833.000 ns/op
+ours-query           insert                 trial=1 390.192 ns/op
+ours-query           upsert                 trial=1 196.554 ns/op
+ours-query           delete                 trial=1 244.500 ns/op
+ours-query           backfill               trial=1 346.796 ns/op
+ours-query           projection-backfill    trial=1 291.343 ns/op
+ours-query           query-all              trial=1 1440521.810 ns/op
+ours-query           point-query            trial=1 16878.125 ns/op
+ours-query           disk                   trial=1 163000.000 ns/op
