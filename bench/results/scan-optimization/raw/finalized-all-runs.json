@@ -1,0 +1,22 @@
+[
+  {
+    "case": "finalized-all-engines",
+    "trial": 1,
+    "binary": "finalized-bench",
+    "command": [
+      "<output>/finalized-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/finalized-all-engines-finalized-bench-r1-data"
+    ],
+    "seconds": 211.94930712506175,
+    "returncode": 0
+  }
+]

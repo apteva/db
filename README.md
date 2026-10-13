@@ -51,6 +51,11 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
+The [unreleased scan optimization report](bench/results/scan-optimization/VALIDATION.md)
+records roughly 22% lower cursor-scan time on `main`, 128 retained benchmark
+processes and Linux/macOS validation. Some other medians were slower on the busy
+workstation; the report includes all samples and does not claim universal improvement.
+
 The [alpha.3 cursor and index validation report](bench/results/alpha3/VALIDATION.md)
 includes the two reported regressions, 8,160-byte encoded entries, matched-harness
 alpha.2 comparisons and large-entry results against Pebble and both SQLite bindings.

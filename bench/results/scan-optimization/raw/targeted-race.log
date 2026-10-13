@@ -1,0 +1,8 @@
+ok  	github.com/apteva/db	21.161s
+ok  	github.com/apteva/db/client	1.352s [no tests to run]
+?   	github.com/apteva/db/cmd/aptevadb-server	[no test files]
+?   	github.com/apteva/db/cmd/aptevadbctl	[no test files]
+?   	github.com/apteva/db/cmd/demo	[no test files]
+?   	github.com/apteva/db/examples/embedded	[no test files]
+?   	github.com/apteva/db/internal/protocol	[no test files]
+?   	github.com/apteva/db/server	[no test files]

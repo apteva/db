@@ -1,0 +1,11 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/db
+cpu: Apple M1 Pro
+BenchmarkRawIteration/Scan-10         	     698	   1613724 ns/op	        16.14 ns/row	   74527 B/op	      27 allocs/op
+BenchmarkRawIteration/Scan-10         	     784	   1495117 ns/op	        14.95 ns/row	   74512 B/op	      27 allocs/op
+BenchmarkRawIteration/Scan-10         	     831	   1465653 ns/op	        14.66 ns/row	   74512 B/op	      27 allocs/op
+BenchmarkRawIteration/Cursor-10       	     308	   3862085 ns/op	        38.62 ns/row	   99352 B/op	    1549 allocs/op
+BenchmarkRawIteration/Cursor-10       	     306	   3910095 ns/op	        39.10 ns/row	   99352 B/op	    1549 allocs/op
+BenchmarkRawIteration/Cursor-10       	     302	   3928384 ns/op	        39.28 ns/row	   99352 B/op	    1549 allocs/op
+PASS

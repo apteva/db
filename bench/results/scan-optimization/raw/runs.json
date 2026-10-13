@@ -1,0 +1,1208 @@
+[
+  {
+    "case": "native-million",
+    "trial": 1,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha2-bench-r1-data"
+    ],
+    "seconds": 7.207072791992687,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha3-bench-r1-data"
+    ],
+    "seconds": 6.349892957950942,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-final-bench-r1-data"
+    ],
+    "seconds": 6.765621708007529,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha3-bench-r2-data"
+    ],
+    "seconds": 7.314089915947989,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-final-bench-r2-data"
+    ],
+    "seconds": 6.562778500025161,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 2,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha2-bench-r2-data"
+    ],
+    "seconds": 6.620514708920382,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-final-bench-r3-data"
+    ],
+    "seconds": 7.498832582961768,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 3,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha2-bench-r3-data"
+    ],
+    "seconds": 6.831611040979624,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha3-bench-r3-data"
+    ],
+    "seconds": 7.671926749986596,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 4,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha2-bench-r4-data"
+    ],
+    "seconds": 6.355531916953623,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 4,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha3-bench-r4-data"
+    ],
+    "seconds": 6.4992399589391425,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 4,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-final-bench-r4-data"
+    ],
+    "seconds": 6.2831788749899715,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 5,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha3-bench-r5-data"
+    ],
+    "seconds": 6.773630374926142,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 5,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-final-bench-r5-data"
+    ],
+    "seconds": 6.274444208014756,
+    "returncode": 0
+  },
+  {
+    "case": "native-million",
+    "trial": 5,
+    "binary": "alpha2-bench",
+    "command": [
+      "<output>/alpha2-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/native-million-alpha2-bench-r5-data"
+    ],
+    "seconds": 5.892972707981244,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 1,
+    "binary": "alpha2-raw.test",
+    "command": [
+      "<output>/alpha2-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.682602541986853,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 1,
+    "binary": "alpha3-raw.test",
+    "command": [
+      "<output>/alpha3-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.388413249980658,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 1,
+    "binary": "final-raw.test",
+    "command": [
+      "<output>/final-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.632377166999504,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 2,
+    "binary": "alpha3-raw.test",
+    "command": [
+      "<output>/alpha3-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.6801104579353705,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 2,
+    "binary": "final-raw.test",
+    "command": [
+      "<output>/final-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.247304167016409,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 2,
+    "binary": "alpha2-raw.test",
+    "command": [
+      "<output>/alpha2-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.256482874974608,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 3,
+    "binary": "final-raw.test",
+    "command": [
+      "<output>/final-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 8.102056417032145,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 3,
+    "binary": "alpha2-raw.test",
+    "command": [
+      "<output>/alpha2-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.31586299999617,
+    "returncode": 0
+  },
+  {
+    "case": "raw-api",
+    "trial": 3,
+    "binary": "alpha3-raw.test",
+    "command": [
+      "<output>/alpha3-raw.test",
+      "-test.run",
+      "^$",
+      "-test.bench",
+      "^BenchmarkRawIteration$",
+      "-test.benchtime",
+      "1s",
+      "-test.count",
+      "3"
+    ],
+    "seconds": 7.941345790983178,
+    "returncode": 0
+  },
+  {
+    "case": "all-engines",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/all-engines-final-bench-r1-data"
+    ],
+    "seconds": 224.95201162504964,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-alpha3-bench-r1-data"
+    ],
+    "seconds": 1.629763292032294,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-final-bench-r1-data"
+    ],
+    "seconds": 1.5105452089337632,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-alpha3-bench-r1-data"
+    ],
+    "seconds": 4.743594500003383,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-final-bench-r1-data"
+    ],
+    "seconds": 4.2413247500080615,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-alpha3-bench-r1-data"
+    ],
+    "seconds": 1.839111166074872,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-final-bench-r1-data"
+    ],
+    "seconds": 1.925258292001672,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-alpha3-bench-r1-data"
+    ],
+    "seconds": 2.804614292108454,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-final-bench-r1-data"
+    ],
+    "seconds": 2.8509038749616593,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-alpha3-bench-r1-data"
+    ],
+    "seconds": 6.327745041926391,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-final-bench-r1-data"
+    ],
+    "seconds": 6.146563083981164,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 1,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-alpha3-bench-r1-data"
+    ],
+    "seconds": 17.271602832945064,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 1,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-final-bench-r1-data"
+    ],
+    "seconds": 16.87056512502022,
+    "returncode": 0
+  },
+  {
+    "case": "all-engines",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/all-engines-final-bench-r2-data"
+    ],
+    "seconds": 205.09029216691852,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-final-bench-r2-data"
+    ],
+    "seconds": 1.670850457972847,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-alpha3-bench-r2-data"
+    ],
+    "seconds": 1.8594363330630586,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-final-bench-r2-data"
+    ],
+    "seconds": 5.825541125028394,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-alpha3-bench-r2-data"
+    ],
+    "seconds": 5.098997125052847,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-final-bench-r2-data"
+    ],
+    "seconds": 1.962607791996561,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-alpha3-bench-r2-data"
+    ],
+    "seconds": 2.1661257080268115,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-final-bench-r2-data"
+    ],
+    "seconds": 3.166488582966849,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-alpha3-bench-r2-data"
+    ],
+    "seconds": 3.1944868749706075,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-final-bench-r2-data"
+    ],
+    "seconds": 8.356785999960266,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-alpha3-bench-r2-data"
+    ],
+    "seconds": 6.548169792047702,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 2,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-final-bench-r2-data"
+    ],
+    "seconds": 17.62652220891323,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 2,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-alpha3-bench-r2-data"
+    ],
+    "seconds": 17.674123249948025,
+    "returncode": 0
+  },
+  {
+    "case": "all-engines",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-n",
+      "1000000",
+      "-engines",
+      "ours,pebble,sqlite-c,sqlite-go",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/all-engines-final-bench-r3-data"
+    ],
+    "seconds": 193.24962725001387,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-alpha3-bench-r3-data"
+    ],
+    "seconds": 1.5850506250280887,
+    "returncode": 0
+  },
+  {
+    "case": "compat",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-compat",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/compat-final-bench-r3-data"
+    ],
+    "seconds": 1.471574041992426,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-alpha3-bench-r3-data"
+    ],
+    "seconds": 3.770354542066343,
+    "returncode": 0
+  },
+  {
+    "case": "wide",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-wideindex",
+      "-n",
+      "10000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/wide-final-bench-r3-data"
+    ],
+    "seconds": 4.010921625071205,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-alpha3-bench-r3-data"
+    ],
+    "seconds": 1.786015290999785,
+    "returncode": 0
+  },
+  {
+    "case": "aggregate",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-agg",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/aggregate-final-bench-r3-data"
+    ],
+    "seconds": 1.782603958970867,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-alpha3-bench-r3-data"
+    ],
+    "seconds": 3.726832834072411,
+    "returncode": 0
+  },
+  {
+    "case": "join",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-join",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/join-final-bench-r3-data"
+    ],
+    "seconds": 3.4660567499231547,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-alpha3-bench-r3-data"
+    ],
+    "seconds": 7.935507415910251,
+    "returncode": 0
+  },
+  {
+    "case": "computed",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computed",
+      "-n",
+      "50000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-final-bench-r3-data"
+    ],
+    "seconds": 6.245161750004627,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 3,
+    "binary": "alpha3-bench",
+    "command": [
+      "<output>/alpha3-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-alpha3-bench-r3-data"
+    ],
+    "seconds": 17.672343999962322,
+    "returncode": 0
+  },
+  {
+    "case": "computed-collections",
+    "trial": 3,
+    "binary": "final-bench",
+    "command": [
+      "<output>/final-bench",
+      "-computedcollections",
+      "-n",
+      "20000",
+      "-reps",
+      "1",
+      "-par",
+      "10",
+      "-dir",
+      "<output>/computed-collections-final-bench-r3-data"
+    ],
+    "seconds": 17.027971250005066,
+    "returncode": 0
+  }
+]

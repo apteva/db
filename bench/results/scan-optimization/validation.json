@@ -1,0 +1,4963 @@
+{
+  "source_commit": "4b5405287229d2c06215b275851237268d9955af",
+  "baseline_alpha3": "26220edae0452a03a5cb5375016ca9eaf1e95209",
+  "baseline_alpha2": "41115aaa65a1c81de471e7f6e94c1db9f833f3af",
+  "native": {
+    "alpha3": {
+      "ours/random/insert": {
+        "median": 777.0,
+        "min": 740.0,
+        "max": 1205.0,
+        "samples": [
+          777.0,
+          1205.0,
+          825.0,
+          740.0,
+          765.0,
+          742.0,
+          1046.0
+        ],
+        "n": 7
+      },
+      "ours/random/settle": {
+        "median": 1432.0,
+        "min": 952.0,
+        "max": 2688.0,
+        "samples": [
+          1432.0,
+          1503.0,
+          2688.0,
+          1811.0,
+          1332.0,
+          952.0,
+          987.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-hit": {
+        "median": 661.0,
+        "min": 645.0,
+        "max": 922.0,
+        "samples": [
+          645.0,
+          922.0,
+          661.0,
+          684.0,
+          653.0,
+          660.0,
+          668.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-miss": {
+        "median": 475.0,
+        "min": 403.0,
+        "max": 521.0,
+        "samples": [
+          403.0,
+          443.0,
+          486.0,
+          495.0,
+          475.0,
+          461.0,
+          521.0
+        ],
+        "n": 7
+      },
+      "ours/random/scan": {
+        "median": 49.0,
+        "min": 48.0,
+        "max": 53.0,
+        "samples": [
+          49.0,
+          49.0,
+          49.0,
+          48.0,
+          49.0,
+          48.0,
+          53.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-hit-par10": {
+        "median": 109.0,
+        "min": 88.0,
+        "max": 212.0,
+        "samples": [
+          88.0,
+          109.0,
+          91.0,
+          116.0,
+          136.0,
+          92.0,
+          212.0
+        ],
+        "n": 7
+      },
+      "ours/seq/insert": {
+        "median": 196.0,
+        "min": 184.0,
+        "max": 206.0,
+        "samples": [
+          185.0,
+          195.0,
+          196.0,
+          198.0,
+          200.0,
+          184.0,
+          206.0
+        ],
+        "n": 7
+      },
+      "ours/seq/settle": {
+        "median": 878.0,
+        "min": 753.0,
+        "max": 935.0,
+        "samples": [
+          884.0,
+          872.0,
+          753.0,
+          935.0,
+          878.0,
+          797.0,
+          906.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-hit": {
+        "median": 988.0,
+        "min": 950.0,
+        "max": 1662.0,
+        "samples": [
+          954.0,
+          985.0,
+          1003.0,
+          950.0,
+          1662.0,
+          988.0,
+          1052.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-miss": {
+        "median": 924.0,
+        "min": 876.0,
+        "max": 1499.0,
+        "samples": [
+          913.0,
+          934.0,
+          876.0,
+          884.0,
+          1499.0,
+          924.0,
+          1456.0
+        ],
+        "n": 7
+      },
+      "ours/seq/scan": {
+        "median": 50.0,
+        "min": 49.0,
+        "max": 51.0,
+        "samples": [
+          50.0,
+          51.0,
+          49.0,
+          49.0,
+          50.0,
+          50.0,
+          51.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-hit-par10": {
+        "median": 166.0,
+        "min": 124.0,
+        "max": 185.0,
+        "samples": [
+          135.0,
+          148.0,
+          124.0,
+          185.0,
+          166.0,
+          183.0,
+          173.0
+        ],
+        "n": 7
+      }
+    },
+    "finalized": {
+      "ours/random/insert": {
+        "median": 844.0,
+        "min": 751.0,
+        "max": 1318.0,
+        "samples": [
+          1318.0,
+          844.0,
+          763.0,
+          751.0,
+          895.0,
+          867.0,
+          786.0
+        ],
+        "n": 7
+      },
+      "ours/random/settle": {
+        "median": 1172.0,
+        "min": 878.0,
+        "max": 2436.0,
+        "samples": [
+          1172.0,
+          2436.0,
+          1059.0,
+          2409.0,
+          1794.0,
+          1087.0,
+          878.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-hit": {
+        "median": 714.0,
+        "min": 662.0,
+        "max": 1791.0,
+        "samples": [
+          1791.0,
+          714.0,
+          685.0,
+          662.0,
+          793.0,
+          803.0,
+          668.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-miss": {
+        "median": 474.0,
+        "min": 435.0,
+        "max": 642.0,
+        "samples": [
+          459.0,
+          522.0,
+          474.0,
+          466.0,
+          642.0,
+          487.0,
+          435.0
+        ],
+        "n": 7
+      },
+      "ours/random/scan": {
+        "median": 38.0,
+        "min": 38.0,
+        "max": 39.0,
+        "samples": [
+          38.0,
+          39.0,
+          38.0,
+          39.0,
+          39.0,
+          38.0,
+          38.0
+        ],
+        "n": 7
+      },
+      "ours/random/find-hit-par10": {
+        "median": 91.0,
+        "min": 84.0,
+        "max": 186.0,
+        "samples": [
+          86.0,
+          142.0,
+          96.0,
+          91.0,
+          186.0,
+          84.0,
+          88.0
+        ],
+        "n": 7
+      },
+      "ours/seq/insert": {
+        "median": 193.0,
+        "min": 188.0,
+        "max": 336.0,
+        "samples": [
+          282.0,
+          224.0,
+          192.0,
+          188.0,
+          336.0,
+          192.0,
+          193.0
+        ],
+        "n": 7
+      },
+      "ours/seq/settle": {
+        "median": 751.0,
+        "min": 672.0,
+        "max": 1844.0,
+        "samples": [
+          1844.0,
+          1369.0,
+          724.0,
+          751.0,
+          1555.0,
+          700.0,
+          672.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-hit": {
+        "median": 1026.0,
+        "min": 938.0,
+        "max": 1435.0,
+        "samples": [
+          1026.0,
+          1183.0,
+          966.0,
+          957.0,
+          1435.0,
+          938.0,
+          1111.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-miss": {
+        "median": 892.0,
+        "min": 860.0,
+        "max": 1534.0,
+        "samples": [
+          1133.0,
+          1534.0,
+          892.0,
+          864.0,
+          1033.0,
+          860.0,
+          882.0
+        ],
+        "n": 7
+      },
+      "ours/seq/scan": {
+        "median": 39.0,
+        "min": 38.0,
+        "max": 50.0,
+        "samples": [
+          38.0,
+          38.0,
+          39.0,
+          39.0,
+          50.0,
+          39.0,
+          39.0
+        ],
+        "n": 7
+      },
+      "ours/seq/find-hit-par10": {
+        "median": 171.0,
+        "min": 129.0,
+        "max": 305.0,
+        "samples": [
+          185.0,
+          210.0,
+          171.0,
+          164.0,
+          305.0,
+          129.0,
+          166.0
+        ],
+        "n": 7
+      }
+    }
+  },
+  "micro": {
+    "alpha2-complete": {
+      "BenchmarkReaderSteady/Single-10/ns/op": {
+        "median": 763.8,
+        "min": 762.2,
+        "max": 844.2,
+        "samples": [
+          844.2,
+          762.2,
+          763.8
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/ns/op": {
+        "median": 107.0,
+        "min": 94.49,
+        "max": 126.2,
+        "samples": [
+          126.2,
+          107.0,
+          94.49
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/op": {
+        "median": 2354034.0,
+        "min": 2330081.0,
+        "max": 2477526.0,
+        "samples": [
+          2354034.0,
+          2477526.0,
+          2330081.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/B/op": {
+        "median": 78608,
+        "min": 78608,
+        "max": 78608,
+        "samples": [
+          78608,
+          78608,
+          78608
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/allocs/op": {
+        "median": 28,
+        "min": 28,
+        "max": 28,
+        "samples": [
+          28,
+          28,
+          28
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/row": {
+        "median": 23.54,
+        "min": 23.3,
+        "max": 24.78,
+        "samples": [
+          23.54,
+          24.78,
+          23.3
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/op": {
+        "median": 5069581.0,
+        "min": 4855647.0,
+        "max": 5230368.0,
+        "samples": [
+          5069581.0,
+          5230368.0,
+          4855647.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/B/op": {
+        "median": 99608,
+        "min": 99608,
+        "max": 99608,
+        "samples": [
+          99608,
+          99608,
+          99608
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/allocs/op": {
+        "median": 1551,
+        "min": 1551,
+        "max": 1551,
+        "samples": [
+          1551,
+          1551,
+          1551
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/row": {
+        "median": 50.7,
+        "min": 48.56,
+        "max": 52.3,
+        "samples": [
+          50.7,
+          52.3,
+          48.56
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/ns/op": {
+        "median": 639.7,
+        "min": 597.4,
+        "max": 752.7,
+        "samples": [
+          639.7,
+          752.7,
+          597.4
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/B/op": {
+        "median": 688,
+        "min": 688,
+        "max": 688,
+        "samples": [
+          688,
+          688,
+          688
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/allocs/op": {
+        "median": 8,
+        "min": 8,
+        "max": 8,
+        "samples": [
+          8,
+          8,
+          8
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/ns/op": {
+        "median": 1289.0,
+        "min": 1107.0,
+        "max": 2160.0,
+        "samples": [
+          1289.0,
+          2160.0,
+          1107.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/B/op": {
+        "median": 3658,
+        "min": 3658,
+        "max": 3658,
+        "samples": [
+          3658,
+          3658,
+          3658
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/allocs/op": {
+        "median": 14,
+        "min": 14,
+        "max": 14,
+        "samples": [
+          14,
+          14,
+          14
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/ns/op": {
+        "median": 9913.0,
+        "min": 9704.0,
+        "max": 10944.0,
+        "samples": [
+          9913.0,
+          10944.0,
+          9704.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/B/op": {
+        "median": 53891,
+        "min": 53891,
+        "max": 53892,
+        "samples": [
+          53891,
+          53892,
+          53891
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/allocs/op": {
+        "median": 25,
+        "min": 25,
+        "max": 25,
+        "samples": [
+          25,
+          25,
+          25
+        ],
+        "n": 3
+      }
+    },
+    "alpha3-complete": {
+      "BenchmarkReaderSteady/Single-10/ns/op": {
+        "median": 797.2,
+        "min": 752.2,
+        "max": 884.0,
+        "samples": [
+          884.0,
+          797.2,
+          752.2
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/ns/op": {
+        "median": 124.8,
+        "min": 86.25,
+        "max": 224.0,
+        "samples": [
+          224.0,
+          124.8,
+          86.25
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/op": {
+        "median": 2477398.0,
+        "min": 2377249.0,
+        "max": 2603391.0,
+        "samples": [
+          2603391.0,
+          2477398.0,
+          2377249.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/B/op": {
+        "median": 78608,
+        "min": 78608,
+        "max": 78608,
+        "samples": [
+          78608,
+          78608,
+          78608
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/allocs/op": {
+        "median": 28,
+        "min": 28,
+        "max": 28,
+        "samples": [
+          28,
+          28,
+          28
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/row": {
+        "median": 24.77,
+        "min": 23.77,
+        "max": 26.03,
+        "samples": [
+          26.03,
+          24.77,
+          23.77
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/op": {
+        "median": 5087361.0,
+        "min": 5045777.0,
+        "max": 5159298.0,
+        "samples": [
+          5045777.0,
+          5159298.0,
+          5087361.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/B/op": {
+        "median": 99608,
+        "min": 99608,
+        "max": 99608,
+        "samples": [
+          99608,
+          99608,
+          99608
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/allocs/op": {
+        "median": 1551,
+        "min": 1551,
+        "max": 1551,
+        "samples": [
+          1551,
+          1551,
+          1551
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/row": {
+        "median": 50.87,
+        "min": 50.46,
+        "max": 51.59,
+        "samples": [
+          50.46,
+          51.59,
+          50.87
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/ns/op": {
+        "median": 636.6,
+        "min": 577.0,
+        "max": 647.5,
+        "samples": [
+          636.6,
+          647.5,
+          577.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/B/op": {
+        "median": 688,
+        "min": 688,
+        "max": 688,
+        "samples": [
+          688,
+          688,
+          688
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/allocs/op": {
+        "median": 8,
+        "min": 8,
+        "max": 8,
+        "samples": [
+          8,
+          8,
+          8
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/ns/op": {
+        "median": 1771.0,
+        "min": 1167.0,
+        "max": 1814.0,
+        "samples": [
+          1771.0,
+          1814.0,
+          1167.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/B/op": {
+        "median": 3658,
+        "min": 3658,
+        "max": 3658,
+        "samples": [
+          3658,
+          3658,
+          3658
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/allocs/op": {
+        "median": 14,
+        "min": 14,
+        "max": 14,
+        "samples": [
+          14,
+          14,
+          14
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/ns/op": {
+        "median": 10436.0,
+        "min": 9719.0,
+        "max": 12778.0,
+        "samples": [
+          12778.0,
+          10436.0,
+          9719.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/B/op": {
+        "median": 53892,
+        "min": 53891,
+        "max": 53893,
+        "samples": [
+          53892,
+          53893,
+          53891
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/allocs/op": {
+        "median": 25,
+        "min": 25,
+        "max": 25,
+        "samples": [
+          25,
+          25,
+          25
+        ],
+        "n": 3
+      }
+    },
+    "finalized": {
+      "BenchmarkReaderSteady/Single-10/ns/op": {
+        "median": 869.5,
+        "min": 791.5,
+        "max": 928.3,
+        "samples": [
+          869.5,
+          791.5,
+          928.3
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Single-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/ns/op": {
+        "median": 154.8,
+        "min": 103.2,
+        "max": 517.1,
+        "samples": [
+          517.1,
+          103.2,
+          154.8
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/B/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkReaderSteady/Parallel-10/allocs/op": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/op": {
+        "median": 2382335.0,
+        "min": 1742820.0,
+        "max": 2594744.0,
+        "samples": [
+          2382335.0,
+          2594744.0,
+          1742820.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/B/op": {
+        "median": 74512,
+        "min": 74512,
+        "max": 74512,
+        "samples": [
+          74512,
+          74512,
+          74512
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/allocs/op": {
+        "median": 27,
+        "min": 27,
+        "max": 27,
+        "samples": [
+          27,
+          27,
+          27
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Scan-10/ns/row": {
+        "median": 23.82,
+        "min": 17.43,
+        "max": 25.95,
+        "samples": [
+          23.82,
+          25.95,
+          17.43
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/op": {
+        "median": 4078465.0,
+        "min": 3937304.0,
+        "max": 4542146.0,
+        "samples": [
+          4542146.0,
+          4078465.0,
+          3937304.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/B/op": {
+        "median": 99352,
+        "min": 99352,
+        "max": 99352,
+        "samples": [
+          99352,
+          99352,
+          99352
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/allocs/op": {
+        "median": 1549,
+        "min": 1549,
+        "max": 1549,
+        "samples": [
+          1549,
+          1549,
+          1549
+        ],
+        "n": 3
+      },
+      "BenchmarkRawIteration/Cursor-10/ns/row": {
+        "median": 40.78,
+        "min": 39.37,
+        "max": 45.42,
+        "samples": [
+          45.42,
+          40.78,
+          39.37
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/ns/op": {
+        "median": 592.4,
+        "min": 562.1,
+        "max": 927.2,
+        "samples": [
+          927.2,
+          592.4,
+          562.1
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/B/op": {
+        "median": 672,
+        "min": 672,
+        "max": 672,
+        "samples": [
+          672,
+          672,
+          672
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/1-10/allocs/op": {
+        "median": 7,
+        "min": 7,
+        "max": 7,
+        "samples": [
+          7,
+          7,
+          7
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/ns/op": {
+        "median": 1344.0,
+        "min": 1150.0,
+        "max": 3594.0,
+        "samples": [
+          3594.0,
+          1344.0,
+          1150.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/B/op": {
+        "median": 3531,
+        "min": 3531,
+        "max": 3531,
+        "samples": [
+          3531,
+          3531,
+          3531
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/8-10/allocs/op": {
+        "median": 13,
+        "min": 13,
+        "max": 13,
+        "samples": [
+          13,
+          13,
+          13
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/ns/op": {
+        "median": 10314.0,
+        "min": 9006.0,
+        "max": 24407.0,
+        "samples": [
+          24407.0,
+          10314.0,
+          9006.0
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/B/op": {
+        "median": 51851,
+        "min": 51850,
+        "max": 51852,
+        "samples": [
+          51852,
+          51850,
+          51851
+        ],
+        "n": 3
+      },
+      "BenchmarkRawRange/128-10/allocs/op": {
+        "median": 24,
+        "min": 24,
+        "max": 24,
+        "samples": [
+          24,
+          24,
+          24
+        ],
+        "n": 3
+      }
+    }
+  },
+  "four_engines": {
+    "ours/random/insert": {
+      "median": 1051.0,
+      "min": 1051.0,
+      "max": 1051.0,
+      "samples": [
+        1051.0
+      ],
+      "n": 1
+    },
+    "ours/random/settle": {
+      "median": 1761.0,
+      "min": 1761.0,
+      "max": 1761.0,
+      "samples": [
+        1761.0
+      ],
+      "n": 1
+    },
+    "ours/random/find-hit": {
+      "median": 1841.0,
+      "min": 1841.0,
+      "max": 1841.0,
+      "samples": [
+        1841.0
+      ],
+      "n": 1
+    },
+    "ours/random/find-miss": {
+      "median": 588.0,
+      "min": 588.0,
+      "max": 588.0,
+      "samples": [
+        588.0
+      ],
+      "n": 1
+    },
+    "ours/random/scan": {
+      "median": 41.0,
+      "min": 41.0,
+      "max": 41.0,
+      "samples": [
+        41.0
+      ],
+      "n": 1
+    },
+    "ours/random/find-hit-par10": {
+      "median": 145.0,
+      "min": 145.0,
+      "max": 145.0,
+      "samples": [
+        145.0
+      ],
+      "n": 1
+    },
+    "pebble/random/insert": {
+      "median": 1879.0,
+      "min": 1879.0,
+      "max": 1879.0,
+      "samples": [
+        1879.0
+      ],
+      "n": 1
+    },
+    "pebble/random/settle": {
+      "median": 5602.0,
+      "min": 5602.0,
+      "max": 5602.0,
+      "samples": [
+        5602.0
+      ],
+      "n": 1
+    },
+    "pebble/random/find-hit": {
+      "median": 2532.0,
+      "min": 2532.0,
+      "max": 2532.0,
+      "samples": [
+        2532.0
+      ],
+      "n": 1
+    },
+    "pebble/random/find-miss": {
+      "median": 2307.0,
+      "min": 2307.0,
+      "max": 2307.0,
+      "samples": [
+        2307.0
+      ],
+      "n": 1
+    },
+    "pebble/random/scan": {
+      "median": 56.0,
+      "min": 56.0,
+      "max": 56.0,
+      "samples": [
+        56.0
+      ],
+      "n": 1
+    },
+    "pebble/random/find-hit-par10": {
+      "median": 561.0,
+      "min": 561.0,
+      "max": 561.0,
+      "samples": [
+        561.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/insert": {
+      "median": 26939.0,
+      "min": 26939.0,
+      "max": 26939.0,
+      "samples": [
+        26939.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/settle": {
+      "median": 13.0,
+      "min": 13.0,
+      "max": 13.0,
+      "samples": [
+        13.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/find-hit": {
+      "median": 2846.0,
+      "min": 2846.0,
+      "max": 2846.0,
+      "samples": [
+        2846.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/find-miss": {
+      "median": 2574.0,
+      "min": 2574.0,
+      "max": 2574.0,
+      "samples": [
+        2574.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/scan": {
+      "median": 128.0,
+      "min": 128.0,
+      "max": 128.0,
+      "samples": [
+        128.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/random/find-hit-par10": {
+      "median": 2507.0,
+      "min": 2507.0,
+      "max": 2507.0,
+      "samples": [
+        2507.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/insert": {
+      "median": 53736.0,
+      "min": 53736.0,
+      "max": 53736.0,
+      "samples": [
+        53736.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/settle": {
+      "median": 26.0,
+      "min": 26.0,
+      "max": 26.0,
+      "samples": [
+        26.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/find-hit": {
+      "median": 5322.0,
+      "min": 5322.0,
+      "max": 5322.0,
+      "samples": [
+        5322.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/find-miss": {
+      "median": 4401.0,
+      "min": 4401.0,
+      "max": 4401.0,
+      "samples": [
+        4401.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/scan": {
+      "median": 105.0,
+      "min": 105.0,
+      "max": 105.0,
+      "samples": [
+        105.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/random/find-hit-par10": {
+      "median": 8942.0,
+      "min": 8942.0,
+      "max": 8942.0,
+      "samples": [
+        8942.0
+      ],
+      "n": 1
+    },
+    "ours/seq/insert": {
+      "median": 194.0,
+      "min": 194.0,
+      "max": 194.0,
+      "samples": [
+        194.0
+      ],
+      "n": 1
+    },
+    "ours/seq/settle": {
+      "median": 881.0,
+      "min": 881.0,
+      "max": 881.0,
+      "samples": [
+        881.0
+      ],
+      "n": 1
+    },
+    "ours/seq/find-hit": {
+      "median": 1011.0,
+      "min": 1011.0,
+      "max": 1011.0,
+      "samples": [
+        1011.0
+      ],
+      "n": 1
+    },
+    "ours/seq/find-miss": {
+      "median": 897.0,
+      "min": 897.0,
+      "max": 897.0,
+      "samples": [
+        897.0
+      ],
+      "n": 1
+    },
+    "ours/seq/scan": {
+      "median": 38.0,
+      "min": 38.0,
+      "max": 38.0,
+      "samples": [
+        38.0
+      ],
+      "n": 1
+    },
+    "ours/seq/find-hit-par10": {
+      "median": 143.0,
+      "min": 143.0,
+      "max": 143.0,
+      "samples": [
+        143.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/insert": {
+      "median": 732.0,
+      "min": 732.0,
+      "max": 732.0,
+      "samples": [
+        732.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/settle": {
+      "median": 2735.0,
+      "min": 2735.0,
+      "max": 2735.0,
+      "samples": [
+        2735.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/find-hit": {
+      "median": 2482.0,
+      "min": 2482.0,
+      "max": 2482.0,
+      "samples": [
+        2482.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/find-miss": {
+      "median": 2091.0,
+      "min": 2091.0,
+      "max": 2091.0,
+      "samples": [
+        2091.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/scan": {
+      "median": 54.0,
+      "min": 54.0,
+      "max": 54.0,
+      "samples": [
+        54.0
+      ],
+      "n": 1
+    },
+    "pebble/seq/find-hit-par10": {
+      "median": 536.0,
+      "min": 536.0,
+      "max": 536.0,
+      "samples": [
+        536.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/insert": {
+      "median": 17175.0,
+      "min": 17175.0,
+      "max": 17175.0,
+      "samples": [
+        17175.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/settle": {
+      "median": 5.0,
+      "min": 5.0,
+      "max": 5.0,
+      "samples": [
+        5.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/find-hit": {
+      "median": 2902.0,
+      "min": 2902.0,
+      "max": 2902.0,
+      "samples": [
+        2902.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/find-miss": {
+      "median": 2568.0,
+      "min": 2568.0,
+      "max": 2568.0,
+      "samples": [
+        2568.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/scan": {
+      "median": 115.0,
+      "min": 115.0,
+      "max": 115.0,
+      "samples": [
+        115.0
+      ],
+      "n": 1
+    },
+    "sqlite-c/seq/find-hit-par10": {
+      "median": 2323.0,
+      "min": 2323.0,
+      "max": 2323.0,
+      "samples": [
+        2323.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/insert": {
+      "median": 19151.0,
+      "min": 19151.0,
+      "max": 19151.0,
+      "samples": [
+        19151.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/settle": {
+      "median": 2.0,
+      "min": 2.0,
+      "max": 2.0,
+      "samples": [
+        2.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/find-hit": {
+      "median": 3964.0,
+      "min": 3964.0,
+      "max": 3964.0,
+      "samples": [
+        3964.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/find-miss": {
+      "median": 3725.0,
+      "min": 3725.0,
+      "max": 3725.0,
+      "samples": [
+        3725.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/scan": {
+      "median": 91.0,
+      "min": 91.0,
+      "max": 91.0,
+      "samples": [
+        91.0
+      ],
+      "n": 1
+    },
+    "sqlite-go/seq/find-hit-par10": {
+      "median": 19533.0,
+      "min": 19533.0,
+      "max": 19533.0,
+      "samples": [
+        19533.0
+      ],
+      "n": 1
+    }
+  },
+  "final_features": {
+    "ours/load/NsPerOp": {
+      "median": 1836.6145700000002,
+      "min": 121.79584,
+      "max": 3551.4333,
+      "samples": [
+        121.79584,
+        3551.4333
+      ],
+      "n": 2
+    },
+    "ours/load/AllocatedBytesPerOp": {
+      "median": 1915.5324,
+      "min": 5.2808,
+      "max": 3825.784,
+      "samples": [
+        5.2808,
+        3825.784
+      ],
+      "n": 2
+    },
+    "ours/build-compound/NsPerOp": {
+      "median": 720.15334,
+      "min": 720.15334,
+      "max": 720.15334,
+      "samples": [
+        720.15334
+      ],
+      "n": 1
+    },
+    "ours/build-compound/AllocatedBytesPerOp": {
+      "median": 345.21488,
+      "min": 345.21488,
+      "max": 345.21488,
+      "samples": [
+        345.21488
+      ],
+      "n": 1
+    },
+    "ours/build-nullable-unique/NsPerOp": {
+      "median": 385.725,
+      "min": 385.725,
+      "max": 385.725,
+      "samples": [
+        385.725
+      ],
+      "n": 1
+    },
+    "ours/build-nullable-unique/AllocatedBytesPerOp": {
+      "median": 135.77728,
+      "min": 135.77728,
+      "max": 135.77728,
+      "samples": [
+        135.77728
+      ],
+      "n": 1
+    },
+    "ours/compound-page/NsPerOp": {
+      "median": 118394.43333333333,
+      "min": 118394.43333333333,
+      "max": 118394.43333333333,
+      "samples": [
+        118394.43333333333
+      ],
+      "n": 1
+    },
+    "ours/compound-page/AllocatedBytesPerOp": {
+      "median": 9206.4,
+      "min": 9206.4,
+      "max": 9206.4,
+      "samples": [
+        9206.4
+      ],
+      "n": 1
+    },
+    "ours/fallback-sort-page/NsPerOp": {
+      "median": 5605118.066666666,
+      "min": 5605118.066666666,
+      "max": 5605118.066666666,
+      "samples": [
+        5605118.066666666
+      ],
+      "n": 1
+    },
+    "ours/fallback-sort-page/AllocatedBytesPerOp": {
+      "median": 124248.53333333334,
+      "min": 124248.53333333334,
+      "max": 124248.53333333334,
+      "samples": [
+        124248.53333333334
+      ],
+      "n": 1
+    },
+    "ours/ordered-cursor/NsPerOp": {
+      "median": 26727.8,
+      "min": 26727.8,
+      "max": 26727.8,
+      "samples": [
+        26727.8
+      ],
+      "n": 1
+    },
+    "ours/ordered-cursor/AllocatedBytesPerOp": {
+      "median": 2112,
+      "min": 2112,
+      "max": 2112,
+      "samples": [
+        2112
+      ],
+      "n": 1
+    },
+    "ours/memory-limit-rejection/NsPerOp": {
+      "median": 2551.4,
+      "min": 2551.4,
+      "max": 2551.4,
+      "samples": [
+        2551.4
+      ],
+      "n": 1
+    },
+    "ours/memory-limit-rejection/AllocatedBytesPerOp": {
+      "median": 5712,
+      "min": 5712,
+      "max": 5712,
+      "samples": [
+        5712
+      ],
+      "n": 1
+    },
+    "pebble-manual/load/NsPerOp": {
+      "median": 3398.45791,
+      "min": 781.05332,
+      "max": 6015.8625,
+      "samples": [
+        781.05332,
+        6015.8625
+      ],
+      "n": 2
+    },
+    "pebble-manual/load/AllocatedBytesPerOp": {
+      "median": 9967.60288,
+      "min": 33.98656,
+      "max": 19901.2192,
+      "samples": [
+        33.98656,
+        19901.2192
+      ],
+      "n": 2
+    },
+    "pebble-manual/build-compound/NsPerOp": {
+      "median": 587.93832,
+      "min": 587.93832,
+      "max": 587.93832,
+      "samples": [
+        587.93832
+      ],
+      "n": 1
+    },
+    "pebble-manual/build-compound/AllocatedBytesPerOp": {
+      "median": 49.5376,
+      "min": 49.5376,
+      "max": 49.5376,
+      "samples": [
+        49.5376
+      ],
+      "n": 1
+    },
+    "pebble-manual/build-nullable-unique/NsPerOp": {
+      "median": 88.53916,
+      "min": 88.53916,
+      "max": 88.53916,
+      "samples": [
+        88.53916
+      ],
+      "n": 1
+    },
+    "pebble-manual/build-nullable-unique/AllocatedBytesPerOp": {
+      "median": 16,
+      "min": 16,
+      "max": 16,
+      "samples": [
+        16
+      ],
+      "n": 1
+    },
+    "pebble-manual/compound-page/NsPerOp": {
+      "median": 251855.56666666668,
+      "min": 251855.56666666668,
+      "max": 251855.56666666668,
+      "samples": [
+        251855.56666666668
+      ],
+      "n": 1
+    },
+    "pebble-manual/compound-page/AllocatedBytesPerOp": {
+      "median": 3922.133333333333,
+      "min": 3922.133333333333,
+      "max": 3922.133333333333,
+      "samples": [
+        3922.133333333333
+      ],
+      "n": 1
+    },
+    "pebble-manual/ordered-cursor/NsPerOp": {
+      "median": 135023.6,
+      "min": 135023.6,
+      "max": 135023.6,
+      "samples": [
+        135023.6
+      ],
+      "n": 1
+    },
+    "pebble-manual/ordered-cursor/AllocatedBytesPerOp": {
+      "median": 1712.5333333333333,
+      "min": 1712.5333333333333,
+      "max": 1712.5333333333333,
+      "samples": [
+        1712.5333333333333
+      ],
+      "n": 1
+    },
+    "sqlite-c/load/NsPerOp": {
+      "median": 40845.862080000006,
+      "min": 1933.68666,
+      "max": 79758.0375,
+      "samples": [
+        1933.68666,
+        79758.0375
+      ],
+      "n": 2
+    },
+    "sqlite-c/load/AllocatedBytesPerOp": {
+      "median": 852.0848,
+      "min": 104.0816,
+      "max": 1600.088,
+      "samples": [
+        104.0816,
+        1600.088
+      ],
+      "n": 2
+    },
+    "sqlite-c/build-compound/NsPerOp": {
+      "median": 355.87332,
+      "min": 355.87332,
+      "max": 355.87332,
+      "samples": [
+        355.87332
+      ],
+      "n": 1
+    },
+    "sqlite-c/build-compound/AllocatedBytesPerOp": {
+      "median": 0.00432,
+      "min": 0.00432,
+      "max": 0.00432,
+      "samples": [
+        0.00432
+      ],
+      "n": 1
+    },
+    "sqlite-c/build-nullable-unique/NsPerOp": {
+      "median": 223.3675,
+      "min": 223.3675,
+      "max": 223.3675,
+      "samples": [
+        223.3675
+      ],
+      "n": 1
+    },
+    "sqlite-c/build-nullable-unique/AllocatedBytesPerOp": {
+      "median": 0.00432,
+      "min": 0.00432,
+      "max": 0.00432,
+      "samples": [
+        0.00432
+      ],
+      "n": 1
+    },
+    "sqlite-c/compound-page/NsPerOp": {
+      "median": 100734.7,
+      "min": 100734.7,
+      "max": 100734.7,
+      "samples": [
+        100734.7
+      ],
+      "n": 1
+    },
+    "sqlite-c/compound-page/AllocatedBytesPerOp": {
+      "median": 3376,
+      "min": 3376,
+      "max": 3376,
+      "samples": [
+        3376
+      ],
+      "n": 1
+    },
+    "sqlite-c/ordered-cursor/NsPerOp": {
+      "median": 71854.16666666667,
+      "min": 71854.16666666667,
+      "max": 71854.16666666667,
+      "samples": [
+        71854.16666666667
+      ],
+      "n": 1
+    },
+    "sqlite-c/ordered-cursor/AllocatedBytesPerOp": {
+      "median": 3328,
+      "min": 3328,
+      "max": 3328,
+      "samples": [
+        3328
+      ],
+      "n": 1
+    },
+    "sqlite-go/load/NsPerOp": {
+      "median": 95790.41752,
+      "min": 2134.60584,
+      "max": 189446.2292,
+      "samples": [
+        2134.60584,
+        189446.2292
+      ],
+      "n": 2
+    },
+    "sqlite-go/load/AllocatedBytesPerOp": {
+      "median": 772.45824,
+      "min": 8.01248,
+      "max": 1536.904,
+      "samples": [
+        8.01248,
+        1536.904
+      ],
+      "n": 2
+    },
+    "sqlite-go/build-compound/NsPerOp": {
+      "median": 730.4375,
+      "min": 730.4375,
+      "max": 730.4375,
+      "samples": [
+        730.4375
+      ],
+      "n": 1
+    },
+    "sqlite-go/build-compound/AllocatedBytesPerOp": {
+      "median": 0.02656,
+      "min": 0.02656,
+      "max": 0.02656,
+      "samples": [
+        0.02656
+      ],
+      "n": 1
+    },
+    "sqlite-go/build-nullable-unique/NsPerOp": {
+      "median": 414.79334,
+      "min": 414.79334,
+      "max": 414.79334,
+      "samples": [
+        414.79334
+      ],
+      "n": 1
+    },
+    "sqlite-go/build-nullable-unique/AllocatedBytesPerOp": {
+      "median": 0.00288,
+      "min": 0.00288,
+      "max": 0.00288,
+      "samples": [
+        0.00288
+      ],
+      "n": 1
+    },
+    "sqlite-go/compound-page/NsPerOp": {
+      "median": 136570.83333333334,
+      "min": 136570.83333333334,
+      "max": 136570.83333333334,
+      "samples": [
+        136570.83333333334
+      ],
+      "n": 1
+    },
+    "sqlite-go/compound-page/AllocatedBytesPerOp": {
+      "median": 1680,
+      "min": 1680,
+      "max": 1680,
+      "samples": [
+        1680
+      ],
+      "n": 1
+    },
+    "sqlite-go/ordered-cursor/NsPerOp": {
+      "median": 87069.46666666666,
+      "min": 87069.46666666666,
+      "max": 87069.46666666666,
+      "samples": [
+        87069.46666666666
+      ],
+      "n": 1
+    },
+    "sqlite-go/ordered-cursor/AllocatedBytesPerOp": {
+      "median": 1696,
+      "min": 1696,
+      "max": 1696,
+      "samples": [
+        1696
+      ],
+      "n": 1
+    },
+    "ours/large-document-write/NsPerOp": {
+      "median": 24386.3984375,
+      "min": 24386.3984375,
+      "max": 24386.3984375,
+      "samples": [
+        24386.3984375
+      ],
+      "n": 1
+    },
+    "ours/large-document-write/AllocatedBytesPerOp": {
+      "median": 33380.6875,
+      "min": 33380.6875,
+      "max": 33380.6875,
+      "samples": [
+        33380.6875
+      ],
+      "n": 1
+    },
+    "ours/large-document-read/NsPerOp": {
+      "median": 4635.498046875,
+      "min": 4635.498046875,
+      "max": 4635.498046875,
+      "samples": [
+        4635.498046875
+      ],
+      "n": 1
+    },
+    "ours/large-document-read/AllocatedBytesPerOp": {
+      "median": 304,
+      "min": 304,
+      "max": 304,
+      "samples": [
+        304
+      ],
+      "n": 1
+    },
+    "pebble/large-document-write/NsPerOp": {
+      "median": 397381.8359375,
+      "min": 397381.8359375,
+      "max": 397381.8359375,
+      "samples": [
+        397381.8359375
+      ],
+      "n": 1
+    },
+    "pebble/large-document-write/AllocatedBytesPerOp": {
+      "median": 32283,
+      "min": 32283,
+      "max": 32283,
+      "samples": [
+        32283
+      ],
+      "n": 1
+    },
+    "pebble/large-document-read/NsPerOp": {
+      "median": 14931.640625,
+      "min": 14931.640625,
+      "max": 14931.640625,
+      "samples": [
+        14931.640625
+      ],
+      "n": 1
+    },
+    "pebble/large-document-read/AllocatedBytesPerOp": {
+      "median": 217.203125,
+      "min": 217.203125,
+      "max": 217.203125,
+      "samples": [
+        217.203125
+      ],
+      "n": 1
+    },
+    "sqlite-c/large-document-write/NsPerOp": {
+      "median": 516901.6875,
+      "min": 516901.6875,
+      "max": 516901.6875,
+      "samples": [
+        516901.6875
+      ],
+      "n": 1
+    },
+    "sqlite-c/large-document-write/AllocatedBytesPerOp": {
+      "median": 64,
+      "min": 64,
+      "max": 64,
+      "samples": [
+        64
+      ],
+      "n": 1
+    },
+    "sqlite-c/large-document-read/NsPerOp": {
+      "median": 30400.5546875,
+      "min": 30400.5546875,
+      "max": 30400.5546875,
+      "samples": [
+        30400.5546875
+      ],
+      "n": 1
+    },
+    "sqlite-c/large-document-read/AllocatedBytesPerOp": {
+      "median": 208,
+      "min": 208,
+      "max": 208,
+      "samples": [
+        208
+      ],
+      "n": 1
+    },
+    "sqlite-go/large-document-write/NsPerOp": {
+      "median": 539189.78125,
+      "min": 539189.78125,
+      "max": 539189.78125,
+      "samples": [
+        539189.78125
+      ],
+      "n": 1
+    },
+    "sqlite-go/large-document-write/AllocatedBytesPerOp": {
+      "median": 16,
+      "min": 16,
+      "max": 16,
+      "samples": [
+        16
+      ],
+      "n": 1
+    },
+    "sqlite-go/large-document-read/NsPerOp": {
+      "median": 123380.208984375,
+      "min": 123380.208984375,
+      "max": 123380.208984375,
+      "samples": [
+        123380.208984375
+      ],
+      "n": 1
+    },
+    "sqlite-go/large-document-read/AllocatedBytesPerOp": {
+      "median": 176,
+      "min": 176,
+      "max": 176,
+      "samples": [
+        176
+      ],
+      "n": 1
+    },
+    "ours-native/insert/NsPerOp": {
+      "median": 1365.135215,
+      "min": 973.38918,
+      "max": 1756.88125,
+      "samples": [
+        1756.88125,
+        973.38918
+      ],
+      "n": 2
+    },
+    "ours-native/upsert/NsPerOp": {
+      "median": 1498.101435,
+      "min": 805.07582,
+      "max": 2191.12705,
+      "samples": [
+        2191.12705,
+        805.07582
+      ],
+      "n": 2
+    },
+    "ours-native/delete/NsPerOp": {
+      "median": 1202.8955,
+      "min": 1202.8955,
+      "max": 1202.8955,
+      "samples": [
+        1202.8955
+      ],
+      "n": 1
+    },
+    "ours-native/query-all/NsPerOp": {
+      "median": 64641.917,
+      "min": 64641.917,
+      "max": 64641.917,
+      "samples": [
+        64641.917
+      ],
+      "n": 1
+    },
+    "ours-native/point-query/NsPerOp": {
+      "median": 132.838041,
+      "min": 132.838041,
+      "max": 132.838041,
+      "samples": [
+        132.838041
+      ],
+      "n": 1
+    },
+    "ours-native/point-par10/NsPerOp": {
+      "median": 17.727459,
+      "min": 17.727459,
+      "max": 17.727459,
+      "samples": [
+        17.727459
+      ],
+      "n": 1
+    },
+    "ours-native/point-par32/NsPerOp": {
+      "median": 19.16625,
+      "min": 19.16625,
+      "max": 19.16625,
+      "samples": [
+        19.16625
+      ],
+      "n": 1
+    },
+    "ours-native/disk/NsPerOp": {
+      "median": 101625,
+      "min": 101625,
+      "max": 101625,
+      "samples": [
+        101625
+      ],
+      "n": 1
+    },
+    "ours-native/disk/DiskBytes": {
+      "median": 8795213,
+      "min": 8795213,
+      "max": 8795213,
+      "samples": [
+        8795213
+      ],
+      "n": 1
+    },
+    "ours-query/insert/NsPerOp": {
+      "median": 449.86875,
+      "min": 449.86875,
+      "max": 449.86875,
+      "samples": [
+        449.86875
+      ],
+      "n": 1
+    },
+    "ours-query/upsert/NsPerOp": {
+      "median": 197.8896,
+      "min": 197.8896,
+      "max": 197.8896,
+      "samples": [
+        197.8896
+      ],
+      "n": 1
+    },
+    "ours-query/delete/NsPerOp": {
+      "median": 410.8545,
+      "min": 410.8545,
+      "max": 410.8545,
+      "samples": [
+        410.8545
+      ],
+      "n": 1
+    },
+    "ours-query/backfill/NsPerOp": {
+      "median": 343.53933333333333,
+      "min": 343.53933333333333,
+      "max": 343.53933333333333,
+      "samples": [
+        343.53933333333333
+      ],
+      "n": 1
+    },
+    "ours-query/projection-backfill/NsPerOp": {
+      "median": 282.0856111111111,
+      "min": 282.0856111111111,
+      "max": 282.0856111111111,
+      "samples": [
+        282.0856111111111
+      ],
+      "n": 1
+    },
+    "ours-query/query-all/NsPerOp": {
+      "median": 1695202.380952381,
+      "min": 1695202.380952381,
+      "max": 1695202.380952381,
+      "samples": [
+        1695202.380952381
+      ],
+      "n": 1
+    },
+    "ours-query/point-query/NsPerOp": {
+      "median": 17136.208,
+      "min": 17136.208,
+      "max": 17136.208,
+      "samples": [
+        17136.208
+      ],
+      "n": 1
+    },
+    "ours-query/disk/NsPerOp": {
+      "median": 145958,
+      "min": 145958,
+      "max": 145958,
+      "samples": [
+        145958
+      ],
+      "n": 1
+    },
+    "ours-query/disk/DiskBytes": {
+      "median": 8458219,
+      "min": 8458219,
+      "max": 8458219,
+      "samples": [
+        8458219
+      ],
+      "n": 1
+    },
+    "pebble-manual/insert/NsPerOp": {
+      "median": 2780.2989450000005,
+      "min": 1378.30834,
+      "max": 4182.28955,
+      "samples": [
+        4182.28955,
+        1378.30834
+      ],
+      "n": 2
+    },
+    "pebble-manual/upsert/NsPerOp": {
+      "median": 2357.66792,
+      "min": 1032.54834,
+      "max": 3682.7875,
+      "samples": [
+        3682.7875,
+        1032.54834
+      ],
+      "n": 2
+    },
+    "pebble-manual/delete/NsPerOp": {
+      "median": 1676.5625,
+      "min": 1676.5625,
+      "max": 1676.5625,
+      "samples": [
+        1676.5625
+      ],
+      "n": 1
+    },
+    "pebble-manual/query-all/NsPerOp": {
+      "median": 91348.958,
+      "min": 91348.958,
+      "max": 91348.958,
+      "samples": [
+        91348.958
+      ],
+      "n": 1
+    },
+    "pebble-manual/point-query/NsPerOp": {
+      "median": 1208.91075,
+      "min": 1208.91075,
+      "max": 1208.91075,
+      "samples": [
+        1208.91075
+      ],
+      "n": 1
+    },
+    "pebble-manual/point-par10/NsPerOp": {
+      "median": 998.104167,
+      "min": 998.104167,
+      "max": 998.104167,
+      "samples": [
+        998.104167
+      ],
+      "n": 1
+    },
+    "pebble-manual/point-par32/NsPerOp": {
+      "median": 1597.826958,
+      "min": 1597.826958,
+      "max": 1597.826958,
+      "samples": [
+        1597.826958
+      ],
+      "n": 1
+    },
+    "pebble-manual/disk/NsPerOp": {
+      "median": 244750,
+      "min": 244750,
+      "max": 244750,
+      "samples": [
+        244750
+      ],
+      "n": 1
+    },
+    "pebble-manual/disk/DiskBytes": {
+      "median": 1213247,
+      "min": 1213247,
+      "max": 1213247,
+      "samples": [
+        1213247
+      ],
+      "n": 1
+    },
+    "pebble-query/insert/NsPerOp": {
+      "median": 3273.85205,
+      "min": 3273.85205,
+      "max": 3273.85205,
+      "samples": [
+        3273.85205
+      ],
+      "n": 1
+    },
+    "pebble-query/upsert/NsPerOp": {
+      "median": 1216.6625,
+      "min": 1216.6625,
+      "max": 1216.6625,
+      "samples": [
+        1216.6625
+      ],
+      "n": 1
+    },
+    "pebble-query/delete/NsPerOp": {
+      "median": 463.583,
+      "min": 463.583,
+      "max": 463.583,
+      "samples": [
+        463.583
+      ],
+      "n": 1
+    },
+    "pebble-query/query-all/NsPerOp": {
+      "median": 1781081.380952381,
+      "min": 1781081.380952381,
+      "max": 1781081.380952381,
+      "samples": [
+        1781081.380952381
+      ],
+      "n": 1
+    },
+    "pebble-query/point-query/NsPerOp": {
+      "median": 1453591.68,
+      "min": 1453591.68,
+      "max": 1453591.68,
+      "samples": [
+        1453591.68
+      ],
+      "n": 1
+    },
+    "pebble-query/disk/NsPerOp": {
+      "median": 276208,
+      "min": 276208,
+      "max": 276208,
+      "samples": [
+        276208
+      ],
+      "n": 1
+    },
+    "pebble-query/disk/DiskBytes": {
+      "median": 1563430,
+      "min": 1563430,
+      "max": 1563430,
+      "samples": [
+        1563430
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/insert/NsPerOp": {
+      "median": 4591.07915,
+      "min": 4591.07915,
+      "max": 4591.07915,
+      "samples": [
+        4591.07915
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/upsert/NsPerOp": {
+      "median": 5004.4,
+      "min": 5004.4,
+      "max": 5004.4,
+      "samples": [
+        5004.4
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/delete/NsPerOp": {
+      "median": 3406.5,
+      "min": 3406.5,
+      "max": 3406.5,
+      "samples": [
+        3406.5
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/query-all/NsPerOp": {
+      "median": 189721,
+      "min": 189721,
+      "max": 189721,
+      "samples": [
+        189721
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/point-query/NsPerOp": {
+      "median": 1653.20875,
+      "min": 1653.20875,
+      "max": 1653.20875,
+      "samples": [
+        1653.20875
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/point-par10/NsPerOp": {
+      "median": 1105.042291,
+      "min": 1105.042291,
+      "max": 1105.042291,
+      "samples": [
+        1105.042291
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/point-par32/NsPerOp": {
+      "median": 1176.212125,
+      "min": 1176.212125,
+      "max": 1176.212125,
+      "samples": [
+        1176.212125
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/disk/NsPerOp": {
+      "median": 89625,
+      "min": 89625,
+      "max": 89625,
+      "samples": [
+        89625
+      ],
+      "n": 1
+    },
+    "sqlite-c-native/disk/DiskBytes": {
+      "median": 684032,
+      "min": 684032,
+      "max": 684032,
+      "samples": [
+        684032
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/insert/NsPerOp": {
+      "median": 4754.3167,
+      "min": 4754.3167,
+      "max": 4754.3167,
+      "samples": [
+        4754.3167
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/upsert/NsPerOp": {
+      "median": 3423.9646,
+      "min": 3423.9646,
+      "max": 3423.9646,
+      "samples": [
+        3423.9646
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/delete/NsPerOp": {
+      "median": 2118.0205,
+      "min": 2118.0205,
+      "max": 2118.0205,
+      "samples": [
+        2118.0205
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/query-all/NsPerOp": {
+      "median": 845688.5238095238,
+      "min": 845688.5238095238,
+      "max": 845688.5238095238,
+      "samples": [
+        845688.5238095238
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/point-query/NsPerOp": {
+      "median": 2616.208,
+      "min": 2616.208,
+      "max": 2616.208,
+      "samples": [
+        2616.208
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/disk/NsPerOp": {
+      "median": 101959,
+      "min": 101959,
+      "max": 101959,
+      "samples": [
+        101959
+      ],
+      "n": 1
+    },
+    "sqlite-c-query/disk/DiskBytes": {
+      "median": 1042600,
+      "min": 1042600,
+      "max": 1042600,
+      "samples": [
+        1042600
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/insert/NsPerOp": {
+      "median": 5621.96455,
+      "min": 5621.96455,
+      "max": 5621.96455,
+      "samples": [
+        5621.96455
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/upsert/NsPerOp": {
+      "median": 6778.8104,
+      "min": 6778.8104,
+      "max": 6778.8104,
+      "samples": [
+        6778.8104
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/delete/NsPerOp": {
+      "median": 4264.854,
+      "min": 4264.854,
+      "max": 4264.854,
+      "samples": [
+        4264.854
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/query-all/NsPerOp": {
+      "median": 105819.333,
+      "min": 105819.333,
+      "max": 105819.333,
+      "samples": [
+        105819.333
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/point-query/NsPerOp": {
+      "median": 2317.546416,
+      "min": 2317.546416,
+      "max": 2317.546416,
+      "samples": [
+        2317.546416
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/point-par10/NsPerOp": {
+      "median": 3434.253959,
+      "min": 3434.253959,
+      "max": 3434.253959,
+      "samples": [
+        3434.253959
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/point-par32/NsPerOp": {
+      "median": 5381.590584,
+      "min": 5381.590584,
+      "max": 5381.590584,
+      "samples": [
+        5381.590584
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/disk/NsPerOp": {
+      "median": 171958,
+      "min": 171958,
+      "max": 171958,
+      "samples": [
+        171958
+      ],
+      "n": 1
+    },
+    "sqlite-go-native/disk/DiskBytes": {
+      "median": 684032,
+      "min": 684032,
+      "max": 684032,
+      "samples": [
+        684032
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/insert/NsPerOp": {
+      "median": 66861.6771,
+      "min": 66861.6771,
+      "max": 66861.6771,
+      "samples": [
+        66861.6771
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/upsert/NsPerOp": {
+      "median": 55927.81665,
+      "min": 55927.81665,
+      "max": 55927.81665,
+      "samples": [
+        55927.81665
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/delete/NsPerOp": {
+      "median": 7250,
+      "min": 7250,
+      "max": 7250,
+      "samples": [
+        7250
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/query-all/NsPerOp": {
+      "median": 4825426.571428572,
+      "min": 4825426.571428572,
+      "max": 4825426.571428572,
+      "samples": [
+        4825426.571428572
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/point-query/NsPerOp": {
+      "median": 4432.084,
+      "min": 4432.084,
+      "max": 4432.084,
+      "samples": [
+        4432.084
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/disk/NsPerOp": {
+      "median": 192500,
+      "min": 192500,
+      "max": 192500,
+      "samples": [
+        192500
+      ],
+      "n": 1
+    },
+    "sqlite-go-query/disk/DiskBytes": {
+      "median": 1042600,
+      "min": 1042600,
+      "max": 1042600,
+      "samples": [
+        1042600
+      ],
+      "n": 1
+    },
+    "ours-native/read-derived/NsPerOp": {
+      "median": 292.906875,
+      "min": 292.906875,
+      "max": 292.906875,
+      "samples": [
+        292.906875
+      ],
+      "n": 1
+    },
+    "ours-native/read-derived/DiskBytes": {
+      "median": 7602192,
+      "min": 7602192,
+      "max": 7602192,
+      "samples": [
+        7602192
+      ],
+      "n": 1
+    },
+    "ours-native/read-derived-10/NsPerOp": {
+      "median": 49.32375,
+      "min": 49.32375,
+      "max": 49.32375,
+      "samples": [
+        49.32375
+      ],
+      "n": 1
+    },
+    "ours-native/read-derived-32/NsPerOp": {
+      "median": 34.99458,
+      "min": 34.99458,
+      "max": 34.99458,
+      "samples": [
+        34.99458
+      ],
+      "n": 1
+    },
+    "ours-native/index-build+verify/NsPerOp": {
+      "median": 1694.7075,
+      "min": 1694.7075,
+      "max": 1694.7075,
+      "samples": [
+        1694.7075
+      ],
+      "n": 1
+    },
+    "ours-native/indexed-filter/NsPerOp": {
+      "median": 35345.85,
+      "min": 35345.85,
+      "max": 35345.85,
+      "samples": [
+        35345.85
+      ],
+      "n": 1
+    },
+    "ours-manual/insert/NsPerOp": {
+      "median": 551.3425,
+      "min": 551.3425,
+      "max": 551.3425,
+      "samples": [
+        551.3425
+      ],
+      "n": 1
+    },
+    "ours-manual/upsert/NsPerOp": {
+      "median": 376.00166,
+      "min": 376.00166,
+      "max": 376.00166,
+      "samples": [
+        376.00166
+      ],
+      "n": 1
+    },
+    "ours-manual/read-derived/NsPerOp": {
+      "median": 619.863125,
+      "min": 619.863125,
+      "max": 619.863125,
+      "samples": [
+        619.863125
+      ],
+      "n": 1
+    },
+    "ours-manual/read-derived/DiskBytes": {
+      "median": 7602192,
+      "min": 7602192,
+      "max": 7602192,
+      "samples": [
+        7602192
+      ],
+      "n": 1
+    },
+    "ours-manual/read-derived-10/NsPerOp": {
+      "median": 77.891665,
+      "min": 77.891665,
+      "max": 77.891665,
+      "samples": [
+        77.891665
+      ],
+      "n": 1
+    },
+    "ours-manual/read-derived-32/NsPerOp": {
+      "median": 74.50083,
+      "min": 74.50083,
+      "max": 74.50083,
+      "samples": [
+        74.50083
+      ],
+      "n": 1
+    },
+    "ours-manual/index-build+verify/NsPerOp": {
+      "median": 2066.86332,
+      "min": 2066.86332,
+      "max": 2066.86332,
+      "samples": [
+        2066.86332
+      ],
+      "n": 1
+    },
+    "ours-manual/indexed-filter/NsPerOp": {
+      "median": 33962.5,
+      "min": 33962.5,
+      "max": 33962.5,
+      "samples": [
+        33962.5
+      ],
+      "n": 1
+    },
+    "ours-readtime/insert/NsPerOp": {
+      "median": 439.88,
+      "min": 439.88,
+      "max": 439.88,
+      "samples": [
+        439.88
+      ],
+      "n": 1
+    },
+    "ours-readtime/upsert/NsPerOp": {
+      "median": 304.81334,
+      "min": 304.81334,
+      "max": 304.81334,
+      "samples": [
+        304.81334
+      ],
+      "n": 1
+    },
+    "ours-readtime/read-derived/NsPerOp": {
+      "median": 275.570415,
+      "min": 275.570415,
+      "max": 275.570415,
+      "samples": [
+        275.570415
+      ],
+      "n": 1
+    },
+    "ours-readtime/read-derived/DiskBytes": {
+      "median": 4964368,
+      "min": 4964368,
+      "max": 4964368,
+      "samples": [
+        4964368
+      ],
+      "n": 1
+    },
+    "ours-readtime/read-derived-10/NsPerOp": {
+      "median": 50.639585,
+      "min": 50.639585,
+      "max": 50.639585,
+      "samples": [
+        50.639585
+      ],
+      "n": 1
+    },
+    "ours-readtime/read-derived-32/NsPerOp": {
+      "median": 38.788335,
+      "min": 38.788335,
+      "max": 38.788335,
+      "samples": [
+        38.788335
+      ],
+      "n": 1
+    },
+    "ours-readtime/derive-filter-scan/NsPerOp": {
+      "median": 3105475,
+      "min": 3105475,
+      "max": 3105475,
+      "samples": [
+        3105475
+      ],
+      "n": 1
+    },
+    "pebble-manual/read-derived/NsPerOp": {
+      "median": 1533.189585,
+      "min": 1533.189585,
+      "max": 1533.189585,
+      "samples": [
+        1533.189585
+      ],
+      "n": 1
+    },
+    "pebble-manual/read-derived/DiskBytes": {
+      "median": 10506319,
+      "min": 10506319,
+      "max": 10506319,
+      "samples": [
+        10506319
+      ],
+      "n": 1
+    },
+    "pebble-manual/read-derived-10/NsPerOp": {
+      "median": 748.627295,
+      "min": 748.627295,
+      "max": 748.627295,
+      "samples": [
+        748.627295
+      ],
+      "n": 1
+    },
+    "pebble-manual/read-derived-32/NsPerOp": {
+      "median": 1027.924585,
+      "min": 1027.924585,
+      "max": 1027.924585,
+      "samples": [
+        1027.924585
+      ],
+      "n": 1
+    },
+    "pebble-readtime/insert/NsPerOp": {
+      "median": 1597.6075,
+      "min": 1597.6075,
+      "max": 1597.6075,
+      "samples": [
+        1597.6075
+      ],
+      "n": 1
+    },
+    "pebble-readtime/upsert/NsPerOp": {
+      "median": 551.86084,
+      "min": 551.86084,
+      "max": 551.86084,
+      "samples": [
+        551.86084
+      ],
+      "n": 1
+    },
+    "pebble-readtime/read-derived/NsPerOp": {
+      "median": 1447.70729,
+      "min": 1447.70729,
+      "max": 1447.70729,
+      "samples": [
+        1447.70729
+      ],
+      "n": 1
+    },
+    "pebble-readtime/read-derived/DiskBytes": {
+      "median": 6977659,
+      "min": 6977659,
+      "max": 6977659,
+      "samples": [
+        6977659
+      ],
+      "n": 1
+    },
+    "pebble-readtime/read-derived-10/NsPerOp": {
+      "median": 765.72417,
+      "min": 765.72417,
+      "max": 765.72417,
+      "samples": [
+        765.72417
+      ],
+      "n": 1
+    },
+    "pebble-readtime/read-derived-32/NsPerOp": {
+      "median": 812.50833,
+      "min": 812.50833,
+      "max": 812.50833,
+      "samples": [
+        812.50833
+      ],
+      "n": 1
+    },
+    "sqlite-c/insert/NsPerOp": {
+      "median": 5971.9875,
+      "min": 5971.9875,
+      "max": 5971.9875,
+      "samples": [
+        5971.9875
+      ],
+      "n": 1
+    },
+    "sqlite-c/upsert/NsPerOp": {
+      "median": 7959.14166,
+      "min": 7959.14166,
+      "max": 7959.14166,
+      "samples": [
+        7959.14166
+      ],
+      "n": 1
+    },
+    "sqlite-c/read-derived/NsPerOp": {
+      "median": 1979.937085,
+      "min": 1979.937085,
+      "max": 1979.937085,
+      "samples": [
+        1979.937085
+      ],
+      "n": 1
+    },
+    "sqlite-c/read-derived/DiskBytes": {
+      "median": 4034560,
+      "min": 4034560,
+      "max": 4034560,
+      "samples": [
+        4034560
+      ],
+      "n": 1
+    },
+    "sqlite-c/index-build/NsPerOp": {
+      "median": 596.32,
+      "min": 596.32,
+      "max": 596.32,
+      "samples": [
+        596.32
+      ],
+      "n": 1
+    },
+    "sqlite-c/indexed-filter/NsPerOp": {
+      "median": 35318.75,
+      "min": 35318.75,
+      "max": 35318.75,
+      "samples": [
+        35318.75
+      ],
+      "n": 1
+    },
+    "sqlite-go/insert/NsPerOp": {
+      "median": 6555.88832,
+      "min": 6555.88832,
+      "max": 6555.88832,
+      "samples": [
+        6555.88832
+      ],
+      "n": 1
+    },
+    "sqlite-go/upsert/NsPerOp": {
+      "median": 8955.17168,
+      "min": 8955.17168,
+      "max": 8955.17168,
+      "samples": [
+        8955.17168
+      ],
+      "n": 1
+    },
+    "sqlite-go/read-derived/NsPerOp": {
+      "median": 2826.29042,
+      "min": 2826.29042,
+      "max": 2826.29042,
+      "samples": [
+        2826.29042
+      ],
+      "n": 1
+    },
+    "sqlite-go/read-derived/DiskBytes": {
+      "median": 4034560,
+      "min": 4034560,
+      "max": 4034560,
+      "samples": [
+        4034560
+      ],
+      "n": 1
+    },
+    "sqlite-go/index-build/NsPerOp": {
+      "median": 990.875,
+      "min": 990.875,
+      "max": 990.875,
+      "samples": [
+        990.875
+      ],
+      "n": 1
+    },
+    "sqlite-go/indexed-filter/NsPerOp": {
+      "median": 71035.4,
+      "min": 71035.4,
+      "max": 71035.4,
+      "samples": [
+        71035.4
+      ],
+      "n": 1
+    },
+    "ours/build-wide-index/NsPerOp": {
+      "median": 20003.35,
+      "min": 20003.35,
+      "max": 20003.35,
+      "samples": [
+        20003.35
+      ],
+      "n": 1
+    },
+    "ours/build-wide-index/AllocatedBytesPerOp": {
+      "median": 41156.1784,
+      "min": 41156.1784,
+      "max": 41156.1784,
+      "samples": [
+        41156.1784
+      ],
+      "n": 1
+    },
+    "ours/ordered-100-row-page/NsPerOp": {
+      "median": 245770.42,
+      "min": 245770.42,
+      "max": 245770.42,
+      "samples": [
+        245770.42
+      ],
+      "n": 1
+    },
+    "ours/ordered-100-row-page/AllocatedBytesPerOp": {
+      "median": 435241.92,
+      "min": 435241.92,
+      "max": 435241.92,
+      "samples": [
+        435241.92
+      ],
+      "n": 1
+    },
+    "ours/reused-resume-100-row-page/NsPerOp": {
+      "median": 228913.34,
+      "min": 228913.34,
+      "max": 228913.34,
+      "samples": [
+        228913.34
+      ],
+      "n": 1
+    },
+    "ours/reused-resume-100-row-page/AllocatedBytesPerOp": {
+      "median": 444080,
+      "min": 444080,
+      "max": 444080,
+      "samples": [
+        444080
+      ],
+      "n": 1
+    },
+    "pebble-manual/build-wide-index/NsPerOp": {
+      "median": 4877.7125,
+      "min": 4877.7125,
+      "max": 4877.7125,
+      "samples": [
+        4877.7125
+      ],
+      "n": 1
+    },
+    "pebble-manual/build-wide-index/AllocatedBytesPerOp": {
+      "median": 25830.788,
+      "min": 25830.788,
+      "max": 25830.788,
+      "samples": [
+        25830.788
+      ],
+      "n": 1
+    },
+    "pebble-manual/ordered-100-row-page/NsPerOp": {
+      "median": 357699.16,
+      "min": 357699.16,
+      "max": 357699.16,
+      "samples": [
+        357699.16
+      ],
+      "n": 1
+    },
+    "pebble-manual/ordered-100-row-page/AllocatedBytesPerOp": {
+      "median": 162307.12,
+      "min": 162307.12,
+      "max": 162307.12,
+      "samples": [
+        162307.12
+      ],
+      "n": 1
+    },
+    "sqlite-c/build-wide-index/NsPerOp": {
+      "median": 67702.8375,
+      "min": 67702.8375,
+      "max": 67702.8375,
+      "samples": [
+        67702.8375
+      ],
+      "n": 1
+    },
+    "sqlite-c/build-wide-index/AllocatedBytesPerOp": {
+      "median": 0.0216,
+      "min": 0.0216,
+      "max": 0.0216,
+      "samples": [
+        0.0216
+      ],
+      "n": 1
+    },
+    "sqlite-c/ordered-100-row-page/NsPerOp": {
+      "median": 563312.5,
+      "min": 563312.5,
+      "max": 563312.5,
+      "samples": [
+        563312.5
+      ],
+      "n": 1
+    },
+    "sqlite-c/ordered-100-row-page/AllocatedBytesPerOp": {
+      "median": 155262.72,
+      "min": 155262.72,
+      "max": 155262.72,
+      "samples": [
+        155262.72
+      ],
+      "n": 1
+    },
+    "sqlite-go/build-wide-index/NsPerOp": {
+      "median": 110918.6333,
+      "min": 110918.6333,
+      "max": 110918.6333,
+      "samples": [
+        110918.6333
+      ],
+      "n": 1
+    },
+    "sqlite-go/build-wide-index/AllocatedBytesPerOp": {
+      "median": 0.9648,
+      "min": 0.9648,
+      "max": 0.9648,
+      "samples": [
+        0.9648
+      ],
+      "n": 1
+    },
+    "sqlite-go/ordered-100-row-page/NsPerOp": {
+      "median": 2252242.09,
+      "min": 2252242.09,
+      "max": 2252242.09,
+      "samples": [
+        2252242.09
+      ],
+      "n": 1
+    },
+    "sqlite-go/ordered-100-row-page/AllocatedBytesPerOp": {
+      "median": 153630.72,
+      "min": 153630.72,
+      "max": 153630.72,
+      "samples": [
+        153630.72
+      ],
+      "n": 1
+    }
+  },
+  "candidate": {
+    "native": {
+      "alpha2": {
+        "ours/random/insert": {
+          "median": 775.0,
+          "min": 752.0,
+          "max": 794.0,
+          "samples": [
+            794.0,
+            775.0,
+            793.0,
+            752.0,
+            764.0
+          ],
+          "n": 5
+        },
+        "ours/random/settle": {
+          "median": 895.0,
+          "min": 772.0,
+          "max": 1154.0,
+          "samples": [
+            1050.0,
+            895.0,
+            1154.0,
+            799.0,
+            772.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit": {
+          "median": 760.0,
+          "min": 623.0,
+          "max": 901.0,
+          "samples": [
+            766.0,
+            760.0,
+            901.0,
+            747.0,
+            623.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-miss": {
+          "median": 523.0,
+          "min": 399.0,
+          "max": 545.0,
+          "samples": [
+            529.0,
+            523.0,
+            545.0,
+            420.0,
+            399.0
+          ],
+          "n": 5
+        },
+        "ours/random/scan": {
+          "median": 47.0,
+          "min": 46.0,
+          "max": 49.0,
+          "samples": [
+            49.0,
+            47.0,
+            46.0,
+            47.0,
+            46.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit-par10": {
+          "median": 94.0,
+          "min": 80.0,
+          "max": 118.0,
+          "samples": [
+            118.0,
+            94.0,
+            107.0,
+            91.0,
+            80.0
+          ],
+          "n": 5
+        },
+        "ours/seq/insert": {
+          "median": 192.0,
+          "min": 190.0,
+          "max": 195.0,
+          "samples": [
+            192.0,
+            190.0,
+            195.0,
+            191.0,
+            193.0
+          ],
+          "n": 5
+        },
+        "ours/seq/settle": {
+          "median": 626.0,
+          "min": 594.0,
+          "max": 782.0,
+          "samples": [
+            631.0,
+            626.0,
+            598.0,
+            782.0,
+            594.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit": {
+          "median": 1008.0,
+          "min": 947.0,
+          "max": 1023.0,
+          "samples": [
+            1008.0,
+            1023.0,
+            990.0,
+            1009.0,
+            947.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-miss": {
+          "median": 903.0,
+          "min": 864.0,
+          "max": 955.0,
+          "samples": [
+            903.0,
+            955.0,
+            926.0,
+            876.0,
+            864.0
+          ],
+          "n": 5
+        },
+        "ours/seq/scan": {
+          "median": 47.0,
+          "min": 47.0,
+          "max": 49.0,
+          "samples": [
+            47.0,
+            49.0,
+            47.0,
+            47.0,
+            48.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit-par10": {
+          "median": 152.0,
+          "min": 145.0,
+          "max": 202.0,
+          "samples": [
+            145.0,
+            202.0,
+            152.0,
+            160.0,
+            149.0
+          ],
+          "n": 5
+        }
+      },
+      "alpha3": {
+        "ours/random/insert": {
+          "median": 774.0,
+          "min": 710.0,
+          "max": 809.0,
+          "samples": [
+            774.0,
+            799.0,
+            809.0,
+            710.0,
+            742.0
+          ],
+          "n": 5
+        },
+        "ours/random/settle": {
+          "median": 829.0,
+          "min": 726.0,
+          "max": 955.0,
+          "samples": [
+            829.0,
+            820.0,
+            955.0,
+            907.0,
+            726.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit": {
+          "median": 693.0,
+          "min": 667.0,
+          "max": 897.0,
+          "samples": [
+            693.0,
+            701.0,
+            667.0,
+            897.0,
+            686.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-miss": {
+          "median": 507.0,
+          "min": 478.0,
+          "max": 1100.0,
+          "samples": [
+            481.0,
+            507.0,
+            1100.0,
+            530.0,
+            478.0
+          ],
+          "n": 5
+        },
+        "ours/random/scan": {
+          "median": 48.0,
+          "min": 47.0,
+          "max": 129.0,
+          "samples": [
+            47.0,
+            47.0,
+            129.0,
+            49.0,
+            48.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit-par10": {
+          "median": 98.0,
+          "min": 88.0,
+          "max": 436.0,
+          "samples": [
+            95.0,
+            88.0,
+            436.0,
+            116.0,
+            98.0
+          ],
+          "n": 5
+        },
+        "ours/seq/insert": {
+          "median": 200.0,
+          "min": 184.0,
+          "max": 205.0,
+          "samples": [
+            184.0,
+            200.0,
+            200.0,
+            189.0,
+            205.0
+          ],
+          "n": 5
+        },
+        "ours/seq/settle": {
+          "median": 688.0,
+          "min": 620.0,
+          "max": 1549.0,
+          "samples": [
+            714.0,
+            1549.0,
+            688.0,
+            620.0,
+            652.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit": {
+          "median": 993.0,
+          "min": 960.0,
+          "max": 1004.0,
+          "samples": [
+            1004.0,
+            1001.0,
+            993.0,
+            971.0,
+            960.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-miss": {
+          "median": 950.0,
+          "min": 869.0,
+          "max": 1435.0,
+          "samples": [
+            929.0,
+            950.0,
+            995.0,
+            869.0,
+            1435.0
+          ],
+          "n": 5
+        },
+        "ours/seq/scan": {
+          "median": 50.0,
+          "min": 48.0,
+          "max": 76.0,
+          "samples": [
+            50.0,
+            48.0,
+            49.0,
+            50.0,
+            76.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit-par10": {
+          "median": 154.0,
+          "min": 124.0,
+          "max": 276.0,
+          "samples": [
+            154.0,
+            143.0,
+            124.0,
+            172.0,
+            276.0
+          ],
+          "n": 5
+        }
+      },
+      "final": {
+        "ours/random/insert": {
+          "median": 798.0,
+          "min": 771.0,
+          "max": 866.0,
+          "samples": [
+            771.0,
+            798.0,
+            866.0,
+            774.0,
+            854.0
+          ],
+          "n": 5
+        },
+        "ours/random/settle": {
+          "median": 861.0,
+          "min": 828.0,
+          "max": 1500.0,
+          "samples": [
+            861.0,
+            862.0,
+            1500.0,
+            828.0,
+            836.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit": {
+          "median": 693.0,
+          "min": 676.0,
+          "max": 781.0,
+          "samples": [
+            693.0,
+            728.0,
+            781.0,
+            676.0,
+            677.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-miss": {
+          "median": 497.0,
+          "min": 451.0,
+          "max": 516.0,
+          "samples": [
+            497.0,
+            496.0,
+            516.0,
+            503.0,
+            451.0
+          ],
+          "n": 5
+        },
+        "ours/random/scan": {
+          "median": 38.0,
+          "min": 37.0,
+          "max": 42.0,
+          "samples": [
+            38.0,
+            39.0,
+            38.0,
+            42.0,
+            37.0
+          ],
+          "n": 5
+        },
+        "ours/random/find-hit-par10": {
+          "median": 115.0,
+          "min": 103.0,
+          "max": 138.0,
+          "samples": [
+            105.0,
+            115.0,
+            121.0,
+            138.0,
+            103.0
+          ],
+          "n": 5
+        },
+        "ours/seq/insert": {
+          "median": 194.0,
+          "min": 192.0,
+          "max": 201.0,
+          "samples": [
+            192.0,
+            201.0,
+            194.0,
+            200.0,
+            192.0
+          ],
+          "n": 5
+        },
+        "ours/seq/settle": {
+          "median": 637.0,
+          "min": 608.0,
+          "max": 918.0,
+          "samples": [
+            608.0,
+            666.0,
+            918.0,
+            637.0,
+            616.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit": {
+          "median": 1002.0,
+          "min": 954.0,
+          "max": 1054.0,
+          "samples": [
+            1025.0,
+            1054.0,
+            1002.0,
+            975.0,
+            954.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-miss": {
+          "median": 937.0,
+          "min": 866.0,
+          "max": 960.0,
+          "samples": [
+            921.0,
+            942.0,
+            937.0,
+            866.0,
+            960.0
+          ],
+          "n": 5
+        },
+        "ours/seq/scan": {
+          "median": 39.0,
+          "min": 38.0,
+          "max": 40.0,
+          "samples": [
+            38.0,
+            40.0,
+            39.0,
+            38.0,
+            39.0
+          ],
+          "n": 5
+        },
+        "ours/seq/find-hit-par10": {
+          "median": 150.0,
+          "min": 129.0,
+          "max": 226.0,
+          "samples": [
+            133.0,
+            226.0,
+            170.0,
+            129.0,
+            150.0
+          ],
+          "n": 5
+        }
+      }
+    },
+    "micro": {
+      "alpha2": {
+        "BenchmarkRawIteration/Scan-10/ns/op": {
+          "median": 2351339.0,
+          "min": 2323768.0,
+          "max": 3621747.0,
+          "samples": [
+            3621747.0,
+            2332178.0,
+            2494221.0,
+            2401563.0,
+            2329429.0,
+            2323768.0,
+            2375223.0,
+            2351339.0,
+            2337506.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/B/op": {
+          "median": 78608,
+          "min": 78608,
+          "max": 78626,
+          "samples": [
+            78626,
+            78618,
+            78608,
+            78619,
+            78608,
+            78608,
+            78619,
+            78608,
+            78608
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/allocs/op": {
+          "median": 28,
+          "min": 28,
+          "max": 28,
+          "samples": [
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/ns/row": {
+          "median": 23.51,
+          "min": 23.24,
+          "max": 36.22,
+          "samples": [
+            36.22,
+            23.32,
+            24.94,
+            24.02,
+            23.29,
+            23.24,
+            23.75,
+            23.51,
+            23.38
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/op": {
+          "median": 4900633.0,
+          "min": 4789809.0,
+          "max": 5262709.0,
+          "samples": [
+            4900633.0,
+            4789809.0,
+            4821075.0,
+            4864993.0,
+            5134607.0,
+            4855953.0,
+            4912505.0,
+            4929370.0,
+            5262709.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/B/op": {
+          "median": 99608,
+          "min": 99608,
+          "max": 99630,
+          "samples": [
+            99608,
+            99608,
+            99609,
+            99629,
+            99608,
+            99608,
+            99608,
+            99630,
+            99608
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/allocs/op": {
+          "median": 1551,
+          "min": 1551,
+          "max": 1551,
+          "samples": [
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/row": {
+          "median": 49.01,
+          "min": 47.9,
+          "max": 52.63,
+          "samples": [
+            49.01,
+            47.9,
+            48.21,
+            48.65,
+            51.35,
+            48.56,
+            49.13,
+            49.29,
+            52.63
+          ],
+          "n": 9
+        }
+      },
+      "alpha3": {
+        "BenchmarkRawIteration/Scan-10/ns/op": {
+          "median": 2360442.0,
+          "min": 2308512.0,
+          "max": 3132689.0,
+          "samples": [
+            2336468.0,
+            2308512.0,
+            2319801.0,
+            2360442.0,
+            3132689.0,
+            2326439.0,
+            2787699.0,
+            2637904.0,
+            2724181.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/B/op": {
+          "median": 78618,
+          "min": 78608,
+          "max": 78640,
+          "samples": [
+            78640,
+            78619,
+            78608,
+            78619,
+            78618,
+            78608,
+            78630,
+            78608,
+            78608
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/allocs/op": {
+          "median": 28,
+          "min": 28,
+          "max": 28,
+          "samples": [
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/ns/row": {
+          "median": 23.6,
+          "min": 23.09,
+          "max": 31.33,
+          "samples": [
+            23.36,
+            23.09,
+            23.2,
+            23.6,
+            31.33,
+            23.26,
+            27.88,
+            26.38,
+            27.24
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/op": {
+          "median": 5041183.0,
+          "min": 4985742.0,
+          "max": 7610654.0,
+          "samples": [
+            5034096.0,
+            7511587.0,
+            5041183.0,
+            4985742.0,
+            5003743.0,
+            5015060.0,
+            5698278.0,
+            7610654.0,
+            6442092.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/B/op": {
+          "median": 99608,
+          "min": 99608,
+          "max": 99609,
+          "samples": [
+            99608,
+            99608,
+            99609,
+            99609,
+            99609,
+            99608,
+            99608,
+            99608,
+            99608
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/allocs/op": {
+          "median": 1551,
+          "min": 1551,
+          "max": 1551,
+          "samples": [
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551,
+            1551
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/row": {
+          "median": 50.41,
+          "min": 49.86,
+          "max": 76.11,
+          "samples": [
+            50.34,
+            75.12,
+            50.41,
+            49.86,
+            50.04,
+            50.15,
+            56.98,
+            76.11,
+            64.42
+          ],
+          "n": 9
+        }
+      },
+      "final": {
+        "BenchmarkRawIteration/Scan-10/ns/op": {
+          "median": 1505782.0,
+          "min": 1465653.0,
+          "max": 1613724.0,
+          "samples": [
+            1509822.0,
+            1505782.0,
+            1488976.0,
+            1613724.0,
+            1495117.0,
+            1465653.0,
+            1544076.0,
+            1492462.0,
+            1544086.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/B/op": {
+          "median": 74512,
+          "min": 74512,
+          "max": 74527,
+          "samples": [
+            74525,
+            74512,
+            74512,
+            74527,
+            74512,
+            74512,
+            74526,
+            74512,
+            74512
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/allocs/op": {
+          "median": 27,
+          "min": 27,
+          "max": 27,
+          "samples": [
+            27,
+            27,
+            27,
+            27,
+            27,
+            27,
+            27,
+            27,
+            27
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Scan-10/ns/row": {
+          "median": 15.06,
+          "min": 14.66,
+          "max": 16.14,
+          "samples": [
+            15.1,
+            15.06,
+            14.89,
+            16.14,
+            14.95,
+            14.66,
+            15.44,
+            14.92,
+            15.44
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/op": {
+          "median": 3928384.0,
+          "min": 3818827.0,
+          "max": 6815287.0,
+          "samples": [
+            3937535.0,
+            3954949.0,
+            3818827.0,
+            3862085.0,
+            3910095.0,
+            3928384.0,
+            6815287.0,
+            3922339.0,
+            3933875.0
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/B/op": {
+          "median": 99352,
+          "min": 99352,
+          "max": 99370,
+          "samples": [
+            99353,
+            99370,
+            99352,
+            99352,
+            99352,
+            99352,
+            99352,
+            99352,
+            99352
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/allocs/op": {
+          "median": 1549,
+          "min": 1549,
+          "max": 1549,
+          "samples": [
+            1549,
+            1549,
+            1549,
+            1549,
+            1549,
+            1549,
+            1549,
+            1549,
+            1549
+          ],
+          "n": 9
+        },
+        "BenchmarkRawIteration/Cursor-10/ns/row": {
+          "median": 39.28,
+          "min": 38.19,
+          "max": 68.15,
+          "samples": [
+            39.38,
+            39.55,
+            38.19,
+            38.62,
+            39.1,
+            39.28,
+            68.15,
+            39.22,
+            39.34
+          ],
+          "n": 9
+        }
+      }
+    }
+  },
+  "intermediate": {
+    "native": {
+      "alpha3": {
+        "ours/random/insert": {
+          "median": 873.0,
+          "min": 795.0,
+          "max": 1068.0,
+          "samples": [
+            795.0,
+            873.0,
+            795.0,
+            1068.0,
+            941.0,
+            942.0,
+            836.0
+          ],
+          "n": 7
+        },
+        "ours/random/settle": {
+          "median": 1137.0,
+          "min": 896.0,
+          "max": 2332.0,
+          "samples": [
+            2332.0,
+            896.0,
+            970.0,
+            2141.0,
+            2058.0,
+            1137.0,
+            1111.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-hit": {
+          "median": 781.0,
+          "min": 720.0,
+          "max": 1846.0,
+          "samples": [
+            730.0,
+            781.0,
+            720.0,
+            775.0,
+            1846.0,
+            810.0,
+            1211.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-miss": {
+          "median": 489.0,
+          "min": 451.0,
+          "max": 800.0,
+          "samples": [
+            471.0,
+            547.0,
+            474.0,
+            489.0,
+            800.0,
+            451.0,
+            735.0
+          ],
+          "n": 7
+        },
+        "ours/random/scan": {
+          "median": 50.0,
+          "min": 48.0,
+          "max": 67.0,
+          "samples": [
+            48.0,
+            52.0,
+            48.0,
+            49.0,
+            67.0,
+            50.0,
+            50.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-hit-par10": {
+          "median": 113.0,
+          "min": 85.0,
+          "max": 181.0,
+          "samples": [
+            108.0,
+            176.0,
+            93.0,
+            85.0,
+            181.0,
+            131.0,
+            113.0
+          ],
+          "n": 7
+        },
+        "ours/seq/insert": {
+          "median": 257.0,
+          "min": 193.0,
+          "max": 871.0,
+          "samples": [
+            210.0,
+            871.0,
+            194.0,
+            193.0,
+            271.0,
+            266.0,
+            257.0
+          ],
+          "n": 7
+        },
+        "ours/seq/settle": {
+          "median": 996.0,
+          "min": 645.0,
+          "max": 1793.0,
+          "samples": [
+            645.0,
+            1032.0,
+            752.0,
+            996.0,
+            828.0,
+            1793.0,
+            1017.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-hit": {
+          "median": 1045.0,
+          "min": 937.0,
+          "max": 1480.0,
+          "samples": [
+            984.0,
+            1025.0,
+            1045.0,
+            1152.0,
+            1480.0,
+            1167.0,
+            937.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-miss": {
+          "median": 1063.0,
+          "min": 888.0,
+          "max": 1168.0,
+          "samples": [
+            916.0,
+            889.0,
+            1063.0,
+            1168.0,
+            1077.0,
+            1119.0,
+            888.0
+          ],
+          "n": 7
+        },
+        "ours/seq/scan": {
+          "median": 50.0,
+          "min": 48.0,
+          "max": 61.0,
+          "samples": [
+            50.0,
+            48.0,
+            51.0,
+            61.0,
+            59.0,
+            50.0,
+            49.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-hit-par10": {
+          "median": 177.0,
+          "min": 147.0,
+          "max": 306.0,
+          "samples": [
+            151.0,
+            147.0,
+            177.0,
+            266.0,
+            306.0,
+            184.0,
+            149.0
+          ],
+          "n": 7
+        }
+      },
+      "protected": {
+        "ours/random/insert": {
+          "median": 881.0,
+          "min": 748.0,
+          "max": 1666.0,
+          "samples": [
+            881.0,
+            1266.0,
+            876.0,
+            1666.0,
+            1068.0,
+            871.0,
+            748.0
+          ],
+          "n": 7
+        },
+        "ours/random/settle": {
+          "median": 1055.0,
+          "min": 883.0,
+          "max": 1526.0,
+          "samples": [
+            984.0,
+            1140.0,
+            1431.0,
+            1526.0,
+            912.0,
+            1055.0,
+            883.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-hit": {
+          "median": 868.0,
+          "min": 681.0,
+          "max": 1044.0,
+          "samples": [
+            849.0,
+            868.0,
+            1044.0,
+            882.0,
+            755.0,
+            962.0,
+            681.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-miss": {
+          "median": 551.0,
+          "min": 481.0,
+          "max": 852.0,
+          "samples": [
+            551.0,
+            499.0,
+            769.0,
+            552.0,
+            507.0,
+            852.0,
+            481.0
+          ],
+          "n": 7
+        },
+        "ours/random/scan": {
+          "median": 39.0,
+          "min": 38.0,
+          "max": 57.0,
+          "samples": [
+            38.0,
+            39.0,
+            40.0,
+            39.0,
+            39.0,
+            57.0,
+            38.0
+          ],
+          "n": 7
+        },
+        "ours/random/find-hit-par10": {
+          "median": 139.0,
+          "min": 117.0,
+          "max": 253.0,
+          "samples": [
+            123.0,
+            117.0,
+            198.0,
+            153.0,
+            139.0,
+            253.0,
+            117.0
+          ],
+          "n": 7
+        },
+        "ours/seq/insert": {
+          "median": 232.0,
+          "min": 187.0,
+          "max": 331.0,
+          "samples": [
+            231.0,
+            256.0,
+            331.0,
+            232.0,
+            213.0,
+            269.0,
+            187.0
+          ],
+          "n": 7
+        },
+        "ours/seq/settle": {
+          "median": 962.0,
+          "min": 616.0,
+          "max": 2247.0,
+          "samples": [
+            771.0,
+            1395.0,
+            1391.0,
+            962.0,
+            2247.0,
+            701.0,
+            616.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-hit": {
+          "median": 1086.0,
+          "min": 940.0,
+          "max": 3729.0,
+          "samples": [
+            3729.0,
+            1398.0,
+            1153.0,
+            1009.0,
+            1086.0,
+            1014.0,
+            940.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-miss": {
+          "median": 1074.0,
+          "min": 881.0,
+          "max": 2100.0,
+          "samples": [
+            2100.0,
+            1056.0,
+            1095.0,
+            1074.0,
+            955.0,
+            1127.0,
+            881.0
+          ],
+          "n": 7
+        },
+        "ours/seq/scan": {
+          "median": 41.0,
+          "min": 37.0,
+          "max": 87.0,
+          "samples": [
+            42.0,
+            38.0,
+            41.0,
+            87.0,
+            43.0,
+            40.0,
+            37.0
+          ],
+          "n": 7
+        },
+        "ours/seq/find-hit-par10": {
+          "median": 222.0,
+          "min": 127.0,
+          "max": 648.0,
+          "samples": [
+            242.0,
+            187.0,
+            648.0,
+            479.0,
+            222.0,
+            221.0,
+            127.0
+          ],
+          "n": 7
+        }
+      }
+    }
+  },
+  "benchmark_processes": 128,
+  "ci": {
+    "conclusion": "success",
+    "headSha": "4b5405287229d2c06215b275851237268d9955af",
+    "jobs": [
+      {
+        "completedAt": "2026-10-13T17:49:17Z",
+        "conclusion": "success",
+        "databaseId": 115447880448,
+        "name": "vet and test (macos-latest)",
+        "startedAt": "2026-10-13T17:45:26Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-13T17:45:30Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-13T17:45:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:33Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-13T17:45:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:38Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 3,
+            "startedAt": "2026-10-13T17:45:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:38Z",
+            "conclusion": "success",
+            "name": "Run go version",
+            "number": 4,
+            "startedAt": "2026-10-13T17:45:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:50Z",
+            "conclusion": "success",
+            "name": "vet",
+            "number": 5,
+            "startedAt": "2026-10-13T17:45:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:51Z",
+            "conclusion": "success",
+            "name": "build",
+            "number": 6,
+            "startedAt": "2026-10-13T17:45:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:43Z",
+            "conclusion": "success",
+            "name": "unit tests",
+            "number": 7,
+            "startedAt": "2026-10-13T17:45:51Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:49:08Z",
+            "conclusion": "success",
+            "name": "benchmark harness builds",
+            "number": 8,
+            "startedAt": "2026-10-13T17:47:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:49:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 15,
+            "startedAt": "2026-10-13T17:49:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:49:13Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 16,
+            "startedAt": "2026-10-13T17:49:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:49:16Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-10-13T17:49:13Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/apteva/db/actions/runs/38441188141/job/115447880448"
+      },
+      {
+        "completedAt": "2026-10-13T17:53:27Z",
+        "conclusion": "success",
+        "databaseId": 115447880817,
+        "name": "race detector (ubuntu-latest)",
+        "startedAt": "2026-10-13T17:45:17Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-13T17:45:18Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-13T17:45:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:19Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-13T17:45:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:20Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 3,
+            "startedAt": "2026-10-13T17:45:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:25Z",
+            "conclusion": "success",
+            "name": "race pass",
+            "number": 4,
+            "startedAt": "2026-10-13T17:45:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:25Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 7,
+            "startedAt": "2026-10-13T17:53:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:26Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 8,
+            "startedAt": "2026-10-13T17:53:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:26Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-13T17:53:26Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/apteva/db/actions/runs/38441188141/job/115447880817"
+      },
+      {
+        "completedAt": "2026-10-13T17:47:56Z",
+        "conclusion": "success",
+        "databaseId": 115447880825,
+        "name": "vet and test (ubuntu-latest)",
+        "startedAt": "2026-10-13T17:45:17Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-13T17:45:19Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-13T17:45:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:20Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-13T17:45:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:23Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 3,
+            "startedAt": "2026-10-13T17:45:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:23Z",
+            "conclusion": "success",
+            "name": "Run go version",
+            "number": 4,
+            "startedAt": "2026-10-13T17:45:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:36Z",
+            "conclusion": "success",
+            "name": "vet",
+            "number": 5,
+            "startedAt": "2026-10-13T17:45:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:37Z",
+            "conclusion": "success",
+            "name": "build",
+            "number": 6,
+            "startedAt": "2026-10-13T17:45:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:46:52Z",
+            "conclusion": "success",
+            "name": "unit tests",
+            "number": 7,
+            "startedAt": "2026-10-13T17:45:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:53Z",
+            "conclusion": "success",
+            "name": "benchmark harness builds",
+            "number": 8,
+            "startedAt": "2026-10-13T17:46:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:53Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 15,
+            "startedAt": "2026-10-13T17:47:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:53Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 16,
+            "startedAt": "2026-10-13T17:47:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:53Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-10-13T17:47:53Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/apteva/db/actions/runs/38441188141/job/115447880825"
+      },
+      {
+        "completedAt": "2026-10-13T17:48:49Z",
+        "conclusion": "success",
+        "databaseId": 115447880903,
+        "name": "fuzz smoke (ubuntu)",
+        "startedAt": "2026-10-13T17:45:17Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-13T17:45:19Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-13T17:45:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:20Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-13T17:45:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:24Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 3,
+            "startedAt": "2026-10-13T17:45:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:46:28Z",
+            "conclusion": "success",
+            "name": "documents",
+            "number": 4,
+            "startedAt": "2026-10-13T17:45:24Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:47:14Z",
+            "conclusion": "success",
+            "name": "pipelines",
+            "number": 5,
+            "startedAt": "2026-10-13T17:46:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:48:00Z",
+            "conclusion": "success",
+            "name": "pages",
+            "number": 6,
+            "startedAt": "2026-10-13T17:47:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:48:46Z",
+            "conclusion": "success",
+            "name": "wide page splits",
+            "number": 7,
+            "startedAt": "2026-10-13T17:48:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:48:46Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 13,
+            "startedAt": "2026-10-13T17:48:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:48:47Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 14,
+            "startedAt": "2026-10-13T17:48:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:48:47Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-10-13T17:48:47Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/apteva/db/actions/runs/38441188141/job/115447880903"
+      },
+      {
+        "completedAt": "2026-10-13T17:53:59Z",
+        "conclusion": "success",
+        "databaseId": 115447881064,
+        "name": "race detector (macos-latest)",
+        "startedAt": "2026-10-13T17:45:23Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-13T17:45:25Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-13T17:45:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:27Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-13T17:45:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:45:31Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 3,
+            "startedAt": "2026-10-13T17:45:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:52Z",
+            "conclusion": "success",
+            "name": "race pass",
+            "number": 4,
+            "startedAt": "2026-10-13T17:45:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:52Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+            "number": 7,
+            "startedAt": "2026-10-13T17:53:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:53Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 8,
+            "startedAt": "2026-10-13T17:53:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-13T17:53:56Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-13T17:53:53Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/apteva/db/actions/runs/38441188141/job/115447881064"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/apteva/db/actions/runs/38441188141"
+  }
+}
