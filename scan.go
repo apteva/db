@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -6,9 +6,9 @@ import (
 )
 
 // Scan calls fn for every key in [start, end) of the default collection in
-// key order; nil bounds are open. fn returns false to stop. The reader lock
-// is held one leaf at a time, so writers interleave between leaves and each
-// leaf is seen atomically.
+// key order at one snapshot; nil bounds are open. fn returns false to stop.
+// The snapshot is released before returning. Writers may run between leaves
+// and callbacks without changing the scan's view.
 func (db *DB) Scan(start, end []byte, fn func(key, val []byte) bool) error {
 	return db.def.Scan(start, end, fn)
 }

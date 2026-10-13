@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"math"
 	"sort"
 	"sync"
+	"unicode/utf8"
 )
 
 // Secondary indexes live in the same B+tree under a reserved key prefix, so
@@ -38,10 +39,11 @@ var (
 )
 
 type indexDef struct {
-	ID    uint32 `json:"id"`
-	Field string `json:"field"`
-	Name  string `json:"-"`
-	Coll  uint32 `json:"-"` // owning collection, from the catalog key
+	ID     uint32 `json:"id"`
+	Field  string `json:"field"`
+	Unique bool   `json:"unique,omitempty"`
+	Name   string `json:"-"`
+	Coll   uint32 `json:"-"` // owning collection, from the catalog key
 }
 
 func catalogKey(coll uint32, name string) []byte {
@@ -66,7 +68,11 @@ func encodeIndexValue(dst []byte, v value) []byte {
 	case kBool:
 		dst = append(dst, byte(v.i))
 	case kInt, kFloat:
-		bits := math.Float64bits(v.num())
+		n := v.num()
+		if n == 0 {
+			n = 0
+		}
+		bits := math.Float64bits(n)
 		if bits&(1<<63) != 0 {
 			bits = ^bits // negatives: reverse their order
 		} else {
@@ -151,15 +157,31 @@ func indexedValues(doc []byte, field string, fn func(v value)) {
 
 // indexOps appends to b the entry deletions and insertions that changing
 // key from oldDoc to newDoc (nil: absent) requires.
-func indexOps(defs []indexDef, b *Batch, key, oldDoc, newDoc []byte) {
+func indexOps(defs []indexDef, b *Batch, key, oldDoc, newDoc []byte) error {
+	var err error
 	for _, d := range defs {
 		if oldDoc != nil {
-			indexedValues(oldDoc, d.Field, func(v value) { b.add(indexEntryKey(d.ID, v, key), nil, true) })
+			indexedValues(oldDoc, d.Field, func(v value) {
+				if err == nil {
+					err = b.add(indexEntryKey(d.ID, v, key), nil, true)
+					if err == nil && v.isNum() && v.num() == 0 {
+						err = b.add(legacyZeroEntryKey(d.ID, key), nil, true)
+					}
+				}
+			})
 		}
 		if newDoc != nil {
-			indexedValues(newDoc, d.Field, func(v value) { b.add(indexEntryKey(d.ID, v, key), nil, false) })
+			indexedValues(newDoc, d.Field, func(v value) {
+				if err == nil {
+					err = b.add(indexEntryKey(d.ID, v, key), nil, false)
+				}
+			})
+		}
+		if err != nil {
+			return err
 		}
 	}
+	return nil
 }
 
 // ---- catalog
@@ -188,20 +210,33 @@ func (db *DB) loadIndexes() error {
 	db.idx.nextID = 1
 	lo := []byte{reservedPrefix, 'c'}
 	hi := []byte{reservedPrefix, 'd'}
+	var invalid error
+	seenIDs := map[uint32]bool{}
 	err := db.scan(view{db, nil}, lo, hi, func(k, v []byte) bool {
 		var d indexDef
-		if len(k) >= 6 && json.Unmarshal(v, &d) == nil {
-			d.Coll = binary.BigEndian.Uint32(k[2:])
-			d.Name = string(k[6:])
-			db.idx.defs = append(db.idx.defs, d)
-			if d.ID >= db.idx.nextID {
-				db.idx.nextID = d.ID + 1
-			}
+
+		if len(k) <= 6 || len(k)-6 > 255 || json.Unmarshal(v, &d) != nil || d.ID == 0 || d.Field == "" || seenIDs[d.ID] || (d.Unique && db.readFormat != 0 && db.readFormat < 6) {
+			invalid = ErrCorrupt
+			return false
+		}
+		d.Coll = binary.BigEndian.Uint32(k[2:])
+		d.Name = string(k[6:])
+		if _, ok := db.collectionByID(d.Coll); !ok {
+			invalid = ErrCorrupt
+			return false
+		}
+		seenIDs[d.ID] = true
+		db.idx.defs = append(db.idx.defs, d)
+		if d.ID >= db.idx.nextID {
+			db.idx.nextID = d.ID + 1
 		}
 		return true
 	})
 	if err != nil {
 		return err
+	}
+	if invalid != nil {
+		return invalid
 	}
 	return db.sweepOrphanEntries()
 }
@@ -239,10 +274,31 @@ func (db *DB) sweepOrphanEntries() error {
 	}
 }
 
+// indexDefs returns the catalog's definitions. The slice is never modified
+// once handed out: every change installs a fresh one, so callers iterate
+// it without the lock.
 func (db *DB) indexDefs() []indexDef {
 	db.idx.mu.RLock()
 	defer db.idx.mu.RUnlock()
 	return db.idx.defs
+}
+
+// withDef returns a new slice holding defs and def.
+func withDef(defs []indexDef, def indexDef) []indexDef {
+	out := make([]indexDef, 0, len(defs)+1)
+	out = append(out, defs...)
+	return append(out, def)
+}
+
+// withoutDef returns a new slice holding defs minus the one with id.
+func withoutDef(defs []indexDef, id uint32) []indexDef {
+	out := make([]indexDef, 0, len(defs))
+	for _, d := range defs {
+		if d.ID != id {
+			out = append(out, d)
+		}
+	}
+	return out
 }
 
 // hasIndexes reports whether any collection has an index.
@@ -257,8 +313,8 @@ func (db *DB) Indexes() map[string]string { return db.def.Indexes() }
 
 // CreateIndex builds an index on a document field of the default
 // collection.
-func (db *DB) CreateIndex(ctx context.Context, name, field string) error {
-	return db.def.CreateIndex(ctx, name, field)
+func (db *DB) CreateIndex(ctx context.Context, name, field string, opts ...IndexOptions) error {
+	return db.def.CreateIndex(ctx, name, field, opts...)
 }
 
 // DropIndex removes an index of the default collection.
@@ -275,9 +331,23 @@ func (db *DB) DropIndex(ctx context.Context, name string) error { return db.def.
 //
 // ctx cancels the build between its steps; a cancelled build leaves no
 // trace but entries the next open sweeps.
-func (c *Collection) CreateIndex(ctx context.Context, name, field string) error {
+func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts ...IndexOptions) error {
+	if len(opts) > 1 {
+		return ErrPipeline
+	}
+	if len(opts) == 1 && opts[0].Unique {
+		return c.createUniqueIndex(ctx, name, field)
+	}
+	if c.snap != nil {
+		return ErrReadOnly
+	}
+	c.db.colls.create.Lock()
+	defer c.db.colls.create.Unlock()
 	ctx = orBackground(ctx)
-	if name == "" || field == "" {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if name == "" || !validCollectionName(name) || field == "" || !utf8.ValidString(field) {
 		return fmt.Errorf("%w: index name and field are required", ErrPipeline)
 	}
 	if err := c.check(); err != nil {
@@ -293,7 +363,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 	}
 	def := indexDef{ID: db.idx.nextID, Field: field, Name: name, Coll: c.id}
 	db.idx.nextID++
-	db.idx.defs = append(db.idx.defs, def)
+	db.idx.defs = withDef(db.idx.defs, def)
 	if db.idx.building == nil {
 		db.idx.building = map[uint32]map[string]struct{}{}
 	}
@@ -306,12 +376,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 		db.idx.mu.Lock()
 		delete(db.idx.building, def.ID)
 		if !keep {
-			for i, d := range db.idx.defs {
-				if d.ID == def.ID {
-					db.idx.defs = append(db.idx.defs[:i], db.idx.defs[i+1:]...)
-					break
-				}
-			}
+			db.idx.defs = withoutDef(db.idx.defs, def.ID)
 		}
 		db.idx.mu.Unlock()
 		db.mu.Lock()
@@ -339,14 +404,24 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 	vals := make([]value, 1)
 	hints := make([]int, 1)
 	pfx := indexPrefix(def.ID)
+	var cerr error
 	add := func(k []byte, v value) {
 		off := len(arena)
 		arena = encodeIndexValue(append(arena, pfx...), v)
 		arena = append(arena, k...)
 		arena = binary.BigEndian.AppendUint16(arena, uint16(len(k)))
+		if len(arena)-off > MaxKeySize {
+			cerr = ErrKeySize
+			arena = arena[:off]
+			return
+		}
+		if len(arena)+len(refs)*16 > MaxTransactionBytes {
+			cerr = ErrTransactionTooLarge
+			arena = arena[:off]
+			return
+		}
 		refs = append(refs, newEntryRef(arena, off, len(arena)-off))
 	}
-	var cerr error
 	err = c.bound(s).Scan(nil, nil, func(k, doc []byte) bool {
 		if len(refs)&4095 == 4095 {
 			if cerr = ctx.Err(); cerr != nil {
@@ -377,7 +452,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 		case indexable(v):
 			add(k, v)
 		}
-		return true
+		return cerr == nil
 	})
 	s.Close()
 	if err == nil {
@@ -419,6 +494,7 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 			}
 			last = ek
 			if err := si.insert(ek, nil); err != nil {
+				db.failed = err
 				db.sortedLoad = false
 				db.mu.Unlock()
 				return fail(err)
@@ -439,7 +515,9 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string) error 
 	meta, _ := json.Marshal(def)
 	b := db.NewBatch()
 	b.internal = true
-	b.add(catalogKey(c.id, name), meta, false)
+	if err := b.add(catalogKey(c.id, name), meta, false); err != nil {
+		return fail(err)
+	}
 	if err := b.Commit(); err != nil {
 		return fail(err)
 	}
@@ -467,30 +545,7 @@ func (r entryRef) key(arena []byte) []byte { return arena[r.off : r.off+r.n] }
 
 // DropIndex removes an index and all its entries.
 func (c *Collection) DropIndex(ctx context.Context, name string) error {
-	ctx = orBackground(ctx)
-	db := c.db
-	db.idx.mu.Lock()
-	var def indexDef
-	found := false
-	for i, d := range db.idx.defs {
-		if d.Name == name && d.Coll == c.id {
-			def, found = d, true
-			db.idx.defs = append(db.idx.defs[:i], db.idx.defs[i+1:]...)
-			break
-		}
-	}
-	db.idx.mu.Unlock()
-	if !found {
-		return ErrNoSuchIndex
-	}
-	b := db.NewBatch()
-	b.internal = true
-	b.add(catalogKey(c.id, name), nil, true)
-	if err := b.Commit(); err != nil {
-		return err
-	}
-	pfx := indexPrefix(def.ID)
-	return db.deleteRange(ctx, pfx, prefixEnd(pfx))
+	return c.dropIndexAtomic(orBackground(ctx), name)
 }
 
 // ---- planning
@@ -503,7 +558,11 @@ func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 	pfx := indexPrefix(def.ID)
 	eq := func(v value) indexRange {
 		lo := encodeIndexValue(pfx, v)
-		return indexRange{lo, prefixEnd(lo)}
+		hi := prefixEnd(lo)
+		if v.isNum() && v.num() == 0 {
+			lo = legacyZeroPrefix(def.ID)
+		}
+		return indexRange{lo, hi}
 	}
 	tagEnd := func(v value) []byte { return prefixEnd(append(append([]byte(nil), pfx...), indexTag(v))) }
 	tagStart := func(v value) []byte { return append(append([]byte(nil), pfx...), indexTag(v)) }
@@ -530,10 +589,16 @@ func indexRangesFor(def indexDef, p pred) ([]indexRange, bool) {
 		v := eq(p.v)
 		switch p.op {
 		case opGt:
+			if p.v.isNum() {
+				return []indexRange{{v.lo, tagEnd(p.v)}}, true
+			}
 			return []indexRange{{v.hi, tagEnd(p.v)}}, true
 		case opGte:
 			return []indexRange{{v.lo, tagEnd(p.v)}}, true
 		case opLt:
+			if p.v.isNum() {
+				return []indexRange{{tagStart(p.v), v.hi}}, true
+			}
 			return []indexRange{{tagStart(p.v), v.lo}}, true
 		default:
 			return []indexRange{{tagStart(p.v), v.hi}}, true
@@ -574,7 +639,7 @@ type indexPlan struct {
 // them past that. The executor still checks every predicate on each
 // document.
 func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
-	if len(preds) == 0 || !c.db.hasIndexes() {
+	if len(preds) == 0 {
 		return indexPlan{}, false
 	}
 	defs := c.indexDefs()
@@ -606,7 +671,7 @@ func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 				limit = best.count
 			}
 			var seen map[string]struct{}
-			if len(rs) > 1 || p.op != opEq {
+			if len(rs) > 1 || p.op != opEq || (p.v.isNum() && p.v.num() == 0) {
 				seen = map[string]struct{}{}
 			}
 			pkbuf = pkbuf[:0]
@@ -711,18 +776,30 @@ func (c *Collection) rangesShards(ctx context.Context, ip indexPlan, n int) ([]S
 // document's indexed values have entries. It reads everything.
 func (db *DB) VerifyIndexes(ctx context.Context) error {
 	ctx = orBackground(ctx)
-	defs := db.indexDefs()
+	s, err := db.readSnapshot()
+	if err != nil {
+		return err
+	}
+	defer s.Close()
+	defs := s.indexes
 	for _, d := range defs {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		c, ok := db.collectionByID(d.Coll)
+		var c *Collection
+		for _, cc := range s.collections {
+			if cc.id == d.Coll {
+				c = cc.bound(s)
+				break
+			}
+		}
+		ok := c != nil
 		if !ok {
 			return fmt.Errorf("aptevadb: index %s belongs to unknown collection %d", d.Name, d.Coll)
 		}
 		pfx := indexPrefix(d.ID)
 		entries := map[string]int{}
-		err := db.scan(view{db, nil}, pfx, prefixEnd(pfx), func(k, _ []byte) bool {
+		err := db.scan(view{db, s}, pfx, prefixEnd(pfx), func(k, _ []byte) bool {
 			entries[string(k)]++
 			return true
 		})
@@ -730,14 +807,45 @@ func (db *DB) VerifyIndexes(ctx context.Context) error {
 			return err
 		}
 		var missing error
+		uniqueValues := map[string][]uniqueOwner{}
 		err = c.Scan(nil, nil, func(k, doc []byte) bool {
 			seen := map[string]struct{}{} // one entry per distinct value of a document
 			indexedValues(doc, d.Field, func(v value) {
+				if d.Unique {
+					if err := checkUniqueValue(v); err != nil {
+						missing = err
+						return
+					}
+					vk := string(encodeIndexValue(indexPrefix(d.ID), v))
+					for _, owner := range uniqueValues[vk] {
+						if owner.pk != string(k) && compareValues(owner.value, v) == 0 {
+							missing = ErrDuplicateKey
+							return
+						}
+					}
+					owned := v
+					owned.s = append([]byte(nil), v.s...)
+					uniqueValues[vk] = append(uniqueValues[vk], uniqueOwner{string(k), owned})
+				}
 				ek := string(indexEntryKey(d.ID, v, k))
 				if _, dup := seen[ek]; dup {
 					return
 				}
 				seen[ek] = struct{}{}
+				if v.isNum() && v.num() == 0 {
+					legacy := string(legacyZeroEntryKey(d.ID, k))
+					n := entries[ek] + entries[legacy]
+					if entries[ek] > 0 {
+						entries[ek]--
+					}
+					if entries[legacy] > 0 {
+						entries[legacy]--
+					}
+					if n == 0 {
+						missing = fmt.Errorf("aptevadb: index %s: missing zero entry for key %q", d.Name, k)
+					}
+					return
+				}
 				if entries[ek] == 0 {
 					missing = fmt.Errorf("aptevadb: index %s: missing entry for key %q", d.Name, k)
 				} else {
@@ -759,4 +867,15 @@ func (db *DB) VerifyIndexes(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// Format 3–5 may encode -0 separately. Queries span both adjacent zero
+// encodings; subsequent updates remove the old key and write canonical +0.
+func legacyZeroPrefix(id uint32) []byte {
+	k := append(indexPrefix(id), indexTag(value{k: kInt}))
+	return binary.BigEndian.AppendUint64(k, math.MaxInt64)
+}
+func legacyZeroEntryKey(id uint32, pk []byte) []byte {
+	k := append(legacyZeroPrefix(id), pk...)
+	return binary.BigEndian.AppendUint16(k, uint16(len(pk)))
 }

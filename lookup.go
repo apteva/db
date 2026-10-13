@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -38,7 +38,7 @@ func (e *env) collection(name string) (*Collection, error) {
 	if e == nil || e.c == nil {
 		return nil, fmt.Errorf("%w: $lookup needs a collection to run in (use Collection.Aggregate)", ErrPipeline)
 	}
-	c, ok := e.c.db.lookupCollection(name)
+	c, ok := e.c.lookupCollection(name)
 	if !ok {
 		return nil, fmt.Errorf("%w: $lookup from %q", ErrNoSuchCollection, name)
 	}

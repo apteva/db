@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"errors"
@@ -18,8 +18,19 @@ type node struct {
 	mapped   bool   // data aliases the read-only file mapping
 	frozen   bool   // data is being written by a checkpoint: copy before modifying
 	writing  bool   // captured by a checkpoint not yet on disk: do not evict
+	kind     byte   // immutable page type; maintenance need not fault clean contents
 	modEpoch uint64 // snapshot epoch current at the last modification
 	ref      atomic.Bool
+	buffer   *pageBufferArena // private writable storage; nil for file-backed pages
+}
+
+// pageType is used only by maintenance. Bounded-cache reloads leave kind
+// unknown to preserve the original read path without an extra mapped access.
+func (n *node) pageType() byte {
+	if n.kind != 0 {
+		return n.kind
+	}
+	return n.data.typ()
 }
 
 // pager owns the data file, the resident page table and page-id allocation.
@@ -55,6 +66,8 @@ type pager struct {
 	hand     int
 
 	loads, writes, evictions uint64
+	bufferArenas             []*pageBufferArena
+	bufferTail               *pageBufferArena
 }
 
 const minMapBytes = 64 << 20
@@ -105,6 +118,10 @@ func (pg *pager) ensureMapped(n uint32) error {
 }
 
 func (pg *pager) close() error {
+	for _, a := range pg.bufferArenas {
+		syscall.Munmap(a.data)
+	}
+	pg.bufferArenas, pg.bufferTail = nil, nil
 	if pg.mm != nil {
 		syscall.Munmap(pg.mm)
 		pg.mm = nil
@@ -177,7 +194,11 @@ func (pg *pager) load(id uint32) (*node, error) {
 	if n := pg.pages[id].Load(); n != nil {
 		return n, nil
 	}
-	n := &node{data: pg.mappedPage(id), id: id, onDisk: true, mapped: true}
+	p := pg.mappedPage(id)
+	n := &node{data: p, id: id, onDisk: true, mapped: true}
+	if pg.limit == 0 {
+		n.kind = p.typ()
+	}
 	if pg.verify && !pg.isVerified(id) {
 		if pageCrc(n.data) != n.data.crc() {
 			return nil, fmt.Errorf("%w: page %d", ErrCorrupt, id)
@@ -246,7 +267,14 @@ func (pg *pager) allocID() uint32 {
 
 // alloc creates a fresh dirty page. Writer lock held.
 func (pg *pager) alloc(typ byte, level byte) *node {
-	n := &node{data: make(page, PageSize), id: pg.allocID(), dirty: true}
+	n := &node{id: pg.allocID(), dirty: true, kind: typ}
+	if typ == pageInternal || pg.limit > 0 {
+		// Sparse parents can outlive hundreds of completed leaves. Keeping
+		// these small buffers separate avoids pinning whole leaf arenas.
+		n.data = make(page, PageSize)
+	} else {
+		n.data, n.buffer = pg.allocPageBuffer()
+	}
 	n.ref.Store(true)
 	initPage(n.data, typ, level)
 	pg.pages[n.id].Store(n)
@@ -262,9 +290,8 @@ func (pg *pager) alloc(typ byte, level byte) *node {
 // mapped page is copied out of the read-only mapping first. Writer lock held.
 func (pg *pager) writable(n *node) page {
 	if n.mapped {
-		buf := make(page, PageSize)
-		copy(buf, n.data)
-		n.data, n.mapped = buf, false
+		pg.copyPageBuffer(n)
+		n.mapped = false
 	}
 	pg.markDirty(n)
 	return n.data
@@ -295,7 +322,7 @@ func (pg *pager) writeNode(n *node) (uint32, error) {
 		pg.pages[n.id].Store(n)
 	}
 	n.data.setCrc(pageCrc(n.data))
-	if _, err := pg.f.WriteAt(n.data, int64(n.id)*PageSize); err != nil {
+	if err := writeAt(pg.f, n.data, int64(n.id)*PageSize); err != nil {
 		return 0, err
 	}
 	pg.markVerified(n.id)
@@ -305,6 +332,7 @@ func (pg *pager) writeNode(n *node) (uint32, error) {
 	}
 	n.dirty = false
 	n.onDisk = true
+	pg.releasePageBuffer(n)
 	n.data, n.mapped = pg.mappedPage(n.id), true
 	return n.id, nil
 }
@@ -313,6 +341,7 @@ func (pg *pager) writeNode(n *node) (uint32, error) {
 // never reached the durable tree is reusable at once; one that did must
 // wait for the next meta flip.
 func (pg *pager) freePage(n *node) {
+	pg.releasePageBuffer(n)
 	if pg.pages[n.id].Load() == n {
 		pg.pages[n.id].Store(nil)
 		pg.resident.Add(-1)

@@ -1,7 +1,7 @@
 // Package engine is a from-scratch embedded key-value engine: a B+tree over
 // fixed-size slotted pages, a write-ahead log with group commit, and
 // copy-on-write checkpoints so the data file is never torn.
-package aptevadb
+package db
 
 import (
 	"bytes"

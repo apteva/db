@@ -1,6 +1,6 @@
 //go:build !darwin
 
-package aptevadb
+package db
 
 func syncFull(f fileLike) error    { return f.Sync() }
 func syncBarrier(f fileLike) error { return f.Sync() }

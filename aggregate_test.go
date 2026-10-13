@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -111,7 +111,7 @@ func TestScanWithConcurrentWriter(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 200_000; i++ {
-			db.Insert(key(i*7919%200_000), []byte("v"))
+			db.Upsert(key(i*7919%200_000), []byte("v"))
 		}
 	}()
 	for r := 0; r < 20; r++ {
@@ -159,7 +159,7 @@ func loadOrders(t *testing.T, db *DB, n int) []order {
 		b.String("customer", o.customer)
 		k := make([]byte, 8)
 		binary.BigEndian.PutUint64(k, uint64(i))
-		if err := db.Insert(k, b.Bytes()); err != nil {
+		if err := db.Upsert(k, b.Bytes()); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -322,7 +322,7 @@ func TestAggregate(t *testing.T) {
 func TestInsertFindJSON(t *testing.T) {
 	db, _ := Open(t.TempDir(), Options{})
 	defer db.Close()
-	if err := db.InsertJSON([]byte("u1"), []byte(`{"name":"ada","age":36}`)); err != nil {
+	if err := db.UpsertJSON([]byte("u1"), []byte(`{"name":"ada","age":36}`)); err != nil {
 		t.Fatal(err)
 	}
 	out, ok, err := db.FindJSON([]byte("u1"))
@@ -421,7 +421,7 @@ func TestNestedDocumentsArraysAndLimits(t *testing.T) {
 		`{"name":"eve","addr":{"city":"Oslo"},"tags":["math"],"scores":[10,10,10],"n":5}`,
 	}
 	for i, d := range docs {
-		if err := db.InsertJSON([]byte(fmt.Sprintf("u%d", i)), []byte(d)); err != nil {
+		if err := db.UpsertJSON([]byte(fmt.Sprintf("u%d", i)), []byte(d)); err != nil {
 			t.Fatal(err)
 		}
 	}

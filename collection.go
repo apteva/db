@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"unicode/utf8"
 )
 
 // Collections are key ranges of the one B+tree. Every user key carries a
@@ -53,7 +54,10 @@ type Collection struct {
 }
 
 type collState struct {
-	dropped atomic.Bool
+	dropped    atomic.Bool
+	computed   *computedPlan             // protected by db.mu; shared by bound handles
+	derived    *computedCollectionPlan   // immutable after handle publication
+	dependents []*computedCollectionPlan // protected by db.mu
 }
 
 type collCatalog struct {
@@ -95,7 +99,15 @@ func newCollection(db *DB, name string, id uint32) *Collection {
 
 // ikey appends the internal form of a user key to dst[:0].
 func (c *Collection) ikey(dst, key []byte) []byte {
-	return append(append(dst[:0], c.pfx...), key...)
+	n := len(c.pfx) + len(key)
+	if cap(dst) < n {
+		dst = make([]byte, n)
+	} else {
+		dst = dst[:n]
+	}
+	copy(dst, c.pfx)
+	copy(dst[len(c.pfx):], key)
+	return dst
 }
 
 // bound returns the collection reading through s (nil: live).
@@ -117,7 +129,7 @@ func (c *Collection) Name() string { return c.name }
 func (c *Collection) DB() *DB { return c.db }
 
 func (c *Collection) check() error {
-	if c.state.dropped.Load() {
+	if c.snap == nil && c.state.dropped.Load() {
 		return ErrNoSuchCollection
 	}
 	return nil
@@ -132,12 +144,14 @@ func (db *DB) loadCollections() error {
 	db.colls.byID[0] = db.def
 	lo := []byte{reservedPrefix, 'n'}
 	hi := []byte{reservedPrefix, 'o'}
-	return db.scan(view{db, nil}, lo, hi, func(k, v []byte) bool {
+	var invalid error
+	err := db.scan(view{db, nil}, lo, hi, func(k, v []byte) bool {
 		var d struct {
 			ID uint32 `json:"id"`
 		}
-		if json.Unmarshal(v, &d) != nil {
-			return true
+		if json.Unmarshal(v, &d) != nil || d.ID == 0 || d.ID >= maxCollections || len(k) < 3 || len(k)-2 > 255 || db.colls.byID[d.ID] != nil {
+			invalid = ErrCorrupt
+			return false
 		}
 		c := newCollection(db, string(k[2:]), d.ID)
 		db.colls.byName[c.name] = c
@@ -147,6 +161,10 @@ func (db *DB) loadCollections() error {
 		}
 		return true
 	})
+	if err != nil {
+		return err
+	}
+	return invalid
 }
 
 // Collections lists the named collections, sorted.
@@ -186,7 +204,7 @@ func (db *DB) Collection(name string) (*Collection, error) {
 	if c, ok := db.lookupCollection(name); ok {
 		return c, nil
 	}
-	if len(name) > 255 {
+	if !validCollectionName(name) {
 		return nil, ErrCollectionName
 	}
 	db.colls.create.Lock()
@@ -220,12 +238,10 @@ func (db *DB) Collection(name string) (*Collection, error) {
 	return c, nil
 }
 
-// DropCollection removes a collection: its indexes, its keys and its
-// catalog entry, in that order, in bounded batches. Handles to it fail
-// with ErrNoSuchCollection afterwards. Interrupted by a crash, the
-// collection stays listed with whatever survived; dropping again finishes.
+// DropCollection atomically removes a named collection, its indexes and catalog.
+// Cancellation and staging-limit errors leave it intact. Existing snapshots
+// continue to see their original collection. The default collection cannot drop.
 func (db *DB) DropCollection(ctx context.Context, name string) error {
-	ctx = orBackground(ctx)
 	if name == "" {
 		return ErrCollectionName
 	}
@@ -235,26 +251,7 @@ func (db *DB) DropCollection(ctx context.Context, name string) error {
 	if !ok {
 		return ErrNoSuchCollection
 	}
-	for n := range c.Indexes() {
-		if err := c.DropIndex(ctx, n); err != nil && err != ErrNoSuchIndex {
-			return err
-		}
-	}
-	if err := db.deleteRange(ctx, c.pfx, c.end); err != nil {
-		return err
-	}
-	b := db.NewBatch()
-	b.internal = true
-	b.add(collCatalogKey(name), nil, true)
-	if err := b.Commit(); err != nil {
-		return err
-	}
-	c.state.dropped.Store(true)
-	db.colls.mu.Lock()
-	delete(db.colls.byName, name)
-	delete(db.colls.byID, c.id)
-	db.colls.mu.Unlock()
-	return nil
+	return db.dropCollectionAtomic(orBackground(ctx), c)
 }
 
 // deleteRange removes every internal key in [lo, hi) in batches of 1000,
@@ -293,26 +290,35 @@ func (db *DB) deleteRange(ctx context.Context, lo, hi []byte) error {
 
 // ---- reads and writes
 
-// Insert stores val under key in the collection, replacing any previous
-// value.
+// Insert creates key. An existing key returns ErrKeyExists without changing it.
 func (c *Collection) Insert(key, val []byte) error {
+	return c.conditionalWrite(key, val, requireAbsent)
+}
+
+// Upsert creates or replaces key. It retains the pre-alpha Insert behavior.
+func (c *Collection) Upsert(key, val []byte) error {
 	if len(val) > MaxValueSize {
 		return ErrValueSize
 	}
 	return c.write(key, val, false)
 }
 
+// Replace replaces an existing key; an absent key returns ErrNotFound.
+func (c *Collection) Replace(key, val []byte) error {
+	return c.conditionalWrite(key, val, requirePresent)
+}
+
 // Delete removes key. Deleting an absent key is not an error.
 func (c *Collection) Delete(key []byte) error { return c.write(key, nil, true) }
 
-// InsertJSON stores a document given as a JSON object.
-func (c *Collection) InsertJSON(key []byte, doc []byte) error {
-	enc, err := EncodeJSON(nil, doc)
-	if err != nil {
-		return err
-	}
-	return c.Insert(key, enc)
-}
+// InsertJSON creates a document from a JSON object; duplicates fail.
+func (c *Collection) InsertJSON(key, doc []byte) error { return c.writeJSON(key, doc, requireAbsent) }
+
+// UpsertJSON creates or replaces a document from a JSON object.
+func (c *Collection) UpsertJSON(key, doc []byte) error { return c.writeJSON(key, doc, 0) }
+
+// ReplaceJSON replaces an existing document from a JSON object.
+func (c *Collection) ReplaceJSON(key, doc []byte) error { return c.writeJSON(key, doc, requirePresent) }
 
 func (c *Collection) write(key, val []byte, del bool) error {
 	if len(key) == 0 || len(key) > MaxKeySize {
@@ -324,12 +330,10 @@ func (c *Collection) write(key, val []byte, del bool) error {
 	if c.snap != nil {
 		return ErrReadOnly
 	}
-	db := c.db
-	if db.hasIndexes() {
-		b := c.NewBatch()
-		b.add(key, val, del)
-		return b.Commit()
+	if c.state.derived != nil {
+		return ErrComputedCollectionReadOnly
 	}
+	db := c.db
 	var kb [64]byte
 	key = c.ikey(kb[:0], key)
 	db.mu.Lock()
@@ -342,11 +346,36 @@ func (c *Collection) write(key, val []byte, del bool) error {
 		return err
 	}
 	db.stallLocked()
-	db.noteActiveStartLocked()
+	if err := c.check(); err != nil {
+		db.mu.Unlock()
+		return err
+	}
+	var l lsn
+	var err error
 	w := db.wal
-	l, err := w.append(key, val, del)
-	if err == nil {
-		err = db.putLocked(key, val, del)
+	if db.hasIndexes() || len(c.state.dependents) > 0 {
+		b := c.NewBatch()
+		b.limit = 0 // a single value may exceed the public batch limit
+		b.first, b.n, b.lastOff = c, 1, 0
+		b.buf = encodeRecord(nil, key, val, true, del, w.crcTab)
+		l, err = b.commitLocked()
+	} else {
+		if !del && c.state.computed != nil {
+			var err error
+			val, err = c.state.computed.apply(val)
+			if err != nil {
+				db.mu.Unlock()
+				return err
+			}
+		}
+		db.noteActiveStartLocked()
+		l, err = w.append(key, val, del)
+		if err == nil {
+			err = db.putLocked(key, val, del)
+		}
+		if err != nil {
+			db.failed = err
+		}
 	}
 	needCkpt := db.needCheckpoint()
 	db.mu.Unlock()
@@ -354,7 +383,7 @@ func (c *Collection) write(key, val []byte, del bool) error {
 		return err
 	}
 	if db.opts.Sync {
-		if err := w.sync(l); err != nil {
+		if err := db.syncWrite(w, l); err != nil {
 			return err
 		}
 	}
@@ -366,6 +395,9 @@ func (c *Collection) write(key, val []byte, del bool) error {
 
 // Find appends the value for key to dst and reports whether it exists.
 func (c *Collection) Find(key, dst []byte) ([]byte, bool, error) {
+	if err := c.check(); err != nil {
+		return dst[:0], false, err
+	}
 	if len(key) > MaxKeySize {
 		return dst[:0], false, ErrKeySize
 	}
@@ -390,6 +422,14 @@ func (c *Collection) FindJSON(key []byte) ([]byte, bool, error) {
 // Scan calls fn for every key in [start, end) of the collection in key
 // order; nil bounds are open. fn returns false to stop.
 func (c *Collection) Scan(start, end []byte, fn func(key, val []byte) bool) error {
+	if c.snap == nil {
+		s, cc, err := c.readView()
+		if err != nil {
+			return err
+		}
+		defer s.Close()
+		return cc.Scan(start, end, fn)
+	}
 	if err := c.check(); err != nil {
 		return err
 	}
@@ -410,21 +450,22 @@ func (c *Collection) Source(start, end []byte) Source {
 // NewBatch returns an empty batch whose writes go to this collection; see
 // Batch.With for writing several collections atomically.
 func (c *Collection) NewBatch() *Batch {
-	return &Batch{coll: c, batchState: &batchState{db: c.db, lastOff: -1}}
+	return &Batch{coll: c, batchState: &batchState{db: c.db, lastOff: -1, limit: MaxTransactionBytes}}
 }
 
 // NewCursor returns a cursor over the collection positioned nowhere.
 func (c *Collection) NewCursor() *Cursor {
 	cur := &Cursor{c: c, v: c.view()}
-	if c.snap != nil {
-		cur.snap = c.snap.mem
-		return cur
+	if c.snap == nil {
+		s, cc, err := c.readView()
+		if err != nil {
+			cur.err = err
+			return cur
+		}
+		cur.owned = s
+		cur.c, cur.v = cc, view{c.db, s}
 	}
-	c.db.mu.RLock()
-	if c.db.mt != nil {
-		cur.snap = c.db.mt.snapshot()
-	}
-	c.db.mu.RUnlock()
+	cur.snap = cur.c.snap.mem
 	return cur
 }
 
@@ -471,6 +512,14 @@ func (c *Collection) AggregateParallel(ctx context.Context, pipeline []byte, sha
 // Run executes a compiled pipeline over the collection on the calling
 // goroutine.
 func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, error) {
+	if c.snap == nil {
+		s, cc, err := c.readView()
+		if err != nil {
+			return nil, err
+		}
+		defer s.Close()
+		return cc.Run(ctx, p)
+	}
 	ctx = orBackground(ctx)
 	if err := c.check(); err != nil {
 		return nil, err
@@ -508,7 +557,7 @@ func (c *Collection) reorder(p *Pipeline, pl *plan) (*Pipeline, *Collection, boo
 	if _, ok := c.indexOn(jp.spec.localField); !ok {
 		return nil, nil, false
 	}
-	from, ok := c.db.lookupCollection(jp.spec.from)
+	from, ok := c.lookupCollection(jp.spec.from)
 	if !ok {
 		return nil, nil, false
 	}
@@ -587,6 +636,14 @@ func (c *Collection) sourceBound(pl *plan) int {
 
 // RunParallel executes a compiled pipeline over the collection in shards.
 func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) ([]map[string]any, error) {
+	if c.snap == nil {
+		s, cc, err := c.readView()
+		if err != nil {
+			return nil, err
+		}
+		defer s.Close()
+		return cc.RunParallel(ctx, p, shards)
+	}
 	ctx = orBackground(ctx)
 	if shards <= 1 {
 		return c.Run(ctx, p)
@@ -634,7 +691,7 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
 // Indexes lists the collection's index names and the fields they cover.
 func (c *Collection) Indexes() map[string]string {
 	out := map[string]string{}
-	for _, d := range c.db.indexDefs() {
+	for _, d := range c.visibleIndexDefs() {
 		if d.Coll == c.id {
 			out[d.Name] = d.Field
 		}
@@ -644,7 +701,7 @@ func (c *Collection) Indexes() map[string]string {
 
 func (c *Collection) indexDefs() []indexDef {
 	var out []indexDef
-	for _, d := range c.db.indexDefs() {
+	for _, d := range c.visibleIndexDefs() {
 		if d.Coll == c.id {
 			out = append(out, d)
 		}
@@ -654,7 +711,7 @@ func (c *Collection) indexDefs() []indexDef {
 
 // indexOn returns the collection's index on field, if any.
 func (c *Collection) indexOn(field string) (indexDef, bool) {
-	for _, d := range c.db.indexDefs() {
+	for _, d := range c.visibleIndexDefs() {
 		if d.Coll == c.id && d.Field == field {
 			return d, true
 		}
@@ -769,4 +826,8 @@ func (c *Collection) String() string {
 		return "collection(default)"
 	}
 	return fmt.Sprintf("collection(%s)", c.name)
+}
+
+func validCollectionName(name string) bool {
+	return len(name) <= 255 && utf8.ValidString(name) && strings.IndexByte(name, 0) < 0
 }

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ func check(t *testing.T, db *DB, m map[string][]byte) {
 func insertAll(t *testing.T, db *DB, m map[string][]byte) {
 	t.Helper()
 	for k, v := range m {
-		if err := db.Insert([]byte(k), v); err != nil {
+		if err := db.Upsert([]byte(k), v); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -82,7 +82,7 @@ func TestRandomInsertFindUpdateReopen(t *testing.T) {
 			v := make([]byte, rng.Intn(600))
 			rng.Read(v)
 			m[k] = v
-			if err := db.Insert([]byte(k), v); err != nil {
+			if err := db.Upsert([]byte(k), v); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -122,7 +122,7 @@ func TestSequentialAndReverse(t *testing.T) {
 			binary.BigEndian.PutUint64(k, uint64(j))
 			v := bytes.Repeat([]byte{byte(j)}, 50)
 			m[string(k)] = v
-			if err := db.Insert(k, v); err != nil {
+			if err := db.Upsert(k, v); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -231,7 +231,7 @@ func TestPageReuseAcrossCheckpoints(t *testing.T) {
 			v := make([]byte, rng.Intn(300))
 			rng.Read(v)
 			m[k] = v
-			db.Insert([]byte(k), v)
+			db.Upsert([]byte(k), v)
 		}
 		if err := db.Checkpoint(); err != nil {
 			t.Fatal(err)
@@ -284,7 +284,7 @@ func TestConcurrentReadersWithWriter(t *testing.T) {
 	}
 	for i := 0; i < n; i++ {
 		k := key(i)
-		if err := db.Insert(k, k); err != nil {
+		if err := db.Upsert(k, k); err != nil {
 			t.Fatal(err)
 		}
 		if i%10_000 == 0 {
@@ -298,10 +298,10 @@ func TestConcurrentReadersWithWriter(t *testing.T) {
 func TestLimits(t *testing.T) {
 	db, _ := Open(t.TempDir(), Options{})
 	defer db.Close()
-	if err := db.Insert(nil, []byte("x")); err != ErrKeySize {
+	if err := db.Upsert(nil, []byte("x")); err != ErrKeySize {
 		t.Fatal("expected ErrKeySize")
 	}
-	if err := db.Insert(make([]byte, 100), make([]byte, MaxCellSize)); err != nil {
+	if err := db.Upsert(make([]byte, 100), make([]byte, MaxCellSize)); err != nil {
 		t.Fatalf("a value of MaxCellSize must spill to overflow pages, got %v", err)
 	}
 	if v, ok, _ := db.Find(make([]byte, 100), nil); !ok || len(v) != MaxCellSize {
@@ -312,7 +312,7 @@ func TestLimits(t *testing.T) {
 		k := make([]byte, 100)
 		binary.BigEndian.PutUint64(k, uint64(i))
 		big[0] = byte(i)
-		if err := db.Insert(k, big); err != nil {
+		if err := db.Upsert(k, big); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -338,7 +338,7 @@ func TestBatchAtomicity(t *testing.T) {
 	b := db.NewBatch()
 	committed := randKV(rng, 2_000)
 	for k, v := range committed {
-		if err := b.Insert([]byte(k), v); err != nil {
+		if err := b.Upsert([]byte(k), v); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -369,7 +369,7 @@ func TestBatchAtomicity(t *testing.T) {
 	}
 	b = db.NewBatch()
 	for k, v := range torn {
-		b.Insert([]byte(k), v)
+		b.Upsert([]byte(k), v)
 	}
 	// batches may delete too
 	b = db.NewBatch()
@@ -388,7 +388,7 @@ func TestBatchAtomicity(t *testing.T) {
 	}
 	b = db.NewBatch()
 	for k, v := range torn {
-		b.Insert([]byte(k), v)
+		b.Upsert([]byte(k), v)
 	}
 	// simulate the crash: write all but the tail of the batch to the log
 	last := b.buf[b.lastOff:]
@@ -462,7 +462,7 @@ func TestEvictionKeepsResidentBounded(t *testing.T) {
 			v := make([]byte, rng.Intn(400))
 			rng.Read(v)
 			m[k] = v
-			if err := db.Insert([]byte(k), v); err != nil {
+			if err := db.Upsert([]byte(k), v); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -523,7 +523,7 @@ func TestEvictionWithConcurrentReaders(t *testing.T) {
 	for i := 0; i < n; i++ {
 		k := key(i)
 		v := append(append([]byte{}, k...), make([]byte, 120)...)
-		if err := db.Insert(k, v[:8]); err != nil {
+		if err := db.Upsert(k, v[:8]); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -556,7 +556,7 @@ func TestCompactShrinksFile(t *testing.T) {
 				v := make([]byte, rng.Intn(300))
 				rng.Read(v)
 				m[k] = v
-				db.Insert([]byte(k), v)
+				db.Upsert([]byte(k), v)
 			}
 			i++
 		}
@@ -624,7 +624,7 @@ func TestMemtableFindScanRecoverCompact(t *testing.T) {
 			v := make([]byte, rng.Intn(200))
 			rng.Read(v)
 			m[k] = v
-			db.Insert([]byte(k), v)
+			db.Upsert([]byte(k), v)
 		}
 		i++
 	}
@@ -752,7 +752,7 @@ func TestLeafFillWithBalancing(t *testing.T) {
 		v := make([]byte, 100)
 		rng.Read(v)
 		m[string(k)] = v
-		if err := db.Insert(k, v); err != nil {
+		if err := db.Upsert(k, v); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -771,7 +771,7 @@ func TestLeafFillWithBalancing(t *testing.T) {
 		t.Fatal(err)
 	}
 	for k, v := range m {
-		if err := db.Insert([]byte(k), v); err != nil {
+		if err := db.Upsert([]byte(k), v); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -918,14 +918,14 @@ func TestLockAndClosedHandles(t *testing.T) {
 	if _, err := Open(dir, Options{}); !errors.Is(err, ErrLocked) {
 		t.Fatalf("second open should fail with ErrLocked, got %v", err)
 	}
-	db.Insert([]byte("a"), []byte("1"))
+	db.Upsert([]byte("a"), []byte("1"))
 	if err := db.Close(); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, err := db.Find([]byte("a"), nil); !errors.Is(err, ErrClosed) {
 		t.Fatalf("Find after Close: %v", err)
 	}
-	if err := db.Insert([]byte("a"), []byte("2")); !errors.Is(err, ErrClosed) {
+	if err := db.Upsert([]byte("a"), []byte("2")); !errors.Is(err, ErrClosed) {
 		t.Fatalf("Insert after Close: %v", err)
 	}
 	if err := db.Scan(nil, nil, func(k, v []byte) bool { return true }); !errors.Is(err, ErrClosed) {
@@ -981,7 +981,7 @@ func TestLargeValuesOverflow(t *testing.T) {
 			v := make([]byte, sizes[rng.Intn(len(sizes))])
 			rng.Read(v)
 			m[string(k)] = v
-			if err := db.Insert(k, v); err != nil {
+			if err := db.Upsert(k, v); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -998,12 +998,12 @@ func TestLargeValuesOverflow(t *testing.T) {
 			case 0:
 				v := []byte("tiny")
 				m[k] = v
-				db.Insert([]byte(k), v)
+				db.Upsert([]byte(k), v)
 			case 1:
 				v := make([]byte, 40_000)
 				rng.Read(v)
 				m[k] = v
-				db.Insert([]byte(k), v)
+				db.Upsert([]byte(k), v)
 			case 2:
 				db.Delete([]byte(k))
 				delete(m, k)
@@ -1035,7 +1035,7 @@ func TestLargeValuesOverflow(t *testing.T) {
 			v := make([]byte, 50_000+i)
 			rng.Read(v)
 			late[k] = v
-			db.Insert([]byte(k), v)
+			db.Upsert([]byte(k), v)
 		}
 		db.FlushLog()
 		db.crash()
@@ -1054,7 +1054,7 @@ func TestLargeValuesOverflow(t *testing.T) {
 		if err := db.Verify(bg); err != nil {
 			t.Fatal(err)
 		}
-		if err := db.Insert([]byte("x"), make([]byte, MaxValueSize+1)); !errors.Is(err, ErrValueSize) {
+		if err := db.Upsert([]byte("x"), make([]byte, MaxValueSize+1)); !errors.Is(err, ErrValueSize) {
 			t.Fatalf("expected ErrValueSize, got %v", err)
 		}
 		db.Close()
@@ -1164,7 +1164,7 @@ func TestLeafFillThroughMemtable(t *testing.T) {
 		v := make([]byte, 100)
 		rng.Read(v)
 		m[string(k)] = v
-		if err := db.Insert(k, v); err != nil {
+		if err := db.Upsert(k, v); err != nil {
 			t.Fatal(err)
 		}
 	}

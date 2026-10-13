@@ -1,5 +1,5 @@
 //go:build race
 
-package aptevadb
+package db
 
 const raceEnabled = true

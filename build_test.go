@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -21,7 +21,7 @@ func TestOrphanEntriesSwept(t *testing.T) {
 	}
 	c, _ := db.Collection("c")
 	for i := 0; i < 2000; i++ {
-		c.InsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"g":%d}`, i%13)))
+		c.UpsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"g":%d}`, i%13)))
 	}
 	if err := c.CreateIndex(bg, "real", "g"); err != nil {
 		t.Fatal(err)
@@ -81,7 +81,7 @@ func TestBulkBuildUnderWrites(t *testing.T) {
 		c, _ := db.Collection("c")
 		rng := rand.New(rand.NewSource(11))
 		for i := 0; i < 60_000; i++ {
-			c.InsertJSON([]byte(fmt.Sprintf("k%06d", i)), []byte(fmt.Sprintf(`{"v":%d,"tags":[%d,%d]}`, rng.Intn(5000), rng.Intn(20), rng.Intn(20))))
+			c.UpsertJSON([]byte(fmt.Sprintf("k%06d", i)), []byte(fmt.Sprintf(`{"v":%d,"tags":[%d,%d]}`, rng.Intn(5000), rng.Intn(20), rng.Intn(20))))
 		}
 		stop := make(chan struct{})
 		var wg sync.WaitGroup
@@ -99,11 +99,11 @@ func TestBulkBuildUnderWrites(t *testing.T) {
 				k := []byte(fmt.Sprintf("k%06d", r.Intn(60_000)))
 				switch i % 3 {
 				case 0:
-					c.InsertJSON(k, []byte(fmt.Sprintf(`{"v":%d,"tags":[%d]}`, r.Intn(5000), r.Intn(20))))
+					c.UpsertJSON(k, []byte(fmt.Sprintf(`{"v":%d,"tags":[%d]}`, r.Intn(5000), r.Intn(20))))
 				case 1:
 					c.Delete(k)
 				default:
-					c.InsertJSON([]byte(fmt.Sprintf("n%06d", i)), []byte(`{"v":1}`))
+					c.UpsertJSON([]byte(fmt.Sprintf("n%06d", i)), []byte(`{"v":1}`))
 				}
 				if i == 200 {
 					// refused while the build runs (its snapshot, or its unlogged inserts)

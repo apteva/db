@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -27,7 +27,7 @@ func TestWhereWritersStall(t *testing.T) {
 	}
 	for i := 0; i < 100_000; i++ {
 		rng.Read(val)
-		db.Insert(key(rng.Intn(200_000)), val)
+		db.Upsert(key(rng.Intn(200_000)), val)
 	}
 	measure := func(name string, work func()) {
 		var wg sync.WaitGroup
@@ -46,7 +46,7 @@ func TestWhereWritersStall(t *testing.T) {
 				}
 				r.Read(v)
 				start := time.Now()
-				db.Insert(key(r.Intn(200_000)), v)
+				db.Upsert(key(r.Intn(200_000)), v)
 				waits = append(waits, time.Since(start))
 			}
 		}()

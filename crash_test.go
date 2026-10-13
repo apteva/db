@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -277,7 +277,7 @@ func TestCrashRecoveryWithFaultInjection(t *testing.T) {
 				rng.Read(v)
 				p = pending{keys: []string{k}, before: map[string][]byte{k: durable[k]}, after: map[string][]byte{k: v}}
 				inflight = &p
-				err = db.Insert([]byte(k), v)
+				err = db.Upsert([]byte(k), v)
 			case kind < 7: // delete
 				k := keyOf(rng.Intn(3000))
 				p = pending{keys: []string{k}, before: map[string][]byte{k: durable[k]}, after: map[string][]byte{k: nil}}
@@ -296,7 +296,7 @@ func TestCrashRecoveryWithFaultInjection(t *testing.T) {
 					} else {
 						v := make([]byte, 1+rng.Intn(300))
 						rng.Read(v)
-						b.Insert([]byte(k), v)
+						b.Upsert([]byte(k), v)
 						p.after[k] = v
 					}
 				}

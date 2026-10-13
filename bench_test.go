@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"math/rand"
@@ -23,7 +23,7 @@ func BenchmarkInsertRandom1M(b *testing.B) {
 		db, _ := Open(b.TempDir(), Options{})
 		start := time.Now()
 		for i := 0; i < 1_000_000; i++ {
-			db.Insert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
+			db.Upsert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
 		}
 		total += time.Since(start)
 		db.Close()
@@ -39,7 +39,7 @@ func BenchmarkInsertRandom1MDirect(b *testing.B) {
 		db, _ := Open(b.TempDir(), Options{MemtableBytes: -1})
 		start := time.Now()
 		for i := 0; i < 1_000_000; i++ {
-			db.Insert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
+			db.Upsert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
 		}
 		total += time.Since(start)
 		db.Close()
@@ -51,7 +51,7 @@ func BenchmarkFindRandom1M(b *testing.B) {
 	keys, vals := benchKeys(1_000_000)
 	db, _ := Open(b.TempDir(), Options{})
 	for i := 0; i < 1_000_000; i++ {
-		db.Insert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
+		db.Upsert(keys[i*16:(i+1)*16], vals[i*100:(i+1)*100])
 	}
 	rng := rand.New(rand.NewSource(9))
 	var buf []byte

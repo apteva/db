@@ -15,7 +15,7 @@ import (
 
 	"github.com/cockroachdb/pebble/v2"
 
-	"github.com/apteva/aptevadb"
+	aptevadb "github.com/apteva/db"
 )
 
 // Aggregation benchmark: N order documents, four pipelines, three engines.
@@ -129,7 +129,7 @@ func runAggBench(dir string, n int, engines []string) {
 			}
 			start := time.Now()
 			for i := range rows {
-				if err := db.Insert(key(i), encode(rows[i])); err != nil {
+				if err := db.Upsert(key(i), encode(rows[i])); err != nil {
 					panic(err)
 				}
 			}
@@ -334,6 +334,11 @@ func runAggBench(dir string, n int, engines []string) {
 			panic("unknown aggregation engine " + name)
 		}
 		results[name] = tm
+		if *flagDir == "" {
+			if err := os.RemoveAll(edir); err != nil {
+				panic(err)
+			}
+		}
 		allQueries := append(append([]aggQuery{}, aggQueries...), indexQueries...)
 		if reference == nil || len(outs) > len(reference) {
 			if reference != nil {

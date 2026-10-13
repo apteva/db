@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"sort"

@@ -5,9 +5,57 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.1] - 2026-10-13
+
+- Module/repository renamed to `github.com/apteva/db`; Go package `db`.
+- Breaking API: Insert creates only; Upsert retains previous replacement behavior.
+  Replace requires an existing key. Batch conditions are atomic and ordered.
+- Consistent scan/cursor/query catalogs and rows; cursors now require Close.
+- Atomic collection/index deletion with cancellation and staging limits.
+- Serializable optimistic read/write transactions with read-your-writes,
+  computed outputs and explicit ErrConflict (no implicit callback retries).
+- Native unique indexes, including atomic swaps and multikey constraints.
+- Format 6 refuses old writers that cannot enforce unique constraints; automatic
+  upgrades from 3–5 and a real format-5 compatibility fixture.
+- Typed document helpers, streaming filters and safe document updates.
+- Verified restore, lossless JSON-lines export/import, durable CLI defaults.
+- Concurrent JSON encoding fixed; short writes detected; WAL I/O failures sticky.
+- HTTP v1 server with authentication/TLS, deadlines, bounded requests/transactions;
+  pooled Go client with streaming results and explicit uncertain-write errors.
+- Linux/macOS CI, race/fuzz/soak gates and binary releases with SHA-256 checksums.
+
+
+- Explicit lifetime accounting for writable page arenas, checkpoint captures
+  and snapshot overlays, with unused storage returned to the OS. Large WAL
+  mappings release superseded buffers immediately; record encoding grows once.
+  Leaf balancing reuses scratch storage. Backup and compaction stream completed
+  pages in bounded batches and avoid faulting clean leaves during maintenance.
+  Bounded-cache mode retains its existing Go allocation and compaction policy
+  after parallel-read regression checks. These buffer changes preserve the storage layout.
+- CPU, process RSS and macOS compressed-memory footprint benchmarks with fresh
+  per-engine processes, retained repetitions and paired regression comparisons.
+
+- Native stored computed fields per collection, deterministic dependencies,
+  arithmetic/string/null operators, validation before WAL append, ordinary
+  indexes on outputs, snapshot introspection and persisted definitions.
+- Computed-field benchmarks against application materialization/read-time
+  derivation, Pebble and both SQLite bindings, retaining every repetition.
+- Computed-field catalogs were introduced in format 4; the current format is 6.
+- Computed-field definition installation/change/removal require an empty collection.
+
+- Native stored computed collections: atomic backfill, filtered/projected rows
+  and incremental scalar groups with exact integer sums/counts. Source writes,
+  dependent results, hidden membership counters and indexes commit/recover
+  together. Direct writes and chains are rejected; source drop requires removing
+  dependents first. Creation/drop block reads and writes and stage at most 256 MiB.
+- On-disk format 5 adds computed-collection catalogs and counters. Formats 3/4
+  upgrade both metadata slots synchronously before Open returns; older engines
+  refuse format 5. Feature benchmarks compare on-demand queries, Pebble
+  application materialization and SQLite triggers, retaining every trial.
+
 ## [0.1.0] - 2026-09-08
 
-First tagged release. On-disk format 3 (see FORMAT.md). Tests, the race
+Initial development version. On-disk format 3 (see FORMAT.md). Tests, the race
 detector and fuzz targets run in CI on Linux and macOS; Windows is not
 supported.
 
@@ -36,7 +84,8 @@ supported.
 - Documents: FORMAT.md, DURABILITY.md.
 - Tests: a fault-injection crash test over random writes and recovery,
   crash coverage of index builds, drops, compaction and the log trim, fuzz
-  targets, and a soak test (`SOAK=<duration>`) with crash-recovery phases;
+  targets, a cursor stress test (`CURSOR_STRESS=<duration>`), and a soak
+  test (`SOAK=<duration>`) with crash-recovery phases;
   CI runs vet, tests, race and fuzz on Linux and macOS, and the soak
   nightly.
 
@@ -69,6 +118,11 @@ written against the pre-release `engine` package can be updated:
 - `Open` restores a database whose compaction swap was interrupted between
   its two renames; previously the original file was deleted and an empty
   database created.
+- A cursor could record a stale leaf against a fresh tree generation when a
+  writer changed the tree between its descent and the moment it cached the
+  position, and then read a page that had moved or been truncated away (a
+  bus error on the mapping). Found by the soak test; the generation is now
+  taken inside the locked descent. A cursor stress test covers the path.
 
 ### Known limitations
 

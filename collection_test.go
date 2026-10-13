@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -30,9 +30,9 @@ func TestCollectionsBasics(t *testing.T) {
 		t.Fatal("Collection should return the same handle")
 	}
 	// the same key in three collections holds three values
-	db.Insert([]byte("k"), []byte("default"))
-	users.Insert([]byte("k"), []byte("user"))
-	orders.Insert([]byte("k"), []byte("order"))
+	db.Upsert([]byte("k"), []byte("default"))
+	users.Upsert([]byte("k"), []byte("user"))
+	orders.Upsert([]byte("k"), []byte("order"))
 	for _, c := range []struct {
 		get  func([]byte, []byte) ([]byte, bool, error)
 		want string
@@ -44,8 +44,8 @@ func TestCollectionsBasics(t *testing.T) {
 	}
 	// scans and cursors stay inside their collection
 	for i := 0; i < 100; i++ {
-		users.Insert([]byte(fmt.Sprintf("u%03d", i)), []byte("x"))
-		orders.Insert([]byte(fmt.Sprintf("o%03d", i)), []byte("y"))
+		users.Upsert([]byte(fmt.Sprintf("u%03d", i)), []byte("x"))
+		orders.Upsert([]byte(fmt.Sprintf("o%03d", i)), []byte("y"))
 	}
 	n := 0
 	users.Scan(nil, nil, func(k, v []byte) bool {
@@ -59,6 +59,7 @@ func TestCollectionsBasics(t *testing.T) {
 		t.Fatalf("users scan saw %d keys, want 101", n)
 	}
 	cur := orders.NewCursor()
+	defer cur.Close()
 	n = 0
 	for ok := cur.First(); ok; ok = cur.Next() {
 		n++
@@ -86,10 +87,10 @@ func TestCollectionsBasics(t *testing.T) {
 		t.Fatalf("Stats.Collections = %d", st.Collections)
 	}
 	// keys with any leading byte live happily in a named collection
-	if err := users.Insert([]byte{0xff, 0xff}, []byte("hi")); err != nil {
+	if err := users.Upsert([]byte{0xff, 0xff}, []byte("hi")); err != nil {
 		t.Fatal(err)
 	}
-	if err := users.Insert([]byte{0x00}, []byte("lo")); err != nil {
+	if err := users.Upsert([]byte{0x00}, []byte("lo")); err != nil {
 		t.Fatal(err)
 	}
 	if v, ok, _ := users.Find([]byte{0xff, 0xff}, nil); !ok || string(v) != "hi" {
@@ -133,8 +134,8 @@ func TestDropCollection(t *testing.T) {
 	c, _ := db.Collection("tmp")
 	keep, _ := db.Collection("keep")
 	for i := 0; i < 5000; i++ {
-		c.InsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"n":%d}`, i%10)))
-		keep.Insert([]byte(fmt.Sprint(i)), []byte("k"))
+		c.UpsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"n":%d}`, i%10)))
+		keep.Upsert([]byte(fmt.Sprint(i)), []byte("k"))
 	}
 	if err := c.CreateIndex(bg, "by_n", "n"); err != nil {
 		t.Fatal(err)
@@ -145,7 +146,7 @@ func TestDropCollection(t *testing.T) {
 	if err := db.DropCollection(bg, "tmp"); err != ErrNoSuchCollection {
 		t.Fatalf("second drop: %v", err)
 	}
-	if err := c.Insert([]byte("x"), []byte("y")); err != ErrNoSuchCollection {
+	if err := c.Upsert([]byte("x"), []byte("y")); err != ErrNoSuchCollection {
 		t.Fatalf("write to dropped collection: %v", err)
 	}
 	if got := db.Collections(); !reflect.DeepEqual(got, []string{"keep"}) {
@@ -185,11 +186,11 @@ func TestCrossCollectionBatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	b := users.NewBatch()
-	b.InsertJSON([]byte("u1"), []byte(`{"name":"ann","orders":0}`))
+	b.UpsertJSON([]byte("u1"), []byte(`{"name":"ann","orders":0}`))
 	ob := b.With(orders)
-	ob.InsertJSON([]byte("o1"), []byte(`{"user":"u1","amount":10}`))
-	ob.InsertJSON([]byte("o2"), []byte(`{"user":"u1","amount":20}`))
-	b.InsertJSON([]byte("u1"), []byte(`{"name":"ann","orders":2}`)) // later write wins
+	ob.UpsertJSON([]byte("o1"), []byte(`{"user":"u1","amount":10}`))
+	ob.UpsertJSON([]byte("o2"), []byte(`{"user":"u1","amount":20}`))
+	b.UpsertJSON([]byte("u1"), []byte(`{"name":"ann","orders":2}`)) // later write wins
 	if b.Len() != 4 {
 		t.Fatalf("Len = %d", b.Len())
 	}
@@ -232,8 +233,8 @@ func TestIndexesArePerCollection(t *testing.T) {
 	a, _ := db.Collection("a")
 	bc, _ := db.Collection("b")
 	for i := 0; i < 1000; i++ {
-		a.InsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"g":%d,"v":%d}`, i%7, i)))
-		bc.InsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"g":%d,"v":%d}`, i%7, -i)))
+		a.UpsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"g":%d,"v":%d}`, i%7, i)))
+		bc.UpsertJSON([]byte(fmt.Sprint(i)), []byte(fmt.Sprintf(`{"g":%d,"v":%d}`, i%7, -i)))
 	}
 	if err := a.CreateIndex(bg, "by_g", "g"); err != nil {
 		t.Fatal(err)
@@ -263,7 +264,7 @@ func TestIndexesArePerCollection(t *testing.T) {
 		t.Fatalf("IndexScans = %d", db.Stats().IndexScans)
 	}
 	// maintenance follows the collection: updating a doc in b touches b's index only
-	bc.InsertJSON([]byte("5"), []byte(`{"g":3,"v":100}`))
+	bc.UpsertJSON([]byte("5"), []byte(`{"g":3,"v":100}`))
 	a.Delete([]byte("3"))
 	if err := db.VerifyIndexes(bg); err != nil {
 		t.Fatal(err)
@@ -288,7 +289,7 @@ func TestSnapshotCollections(t *testing.T) {
 	defer db.Close()
 	c, _ := db.Collection("c")
 	for i := 0; i < 100; i++ {
-		c.InsertJSON([]byte(fmt.Sprintf("%03d", i)), []byte(`{"v":1}`))
+		c.UpsertJSON([]byte(fmt.Sprintf("%03d", i)), []byte(`{"v":1}`))
 	}
 	s, err := db.Snapshot()
 	if err != nil {
@@ -303,8 +304,8 @@ func TestSnapshotCollections(t *testing.T) {
 		t.Fatalf("missing collection: %v", err)
 	}
 	for i := 0; i < 100; i++ {
-		c.InsertJSON([]byte(fmt.Sprintf("%03d", i)), []byte(`{"v":2}`))
-		c.InsertJSON([]byte(fmt.Sprintf("n%03d", i)), []byte(`{"v":2}`))
+		c.UpsertJSON([]byte(fmt.Sprintf("%03d", i)), []byte(`{"v":2}`))
+		c.UpsertJSON([]byte(fmt.Sprintf("n%03d", i)), []byte(`{"v":2}`))
 	}
 	rows, err := sc.Aggregate(bg, []byte(`[{"$group":{"_id":null,"s":{"$sum":"$v"},"n":{"$sum":1}}}]`))
 	if err != nil || rows[0]["s"] != int64(100) || rows[0]["n"] != int64(100) {
@@ -314,10 +315,11 @@ func TestSnapshotCollections(t *testing.T) {
 	if live[0]["s"] != int64(400) || live[0]["n"] != int64(200) {
 		t.Fatalf("live rows %v", live)
 	}
-	if err := sc.Insert([]byte("x"), []byte("y")); err == nil {
+	if err := sc.Upsert([]byte("x"), []byte("y")); err == nil {
 		t.Fatal("snapshot collection accepted a write")
 	}
 	cur := sc.NewCursor()
+	defer cur.Close()
 	n := 0
 	for ok := cur.First(); ok; ok = cur.Next() {
 		n++
@@ -352,7 +354,7 @@ func loadJoinData(t *testing.T, db *DB, nu, no int, seed int64) (*Collection, *C
 	ub := users.NewBatch()
 	for i := range us {
 		us[i] = ju{int64(i), countries[rng.Intn(4)], []int64{int64(rng.Intn(5)), int64(rng.Intn(5))}}
-		if err := ub.InsertJSON([]byte(fmt.Sprintf("u%06d", i)), []byte(fmt.Sprintf(`{"id":%d,"country":%q,"tags":[%d,%d]}`, i, us[i].country, us[i].tags[0], us[i].tags[1]))); err != nil {
+		if err := ub.UpsertJSON([]byte(fmt.Sprintf("u%06d", i)), []byte(fmt.Sprintf(`{"id":%d,"country":%q,"tags":[%d,%d]}`, i, us[i].country, us[i].tags[0], us[i].tags[1]))); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -364,7 +366,7 @@ func loadJoinData(t *testing.T, db *DB, nu, no int, seed int64) (*Collection, *C
 	for i := range os {
 		// some orders point at users that do not exist
 		os[i] = jo{int64(i), int64(rng.Intn(nu + nu/10)), float64(rng.Intn(10000)) / 100, []string{"new", "shipped"}[rng.Intn(2)], int64(rng.Intn(5))}
-		if err := ob.InsertJSON([]byte(fmt.Sprintf("o%06d", i)), []byte(fmt.Sprintf(`{"id":%d,"user":%d,"amount":%g,"status":%q,"tag":%d}`, i, os[i].user, os[i].amount, os[i].status, os[i].tag))); err != nil {
+		if err := ob.UpsertJSON([]byte(fmt.Sprintf("o%06d", i)), []byte(fmt.Sprintf(`{"id":%d,"user":%d,"amount":%g,"status":%q,"tag":%d}`, i, os[i].user, os[i].amount, os[i].status, os[i].tag))); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -372,8 +374,8 @@ func loadJoinData(t *testing.T, db *DB, nu, no int, seed int64) (*Collection, *C
 		t.Fatal(err)
 	}
 	// a non-document in each collection must be invisible
-	users.Insert([]byte("raw"), []byte{1, 2, 3})
-	orders.Insert([]byte("raw"), []byte{4, 5, 6})
+	users.Upsert([]byte("raw"), []byte{1, 2, 3})
+	orders.Upsert([]byte("raw"), []byte{4, 5, 6})
 	return users, orders, us, os
 }
 
@@ -633,7 +635,7 @@ func TestLookupMatchesNaiveJoin(t *testing.T) {
 	}
 	defer s.Close()
 	for i := 0; i < 100; i++ {
-		orders.InsertJSON([]byte(fmt.Sprintf("o%06d", i)), []byte(`{"id":-1,"user":0,"amount":1e9,"status":"new","tag":0}`))
+		orders.UpsertJSON([]byte(fmt.Sprintf("o%06d", i)), []byte(`{"id":-1,"user":0,"amount":1e9,"status":"new","tag":0}`))
 	}
 	su, _ := s.Collection("users")
 	so, _ := s.Collection("orders")
@@ -652,7 +654,7 @@ func TestLookupErrors(t *testing.T) {
 	}
 	defer db.Close()
 	c, _ := db.Collection("c")
-	c.InsertJSON([]byte("1"), []byte(`{"a":1}`))
+	c.UpsertJSON([]byte("1"), []byte(`{"a":1}`))
 	q := `[{"$lookup":{"from":"missing","localField":"a","foreignField":"a","as":"x"}}]`
 	if _, err := c.Aggregate(bg, []byte(q)); !errors.Is(err, ErrNoSuchCollection) {
 		t.Fatalf("missing from: %v", err)
@@ -671,8 +673,8 @@ func TestLookupErrors(t *testing.T) {
 		}
 	}
 	// self join through the default collection ("" is allowed as from)
-	db.InsertJSON([]byte("1"), []byte(`{"a":1,"b":1}`))
-	db.InsertJSON([]byte("2"), []byte(`{"a":1,"b":2}`))
+	db.UpsertJSON([]byte("1"), []byte(`{"a":1,"b":1}`))
+	db.UpsertJSON([]byte("2"), []byte(`{"a":1,"b":2}`))
 	rows, err := db.Aggregate(bg, []byte(`[{"$lookup":{"from":"","localField":"a","foreignField":"a","as":"m"}},{"$unwind":"$m"},{"$count":"n"}]`))
 	if err != nil || rows[0]["n"] != int64(4) {
 		t.Fatalf("self join: %v %v", rows, err)
@@ -717,7 +719,7 @@ func TestCollectionKeysSortInsideTheirRange(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := c.InsertJSON([]byte("k"), []byte(fmt.Sprintf(`{"i":%d}`, i))); err != nil {
+		if err := c.UpsertJSON([]byte("k"), []byte(fmt.Sprintf(`{"i":%d}`, i))); err != nil {
 			t.Fatal(err)
 		}
 		last = c
@@ -765,7 +767,7 @@ func TestApproxCount(t *testing.T) {
 		c, _ := db.Collection(name)
 		b := c.NewBatch()
 		for i := 0; i < n; i++ {
-			b.InsertJSON([]byte(fmt.Sprintf("%08d", i)), []byte(`{"v":1,"pad":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}`))
+			b.UpsertJSON([]byte(fmt.Sprintf("%08d", i)), []byte(`{"v":1,"pad":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}`))
 			if b.Len() >= 5000 {
 				if err := b.Commit(); err != nil {
 					t.Fatal(err)

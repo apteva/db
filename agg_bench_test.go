@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -25,7 +25,7 @@ func BenchmarkAggregateQ3(b *testing.B) {
 		d.String("customer", fmt.Sprintf("c%06d", rng.Intn(100000)))
 		k := make([]byte, 16)
 		binary.BigEndian.PutUint64(k, uint64(i))
-		db.Insert(k, d.Bytes())
+		db.Upsert(k, d.Bytes())
 	}
 	p, _ := ParsePipeline([]byte(`[{"$match": {"amount": {"$gt": 500}}}, {"$group": {"_id": null, "n": {"$sum": 1}, "avg": {"$avg": "$amount"}}}]`))
 	b.ResetTimer()

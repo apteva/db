@@ -12,3 +12,9 @@
 
 # databases created by the demo or by benchmark runs kept with -dir
 /demo-db/
+
+# release output and local benchmark intermediates
+/dist/
+/bench/__pycache__/
+/bench/results/rerun-*/
+/aptevadb-server

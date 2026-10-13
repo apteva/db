@@ -1,6 +1,6 @@
 # On-disk format
 
-Format version **3**, as `aptevadb.FormatVersion`. This document is the
+Format version **6**, as `aptevadb.FormatVersion`. This document is the
 contract for what a build writes and reads; the policy for changing it is at
 the end.
 
@@ -107,6 +107,9 @@ Reserved keys:
 
 | Key | Value |
 |---|---|
+| `0x00 'g' collectionID_u32BE` | computed-field catalog: JSON `{"version":1,"fields":{"output":expression}}` |
+| `0x00 'm' collectionID_u32BE` | computed-collection catalog: JSON `{"version":1,"source":sourceID,"pipeline":[...]}` |
+| `0x00 'r' collectionID_u32BE groupKey` | grouped collection membership counter: positive uint64 little-endian |
 | `0x00 'n' name` | collection catalog: JSON `{"id":n}` |
 | `0x00 'c' coll u32 BE name` | index catalog: JSON `{"id":n,"field":"path"}` |
 | `0x00 'i' index u32 BE, value encoding, primary key, pklen u16 BE` | index entry, empty value |
@@ -156,18 +159,46 @@ checkpoint is dropped at close and after compaction.
 
 ## Compatibility policy
 
-- `Open` reads the meta page first and refuses a file whose format version
-  is not `FormatVersion` with `ErrFormat`, naming both versions. Nothing is
-  written to such a file. `FormatVersionOf` and `aptevadbctl format <dir>`
-  report a file's version without opening it.
+- `Open` reads formats 3, 4, 5 and 6. Older supported formats are upgraded with
+  two synchronous full checkpoints, replacing both alternating meta slots
+  before `Open` returns. Format 6 is durable before unique constraints
+  or new definitions can enter the WAL. Older binaries refuse it,
+  including after a crash or a damaged newest meta page. This is a one-way
+  upgrade; retain a backup for older binaries. Other versions are refused with
+  `ErrFormat`. `FormatVersionOf` and `aptevadbctl format <dir>` report a file's
+  version without opening it.
 - Any change that an older build could misread bumps the version: page
   layout, key tags, catalog keys, the index value encoding, the document
   encoding, the log record layout.
 - Adding a new page type, a new document type tag, a new reserved catalog
   prefix or a new log flag also bumps the version, since older builds would
   treat them as corruption.
-- During 0.x, a bump ships with a `aptevadbctl` conversion command or, when
-  that is impractical, with a documented dump-and-reload through
+- Format 4 adds the computed-field catalog and no layout changes. Version-one
+  expressions use checked integer/finite float arithmetic and ASCII casing.
+  Definitions are stored per collection; generated values are ordinary fields
+  inside document records. Replay never evaluates expressions. Changes to these
+  semantics require a new expression version and explicit migration.
+- Format 5 adds computed-collection definitions and hidden group membership
+  counters without changing page, log or document layouts. Source rows, dependent
+  rows, counters and indexes share one WAL transaction. Group keys begin with
+  their document scalar type tag, followed by bool byte, int64 little-endian,
+  float64 bits little-endian or raw string bytes as appropriate. Missing IDs
+  normalize to null; finite integral floats within int64 normalize to integers.
+  Generated group documents store `_id` and checked int64 aggregates. Membership
+  counters distinguish empty groups from groups whose sums are zero. Definitions
+  support leading scalar matches and final projection or scalar grouping with
+  integer sums/counts. Recovery does not re-evaluate pipelines. Changes to these
+  semantics require a new definition version and explicit migration.
+- Format 6 adds the `unique` flag to secondary-index catalog definitions and
+  canonicalizes numeric signed zero in index keys. Older engines must refuse
+  these files because they would otherwise write without enforcing uniqueness.
+  The alpha API also changes Insert to create-only; Upsert retains replacement
+  behavior. Readers also understand legacy signed-zero index keys; an update removes
+  the old encoding and writes canonical zero. No full index rebuild is required. The test suite opens a real preserved format-5
+  fixture with computed fields/collections, indexes and WAL, not just rewritten
+  metadata headers.
+- During 0.x, a bump ships with an automatic upgrade, a `aptevadbctl` conversion
+  command or, when that is impractical, with a documented dump-and-reload through
   `aptevadbctl dump`; the changelog says which. From 1.0 on, every release
   reads the format written by the previous minor version.
 - What is not part of the contract: `Stats` fields, lock-hold names, the

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -6,18 +6,21 @@ import (
 )
 
 // Cursor iterates keys in order, forwards or backwards, merging the tree
-// with the memtable as it stood when the cursor was created. Each step
+// with the memtable at one snapshot taken when the cursor was created.
+// Close the cursor to release its view. Each step
 // re-descends the tree, so it costs a lookup rather than a pointer chase;
 // no lock is held between calls.
 type Cursor struct {
-	c     *Collection
-	v     view
-	snap  []mtEntry
-	ikey  []byte // internal key of the current position
-	key   []byte // user key
-	val   []byte
-	valid bool
-	err   error
+	owned  *Snapshot
+	closed bool
+	c      *Collection
+	v      view
+	snap   []mtEntry
+	ikey   []byte // internal key of the current position
+	key    []byte // user key
+	val    []byte
+	valid  bool
+	err    error
 
 	// the leaf and slot of the tree key found last, valid while the tree
 	// generation is unchanged: a step then moves within the leaf instead
@@ -71,6 +74,10 @@ func (c *Cursor) Prev() bool {
 // move finds the nearest key in direction fwd from `from` (inclusive when
 // incl), skipping tombstones.
 func (c *Cursor) move(from []byte, fwd, incl bool) bool {
+	if c.closed || c.err != nil {
+		c.valid = false
+		return false
+	}
 	if err := c.c.check(); err != nil {
 		c.err, c.valid = err, false
 		return false
@@ -157,13 +164,14 @@ func (c *Cursor) treeStep(from []byte, fwd, incl bool) (k, v []byte, ok bool, er
 		}
 		db.mu.RUnlock()
 	}
+	// the generation must be the one the descent saw: taken later, under a
+	// fresh lock, it could describe a tree in which the leaf has moved
 	var id uint32
 	var idx int
-	k, v, id, idx, ok, err = db.treeNeighbour(c.v, from, fwd, incl)
+	var gen uint64
+	k, v, id, idx, gen, ok, err = db.treeNeighbour(c.v, from, fwd, incl)
 	if ok {
-		db.mu.RLock()
-		c.leafID, c.leafIdx, c.leafGen = id, idx, db.treeGen
-		db.mu.RUnlock()
+		c.leafID, c.leafIdx, c.leafGen = id, idx, gen
 	} else {
 		c.leafID = 0
 	}
@@ -204,14 +212,15 @@ func (c *Cursor) memNeighbour(from []byte, fwd, incl bool) int {
 }
 
 // treeNeighbour returns the nearest tree key in direction fwd from `from`
-// (nil: from the end), with a copy of its full value, and the leaf page id
-// and slot it was found at.
-func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, leafID uint32, slot int, ok bool, err error) {
+// (nil: from the end), with a copy of its full value, the leaf page id and
+// slot it was found at, and the tree generation those are valid for.
+func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, leafID uint32, slot int, gen uint64, ok bool, err error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 	if db.closed {
-		return nil, nil, 0, 0, false, ErrClosed
+		return nil, nil, 0, 0, 0, false, ErrClosed
 	}
+	gen = db.treeGen
 	type frame struct {
 		n   page
 		idx int
@@ -221,7 +230,7 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 	id := vw.root()
 	n, err := vw.page(id)
 	if err != nil {
-		return nil, nil, 0, 0, false, err
+		return nil, nil, 0, 0, gen, false, err
 	}
 	for n.typ() == pageInternal {
 		p := n
@@ -235,7 +244,7 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 		depth++
 		id = p.child(idx)
 		if n, err = vw.page(id); err != nil {
-			return nil, nil, 0, 0, false, err
+			return nil, nil, 0, 0, gen, false, err
 		}
 	}
 	leaf := n
@@ -276,11 +285,11 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 			d--
 		}
 		if d < 0 {
-			return nil, nil, 0, 0, false, nil
+			return nil, nil, 0, 0, gen, false, nil
 		}
 		id = stack[d].n.child(stack[d].idx)
 		if n, err = vw.page(id); err != nil {
-			return nil, nil, 0, 0, false, err
+			return nil, nil, 0, 0, gen, false, err
 		}
 		depth = d + 1
 		for n.typ() == pageInternal {
@@ -292,7 +301,7 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 			depth++
 			id = n.child(idx)
 			if n, err = vw.page(id); err != nil {
-				return nil, nil, 0, 0, false, err
+				return nil, nil, 0, 0, gen, false, err
 			}
 		}
 		leaf = n
@@ -303,12 +312,28 @@ func (db *DB) treeNeighbour(vw view, from []byte, fwd, incl bool) (k, v []byte, 
 		}
 		if leaf.numCells() == 0 {
 			// an empty leaf can only be the root
-			return nil, nil, 0, 0, false, nil
+			return nil, nil, 0, 0, gen, false, nil
 		}
 	}
 	v, err = vw.leafValue(leaf, i, nil)
 	if err != nil {
-		return nil, nil, 0, 0, false, err
+		return nil, nil, 0, 0, gen, false, err
 	}
-	return append([]byte(nil), leaf.leafKey(i)...), v, id, i, true, nil
+	return append([]byte(nil), leaf.leafKey(i)...), v, id, i, gen, true, nil
+}
+
+// Close releases the cursor's read view. Close is idempotent. A cursor is
+// owned by one goroutine; Key and Value are valid until its next operation.
+func (c *Cursor) Close() error {
+	if !c.closed {
+		c.closed = true
+		c.valid = false
+		if c.owned != nil {
+			c.owned.Close()
+			c.owned = nil
+		}
+		c.snap = nil
+		c.key, c.val = nil, nil
+	}
+	return nil
 }

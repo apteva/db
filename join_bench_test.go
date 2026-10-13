@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -37,7 +37,7 @@ func BenchmarkJoin(b *testing.B) {
 			d.Int("id", int64(i))
 			d.String("name", fmt.Sprintf("user%06d", i))
 			d.String("country", countries[rng.Intn(10)])
-			users.Insert(key(i), d.Bytes())
+			users.Upsert(key(i), d.Bytes())
 		}
 		for i := 0; i < 1_000_000; i++ {
 			d.Reset()
@@ -45,7 +45,7 @@ func BenchmarkJoin(b *testing.B) {
 			d.Int("user_id", int64(rng.Intn(80_000)))
 			d.Float("amount", float64(rng.Intn(100000))/100)
 			d.String("status", "shipped")
-			orders.Insert(key(i), d.Bytes())
+			orders.Upsert(key(i), d.Bytes())
 		}
 		db.Checkpoint()
 	}

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ func TestFormatRefusal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	db.Insert([]byte("k"), []byte("v"))
+	db.Upsert([]byte("k"), []byte("v"))
 	db.Close()
 	if v, err := FormatVersionOf(dir); err != nil || v != FormatVersion {
 		t.Fatalf("FormatVersionOf = %d, %v", v, err)
@@ -81,7 +81,7 @@ func TestOpenRestoresInterruptedSwap(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 1000; i++ {
-		db.Insert([]byte(fmt.Sprintf("k%04d", i)), []byte("v"))
+		db.Upsert([]byte(fmt.Sprintf("k%04d", i)), []byte("v"))
 	}
 	db.Close()
 	if err := os.Rename(filepath.Join(dir, "data"), filepath.Join(dir, "data.old")); err != nil {

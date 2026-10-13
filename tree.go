@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import "bytes"
 
@@ -196,7 +196,7 @@ func (db *DB) balanceLeaf(parent *node, idx int, child *node, need int) (bool, e
 		// lay out both leaves' cells in order, then pick the most balanced cut
 		// at which both halves fit (cells plus slots) with room for the new record
 		buf := db.scratch2[:0]
-		var sizes []int
+		sizes := db.cellSizes[:0]
 		for _, ln := range [2]*node{left, right} {
 			for i := 0; i < ln.data.numCells(); i++ {
 				c := ln.data.rawCell(i)
@@ -205,6 +205,7 @@ func (db *DB) balanceLeaf(parent *node, idx int, child *node, need int) (bool, e
 			}
 		}
 		db.scratch2 = buf
+		db.cellSizes = sizes
 		const capacity = PageSize - hdrSize
 		total := 0
 		for _, sz := range sizes {

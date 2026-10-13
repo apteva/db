@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"context"
@@ -223,7 +223,7 @@ func TestSoak(t *testing.T) {
 									b.Delete([]byte(key))
 									changes = append(changes, change{true, key, 0})
 								} else {
-									b.InsertJSON([]byte(key), userDoc(key, v))
+									b.UpsertJSON([]byte(key), userDoc(key, v))
 									changes = append(changes, change{true, key, v})
 								}
 							} else {
@@ -233,7 +233,7 @@ func TestSoak(t *testing.T) {
 									ob.Delete([]byte(key))
 									changes = append(changes, change{false, key, 0})
 								} else {
-									ob.InsertJSON([]byte(key), orderDoc(key, v, userKey(w, rng.Intn(userKeys/writers))))
+									ob.UpsertJSON([]byte(key), orderDoc(key, v, userKey(w, rng.Intn(userKeys/writers))))
 									changes = append(changes, change{false, key, v})
 								}
 							}
@@ -263,7 +263,7 @@ func TestSoak(t *testing.T) {
 							m.users[key] = 0
 							ops[1].Add(1)
 						} else {
-							if err := users.InsertJSON([]byte(key), userDoc(key, v)); err != nil {
+							if err := users.UpsertJSON([]byte(key), userDoc(key, v)); err != nil {
 								report(err)
 								return
 							}
@@ -281,7 +281,7 @@ func TestSoak(t *testing.T) {
 							m.orders[key] = 0
 							ops[1].Add(1)
 						} else {
-							if err := orders.InsertJSON([]byte(key), orderDoc(key, v, userKey(w, rng.Intn(userKeys/writers)))); err != nil {
+							if err := orders.UpsertJSON([]byte(key), orderDoc(key, v, userKey(w, rng.Intn(userKeys/writers)))); err != nil {
 								report(err)
 								return
 							}
@@ -332,6 +332,7 @@ func TestSoak(t *testing.T) {
 						ops[3].Add(1)
 					default:
 						cur := users.NewCursor()
+
 						n := 0
 						for ok := cur.Seek([]byte(userKey(0, rng.Intn(userKeys/writers)))); ok && n < 200; ok = cur.Next() {
 							if err := checkDoc("cursor", cur.Key(), cur.Value()); err != nil {
@@ -340,6 +341,7 @@ func TestSoak(t *testing.T) {
 							}
 							n++
 						}
+						cur.Close()
 						if cur.Err() != nil {
 							report(cur.Err())
 							return

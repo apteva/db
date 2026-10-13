@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"context"
@@ -12,13 +12,17 @@ import (
 // later write. While a snapshot is open, page ids it may reference are
 // quarantined instead of reused.
 type Snapshot struct {
-	db      *DB
-	epoch   uint64
-	root    uint32
-	mem     []mtEntry       // memtables as of the snapshot, merged and sorted
-	overlay map[uint32]page // page id -> its contents at the snapshot
-	pos     lsn             // log position at the snapshot
-	closed  bool
+	db          *DB
+	revision    uint64
+	epoch       uint64
+	root        uint32
+	mem         []mtEntry          // memtables as of the snapshot, merged and sorted
+	overlay     map[uint32]page    // page id -> its contents at the snapshot
+	buffers     []*pageBufferArena // retained private-page storage for overlay entries
+	pos         lsn                // log position at the snapshot
+	collections map[string]*Collection
+	indexes     []indexDef
+	closed      bool
 }
 
 var ErrSnapshotsOpen = errors.New("aptevadb: operation not allowed while snapshots are open")
@@ -31,20 +35,45 @@ type quarantine struct {
 }
 
 // Snapshot takes a consistent view. Close it when done.
-func (db *DB) Snapshot() (*Snapshot, error) {
+func (db *DB) Snapshot() (*Snapshot, error) { return db.snapshot(true) }
+
+func (db *DB) readSnapshot() (*Snapshot, error) { return db.snapshot(false) }
+
+func (db *DB) snapshot(logPosition bool) (*Snapshot, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.closed {
 		return nil, ErrClosed
 	}
+	if db.failed != nil {
+		return nil, db.failed
+	}
 	db.epoch++
 	s := &Snapshot{db: db, epoch: db.epoch, root: db.root, overlay: map[uint32]page{}}
+	s.revision = db.revision
 	s.mem = db.memSnapshotLocked()
-	g, off, err := db.wal.flushAndPosition()
+	var g, off uint64
+	var err error
+	if logPosition {
+		g, off, err = db.wal.flushAndPosition()
+	}
 	if err != nil {
 		return nil, err
 	}
 	s.pos = lsn{g, off}
+	s.collections = make(map[string]*Collection)
+	db.colls.mu.RLock()
+	for name, c := range db.colls.byName {
+		s.collections[name] = c
+	}
+	s.collections[""] = db.def
+	db.colls.mu.RUnlock()
+	for _, d := range db.indexDefs() {
+		if db.idx.touched(d.ID) == nil {
+			s.indexes = append(s.indexes, d)
+		}
+	}
+
 	if db.snaps == nil {
 		db.snaps = map[uint64]*Snapshot{}
 	}
@@ -62,6 +91,14 @@ func (s *Snapshot) Close() {
 	}
 	s.closed = true
 	delete(db.snaps, s.epoch)
+	for _, a := range s.buffers {
+		a.live--
+	}
+	s.buffers, s.overlay = nil, nil
+	// Captures retain their own references, so unused private arenas can
+	// be released even if checkpoint I/O is in progress. File mappings
+	// wait until that I/O has committed.
+	db.pager.releaseUnusedBuffers(false)
 	db.releaseQuarantineLocked()
 }
 
@@ -83,6 +120,10 @@ func (db *DB) preserveForSnapshots(n *node) {
 		if s.epoch > n.modEpoch {
 			if _, ok := s.overlay[n.id]; !ok {
 				s.overlay[n.id] = n.data
+				if n.buffer != nil {
+					n.buffer.live++
+					s.buffers = append(s.buffers, n.buffer)
+				}
 			}
 		}
 	}
@@ -97,9 +138,8 @@ func (db *DB) writable(n *node) page {
 		db.preserveForSnapshots(n)
 	}
 	if preserve || n.frozen || n.mapped {
-		buf := make(page, PageSize)
-		copy(buf, n.data)
-		n.data, n.mapped, n.frozen = buf, false, false
+		db.pager.copyPageBuffer(n)
+		n.mapped, n.frozen = false, false
 	}
 	db.pager.markDirty(n)
 	n.modEpoch = db.epoch
@@ -110,6 +150,7 @@ func (db *DB) writable(n *node) page {
 func (db *DB) freePage(n *node) {
 	if len(db.snaps) > 0 {
 		db.preserveForSnapshots(n)
+		db.pager.releasePageBuffer(n)
 		if db.pager.pages[n.id].Load() == n {
 			db.pager.pages[n.id].Store(nil)
 			db.pager.resident.Add(-1)
@@ -169,6 +210,9 @@ func (v view) root() uint32 {
 
 func (v view) page(id uint32) (page, error) {
 	if v.snap != nil {
+		if v.snap.closed {
+			return nil, ErrClosed
+		}
 		if p, ok := v.snap.overlay[id]; ok {
 			return p, nil
 		}
@@ -324,10 +368,14 @@ func (v view) leafValue(p page, i int, dst []byte) ([]byte, error) {
 }
 
 // Collection returns the named collection as it stands in the snapshot;
-// "" is the default collection. A collection created after the snapshot
-// was taken is still visible, but empty.
+// "" is the default collection. Later catalog changes are invisible.
 func (s *Snapshot) Collection(name string) (*Collection, error) {
-	c, ok := s.db.lookupCollection(name)
+	s.db.mu.RLock()
+	defer s.db.mu.RUnlock()
+	if s.closed || s.db.closed {
+		return nil, ErrClosed
+	}
+	c, ok := s.collections[name]
 	if !ok {
 		return nil, ErrNoSuchCollection
 	}

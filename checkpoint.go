@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"context"
@@ -189,8 +189,9 @@ func (db *DB) applyImmutable() error {
 
 // ioPage is one buffer to write at a page id.
 type ioPage struct {
-	id   uint32
-	data page
+	id     uint32
+	data   page
+	buffer *pageBufferArena
 }
 
 type captureSet struct {
@@ -210,9 +211,15 @@ func (db *DB) flushPass(full bool) error {
 	db.noteHold("capture", t)
 	db.mu.Unlock()
 	if err != nil {
+		db.mu.Lock()
+		db.releaseCaptureBuffers(cs)
+		db.mu.Unlock()
 		return err
 	}
 	if err := db.writeCapture(cs); err != nil {
+		db.mu.Lock()
+		db.releaseCaptureBuffers(cs)
+		db.mu.Unlock()
 		return err
 	}
 	db.mu.Lock()
@@ -263,17 +270,17 @@ func (db *DB) captureLocked(full bool) (*captureSet, error) {
 	db.dirtyOverflow = db.dirtyOverflow[:0]
 	root, err := db.pager.get(db.root)
 	if err != nil {
-		return nil, err
+		return cs, err
 	}
 	newRoot, err := db.captureSubtree(cs, root)
 	if err != nil {
-		return nil, err
+		return cs, err
 	}
 	db.root = newRoot
 	// free list: ids reusable once this meta is durable
 	freeHead, err := db.captureFreelist(cs)
 	if err != nil {
-		return nil, err
+		return cs, err
 	}
 	cs.toRelease = append(cs.toRelease, db.pager.pending...)
 	db.pager.pending = db.pager.pending[:0]
@@ -298,14 +305,17 @@ func (db *DB) captureNode(cs *captureSet, n *node) uint32 {
 	}
 	// leaves are checksummed on a scratch copy in the I/O phase (the bulk of
 	// the work); a mapped page's on-disk checksum is already right
-	if n.data.typ() != pageLeaf && !n.mapped {
+	if n.pageType() != pageLeaf && !n.mapped {
 		n.data.setCrc(pageCrc(n.data))
 	}
 	if n.dirty {
 		pg.dirtyN--
 	}
 	n.dirty, n.onDisk, n.frozen, n.writing = false, true, true, true
-	cs.pages = append(cs.pages, ioPage{n.id, n.data})
+	if n.buffer != nil {
+		n.buffer.live++
+	}
+	cs.pages = append(cs.pages, ioPage{id: n.id, data: n.data, buffer: n.buffer})
 	cs.nodes = append(cs.nodes, n)
 	return n.id
 }
@@ -313,7 +323,7 @@ func (db *DB) captureNode(cs *captureSet, n *node) uint32 {
 // captureSubtree walks resident internal nodes, capturing dirty pages
 // children first so parents point at final ids.
 func (db *DB) captureSubtree(cs *captureSet, n *node) (uint32, error) {
-	if n.data.typ() == pageInternal {
+	if n.pageType() == pageInternal {
 		nc := n.data.numCells()
 		for i := 0; i <= nc; i++ {
 			cid := n.data.child(i)
@@ -323,7 +333,7 @@ func (db *DB) captureSubtree(cs *captureSet, n *node) (uint32, error) {
 			}
 			var newID uint32
 			switch {
-			case cn.data.typ() == pageInternal:
+			case cn.pageType() == pageInternal:
 				id, err := db.captureSubtree(cs, cn)
 				if err != nil {
 					return 0, err
@@ -399,14 +409,14 @@ func (db *DB) writeCapture(cs *captureSet) error {
 			scratch.setCrc(pageCrc(scratch))
 			buf = scratch
 		}
-		if _, err := f.WriteAt(buf, int64(p.id)*PageSize); err != nil {
+		if err := writeAt(f, buf, int64(p.id)*PageSize); err != nil {
 			return err
 		}
 	}
 	if err := db.wal.syncFn(f); err != nil {
 		return err
 	}
-	if _, err := f.WriteAt(cs.metaBuf, int64(cs.meta.checkpoint%2)*PageSize); err != nil {
+	if err := writeAt(f, cs.metaBuf, int64(cs.meta.checkpoint%2)*PageSize); err != nil {
 		return err
 	}
 	return db.wal.syncFn(f)
@@ -425,6 +435,7 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
 		n.writing = false
 		pg.markVerified(n.id)
 		if n.frozen && !n.dirty && pg.pages[n.id].Load() == n {
+			pg.releasePageBuffer(n)
 			n.data, n.mapped = pg.mappedPage(n.id), true
 		}
 		n.frozen = false
@@ -439,8 +450,29 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
 	if cs.full && db.metaLogPos == nil {
 		dropGen = cs.meta.walGen
 	}
+	// The capture's I/O has finished. Readers are excluded by the writer
+	// lock; snapshots are the only remaining possible aliases of old
+	// private buffers or superseded file mappings.
+	db.releaseCaptureBuffers(cs)
+	pg.releaseUnusedBuffers(len(db.snaps) == 0)
 	db.cond.Broadcast()
 	return truncateTo, dropGen, nil
+}
+
+// Capture aliases are released on success and on any completed I/O/error
+// path. Current nodes and snapshots retain their own independent references.
+// The writer lock is held; file mappings wait for successful publication.
+func (db *DB) releaseCaptureBuffers(cs *captureSet) {
+	if cs == nil {
+		return
+	}
+	for _, p := range cs.pages {
+		if p.buffer != nil {
+			p.buffer.live--
+		}
+	}
+	cs.pages, cs.nodes = nil, nil
+	db.pager.releaseUnusedBuffers(false)
 }
 
 // ---- lifecycle
@@ -658,6 +690,7 @@ func (db *DB) compact(ctx context.Context) error {
 	db.activeStart = lsn{g, off}
 	db.cond.Broadcast()
 	db.noteHold("compact-swap-hold", t)
+	pg, warmLimit := db.pager, db.pager.hwm
 	db.mu.Unlock()
 	os.Remove(old)
 	os.RemoveAll(tmp)
@@ -665,8 +698,35 @@ func (db *DB) compact(ctx context.Context) error {
 		d.Sync()
 		d.Close()
 	}
+	var warmErr error
+	if pg.limit == 0 {
+		warmErr = db.warmCompactedPages(pg, warmLimit)
+	}
 	db.mu.Lock() // matched by the deferred unlock
-	return nil
+	return warmErr
+}
+
+// warmCompactedPages restores the pre-existing warm read layout after the old
+// mapping has been closed, so both trees never need to be resident together.
+// Small read-locked batches let concurrent writers proceed between faults.
+// ckptMu excludes another compaction/checkpoint/close while this runs.
+func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
+	for start := 0; ; start += 32 {
+		db.mu.RLock()
+		end := min(start+32, int(limit), int(pg.hwm))
+		for i := start; i < end; i++ {
+			n := pg.pages[i].Load()
+			if n != nil && n.mapped && n.kind != 0 && n.data.typ() != n.kind {
+				db.mu.RUnlock()
+				return fmt.Errorf("%w: compacted page %d type", ErrCorrupt, n.id)
+			}
+		}
+		done := end >= min(int(limit), int(pg.hwm))
+		db.mu.RUnlock()
+		if done {
+			return nil
+		}
+	}
 }
 
 // copySnapshot writes the contents of s into a new database at dir and
@@ -680,6 +740,13 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 	}
 	ndb.stopFlusher()
 	ndb.stopCheckpointer()
+	// The initial empty root is durable. Start the private builder on a
+	// fresh id so completed leaves can be written once without relocating
+	// their ids or patching already-built parents.
+	stream := opts.CacheBytes <= 0
+	ndb.sortedLoad, ndb.streamCopy = stream, stream
+	si := sortedInserter{db: ndb}
+	writer := copyPageWriter{pg: ndb.pager}
 	n := 0
 	var cerr error
 	err = db.scan(view{db, s}, nil, nil, func(k, v []byte) bool {
@@ -688,13 +755,41 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 				return false
 			}
 		}
-		if cerr = ndb.insertTree(k, v); cerr != nil {
+		if !stream {
+			cerr = ndb.insertTree(k, v)
+			return cerr == nil
+		}
+		if n == 1 {
+			oldRoot, rerr := ndb.pager.get(ndb.root)
+			if rerr != nil {
+				cerr = rerr
+				return false
+			}
+			ndb.root = ndb.pager.alloc(pageLeaf, 0).id
+			ndb.freePage(oldRoot)
+		}
+		previous := si.leaf
+		if cerr = si.insert(k, v); cerr != nil {
 			return false
 		}
+		if previous != nil && previous != si.leaf {
+			if cerr = writer.add(previous); cerr != nil {
+				return false
+			}
+		}
+		// Overflow chains are immutable and already written by streamCopy.
+		// Drop the tracking entries after each row, keeping the builder's
+		// working set bounded even for very large values.
+		clear(ndb.dirtyOverflow)
+		ndb.dirtyOverflow = ndb.dirtyOverflow[:0]
 		return true
 	})
+	ndb.sortedLoad, ndb.streamCopy = false, false
 	if err == nil {
 		err = cerr
+	}
+	if err == nil {
+		err = writer.flush()
 	}
 	if err == nil {
 		err = ndb.runCheckpoint(true)

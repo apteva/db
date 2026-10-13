@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -35,7 +35,7 @@ func TestSnapshotIsolation(t *testing.T) {
 				v := make([]byte, rng.Intn(300))
 				rng.Read(v)
 				m[k] = v
-				db.Insert([]byte(k), v)
+				db.Upsert([]byte(k), v)
 			case 1:
 				db.Delete([]byte(k))
 				delete(m, k)
@@ -53,7 +53,7 @@ func TestSnapshotIsolation(t *testing.T) {
 		s2, _ := db.Snapshot()
 		big := make([]byte, 50_000)
 		rng.Read(big)
-		db.Insert([]byte("big"), big)
+		db.Upsert([]byte("big"), big)
 		m["big"] = big
 		db.Checkpoint()
 
@@ -94,6 +94,7 @@ func TestSnapshotIsolation(t *testing.T) {
 		}
 		// cursor and aggregation over the snapshot
 		c := s1.NewCursor()
+		defer c.Close()
 		cnt := 0
 		for ok := c.First(); ok; ok = c.Next() {
 			if !bytes.Equal(c.Value(), frozen[string(c.Key())]) {
@@ -142,7 +143,7 @@ func TestSnapshotUnderConcurrentWrites(t *testing.T) {
 	}
 	val := func(i, gen int) []byte { return []byte{byte(gen), byte(i), byte(i >> 8)} }
 	for i := 0; i < n; i++ {
-		db.Insert(key(i), val(i, 0))
+		db.Upsert(key(i), val(i, 0))
 	}
 	db.Checkpoint()
 	var wg sync.WaitGroup
@@ -203,7 +204,7 @@ func TestSnapshotUnderConcurrentWrites(t *testing.T) {
 		for gen := 1; gen <= 4; gen++ {
 			b := db.NewBatch()
 			for i := 0; i < n; i++ {
-				b.Insert(key(i), val(i, gen))
+				b.Upsert(key(i), val(i, gen))
 			}
 			if err := b.Commit(); err != nil {
 				t.Error(err)

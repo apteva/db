@@ -27,13 +27,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
           cache-dependency-path: bench/go.sum
+      - name: cursor stress
+        env:
+          CURSOR_STRESS: 10m
+          GOTRACEBACK: all
+        run: go test -count=1 -timeout 25m -run '^TestCursorStress$' -v . 2>&1 | grep -E "^(--- |ok|FAIL|panic|fatal error|unexpected fault)"
       - name: soak
         env:
           SOAK: ${{ github.event.inputs.duration || '60m' }}
-        run: go test -count=1 -timeout 110m -run '^TestSoak$' -v . 2>&1 | grep -E "soak_test|^(--- |ok|FAIL|panic)"
+          GOTRACEBACK: all
+        run: go test -count=1 -timeout 110m -run '^TestSoak$' -v . 2>&1 | grep -E "soak_test|^(--- |ok|FAIL|panic|fatal error|unexpected fault)"

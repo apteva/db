@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bufio"
@@ -36,6 +36,7 @@ type wal struct {
 	f      fileLike
 	crcTab *crc32.Table
 
+	err     error      // sticky I/O failure; protected by mu
 	mu      sync.Mutex // guards buf, base, durable, gen, f, inflight
 	buf     []byte
 	base    uint64 // file offset of buf[0] in the current generation
@@ -45,11 +46,12 @@ type wal struct {
 	// The flusher goroutine writes full buffers so that appenders never
 	// wait on a write syscall: it swaps buf out as inflight and writes it
 	// without the lock. Synchronous flushes wait for it first.
-	inflight   []byte
-	inflightAt uint64
-	inflightOn *sync.Cond
-	spare      []byte
-	kick       chan struct{}
+	inflight                            []byte
+	inflightAt                          uint64
+	inflightOn                          *sync.Cond
+	spare                               []byte
+	bufStore, spareStore, inflightStore []byte // owned storage for the rotating buffers
+	kick                                chan struct{}
 
 	syncing  bool       // an fsync is in progress; its leader holds no lock meanwhile
 	syncDone *sync.Cond // broadcast when it finishes: every covered waiter returns at once
@@ -57,6 +59,7 @@ type wal struct {
 	grouped  bool       // the last fsync had waiters: the next leader lets a group form
 	syncFn   func(fileLike) error
 	maxFlush time.Duration // longest single flush write, for diagnostics
+	heapOnly bool          // bounded-cache mode preserves the original allocation policy
 }
 
 func walPath(dir string, gen uint64) string {
@@ -88,13 +91,13 @@ func walGens(dir string) ([]uint64, error) {
 const walMaxBuffered = 64 << 20
 
 func newWAL(dir string) *wal {
-	w := &wal{dir: dir, crcTab: crc32.MakeTable(crc32.Castagnoli), buf: make([]byte, 0, walFlushBytes+MaxCellSize+16),
-		spare: make([]byte, 0, walFlushBytes+MaxCellSize+16), syncFn: syncFull, kick: make(chan struct{}, 1)}
+	w := &wal{dir: dir, crcTab: crc32.MakeTable(crc32.Castagnoli), syncFn: syncFull, kick: make(chan struct{}, 1)}
 	w.inflightOn = sync.NewCond(&w.mu)
 	w.syncDone = sync.NewCond(&w.mu)
-	// both buffers start at their working size: appends never grow them
-	w.buf = make([]byte, 0, 2*walFlushBytes)
-	w.spare = make([]byte, 0, 2*walFlushBytes)
+	// Both buffers start at the normal flush capacity; large bursts may grow them.
+	w.bufStore = newWALBuffer(2 * walFlushBytes)
+	w.spareStore = newWALBuffer(2 * walFlushBytes)
+	w.buf, w.spare = w.bufStore[:0], w.spareStore[:0]
 	return w
 }
 
@@ -115,7 +118,7 @@ func (w *wal) prepareGen(gen uint64) (fileLike, uint64, error) {
 		var hdr [walHeaderSize]byte
 		copy(hdr[:], walMagic)
 		le.PutUint64(hdr[8:], gen)
-		if _, err := f.WriteAt(hdr[:], 0); err != nil {
+		if err := writeAt(f, hdr[:], 0); err != nil {
 			f.Close()
 			return nil, 0, err
 		}
@@ -228,6 +231,38 @@ const (
 // encodeRecord appends one framed record to dst.
 func encodeRecord(dst []byte, key, val []byte, more, del bool, tab *crc32.Table) []byte {
 	start := len(dst)
+	end := start + 11 + len(key) + len(val)
+	if end > cap(dst) {
+		// One growth and one copy per record, with geometric capacity. Large
+		// asynchronous log bursts otherwise repeatedly grow by small steps,
+		// retaining obsolete backing arrays until a later GC.
+		buf := make([]byte, end, max(end, 2*cap(dst)))
+		copy(buf, dst)
+		dst = buf
+	} else {
+		dst = dst[:end]
+	}
+	var flags byte
+	if more {
+		flags |= flagMore
+	}
+	if del {
+		flags |= flagDelete
+	}
+	dst[start+8] = flags
+	le.PutUint16(dst[start+9:], uint16(len(key)))
+	copy(dst[start+11:], key)
+	copy(dst[start+11+len(key):], val)
+	payload := dst[start+8:]
+	le.PutUint32(dst[start:], uint32(len(payload)))
+	le.PutUint32(dst[start+4:], crc32.Checksum(payload, tab))
+	return dst
+}
+
+// Bounded-cache mode keeps Go's original append growth to preserve both
+// the established CPU behavior and its smaller long-lived WAL capacities.
+func encodeRecordHeap(dst []byte, key, val []byte, more, del bool, tab *crc32.Table) []byte {
+	start := len(dst)
 	var flags byte
 	if more {
 		flags |= flagMore
@@ -250,7 +285,18 @@ type lsn struct{ gen, off uint64 }
 // append buffers one record and returns its LSN.
 func (w *wal) append(key, val []byte, del bool) (lsn, error) {
 	w.mu.Lock()
-	w.buf = encodeRecord(w.buf, key, val, false, del, w.crcTab)
+	if w.err != nil {
+		err := w.err
+		w.mu.Unlock()
+		return lsn{}, err
+	}
+	if w.heapOnly {
+		w.buf = encodeRecordHeap(w.buf, key, val, false, del, w.crcTab)
+		w.bufStore = w.buf[:cap(w.buf)]
+	} else {
+		w.reserveBuffer(11 + len(key) + len(val))
+		w.buf = encodeRecord(w.buf, key, val, false, del, w.crcTab)
+	}
 	l := lsn{w.gen, w.base + uint64(len(w.buf))}
 	err := w.afterAppendLocked()
 	w.mu.Unlock()
@@ -260,7 +306,18 @@ func (w *wal) append(key, val []byte, del bool) (lsn, error) {
 // appendRaw buffers pre-encoded records (a batch) and returns the LSN.
 func (w *wal) appendRaw(rec []byte) (lsn, error) {
 	w.mu.Lock()
+	if w.err != nil {
+		err := w.err
+		w.mu.Unlock()
+		return lsn{}, err
+	}
+	if !w.heapOnly {
+		w.reserveBuffer(len(rec))
+	}
 	w.buf = append(w.buf, rec...)
+	if w.heapOnly {
+		w.bufStore = w.buf[:cap(w.buf)]
+	}
 	l := lsn{w.gen, w.base + uint64(len(w.buf))}
 	err := w.afterAppendLocked()
 	w.mu.Unlock()
@@ -287,22 +344,33 @@ func (w *wal) afterAppendLocked() error {
 // writes it without holding the lock.
 func (w *wal) flushAsync() error {
 	w.mu.Lock()
+	if w.err != nil {
+		err := w.err
+		w.mu.Unlock()
+		return err
+	}
 	if w.inflight != nil || len(w.buf) == 0 || w.f == nil {
 		w.mu.Unlock()
 		return nil
 	}
 	w.inflight, w.buf = w.buf, w.spare[:0]
+	w.inflightStore, w.bufStore, w.spareStore = w.bufStore, w.spareStore, nil
+	w.spare = nil
 	w.inflightAt = w.base
 	w.base += uint64(len(w.inflight))
 	f := w.f
 	w.mu.Unlock()
 	t := time.Now()
-	_, err := f.WriteAt(w.inflight, int64(w.inflightAt))
+	err := writeAt(f, w.inflight, int64(w.inflightAt))
 	w.mu.Lock()
+	if err != nil {
+		w.err = err
+	}
 	if d := time.Since(t); d > w.maxFlush {
 		w.maxFlush = d
 	}
 	w.spare = w.inflight[:0]
+	w.spareStore, w.inflightStore = w.inflightStore, nil
 	w.inflight = nil
 	w.inflightOn.Broadcast()
 	w.mu.Unlock()
@@ -314,11 +382,17 @@ func (w *wal) flushLocked() error {
 	for w.inflight != nil {
 		w.inflightOn.Wait()
 	}
+	if w.err != nil {
+		return w.err
+	}
 	if len(w.buf) == 0 {
 		return nil
 	}
 	t := time.Now()
-	_, err := w.f.WriteAt(w.buf, int64(w.base))
+	err := writeAt(w.f, w.buf, int64(w.base))
+	if err != nil {
+		w.err = err
+	}
 	if d := time.Since(t); d > w.maxFlush {
 		w.maxFlush = d
 	}
@@ -346,6 +420,11 @@ func (w *wal) flush() error {
 func (w *wal) sync(l lsn) error {
 	w.mu.Lock()
 	for {
+		if w.err != nil {
+			err := w.err
+			w.mu.Unlock()
+			return err
+		}
 		if w.gen > l.gen || w.durable >= l.off {
 			w.mu.Unlock()
 			return nil // done by an earlier fsync, or rotation synced the older generation
@@ -371,20 +450,33 @@ func (w *wal) sync(l lsn) error {
 	for w.inflight != nil {
 		w.inflightOn.Wait()
 	}
+	if w.err != nil {
+		err := w.err
+		w.syncing = false
+		w.syncDone.Broadcast()
+		w.mu.Unlock()
+		return err
+	}
 	var werr error
 	if len(w.buf) > 0 {
 		w.inflight, w.buf = w.buf, w.spare[:0]
+		w.inflightStore, w.bufStore, w.spareStore = w.bufStore, w.spareStore, nil
+		w.spare = nil
 		w.inflightAt = w.base
 		w.base += uint64(len(w.inflight))
 		f := w.f
 		w.mu.Unlock()
 		t := time.Now()
-		_, werr = f.WriteAt(w.inflight, int64(w.inflightAt))
+		werr = writeAt(f, w.inflight, int64(w.inflightAt))
 		w.mu.Lock()
+		if werr != nil {
+			w.err = werr
+		}
 		if d := time.Since(t); d > w.maxFlush {
 			w.maxFlush = d
 		}
 		w.spare = w.inflight[:0]
+		w.spareStore, w.inflightStore = w.inflightStore, nil
 		w.inflight = nil
 		w.inflightOn.Broadcast()
 	}
@@ -396,6 +488,12 @@ func (w *wal) sync(l lsn) error {
 		err = w.syncFn(f)
 	}
 	w.mu.Lock()
+	if err != nil {
+		w.err = err
+	}
+	if w.err != nil {
+		err = w.err
+	}
 	if err == nil && flushed > w.durable {
 		w.durable = flushed
 	}
@@ -511,6 +609,7 @@ func (w *wal) close() error {
 	for w.inflight != nil {
 		w.inflightOn.Wait()
 	}
+	w.releaseBuffers()
 	if w.f == nil {
 		return nil
 	}

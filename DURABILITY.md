@@ -37,12 +37,23 @@ truncated there.
   entries it maintains: its records are chained in the log and replay
   applies a chain only when its last record is present.
 - Readers see a consistent state at every point: a `Find` never sees half a
-  batch, a `Snapshot` sees the database as of one instant, and a `Scan`
-  sees each leaf atomically (it may see batches committed after it started
-  in later leaves).
+  batch, a `Snapshot` sees the database as of one instant, and scans/cursors/queries use a snapshot of both rows and catalogs
+  for the entire operation.
 - Index entries are maintained in the same batch as the document, so an
   index never disagrees with the documents after recovery; `VerifyIndexes`
   checks that.
+
+## Computed fields
+
+Definitions are WAL-backed catalog records with the same sync contract as
+writes. Installing or changing them holds the writer lock while checking that
+the collection is empty and publishing the rules. Every upsert computes its
+outputs under that lock, before log append and index maintenance. Evaluation
+failures leave the entire batch unchanged. The WAL contains the final document
+bytes and associated index entries; replay does not recompute results. Backup,
+snapshots and compaction carry both the catalog and stored output values.
+Format-3/4 migration publishes format 5 synchronously before new definitions can
+reach the log, so an older writer cannot silently bypass the rules.
 
 ## Memtable and checkpoints
 
@@ -75,11 +86,13 @@ generation deletion, so the set of files recovery finds is itself durable.
   catalog entry leaves entries with no owner, which the next open removes.
   Writes made during the build are logged and maintained normally.
   `Compact` is refused while a build runs.
-- **`DropIndex` and `DropCollection`** delete in bounded batches. A crash
-  midway leaves a partial deletion: the index or collection is still
-  listed, with whatever survived, and dropping it again finishes the job.
-  `DropCollection` removes the indexes first, then the keys, then the
-  catalog entry.
+- **`DropIndex` and `DropCollection`** validate and stage all tombstones and
+  catalog deletions under the writer lock, then commit one WAL group. Cancellation,
+  a staging-limit error or validation failure changes nothing. Replay restores
+  either the intact original or the complete deletion. Held snapshots retain
+  their old catalogs and rows. Staging is limited to 256 MiB; larger drops fail
+  with `ErrTransactionTooLarge` intact. Source collections with computed dependents
+  must have those dependents removed first.
 - **`Compact`** copies a snapshot into `compact.tmp`, replays the log delta
   into the copy, checkpoints the copy, then swaps files with two renames
   and an fsync of the directory. Until the swap, the original is
@@ -113,3 +126,34 @@ backup.
   system whose `flock` does not work (some network file systems).
 - Windows, where the file mapping, locking and fsync code has not been
   built.
+
+## Computed collections
+
+Creation commits the definition, backfilled rows and group counters as a single
+WAL transaction. Every source transaction includes its dependent row changes,
+counters and normal index updates before logging. Validation and final int64
+aggregate overflow failures abort before WAL append. Group updates coalesce
+within the transaction and use checked 128-bit intermediate arithmetic. No
+asynchronous worker or refresh is involved. A torn transaction recovers neither
+its source changes nor its derived changes. Recovery replays stored bytes rather
+than rerunning pipelines. Snapshots see source and output from the same instant;
+backup and compaction carry definitions, rows and counters. Derived collections
+are read-only and cannot be sources of other computed collections. Dropping one
+atomically removes its definition, data, counters and indexes; a source cannot
+be dropped while dependents remain. Creation/drop hold the writer lock and stage
+at most 256 MiB; cancellation is checked before logging.
+
+## Release operation contracts
+
+`Insert`/`InsertJSON` create only (`ErrKeyExists` on collision), `Replace` requires
+an existing key (`ErrNotFound` on absence), and `Upsert` deliberately replaces.
+Batch conditions are checked in operation order before logging. Unique constraints
+validate the final transaction state, including computed outputs; swaps are allowed.
+Writing transactions validate a database-wide revision and return `ErrConflict`
+if any write committed since Begin. A callback passed to Update runs once.
+
+I/O errors, including short writes and ENOSPC, poison the WAL/DB until reopen;
+subsequent writes cannot acknowledge data after a failed flush. A failed write
+or sync may already have reached storage: its outcome can be unknown. Reopen and
+check application keys before deciding to retry. Network clients never retry
+writes automatically and report `client.ErrCommitUnknown` on transport failure.

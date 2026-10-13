@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"errors"
@@ -33,7 +33,7 @@ func TestSecondaryIndexes(t *testing.T) {
 				tags += fmt.Sprintf("%q", tg)
 			}
 			j := fmt.Sprintf(`{"region":%q,"amount":%g,"tags":[%s],"addr":{"city":%q}}`, d.region, d.amount, tags, d.region+"-city")
-			if err := db.InsertJSON([]byte(k), []byte(j)); err != nil {
+			if err := db.UpsertJSON([]byte(k), []byte(j)); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -41,7 +41,7 @@ func TestSecondaryIndexes(t *testing.T) {
 			put(fmt.Sprintf("d%05d", i), doc{regions[rng.Intn(4)], float64(rng.Intn(100000)) / 100, []string{"t" + fmt.Sprint(rng.Intn(50)), "t" + fmt.Sprint(rng.Intn(50))}})
 		}
 		// keys may start with any byte; the reserved space is internal
-		if err := db.Insert([]byte{0, 'x'}, []byte("zero-byte key")); err != nil {
+		if err := db.Upsert([]byte{0, 'x'}, []byte("zero-byte key")); err != nil {
 			t.Fatal(err)
 		}
 		if v, ok, _ := db.Find([]byte{0, 'x'}, nil); !ok || string(v) != "zero-byte key" {
@@ -81,7 +81,7 @@ func TestSecondaryIndexes(t *testing.T) {
 				db.Delete([]byte(k))
 				delete(docs, k)
 			case 2:
-				db.Insert([]byte(k), []byte("not a document")) // loses its entries, stays a user key
+				db.Upsert([]byte(k), []byte("not a document")) // loses its entries, stays a user key
 				delete(docs, k)
 				nonDoc[k] = true
 			}
@@ -91,7 +91,7 @@ func TestSecondaryIndexes(t *testing.T) {
 		b.Delete([]byte("d00001"))
 		delete(docs, "d00001")
 		delete(nonDoc, "d00001")
-		b.InsertJSON([]byte("d00001"), []byte(`{"region":"east","amount":5,"tags":["t7"]}`)) // same key twice in one batch
+		b.UpsertJSON([]byte("d00001"), []byte(`{"region":"east","amount":5,"tags":["t7"]}`)) // same key twice in one batch
 		docs["d00001"] = doc{"east", 5, []string{"t7"}}
 		if err := b.Commit(); err != nil {
 			t.Fatal(err)
@@ -195,6 +195,7 @@ func TestSecondaryIndexes(t *testing.T) {
 			t.Fatal("dropping twice should fail")
 		}
 		c := db.NewCursor()
+		defer c.Close()
 		if !c.First() || c.Key()[0] != 'd' {
 			t.Fatalf("cursor first key %q: must be a user key, never an index entry", c.Key())
 		}
@@ -209,7 +210,7 @@ func TestCreateIndexWithConcurrentWrites(t *testing.T) {
 	}
 	defer db.Close()
 	for i := 0; i < 30_000; i++ {
-		db.InsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"v":%d}`, i%100)))
+		db.UpsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"v":%d}`, i%100)))
 	}
 	var wg sync.WaitGroup
 	stop := make(chan struct{})
@@ -227,7 +228,7 @@ func TestCreateIndexWithConcurrentWrites(t *testing.T) {
 			if rng.Intn(4) == 0 {
 				db.Delete([]byte(fmt.Sprintf("k%05d", i)))
 			} else {
-				db.InsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"v":%d}`, rng.Intn(100))))
+				db.UpsertJSON([]byte(fmt.Sprintf("k%05d", i)), []byte(fmt.Sprintf(`{"v":%d}`, rng.Intn(100))))
 			}
 		}
 	}()

@@ -1,14 +1,14 @@
-module github.com/apteva/aptevadb/bench
+module github.com/apteva/db/bench
 
 go 1.25
 
 // The benchmark harness pulls in Pebble and two SQLite bindings; keeping it
 // in its own module keeps them out of the engine's dependency graph.
-replace github.com/apteva/aptevadb => ../
+replace github.com/apteva/db => ../
 
 require (
 	crawshaw.io/sqlite v0.3.2
-	github.com/apteva/aptevadb v0.0.0
+	github.com/apteva/db v0.0.0
 	github.com/cockroachdb/pebble/v2 v2.1.7
 	zombiezen.com/go/sqlite v1.4.0
 )

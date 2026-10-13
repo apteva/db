@@ -20,6 +20,7 @@ type stmt interface {
 	ColumnBytes(col int, buf []byte) int
 	ColumnText(col int) string
 	ColumnFloat(col int) float64
+	ColumnInt64(col int) int64
 	ColumnCount() int
 }
 
@@ -165,7 +166,7 @@ func newSQLiteKV(open func() (conn, error), sync bool, txn int) (kv, error) {
 	return s, nil
 }
 
-func (s *sqliteKV) Insert(k, v []byte) error {
+func (s *sqliteKV) Upsert(k, v []byte) error {
 	if s.txn > 1 && !s.open {
 		if _, err := s.begin.Step(); err != nil {
 			return err
@@ -272,7 +273,7 @@ func openSQLiteTables(dir string, n int) (kv, error) {
 
 func (t *sqliteTables) pick(k []byte) int { return int(k[len(k)-1]) % len(t.ins) }
 
-func (t *sqliteTables) Insert(k, v []byte) error {
+func (t *sqliteTables) Upsert(k, v []byte) error {
 	ins := t.ins[t.pick(k)]
 	ins.BindBytes(1, k)
 	ins.BindBytes(2, v)

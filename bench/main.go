@@ -21,11 +21,11 @@ import (
 	"github.com/cockroachdb/pebble/v2"
 	"github.com/cockroachdb/pebble/v2/bloom"
 
-	"github.com/apteva/aptevadb"
+	aptevadb "github.com/apteva/db"
 )
 
 type kv interface {
-	Insert(k, v []byte) error
+	Upsert(k, v []byte) error
 	Find(k, dst []byte) ([]byte, bool, error)
 	// Iterate walks every key in order and reports how many it saw.
 	Iterate() (int, error)
@@ -45,19 +45,21 @@ type reader interface {
 type opener func(dir string) (kv, error)
 
 var (
-	flagN       = flag.Int("n", 1_000_000, "keys per workload")
-	flagVal     = flag.Int("vsize", 100, "value size in bytes")
-	flagEngines = flag.String("engines", "ours,pebble,sqlite-c,sqlite-go", "comma list")
-	flagWork    = flag.String("workloads", "random,seq", "comma list of random,seq")
-	flagDir     = flag.String("dir", "", "scratch dir (default: temp)")
-	flagPar     = flag.Int("par", runtime.GOMAXPROCS(0), "goroutines for the parallel find phase")
-	flagNoPar   = flag.Bool("nopar", false, "skip parallel find phase")
-	flagCache   = flag.Int64("cachemb", 512, "block/page cache size in MB for Pebble and SQLite")
-	flagOursMB  = flag.Int64("ourscachemb", 0, "page cache limit in MB for our engine (0: keep everything resident)")
-	flagDurable = flag.Bool("durable", false, "durable-insert mode: single writer, then 10 and 50 concurrent writers; no find phases")
-	flagAgg     = flag.Bool("agg", false, "aggregation mode: load N documents, run the pipelines (engines: ours, pebble, sqlite-c)")
-	flagJoin    = flag.Bool("join", false, "join mode: users and orders collections, $lookup pipelines against SQL joins (engines: ours, ours-par, sqlite-c)")
-	flagReps    = flag.Int("reps", 1, "run each engine this many times on fresh directories and keep the best of each phase")
+	flagN                   = flag.Int("n", 1_000_000, "keys per workload")
+	flagVal                 = flag.Int("vsize", 100, "value size in bytes")
+	flagEngines             = flag.String("engines", "ours,pebble,sqlite-c,sqlite-go", "comma list")
+	flagWork                = flag.String("workloads", "random,seq", "comma list of random,seq")
+	flagDir                 = flag.String("dir", "", "scratch dir (default: temp)")
+	flagPar                 = flag.Int("par", runtime.GOMAXPROCS(0), "goroutines for the parallel find phase")
+	flagNoPar               = flag.Bool("nopar", false, "skip parallel find phase")
+	flagCache               = flag.Int64("cachemb", 512, "block/page cache size in MB for Pebble and SQLite")
+	flagOursMB              = flag.Int64("ourscachemb", 0, "page cache limit in MB for our engine (0: keep everything resident)")
+	flagDurable             = flag.Bool("durable", false, "durable-insert mode: single writer, then 10 and 50 concurrent writers; no find phases")
+	flagAgg                 = flag.Bool("agg", false, "aggregation mode: load N documents, run the pipelines (engines: ours, pebble, sqlite-c)")
+	flagJoin                = flag.Bool("join", false, "join mode: users and orders collections, $lookup pipelines against SQL joins (engines: ours, ours-par, sqlite-c)")
+	flagComputedCollections = flag.Bool("computedcollections", false, "native maintained collections versus on-demand queries, Pebble application maintenance and SQLite triggers")
+	flagComputed            = flag.Bool("computed", false, "stored computed fields versus application writes/read-time derivation, Pebble and SQLite generated columns")
+	flagReps                = flag.Int("reps", 1, "run each engine this many times on fresh directories and keep the best of each phase")
 )
 
 type result struct {
@@ -79,6 +81,14 @@ func main() {
 	}
 	if *flagAgg {
 		runAggBench(dir, *flagN, strings.Split(*flagEngines, ","))
+		return
+	}
+	if *flagComputedCollections {
+		runComputedCollectionsBench(dir, *flagN, strings.Split(*flagEngines, ","))
+		return
+	}
+	if *flagComputed {
+		runComputedBench(dir, *flagN, strings.Split(*flagEngines, ","))
 		return
 	}
 	if *flagJoin {
@@ -112,6 +122,10 @@ func main() {
 		"sqlite-go-sync":        func(d string) (kv, error) { return openSQLiteGo(d, true, 1) },
 		"sqlite-go-txn1000":     func(d string) (kv, error) { return openSQLiteGo(d, false, 1000) },
 		"sqlite-go-bulk":        func(d string) (kv, error) { return openSQLiteGo(d, false, *flagN) },
+	}
+	if *flagResources {
+		runResourceBench(dir, openers)
+		return
 	}
 	var results []result
 	var sizes = map[string]int64{}
@@ -152,7 +166,7 @@ func main() {
 
 				start := time.Now()
 				for i := 0; i < ks; i++ {
-					if err := db.Insert(keys[i*16:(i+1)*16], vals[i*(*flagVal):(i+1)*(*flagVal)]); err != nil {
+					if err := db.Upsert(keys[i*16:(i+1)*16], vals[i*(*flagVal):(i+1)*(*flagVal)]); err != nil {
 						panic(err)
 					}
 				}
@@ -178,7 +192,7 @@ func main() {
 							go func(g int) {
 								defer wg.Done()
 								for i := g; i < ks; i += par {
-									if err := target.Insert(extra[i*16:(i+1)*16], vals[i*(*flagVal):(i+1)*(*flagVal)]); err != nil {
+									if err := target.Upsert(extra[i*16:(i+1)*16], vals[i*(*flagVal):(i+1)*(*flagVal)]); err != nil {
 										panic(err)
 									}
 								}
@@ -191,6 +205,11 @@ func main() {
 						panic(err)
 					}
 					sizes[name+"/"+wl] = dirSize(edir)
+					if *flagDir == "" {
+						if err := os.RemoveAll(edir); err != nil {
+							panic(err)
+						}
+					}
 					continue
 				}
 
@@ -275,6 +294,11 @@ func main() {
 					panic(err)
 				}
 				sizes[name+"/"+wl] = dirSize(edir)
+				if *flagDir == "" {
+					if err := os.RemoveAll(edir); err != nil {
+						panic(err)
+					}
+				}
 			}
 		}
 	}
@@ -393,7 +417,7 @@ func (o *oursCompact) Settle() error {
 	}
 	return o.db.Compact(context.Background())
 }
-func (o *oursCompact) NewReader() (reader, error) { return sharedReader{o}, nil }
+func (o *oursCompact) NewReader() (reader, error) { return o.db.NewReader() }
 
 func openOursMode(dir string, mode aptevadb.SyncMode) (kv, error) {
 	db, err := aptevadb.Open(dir, aptevadb.Options{Sync: true, SyncMode: mode, CacheBytes: *flagOursMB << 20})
@@ -422,8 +446,8 @@ func openOursBatch(dir string, mode aptevadb.SyncMode, n int) (kv, error) {
 	return &oursBatch{db: db, b: db.NewBatch(), n: n}, nil
 }
 
-func (o *oursBatch) Insert(k, v []byte) error {
-	if err := o.b.Insert(k, v); err != nil {
+func (o *oursBatch) Upsert(k, v []byte) error {
+	if err := o.b.Upsert(k, v); err != nil {
 		return err
 	}
 	if o.b.Len() >= o.n {
@@ -437,7 +461,12 @@ func (o *oursBatch) Find(k, dst []byte) ([]byte, bool, error) {
 	}
 	return o.db.Find(k, dst)
 }
-func (o *oursBatch) NewReader() (reader, error) { return sharedReader{o}, o.b.Commit() }
+func (o *oursBatch) NewReader() (reader, error) {
+	if err := o.b.Commit(); err != nil {
+		return nil, err
+	}
+	return o.db.NewReader()
+}
 func (o *oursBatch) Settle() error {
 	if err := o.b.Commit(); err != nil {
 		return err
@@ -457,13 +486,14 @@ type lockedKV struct {
 	mu sync.Mutex
 }
 
-func (l *lockedKV) Insert(k, v []byte) error {
+func (l *lockedKV) Upsert(k, v []byte) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return l.kv.Insert(k, v)
+	return l.kv.Upsert(k, v)
 }
 func (o *ours) Iterate() (int, error) {
 	cur := o.db.NewCursor()
+	defer cur.Close()
 	n := 0
 	for ok := cur.First(); ok; ok = cur.Next() {
 		n++
@@ -474,6 +504,7 @@ func (o *oursColl) Iterate() (int, error) {
 	n := 0
 	for _, c := range o.colls {
 		cur := c.NewCursor()
+		defer cur.Close()
 		for ok := cur.First(); ok; ok = cur.Next() {
 			n++
 		}
@@ -504,10 +535,10 @@ func (p *peb) Iterate() (int, error) {
 	}
 	return n, it.Error()
 }
-func (o *ours) Insert(k, v []byte) error                 { return o.db.Insert(k, v) }
+func (o *ours) Upsert(k, v []byte) error                 { return o.db.Upsert(k, v) }
 func (o *ours) Find(k, dst []byte) ([]byte, bool, error) { return o.db.Find(k, dst) }
 func (o *ours) Close() error                             { return o.db.Close() }
-func (o *ours) NewReader() (reader, error)               { return sharedReader{o}, nil }
+func (o *ours) NewReader() (reader, error)               { return o.db.NewReader() }
 func (o *ours) Settle() error {
 	// a checkpoint, then a full compaction: the packed layout Pebble's
 	// settle (a full compaction) reaches too
@@ -542,13 +573,38 @@ func openOursColl(dir string, n int) (kv, error) {
 }
 
 func (o *oursColl) pick(k []byte) *aptevadb.Collection { return o.colls[int(k[len(k)-1])%len(o.colls)] }
-func (o *oursColl) Insert(k, v []byte) error           { return o.pick(k).Insert(k, v) }
+func (o *oursColl) Upsert(k, v []byte) error           { return o.pick(k).Upsert(k, v) }
 func (o *oursColl) Find(k, dst []byte) ([]byte, bool, error) {
 	return o.pick(k).Find(k, dst)
 }
-func (o *oursColl) Close() error               { return o.db.Close() }
-func (o *oursColl) NewReader() (reader, error) { return sharedReader{o}, nil }
-func (o *oursColl) Settle() error              { return o.db.Checkpoint() }
+func (o *oursColl) Close() error { return o.db.Close() }
+func (o *oursColl) NewReader() (reader, error) {
+	r := &oursCollReader{}
+	for _, c := range o.colls {
+		h, err := c.NewReader()
+		if err != nil {
+			r.Close()
+			return nil, err
+		}
+		r.handles = append(r.handles, h)
+	}
+	return r, nil
+}
+func (o *oursColl) Settle() error { return o.db.Checkpoint() }
+
+type oursCollReader struct{ handles []*aptevadb.Reader }
+
+func (r *oursCollReader) Find(k, dst []byte) ([]byte, bool, error) {
+	return r.handles[int(k[len(k)-1])%len(r.handles)].Find(k, dst)
+}
+func (r *oursCollReader) Close() error {
+	for _, h := range r.handles {
+		if err := h.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // pebColl is Pebble with a one-byte table prefix on every key, the usual
 // way to keep several tables in one LSM.
@@ -570,7 +626,7 @@ func (p *pebColl) tag(k []byte) []byte {
 	p.buf = append(append(p.buf[:0], byte(int(k[len(k)-1])%p.n)), k...)
 	return p.buf
 }
-func (p *pebColl) Insert(k, v []byte) error { return p.peb.Insert(p.tag(k), v) }
+func (p *pebColl) Upsert(k, v []byte) error { return p.peb.Upsert(p.tag(k), v) }
 func (p *pebColl) Find(k, dst []byte) ([]byte, bool, error) {
 	return p.peb.Find(p.tag(k), dst)
 }
@@ -624,7 +680,7 @@ func openPebble(dir string, sync bool, batch int) (kv, error) {
 	return p, nil
 }
 
-func (p *peb) Insert(k, v []byte) error {
+func (p *peb) Upsert(k, v []byte) error {
 	if p.bsize == 0 {
 		return p.db.Set(k, v, p.wo)
 	}

@@ -1,6 +1,7 @@
-package aptevadb
+package db
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"hash/crc32"
@@ -27,7 +28,8 @@ const (
 
 // Options tunes durability and checkpointing.
 type Options struct {
-	// Sync flushes the log before Insert returns. Concurrent inserts share flushes.
+	// Sync flushes the log before a write returns. Default false (async).
+	// Use DurableOptions for power-loss-safe writes. Concurrent writes share flushes.
 	Sync bool
 	// SyncMode picks the flush primitive; default SyncFull.
 	SyncMode SyncMode
@@ -36,7 +38,7 @@ type Options struct {
 	// LogFlushInterval is how often buffered log records are handed to the OS
 	// when Sync is off. Default 10ms.
 	LogFlushInterval time.Duration
-	// CacheBytes caps resident pages; clean pages are evicted past it and a
+	// CacheBytes targets the logical page cache, not total process memory; clean pages are evicted past it and a
 	// checkpoint runs when dirty pages reach three quarters of it. 0 keeps
 	// everything resident, which is fastest when the data fits in RAM.
 	CacheBytes int64
@@ -60,20 +62,20 @@ var (
 	ErrCellSize      = errors.New("aptevadb: key+value too large")
 	ErrClosed        = errors.New("aptevadb: closed")
 	ErrIndexBuilding = errors.New("aptevadb: an index is being built")
+	ErrOptions       = errors.New("aptevadb: invalid options")
 	ErrFormat        = errors.New("aptevadb: unsupported file format version")
 )
 
 // Version is the library version.
-const Version = "0.1.0"
+const Version = "0.2.0-alpha.1"
 
-// FormatVersion is the on-disk format this build reads and writes, stored
-// in the meta page. Files written by another version are refused with
-// ErrFormat rather than misread; see FORMAT.md for the policy.
-const FormatVersion = 3
+// FormatVersion is the on-disk format this build writes. Open also reads
+// formats 3, 4 and 5 and upgrades them before returning; see FORMAT.md for the policy.
+const FormatVersion = 6
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
-	mu          sync.RWMutex // tree structure; writers take it exclusively
+	mu          treeMutex // tree structure; writers exclude every read lane
 	dir         string
 	pager       *pager
 	wal         *wal
@@ -87,8 +89,8 @@ type DB struct {
 
 	scratch       page
 	scratch2      []byte // two pages, for sibling balancing
+	cellSizes     []int  // reusable cell lengths for sibling balancing; writer lock held
 	sepBufs       [16][]byte
-	docBuf        []byte
 	ptrBuf        []byte
 	balances      uint64
 	merges        uint64
@@ -98,28 +100,36 @@ type DB struct {
 	idx           indexCatalog
 	colls         collCatalog
 	def           *Collection // the default collection, id 0
+	revision      uint64      // logical writes; writer lock held
+	readFormat    uint32      // selected persisted format; zero for private copies
 	treeGen       uint64      // bumped whenever a page or page id of the tree changes
 	noReorder     bool        // tests: run joins as written
 	sortedLoad    bool        // a bulk load is inserting ascending keys: split leaves at the end
 	sortedApply   bool        // a memtable is being applied in key order: split leaves at the insertion point
+	streamCopy    bool        // private compaction/backup builder: persist completed overflow pages
 	bulkLoads     int         // index builds in progress (their inserts are not logged)
 	epoch         uint64      // bumped per snapshot; nodes record the epoch of their last write
 	snaps         map[uint64]*Snapshot
 	quar          []quarantine
 	debugVerify   func(where string, pages ...page)
 
-	stop     chan struct{}
-	done     chan struct{}
-	stopOnce sync.Once
-	closed   bool
-	ckptMu   sync.Mutex               // one checkpoint or compaction at a time
-	holds    map[string]time.Duration // longest writer-lock hold per section (diagnostics)
-	stalls   uint64                   // writer waits for the memtable to drain
-	ckptReq  chan ckptRequest         // to the background checkpointer
-	ckptDone chan struct{}            // closed when the checkpointer exits
-	ckptOnce sync.Once
-	cond     *sync.Cond // signalled when imm drains or a checkpoint commits
-	failed   error      // set after an I/O error left in-memory state unsure; writes refuse
+	stop          chan struct{}
+	done          chan struct{}
+	stopOnce      sync.Once
+	closed        bool
+	ckptMu        sync.Mutex               // one checkpoint or compaction at a time
+	holds         map[string]time.Duration // longest writer-lock hold per section (diagnostics)
+	stalls        uint64                   // writer waits for the memtable to drain
+	ckptReq       chan ckptRequest         // to the background checkpointer
+	ckptDone      chan struct{}            // closed when the checkpointer exits
+	ckptOnce      sync.Once
+	cond          *sync.Cond // signalled when imm drains or a checkpoint commits
+	failed        error      // set after an I/O error left in-memory state unsure; writes refuse
+	computedCount int        // configured collections; writer lock held
+	legacyFormat  bool       // recovery selected format 3; upgraded before Open returns
+	upgradeFormat bool       // either valid meta slot carries an older format
+	legacyViews   bool       // selected meta predates computed collections
+	derivedCount  int        // writer lock held
 }
 
 const metaMagic = "NDBMETA1"
@@ -134,6 +144,15 @@ type meta struct {
 
 // Open opens or creates the database in dir.
 func Open(dir string, opts Options) (*DB, error) {
+	if opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
+		return nil, ErrOptions
+	}
+	if _, err := os.Lstat(filepath.Join(dir, restoreMarker)); err == nil {
+		return nil, ErrRestoreIncomplete
+	} else if !os.IsNotExist(err) {
+		return nil, err
+	}
+
 	if opts.CheckpointLogBytes == 0 {
 		opts.CheckpointLogBytes = 256 << 20
 	}
@@ -168,6 +187,7 @@ func Open(dir string, opts Options) (*DB, error) {
 		return nil, err
 	}
 	w := newWAL(dir)
+	w.heapOnly = opts.CacheBytes > 0
 	switch opts.SyncMode {
 	case SyncBarrier:
 		w.syncFn = syncBarrier
@@ -208,6 +228,26 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	if err == nil {
 		err = db.loadIndexes()
+	}
+	if err == nil {
+		err = db.loadComputedFields()
+	}
+	if err == nil {
+		err = db.loadComputedCollections()
+	}
+	if err == nil && db.upgradeFormat {
+		// Publish the current format durably before any computed catalog record can
+		// reach the WAL; an older writer must refuse the database even after
+		// a crash before the first post-definition checkpoint.
+		err = db.runCheckpoint(true)
+		if err == nil {
+			// Upgrade both alternating slots. Falling back after a damaged
+			// newest meta page must not expose a valid older-format writer path.
+			err = db.runCheckpoint(true)
+		}
+		db.legacyFormat = false
+		db.legacyViews = false
+		db.upgradeFormat = false
 	}
 	if err != nil {
 		// release the lock and descriptors: a failed open must not wedge the next one
@@ -276,6 +316,7 @@ func (db *DB) recover() error {
 // putLocked applies one upsert or tombstone to the memtable if there is
 // one, else to the tree. Writer lock held; the record is already in the log.
 func (db *DB) putLocked(key, val []byte, del bool) error {
+	db.revision++
 	if db.mt != nil {
 		db.mt.put(key, val, del)
 		return nil
@@ -300,20 +341,26 @@ func (db *DB) flusher() {
 		db.mu.RUnlock()
 		select {
 		case <-db.stop:
-			w.flush()
+			db.markFailed(w.flush())
 			return
 		case <-w.kick:
-			w.flushAsync()
+			db.markFailed(w.flushAsync())
 		case <-t.C:
-			w.flushAsync()
+			db.markFailed(w.flushAsync())
 		}
 	}
 }
 
-// Insert stores val under key in the default collection, replacing any
-// previous value. Values that do not fit a cell are stored in overflow
+// Insert creates a key in the default collection; duplicates return
+// ErrKeyExists. Values that do not fit a cell are stored in overflow
 // pages, up to MaxValueSize.
 func (db *DB) Insert(key, val []byte) error { return db.def.Insert(key, val) }
+
+// Upsert creates or replaces a key in the default collection.
+func (db *DB) Upsert(key, val []byte) error { return db.def.Upsert(key, val) }
+
+// Replace replaces an existing key in the default collection.
+func (db *DB) Replace(key, val []byte) error { return db.def.Replace(key, val) }
 
 // Delete removes key from the default collection. Deleting an absent key
 // is not an error.
@@ -364,11 +411,16 @@ type Batch struct {
 }
 
 type batchState struct {
-	db       *DB
-	buf      []byte
-	lastOff  int
-	n        int
-	internal bool // may write reserved keys (catalog and index maintenance)
+	db         *DB
+	buf        []byte
+	lastOff    int
+	n          int
+	internal   bool // may write reserved keys (catalog and index maintenance)
+	mixed      bool
+	first      *Collection
+	conditions []writeCondition
+	limit      int           // staged bytes; zero for internal/single-value writes
+	views      []*Collection // other collections with queued records
 }
 
 // NewBatch returns an empty batch bound to the default collection.
@@ -376,10 +428,12 @@ func (db *DB) NewBatch() *Batch { return db.def.NewBatch() }
 
 // With returns the same batch bound to collection c: writes queued through
 // either handle commit together.
-func (b *Batch) With(c *Collection) *Batch { return &Batch{coll: c, batchState: b.batchState} }
+func (b *Batch) With(c *Collection) *Batch {
+	return &Batch{coll: c, batchState: b.batchState}
+}
 
-// Insert queues an upsert in the batch.
-func (b *Batch) Insert(key, val []byte) error {
+// Upsert queues a create or replacement in the batch.
+func (b *Batch) Upsert(key, val []byte) error {
 	if len(val) > MaxValueSize {
 		return ErrValueSize
 	}
@@ -389,25 +443,58 @@ func (b *Batch) Insert(key, val []byte) error {
 // Delete queues a tombstone in the batch.
 func (b *Batch) Delete(key []byte) error { return b.add(key, nil, true) }
 
-// InsertJSON queues a document given as a JSON object.
-func (b *Batch) InsertJSON(key, doc []byte) error {
+// UpsertJSON queues a create or replacement from JSON.
+func (b *Batch) UpsertJSON(key, doc []byte) error {
 	enc, err := EncodeJSON(nil, doc)
 	if err != nil {
 		return err
 	}
-	return b.Insert(key, enc)
+	return b.Upsert(key, enc)
 }
 
 func (b *Batch) add(key, val []byte, del bool) error {
 	if len(key) == 0 || len(key) > MaxKeySize {
-		return ErrKeySize
+		// The public limit applies to user keys. Internal collection rows
+		// also carry a one/three-byte tag; reserved catalog/index keys retain
+		// their existing total-length limit.
+		_, user, ok := splitKey(key)
+		if !b.internal || !ok || len(user) == 0 || len(user) > MaxKeySize {
+			return ErrKeySize
+		}
 	}
 	if !b.internal {
+		if b.coll.db != b.db {
+			return errors.New("aptevadb: batch collection belongs to another database")
+		}
+		if b.coll.snap != nil {
+			return ErrReadOnly
+		}
+		if b.coll.state.derived != nil {
+			return ErrComputedCollectionReadOnly
+		}
 		if err := b.coll.check(); err != nil {
 			return err
 		}
+		if b.n == 0 {
+			b.first, b.mixed, b.views = b.coll, false, b.views[:0]
+		} else if b.coll != b.first {
+			b.mixed = true
+			seen := false
+			for _, c := range b.views {
+				if c == b.coll {
+					seen = true
+					break
+				}
+			}
+			if !seen {
+				b.views = append(b.views, b.coll)
+			}
+		}
 		var kb [64]byte
 		key = b.coll.ikey(kb[:0], key)
+	}
+	if b.limit != 0 && len(b.buf)+len(key)+len(val)+11 > b.limit {
+		return ErrTransactionTooLarge
 	}
 	b.lastOff = len(b.buf)
 	b.buf = encodeRecord(b.buf, key, val, true, del, b.db.wal.crcTab)
@@ -419,7 +506,16 @@ func (b *Batch) add(key, val []byte, del bool) error {
 func (b *Batch) Len() int { return b.n }
 
 // Commit applies the batch atomically and, in sync mode, waits for one flush.
-func (b *Batch) Commit() error {
+func (b *Batch) Commit() error { return b.CommitContext(nil) }
+
+// CommitContext checks cancellation before logging; once logging starts the
+// atomic write and required flush are completed.
+func (b *Batch) CommitContext(ctx context.Context) error {
+	ctx = orBackground(ctx)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if b.n == 0 {
 		return nil
 	}
@@ -434,6 +530,10 @@ func (b *Batch) Commit() error {
 		return err
 	}
 	db.stallLocked()
+	if err := ctx.Err(); err != nil {
+		db.mu.Unlock()
+		return err
+	}
 	w := db.wal
 	l, err := b.commitLocked()
 	needCkpt := db.needCheckpoint()
@@ -442,7 +542,7 @@ func (b *Batch) Commit() error {
 		return err
 	}
 	if db.opts.Sync {
-		if err := w.sync(l); err != nil {
+		if err := db.syncWrite(w, l); err != nil {
 			return err
 		}
 	}
@@ -460,11 +560,66 @@ func (b *Batch) commitLocked() (lsn, error) {
 	if b.n == 0 {
 		return lsn{}, nil
 	}
-	if !b.internal && db.hasIndexes() {
-		if err := b.addIndexOpsLocked(); err != nil {
-			b.buf, b.n, b.lastOff = b.buf[:0], 0, -1
+	if !b.internal {
+		if err := b.validateConditionsLocked(); err != nil {
+			b.reset()
 			return lsn{}, err
 		}
+		check := func(c *Collection) error {
+			var err error
+			if c.db != db {
+				err = errors.New("aptevadb: batch collection belongs to another database")
+			} else if c.snap != nil {
+				err = ErrReadOnly
+			} else if c.state.derived != nil {
+				err = ErrComputedCollectionReadOnly
+			} else {
+				err = c.check()
+			}
+			return err
+		}
+		if err := check(b.coll); err != nil {
+			b.reset()
+			return lsn{}, err
+		}
+		if b.first != b.coll {
+			if err := check(b.first); err != nil {
+				b.reset()
+				return lsn{}, err
+			}
+		}
+		for _, c := range b.views {
+			if err := check(c); err != nil {
+				b.reset()
+				return lsn{}, err
+			}
+		}
+		if db.computedCount > 0 && (b.mixed || b.first.state.computed != nil) {
+			if err := b.addComputedFieldsLocked(); err != nil {
+				b.reset()
+				return lsn{}, err
+			}
+		}
+		if db.derivedCount > 0 && (b.mixed || len(b.first.state.dependents) > 0) {
+			if err := b.addComputedCollectionOpsLocked(); err != nil {
+				b.reset()
+				return lsn{}, err
+			}
+		}
+	}
+	if b.limit != 0 && len(b.buf) > b.limit {
+		b.reset()
+		return lsn{}, ErrTransactionTooLarge
+	}
+	if !b.internal && db.hasIndexes() {
+		if err := b.addIndexOpsLocked(); err != nil {
+			b.reset()
+			return lsn{}, err
+		}
+	}
+	if b.limit != 0 && len(b.buf) > b.limit {
+		b.reset()
+		return lsn{}, ErrTransactionTooLarge
 	}
 	// clear the "more" flag on the last record and refresh its checksum
 	last := b.buf[b.lastOff:]
@@ -483,7 +638,10 @@ func (b *Batch) commitLocked() (lsn, error) {
 			off += 8 + plen
 		}
 	}
-	b.buf, b.n, b.lastOff = b.buf[:0], 0, -1
+	if err != nil {
+		db.failed = err
+	}
+	b.reset()
 	return l, err
 }
 
@@ -494,6 +652,12 @@ func (b *Batch) commitLocked() (lsn, error) {
 func (b *Batch) addIndexOpsLocked() error {
 	db := b.db
 	ib := &Batch{coll: db.def, batchState: &batchState{db: db, internal: true, lastOff: -1}}
+	if b.limit != 0 {
+		ib.limit = b.limit - len(b.buf)
+		if ib.limit == 0 {
+			ib.limit = -1
+		}
+	}
 	pending := map[string][]byte{}
 	perColl := map[uint32][]indexDef{}
 	var buf []byte
@@ -534,15 +698,29 @@ func (b *Batch) addIndexOpsLocked() error {
 		if !del {
 			newDoc = val
 		}
-		indexOps(defs, ib, uk, old, newDoc) // entries carry the user key
+		if err := indexOps(defs, ib, uk, old, newDoc); err != nil {
+			return err
+		} // entries carry the user key
 		pending[string(key)] = newDoc
-		for _, d := range defs {
+	}
+	if err := db.validateUniqueDocumentsLocked(pending, db.indexDefs()); err != nil {
+		return err
+	}
+	for key := range pending {
+		cid, uk, ok := splitKey([]byte(key))
+		if !ok {
+			continue
+		}
+		for _, d := range perColl[cid] {
 			if t := db.idx.touched(d.ID); t != nil {
-				t[string(uk)] = struct{}{} // an index being built skips this key's backfill
+				t[string(uk)] = struct{}{}
 			}
 		}
 	}
 	if ib.n > 0 {
+		if b.limit != 0 && len(b.buf)+len(ib.buf) > b.limit {
+			return ErrTransactionTooLarge
+		}
 		b.buf = append(b.buf, ib.buf...)
 		b.lastOff = len(b.buf) - (len(ib.buf) - ib.lastOff)
 		b.n += ib.n
@@ -565,6 +743,13 @@ func (db *DB) find(v view, key, dst []byte) ([]byte, bool, error) {
 
 // findLocked is Find with the lock already held (either mode).
 func (db *DB) findLocked(v view, key, dst []byte) ([]byte, bool, error) {
+	if db.failed != nil {
+		return dst[:0], false, db.failed
+	}
+	if v.snap != nil && v.snap.closed {
+		return dst[:0], false, ErrClosed
+	}
+
 	if mv, del, ok := v.memGet(key); ok {
 		if del {
 			return dst[:0], false, nil
@@ -633,7 +818,7 @@ func (db *DB) relocateTailLocked() (int, error) {
 func (db *DB) writeMeta(m meta) error {
 	buf := make(page, PageSize)
 	db.encodeMeta(buf, m)
-	_, err := db.pager.f.WriteAt(buf, int64(m.checkpoint%2)*PageSize)
+	err := writeAt(db.pager.f, buf, int64(m.checkpoint%2)*PageSize)
 	return err
 }
 
@@ -663,12 +848,19 @@ func (db *DB) readMeta() (meta, error) {
 			crc32.Checksum(buf[:52], db.wal.crcTab) != le.Uint32(buf[52:]) {
 			continue
 		}
-		if le.Uint32(buf[8:]) != FormatVersion {
+		version := le.Uint32(buf[8:])
+		if version != FormatVersion && version != 3 && version != 4 && version != 5 {
 			return meta{}, fmt.Errorf("%w: file is format %d, this build reads %d", ErrFormat, le.Uint32(buf[8:]), FormatVersion)
+		}
+		if version < FormatVersion {
+			db.upgradeFormat = true
 		}
 		m := meta{le.Uint64(buf[16:]), le.Uint32(buf[24:]), le.Uint32(buf[28:]), le.Uint64(buf[32:]), le.Uint64(buf[40:]), le.Uint32(buf[48:])}
 		if !found || m.checkpoint > best.checkpoint {
 			best, found = m, true
+			db.readFormat = version
+			db.legacyFormat = version == 3
+			db.legacyViews = version < 5
 		}
 	}
 	if !found {
@@ -802,7 +994,10 @@ func (db *DB) Stats() Stats {
 	db.colls.mu.RLock()
 	s.Collections = len(db.colls.byName)
 	db.colls.mu.RUnlock()
-	s.LockHolds = map[string]time.Duration{"wal-flush-write": db.wal.maxFlush}
+	db.wal.mu.Lock()
+	maxFlush := db.wal.maxFlush
+	db.wal.mu.Unlock()
+	s.LockHolds = map[string]time.Duration{"wal-flush-write": maxFlush}
 	for k, v := range db.holds {
 		s.LockHolds[k] = v
 	}

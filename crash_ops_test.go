@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -121,7 +121,7 @@ var crashOpts = []Options{
 func loadCrashDocs(t *testing.T, c *Collection, n int) {
 	b := c.NewBatch()
 	for i := 0; i < n; i++ {
-		if err := b.InsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[%d,%d],"pad":"%032d"}`, i%17, i%5, i%7, i))); err != nil {
+		if err := b.UpsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[%d,%d],"pad":"%032d"}`, i%17, i%5, i%7, i))); err != nil {
 			t.Fatal(err)
 		}
 		if b.Len() >= 500 {
@@ -327,7 +327,13 @@ func TestCrashDuringDrops(t *testing.T) {
 				}
 			}
 			if listed {
-				// partial: finish the job
+				if n := countDocs(t, mustCollection(t, db, "c"), where); n != 3000 {
+					t.Fatalf("%s: partial atomic drop left %d rows", where, n)
+				}
+				if got := mustCollection(t, db, "c").Indexes(); len(got) != 2 {
+					t.Fatalf("%s: partial catalog: %v", where, got)
+				}
+				// The original collection survived intact; drop it now.
 				if err := db.DropCollection(bg, "c"); err != nil {
 					t.Fatalf("%s: drop again: %v", where, err)
 				}
@@ -374,7 +380,7 @@ func TestCrashDuringCompact(t *testing.T) {
 			where := fmt.Sprintf("opts %d compact trip %d/%d", oi, trip, total)
 			// some writes between compactions, so each has a log delta to catch up
 			for i := 1; i < 3000; i += 300 {
-				c.InsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[1],"pad":"x"}`, i%17)))
+				c.UpsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[1],"pad":"x"}`, i%17)))
 			}
 			lab.arm(trip)
 			err := db.Compact(bg)
@@ -415,7 +421,7 @@ func TestCrashDuringLogTrimAtClose(t *testing.T) {
 			pad[i] = 'x'
 		}
 		for i := 0; i < 20_000; i++ {
-			b.InsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[0],"pad":"%s"}`, i%17, pad)))
+			b.UpsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[0],"pad":"%s"}`, i%17, pad)))
 			if b.Len() >= 1000 {
 				if err := b.Commit(); err != nil {
 					t.Fatal(err)
@@ -440,7 +446,7 @@ func TestCrashDuringLogTrimAtClose(t *testing.T) {
 			c, _ = db.Collection("c")
 			b := c.NewBatch()
 			for i := 0; i < 20_000; i++ {
-				b.InsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[1],"pad":"%s"}`, i%17, pad)))
+				b.UpsertJSON([]byte(fmt.Sprintf("d%05d", i)), []byte(fmt.Sprintf(`{"g":%d,"tags":[1],"pad":"%s"}`, i%17, pad)))
 				if b.Len() >= 1000 {
 					if err := b.Commit(); err != nil {
 						t.Fatal(err)

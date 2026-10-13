@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apteva/aptevadb"
+	aptevadb "github.com/apteva/db"
 )
 
 // Join benchmark: a users collection (N/10 documents) and an orders
@@ -145,12 +145,12 @@ func runJoinBench(dir string, n int, engines []string) {
 			co, _ := db.Collection("orders")
 			start := time.Now()
 			for _, u := range users {
-				if err := cu.Insert(key(u.id), encUser(u)); err != nil {
+				if err := cu.Upsert(key(u.id), encUser(u)); err != nil {
 					panic(err)
 				}
 			}
 			for _, o := range orders {
-				if err := co.Insert(key(o.id), encOrder(o)); err != nil {
+				if err := co.Upsert(key(o.id), encOrder(o)); err != nil {
 					panic(err)
 				}
 			}
@@ -257,6 +257,11 @@ func runJoinBench(dir string, n int, engines []string) {
 			panic("unknown join engine " + name)
 		}
 		results[name] = tm
+		if *flagDir == "" {
+			if err := os.RemoveAll(edir); err != nil {
+				panic(err)
+			}
+		}
 		if reference == nil {
 			reference = outs
 		} else {

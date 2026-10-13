@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"encoding/binary"
@@ -26,7 +26,7 @@ func TestCheckpointsDoNotStallWriters(t *testing.T) {
 	}
 	for i := 0; i < 100_000; i++ {
 		rng.Read(val)
-		db.Insert(key(rng.Intn(200_000)), val)
+		db.Upsert(key(rng.Intn(200_000)), val)
 	}
 	var wg sync.WaitGroup
 	stop := make(chan struct{})
@@ -47,7 +47,7 @@ func TestCheckpointsDoNotStallWriters(t *testing.T) {
 			}
 			rng.Read(v)
 			start := time.Now()
-			if err := db.Insert(key(rng.Intn(200_000)), v); err != nil {
+			if err := db.Upsert(key(rng.Intn(200_000)), v); err != nil {
 				t.Error(err)
 				return
 			}

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -582,6 +582,7 @@ type accState struct {
 }
 
 type groupState struct {
+	key  string // owned encoded key, also backing the string/document ID parts
 	id   []scalar
 	accs []accState
 }
@@ -593,6 +594,32 @@ type grouper struct {
 	order  []*groupState
 	keyBuf []byte
 	max    int
+	states []groupState
+	ids    []scalar
+	accs   []accState
+	used   int
+}
+
+// Groups own query-local slabs: addresses remain stable through shard merges,
+// while large cardinalities do not allocate three objects for every group.
+func (g *grouper) allocGroup() *groupState {
+	if g.used == len(g.states) {
+		n := 256
+		if g.states == nil {
+			n = 8
+		}
+		g.states = make([]groupState, n)
+		g.ids = make([]scalar, n*len(g.spec.idFields))
+		g.accs = make([]accState, n*len(g.spec.accs))
+		g.used = 0
+	}
+	i := g.used
+	g.used++
+	gs := &g.states[i]
+	ni, na := len(g.spec.idFields), len(g.spec.accs)
+	gs.id = g.ids[i*ni : (i+1)*ni : (i+1)*ni]
+	gs.accs = g.accs[i*na : (i+1)*na : (i+1)*na]
+	return gs
 }
 
 func newGrouper(spec *groupSpec, maxGroups int) *grouper {
@@ -684,7 +711,6 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 
 // lookup finds or creates the group for the _id built from vals.
 func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
-	spec := g.spec
 	kb := g.keyBuf[:0]
 	for _, ix := range idIdx {
 		v := vals[ix]
@@ -705,62 +731,77 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 		if len(g.groups) >= g.max {
 			return nil, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
 		}
-		gs = &groupState{accs: make([]accState, len(spec.accs))}
-		for _, ix := range idIdx {
-			gs.id = append(gs.id, toScalar(vals[ix]))
+		gs = g.allocGroup()
+		gs.key = string(kb)
+		off := 0
+		for i, ix := range idIdx {
+			v := vals[ix]
+			s := scalar{k: v.k, i: v.i, f: v.f}
+			switch v.k {
+			case kBool, kInt, kFloat:
+				off += 9
+			case kString, kDoc, kArray:
+				s.s = gs.key[off+3 : off+3+len(v.s)]
+				off += 3 + len(v.s)
+			default:
+				off++
+			}
+			gs.id[i] = s
 		}
-		g.groups[string(kb)] = gs
+		g.groups[gs.key] = gs
 		g.order = append(g.order, gs)
 	}
 	return gs, nil
 }
 
 func (g *grouper) rows() []map[string]any {
-	spec := g.spec
 	out := make([]map[string]any, 0, len(g.order))
 	for _, gs := range g.order {
-		row := make(map[string]any, len(spec.accs)+1)
-		switch {
-		case len(spec.idFields) == 0:
-			row["_id"] = nil
-		case spec.idNames == nil:
-			row["_id"] = gs.id[0].any()
-		default:
-			id := make(map[string]any, len(spec.idNames))
-			for i, n := range spec.idNames {
-				id[n] = gs.id[i].any()
-			}
-			row["_id"] = id
-		}
-		for i := range spec.accs {
-			a := &spec.accs[i]
-			st := &gs.accs[i]
-			switch a.op {
-			case accSum:
-				if st.hasFloat {
-					row[a.name] = st.fsum + float64(st.isum)
-				} else {
-					row[a.name] = st.isum
-				}
-			case accAvg:
-				if st.count == 0 {
-					row[a.name] = nil
-				} else {
-					row[a.name] = (st.fsum + float64(st.isum)) / float64(st.count)
-				}
-			case accCount:
-				row[a.name] = st.count
-			default:
-				if st.hasExt {
-					row[a.name] = st.ext.any()
-				} else {
-					row[a.name] = nil
-				}
-			}
-		}
-		out = append(out, row)
+		out = append(out, g.row(gs))
 	}
 	return out
+}
+
+func (g *grouper) row(gs *groupState) map[string]any {
+	spec := g.spec
+	row := make(map[string]any, len(spec.accs)+1)
+	switch {
+	case len(spec.idFields) == 0:
+		row["_id"] = nil
+	case spec.idNames == nil:
+		row["_id"] = gs.id[0].any()
+	default:
+		id := make(map[string]any, len(spec.idNames))
+		for i, n := range spec.idNames {
+			id[n] = gs.id[i].any()
+		}
+		row["_id"] = id
+	}
+	for i := range spec.accs {
+		row[spec.accs[i].name] = accValue(&spec.accs[i], &gs.accs[i]).any()
+	}
+	return row
+}
+
+func accValue(a *accSpec, st *accState) value {
+	switch a.op {
+	case accSum:
+		if st.hasFloat {
+			return value{k: kFloat, f: st.fsum + float64(st.isum)}
+		}
+		return value{k: kInt, i: st.isum}
+	case accAvg:
+		if st.count > 0 {
+			return value{k: kFloat, f: (st.fsum + float64(st.isum)) / float64(st.count)}
+		}
+	case accCount:
+		return value{k: kInt, i: st.count}
+	default:
+		if st.hasExt {
+			return st.ext.view()
+		}
+	}
+	return value{k: kNull}
 }
 
 // merge folds o (which covered keys after g's range) into g.
@@ -773,7 +814,13 @@ func (g *grouper) merge(o *grouper) error {
 			mergeState(g.spec, g.single, o.single)
 		}
 	}
-	for k, os := range o.groups {
+	// Iterate encounter order, rather than map order, so stable sort ties and
+	// first/last remain consistent between serial and sharded execution.
+	for _, os := range o.order {
+		if os == o.single {
+			continue
+		}
+		k := os.key
 		gs := g.groups[k]
 		if gs == nil {
 			if len(g.groups) >= g.max {
@@ -1267,6 +1314,17 @@ func (p *Pipeline) finish(ctx context.Context, pl *plan, rows []map[string]any, 
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
+		if end, keep, skip, ok := p.sortWindow(i); ok {
+			selected, valid, sortErr := topRows(ctx, rows, p.stages[i].sortKeys, keep, skip)
+			if sortErr != nil {
+				return nil, sortErr
+			}
+			if valid {
+				rows = selected
+				i = end
+				continue
+			}
+		}
 		if rows, err = applyRows(&p.stages[i], rows, pl.limits, e); err != nil {
 			return nil, err
 		}
@@ -1293,13 +1351,16 @@ func orBackground(ctx context.Context) context.Context {
 }
 
 func (p *Pipeline) run(ctx context.Context, spec srcSpec, e *env) ([]map[string]any, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	pl := p.plan()
 	if pl.group != nil {
 		g, err := pl.streamGroup(ctx, spec, e, nil)
 		if err != nil {
 			return nil, err
 		}
-		return p.finish(ctx, &pl, g.rows(), e)
+		return p.finishGroup(ctx, &pl, g, e)
 	}
 	rows, err := pl.streamRows(ctx, spec, e)
 	if err != nil {
@@ -1341,6 +1402,9 @@ func concat(shards []srcSpec) Source {
 }
 
 func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]map[string]any, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if len(shards) == 0 {
 		return []map[string]any{}, nil
 	}
@@ -1411,7 +1475,7 @@ func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]
 		}
 		groupers = next
 	}
-	return p.finish(ctx, &pl, groupers[0].rows(), e)
+	return p.finishGroup(ctx, &pl, groupers[0], e)
 }
 
 func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[string]any, error) {

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ func TestCursorForwardBackwardWithMemtable(t *testing.T) {
 				v := make([]byte, 20_000)
 				rng.Read(v)
 				m[k] = v
-				db.Insert([]byte(k), v)
+				db.Upsert([]byte(k), v)
 			case 1:
 				db.Delete([]byte(k))
 				delete(m, k)
@@ -38,6 +38,8 @@ func TestCursorForwardBackwardWithMemtable(t *testing.T) {
 		sort.Strings(keys)
 
 		c := db.NewCursor()
+
+		defer c.Close()
 		var got []string
 		for ok := c.First(); ok; ok = c.Next() {
 			if !bytes.Equal(c.Value(), m[string(c.Key())]) {

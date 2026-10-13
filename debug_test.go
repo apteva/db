@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -52,7 +52,7 @@ func TestBalanceKeepsLeavesConsistent(t *testing.T) {
 		rng.Read(k)
 		v := make([]byte, rng.Intn(300))
 		rng.Read(v)
-		if err := db.Insert(k, v); err != nil {
+		if err := db.Upsert(k, v); err != nil {
 			t.Fatal(err)
 		}
 	}

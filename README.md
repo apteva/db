@@ -1,39 +1,199 @@
-# aptevadb — a from-scratch Go key-value engine, benchmarked against SQLite and Pebble
+# AptevaDB
 
-Started as two operations, `Insert` and `Find`; now an embedded key-value and
-document store with collections, deletes, cross-collection batches, cursors,
-large values, secondary indexes, MongoDB-style aggregation with `$lookup`
-joins, snapshots, crash-safe checkpoints and a fault-injected recovery test.
+A Go document and key-value database with named collections, atomic transactions,
+unique indexes, snapshots, aggregation, stored computed fields and computed
+collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-```go
-import "github.com/apteva/aptevadb"
+**Public alpha: v0.2.0-alpha.1.** Go 1.25+, Linux and macOS, amd64 and arm64.
+Windows, replication and SQL are not supported. The module has no external
+runtime dependencies. The file format is 6; opening formats 3–5 upgrades them
+permanently, so keep a backup before upgrading.
 
-db, _ := aptevadb.Open(dir, aptevadb.Options{})
-users, _ := db.Collection("users")
-orders, _ := db.Collection("orders")
-users.InsertJSON([]byte("u1"), []byte(`{"id":1,"country":"FR"}`))
-b := orders.NewBatch()                       // one atomic batch, two collections
-b.InsertJSON([]byte("o1"), []byte(`{"user_id":1,"amount":42}`))
-b.With(users).InsertJSON([]byte("u1"), []byte(`{"id":1,"country":"FR","orders":1}`))
-b.Commit()
-orders.CreateIndex(ctx, "by_user", "user_id")
-rows, _ := orders.Aggregate(ctx, []byte(`[
-  {"$lookup": {"from": "users", "localField": "user_id", "foreignField": "id", "as": "u"}},
-  {"$unwind": "$u"},
-  {"$group": {"_id": "$u.country", "total": {"$sum": "$amount"}}}]`))
+```sh
+go get github.com/apteva/db@v0.2.0-alpha.1
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.1
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.1
 ```
 
-Version 0.1.0, on-disk format 3. The engine has no dependencies. See
-[FORMAT.md](FORMAT.md) for the file format and its compatibility policy,
-[DURABILITY.md](DURABILITY.md) for what survives which crash, and
-[CHANGELOG.md](CHANGELOG.md). CI runs vet, the tests, the race detector and
-a fuzz smoke test on Linux and macOS; benchmarks were taken on macOS on
-arm64. Windows is not supported.
+```go
+import (
+    "context"
+    db "github.com/apteva/db"
+)
 
-Layout: the root package is the engine; `cmd/aptevadbctl` inspects and
-maintains a database; `bench/` is a separate module holding the benchmark
-harness, so its dependencies (Pebble and two SQLite bindings) stay out of
-the engine's graph.
+database, err := db.Open("./data", db.DurableOptions())
+if err != nil { return err }
+defer database.Close()
+users, err := database.Collection("users")
+if err != nil { return err }
+err = users.InsertJSON([]byte("u1"), []byte(`{"name":"Ada","age":30}`))
+if err != nil { return err }
+err = users.CreateUniqueIndex(context.Background(), "name", "name")
+if err != nil { return err }
+var user struct { Name string; Age int }
+found, err := users.FindOne(context.Background(), []byte(`{"age":{"$gte":18}}`), &user)
+```
+
+Run `go run ./examples/embedded` for a complete example with error handling.
+The root package is the embedded Go API; `client` is the remote Go driver.
+See [USAGE.md](USAGE.md) for transactions, streaming queries and operation
+contracts, [OPERATIONS.md](OPERATIONS.md) for backup/import/recovery and limits,
+[SERVER.md](SERVER.md) for the server/driver and HTTP protocol,
+[DURABILITY.md](DURABILITY.md), [FORMAT.md](FORMAT.md), and [CHANGELOG.md](CHANGELOG.md).
+
+**Durability:** `DurableOptions()` enables full synchronous flushing.
+`Options{}` deliberately uses asynchronous writes for compatibility and benchmark
+comparisons; recent acknowledged writes can be lost after a crash. The server
+and maintenance CLI use the durable profile.
+
+One process owns a database directory. Within it, DB and collection handles
+support concurrent use; writes serialize. Transactions, batches and cursors
+belong to one goroutine. Close snapshots/cursors/transactions promptly: they
+retain older pages and prevent compaction while held.
+
+Historical benchmark results are under `bench/results/`. They describe their
+original builds, settings and hardware, not the current alpha. The separate
+`bench` module compares SQLite and Pebble without adding engine dependencies.
+KV comparisons use `Upsert` (matching the other engines' replacement behavior);
+`Insert` now performs a duplicate-key check. See [BENCHMARKS.md](BENCHMARKS.md).
+
+## Stored computed fields
+
+Define deterministic scalar fields on an **empty collection**, then write source
+fields normally. The database stores the derived values with each document:
+
+```go
+err := orders.DefineComputedFields(ctx, []byte(`{
+  "total": {"$multiply": ["$qty", "$price"]},
+  "email_key": {"$lower": "$email"},
+  "net": {"$subtract": ["$total", {"$ifNull": ["$discount", 0]}]}
+}`))
+if err != nil { return err }
+err = orders.InsertJSON([]byte("o1"), []byte(`{
+  "qty": 3, "price": 700, "discount": 100, "email": "A@EXAMPLE.COM"
+}`)) // stores total=2100, net=2000, email_key="a@example.com"
+if err != nil { return err }
+err = orders.CreateIndex(ctx, "by_email_key", "email_key")
+```
+
+`DB.DefineComputedFields` addresses the default collection.
+`Collection.ComputedFields`, `DB.ComputedFields` and `Snapshot.ComputedFields`
+return detached definition maps; snapshot collection handles return the rules
+at that snapshot. Reads, cursors, aggregation and persistent readers use the
+stored values. Supplied values for computed output names are overwritten.
+Binary `Insert`, JSON writes and batches across collections all enforce the
+same rules. An evaluation error aborts the entire batch before any log records
+or index entries are written. Recovery replays stored bytes without evaluating
+expressions again. Ordinary indexes work on computed outputs.
+
+Definitions map top-level output names to expressions. A string `"$a.b"` reads
+a source path; an exact computed output name may reference another definition.
+Dependencies are sorted automatically and cycles are rejected. Use `$literal`
+to store a string beginning with `$`. Supported version-one operators:
+
+| Operator | Arguments / result |
+|---|---|
+| `$add`, `$multiply` | 2–16 numeric expressions |
+| `$subtract` | Two numeric expressions |
+| `$divide` | Two numeric expressions; floating result, zero divisor rejected |
+| `$lower`, `$upper` | One string expression; ASCII casing, other bytes preserved |
+| `$concat` | 1–16 string expressions |
+| `$ifNull` | `[input, fallback]`; evaluates fallback only for missing/null input |
+| `$literal` | A null, boolean, string or finite numeric scalar |
+
+Missing and null inputs propagate null. Other type mismatches fail with
+`ErrComputedField`; integer-only arithmetic preserves int64 precision and
+rejects overflow, and floating arithmetic rejects non-finite results. Integer
+literals outside int64 are rejected. Explicit floating literals use float64.
+Configured collections accept validated binary documents up to 65,535 bytes,
+with unique field names, at most 255 total fields and nesting up to 16 levels.
+Definitions allow at most 64 outputs, 64 KiB of input/canonical JSON, 1,024 expression nodes
+and expression depth 32. Outputs are scalars, not nested document/array fields.
+
+Installing, replacing or removing definitions requires an empty collection
+(`ErrComputedNonEmpty` otherwise); `{}` removes them. There is no automatic
+backfill yet. Deleted documents do not prevent a schema change, even before a
+checkpoint. Dropping a collection drops its rules too.
+
+**Format migration:** opening a format-3, format-4 or format-5 database upgrades both
+metadata slots durably to format 6 before returning. Older binaries then refuse
+to open it; keep a backup if you need to use one. Page, log and document layouts
+are unchanged; computed catalogs, group counters and unique constraints require the
+version bump. Other format versions are refused.
+
+Benchmark the feature with `cd bench` and
+`GOTOOLCHAIN=local GOWORK=off go run . -computed -n 100000 -reps 3`.
+The harness retains every trial and checks every derived result. It compares
+native fields, application materialization and read-time computation with
+Pebble and SQLite stored generated columns, using non-durable 1,000-row
+batches/transactions. SQL uses typed columns; the other stores use binary
+documents. Index build and query phases are reported separately. This workload
+measures feature costs and query benefits, not a universal database ranking.
+
+## Stored computed collections
+
+Create a collection derived from an existing source. Creation atomically
+backfills current documents; future source upserts, deletes and cross-collection
+batches maintain the stored results and their indexes in the same transaction.
+Computed fields on the source are evaluated first.
+
+```go
+totals, err := db.CreateComputedCollection(ctx, "paid_totals", "orders", []byte(`[
+  {"$match": {"paid": true}},
+  {"$group": {"_id": "$customer", "total": {"$sum": "$amount"}, "n": {"$count": {}}}}
+]`))
+if err != nil { return err }
+key, err := aptevadb.ComputedGroupKey(int64(42))
+if err != nil { return err }
+doc, found, err := totals.Find(key, nil) // current total for customer 42
+```
+
+The first version supports up to 16 stages: leading `$match` stages followed
+by an optional final `$project` or `$group`. An empty pipeline copies the source.
+Filtered/projected collections retain the source primary keys. Projection uses
+top-level 0/1 or boolean flags with the same semantics as ordinary aggregation.
+Filters support scalar comparisons and `$in`, including nested source paths.
+
+Groups use `_id: null` or one `"$field.path"` reference to a scalar. Outputs
+support exact int64 `$sum` (a field or integer constant) and `$count: {}`;
+`$sum: 1` also counts rows. Missing/null sum inputs contribute zero; other
+non-integer inputs fail. Checked 128-bit intermediate arithmetic permits a
+batch to exceed int64 temporarily if its final totals fit. Zero-sum groups
+remain present until their last matching member is deleted. Missing and null
+IDs share a key; integral floats normalize to int64. `ComputedGroupKey` accepts
+nil, bool, int, int64, finite float64, string and valid scalar `json.Number`.
+Integer IDs remain distinct above 2^53. Encoded IDs are limited to 1,018 bytes.
+
+Computed collections are read-only: direct inserts, deletes and computed-field
+definitions return `ErrComputedCollectionReadOnly`. Their ordinary indexes,
+cursors, aggregation, snapshots and persistent readers work normally.
+`Collection.ComputedCollection()` returns a detached definition, or nil for an
+ordinary collection; a snapshot handle reads the definition at that snapshot.
+
+The destination must be a new named collection; the source must already exist
+(use `""` for the default collection). There are at most 64 dependents per source.
+Chaining, joins, array expansion, window stages, composite IDs, averages, extrema
+and floating-point sums are outside this version. Definitions are immutable;
+drop and recreate to change them. Dropping a source with dependents returns
+`ErrComputedCollectionDependency`; drop dependents first. Dropping a computed
+collection removes its rows, membership counters, indexes and definition atomically.
+
+Creation and drop block readers and writers while staging a single transaction, bounded
+at 256 MiB (`ErrComputedCollectionLimit`). Context cancellation and validation
+failures before logging leave the database unchanged. Sources must contain
+validated binary documents, including documents that do not match a filter.
+A source-write validation or aggregate overflow error aborts the entire batch
+before logging. WAL recovery replays stored results without recomputing; backup
+and compaction preserve definitions, results and hidden membership counters.
+
+Benchmark with `cd bench` and
+`GOTOOLCHAIN=local GOWORK=off go run . -computedcollections -n 250000 -reps 3`.
+It retains all trials and checks every summary against an independent integer
+model, including group moves, filter changes and deletion. Comparisons include
+on-demand queries, Pebble application-maintained summaries and SQLite triggers,
+with 1,000-row batches/transactions, WAL on and sync off. On-demand point queries
+use a source index where supported; stored point queries use primary keys.
+Benchmarks report write costs, all-group queries and 10/32-reader throughput.
 
 ## Design
 
@@ -49,6 +209,20 @@ the engine's graph.
   clean leaf pages are evicted by a CLOCK sweep (internal pages stay resident so
   checkpoints can always reach dirty leaves) and a checkpoint runs once dirty pages
   reach three quarters of the limit.
+* **Writable-buffer lifetime** (`page_buffers.go`, `wal_buffer.go`). In the
+  default unlimited-cache mode, private leaf and overflow pages use anonymous mapped arenas; small internal pages use
+  Go storage. WAL buffers up to 16 MiB remain on the Go heap to avoid increasing GC
+  work on small databases; larger buffers use owned anonymous mappings.
+  Checkpoint captures and snapshot overlays retain explicit references; unused
+  arenas and superseded WAL buffers are returned to the OS when those references
+  are released. Compaction and backup write completed pages in bounded batches
+  instead of retaining an entire replacement tree. Bounded-cache mode retains
+  Go writable buffers and its original compaction builder to preserve parallel
+  read CPU efficiency. Backup always uses the streaming builder. Sibling balancing reuses its
+  cell-length scratch slice. These
+  mappings are outside Go's heap, so measure total process RSS and memory footprint
+  as well as `runtime.MemStats`. `CacheBytes` controls the logical page cache,
+  not a hard limit on all process memory, memtables or snapshot versions.
 * **Sibling balancing** (`tree.go`, `balanceLeaf`). A leaf that overflows
   first sheds cells to a neighbour with room and rewrites the separator; it splits
   only when both neighbours are full. Leaves end up ~87% full after random inserts
@@ -70,8 +244,7 @@ the engine's graph.
   checkpoint moves the highest-numbered live pages into low free slots and
   truncates the free tail, so copy-on-write holes never accumulate in the file.
 * **Compact** (`DB.Compact`) rewrites the tree in key order into a fresh file and
-  swaps it in, reclaiming the remaining split slack. The database is locked while
-  it runs.
+  swaps it in, reclaiming the remaining split slack. It copies a snapshot while writes continue, briefly locking to swap the file.
 * **Write-ahead log with group commit** (`wal.go`). Logical records
   `[len][crc32c][klen][key][value]`. With `Options.Sync` every Insert waits for an
   fsync that concurrent inserts share: while one fsync runs, arriving writers
@@ -90,8 +263,16 @@ the engine's graph.
   walking internal pages only.
 * **Append optimization**: inserting past the last key of the tree starts a fresh
   leaf instead of splitting in the middle, so sequential loads pack pages tightly.
-* **Concurrency**: one writer, many readers, under a `sync.RWMutex`. Readers never
-  allocate; `Find` appends the value into a caller-provided buffer.
+* **Concurrency**: one writer, many readers. Ordinary `Find` uses a
+  `sync.RWMutex` and appends into a caller-provided buffer. For sustained
+  parallel point reads, create one `Reader` per worker with `DB.NewReader`,
+  `Collection.NewReader`, or `Snapshot.NewReader`, reuse it for `Find` calls,
+  then `Close` it. Persistent handles distribute read counters across padded
+  lanes. Writers exclude both ordinary and handle reads; no lock is held
+  between handle calls. A live handle sees current values, while a snapshot
+  handle retains its snapshot's view. Close all handles when finished so
+  writes can skip lane coordination. Short keys and reused value buffers
+  avoid allocations on successful point reads.
 * **Cursors** step within the leaf reached last, validated by a tree generation
   counter, and descend from the root only at leaf boundaries or after a
   change, so ordered iteration costs tens of nanoseconds per key.
@@ -266,8 +447,7 @@ engine N times on fresh directories and keeps the best of every phase.
 
 ## Not built yet
 
-Read transactions that span several statements with a write set, composite
-and unique indexes, index-only scans, join reordering beyond the one shape
+Composite indexes, index-only scans, join reordering beyond the one shape
 described above, the `let` and `pipeline` forms of `$lookup`, per-collection
 statistics, buffered (Bε) internal nodes, a runtime page-size option,
 Windows support, and any SQL layer.

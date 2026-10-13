@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"bytes"
@@ -621,14 +621,7 @@ func rank(v value) int {
 }
 
 // InsertJSON encodes a flat JSON object and stores it under key.
-func (db *DB) InsertJSON(key, doc []byte) error {
-	enc, err := EncodeJSON(db.docBuf[:0], doc)
-	if err != nil {
-		return err
-	}
-	db.docBuf = enc[:0]
-	return db.Insert(key, enc)
-}
+func (db *DB) InsertJSON(key, doc []byte) error { return db.def.InsertJSON(key, doc) }
 
 // FindJSON returns the document under key as JSON.
 func (db *DB) FindJSON(key []byte) ([]byte, bool, error) {
@@ -643,3 +636,9 @@ func (db *DB) FindJSON(key []byte) ([]byte, bool, error) {
 	out, err := json.Marshal(m)
 	return out, true, err
 }
+
+// UpsertJSON creates or replaces a JSON document in the default collection.
+func (db *DB) UpsertJSON(key, doc []byte) error { return db.def.UpsertJSON(key, doc) }
+
+// ReplaceJSON replaces an existing JSON document in the default collection.
+func (db *DB) ReplaceJSON(key, doc []byte) error { return db.def.ReplaceJSON(key, doc) }

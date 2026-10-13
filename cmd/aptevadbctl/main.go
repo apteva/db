@@ -20,10 +20,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 
-	"github.com/apteva/aptevadb"
+	aptevadb "github.com/apteva/db"
 )
 
 func main() {
@@ -40,24 +41,54 @@ func main() {
 		usage()
 	}
 	cmd, dir := os.Args[1], os.Args[2]
+	if cmd == "import" {
+		if len(os.Args) != 4 {
+			usage()
+		}
+		in, err := os.Open(os.Args[3])
+		if err != nil {
+			fail(err)
+		}
+		defer in.Close()
+		if err = aptevadb.Import(context.Background(), in, dir); err != nil {
+			fail(err)
+		}
+		fmt.Println("ok")
+		return
+	}
+	if cmd == "restore" {
+		if len(os.Args) != 4 {
+			usage()
+		}
+		if err := aptevadb.Restore(context.Background(), dir, os.Args[3]); err != nil {
+			fail(err)
+		}
+		fmt.Println("ok")
+		return
+	}
 	if cmd == "format" {
 		v, err := aptevadb.FormatVersionOf(dir)
 		if err != nil {
 			fail(err)
 		}
 		state := "readable by this build"
-		if v != aptevadb.FormatVersion {
+		if v >= 3 && v < aptevadb.FormatVersion {
+			state = "readable; Open upgrades automatically (back up first)"
+		} else if v != aptevadb.FormatVersion {
 			state = fmt.Sprintf("not readable by this build, which reads format %d", aptevadb.FormatVersion)
 		}
 		fmt.Printf("format %d: %s\n", v, state)
 		return
 	}
-	db, err := aptevadb.Open(dir, aptevadb.Options{})
+	if _, err := os.Stat(filepath.Join(dir, "data")); err != nil {
+		fail(err)
+	}
+	db, err := aptevadb.Open(dir, aptevadb.DurableOptions())
 	if err != nil {
 		fail(err)
 	}
 	defer db.Close()
-	coll, err := db.Collection(collName)
+	coll, err := db.OpenCollection(collName)
 	if err != nil {
 		fail(err)
 	}
@@ -73,6 +104,9 @@ func main() {
 		}
 	case "verify":
 		if err := db.Verify(context.Background()); err != nil {
+			fail(err)
+		}
+		if err := db.VerifyIndexes(context.Background()); err != nil {
 			fail(err)
 		}
 		fmt.Println("ok")
@@ -123,6 +157,25 @@ func main() {
 			fail(err)
 		}
 		fmt.Printf("pages %d -> %d\n", before, db.Stats().HighWaterPages)
+	case "export":
+		if len(os.Args) != 4 {
+			usage()
+		}
+		out, err := os.OpenFile(os.Args[3], os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+		if err != nil {
+			fail(err)
+		}
+		if err = db.Export(context.Background(), out); err == nil {
+			err = out.Sync()
+		}
+		closeErr := out.Close()
+		if err != nil {
+			fail(err)
+		}
+		if closeErr != nil {
+			fail(closeErr)
+		}
+		fmt.Println("ok")
 	case "backup":
 		if len(os.Args) < 4 {
 			usage()
@@ -157,6 +210,6 @@ func fail(err error) {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aptevadbctl version | format <dir> | [-c collection] stats|verify|collections|get|dump|agg|compact|backup <dir> [args]")
+	fmt.Fprintln(os.Stderr, "usage: aptevadbctl version | format <dir> | [-c collection] stats|verify|collections|get|dump|agg|compact|backup|restore|export|import <dir> [args]")
 	os.Exit(2)
 }

@@ -1,4 +1,4 @@
-package aptevadb
+package db
 
 import (
 	"context"
@@ -26,12 +26,25 @@ func (db *DB) spill(val []byte) ([]byte, error) {
 		n.data.setChainLen(chunk)
 		if prev != nil {
 			prev.data.setChainNext(n.id)
+			if db.streamCopy {
+				if _, err := db.pager.writeNode(prev); err != nil {
+					return nil, err
+				}
+				if off%(pageBufferArenaBytes/PageSize*overflowData) == 0 {
+					db.pager.releaseUnusedBuffers(true)
+				}
+			}
 		} else {
 			first = n
 		}
 		db.dirtyOverflow = append(db.dirtyOverflow, n)
 		prev = n
 		off += chunk
+	}
+	if db.streamCopy {
+		if _, err := db.pager.writeNode(prev); err != nil {
+			return nil, err
+		}
 	}
 	ptr := db.ptrBuf[:0]
 	ptr = le.AppendUint32(ptr, uint32(len(val)))
