@@ -220,7 +220,7 @@ func runCompatibilityBench(dir string, n, reps int) {
 					panic(err)
 				}
 			case "pebble-manual":
-				p, err := pebble.Open(ed, &pebble.Options{})
+				p, err := pebble.Open(ed, &pebble.Options{CacheSize: *flagCache << 20, MemTableSize: 64 << 20, Logger: quiet{}})
 				if err != nil {
 					panic(err)
 				}
