@@ -70,6 +70,22 @@ type result struct {
 
 func main() {
 	flag.Parse()
+	explicitEngines := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "engines" {
+			explicitEngines = true
+		}
+	})
+	if !explicitEngines {
+		switch {
+		case *flagJoin:
+			*flagEngines = "ours,ours-par,sqlite-c,sqlite-go"
+		case *flagAgg:
+			*flagEngines = "ours,ours-par,pebble,sqlite-c,sqlite-go"
+		case *flagDurable:
+			*flagEngines = "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync"
+		}
+	}
 	dir := *flagDir
 	if dir == "" {
 		d, err := os.MkdirTemp("", "kvbench")
