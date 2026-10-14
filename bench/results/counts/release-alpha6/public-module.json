@@ -1,0 +1,12 @@
+{
+  "Path": "github.com/apteva/db",
+  "Version": "v0.2.0-alpha.6",
+  "Sum": "h1:XdQ2RRSCvA5obfyc5j3yVe4bByNrYt4ecdqUHbMNN4E=",
+  "GoModSum": "h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc=",
+  "Origin": {
+    "VCS": "git",
+    "URL": "https://github.com/apteva/db",
+    "Hash": "fe9f71a82bb3019ee9ad526b1f3441f2f609bb83",
+    "Ref": "refs/tags/v0.2.0-alpha.6"
+  }
+}

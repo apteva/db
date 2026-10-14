@@ -1,0 +1,2 @@
+public Go HTTP CountDocuments and snapshot count passed; filtered/projected watch, leased snapshot find/query and resume passed
+{"format":10,"version":"0.2.0-alpha.6"}

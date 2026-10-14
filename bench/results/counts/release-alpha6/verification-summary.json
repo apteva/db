@@ -1,0 +1,46 @@
+{
+  "release_commit": "fe9f71a82bb3019ee9ad526b1f3441f2f609bb83",
+  "local_command": "CURSOR_STRESS=2m SOAK=2m CHANGE_FEED_STRESS=2m go test -race -count=1 -timeout 35m -json ./...",
+  "local_packages": [
+    {
+      "Package": "github.com/apteva/db/client",
+      "Action": "pass",
+      "Elapsed": 2.716
+    },
+    {
+      "Package": "github.com/apteva/db",
+      "Action": "pass",
+      "Elapsed": 781.864
+    }
+  ],
+  "local_stress_soak": [
+    {
+      "Test": "TestChangeFeedStress",
+      "Action": "pass",
+      "Elapsed": 120.41
+    },
+    {
+      "Test": "TestCursorStress",
+      "Action": "pass",
+      "Elapsed": 123.17
+    },
+    {
+      "Test": "TestSoak",
+      "Action": "pass",
+      "Elapsed": 124.89
+    }
+  ],
+  "count_tests_passed": [
+    "TestCountNonNull",
+    "TestCountDocumentsCoverageAndFallback",
+    "TestCountSparseAndMultikey",
+    "TestCountSnapshotWritesAndCatalog",
+    "TestCountLimitsAndCancellation",
+    "TestCountBufferedCheckpointReopen"
+  ],
+  "source_ci_run": 38592983718,
+  "duplicate_tag_ci_run_cancelled": 38595026419,
+  "duplicate_tag_ci_reason": "Exact same release commit had passed source CI; independent release verification remained enabled.",
+  "release_ci_run": 38595026594,
+  "alpha5_directory_compatibility": "Public alpha.6 opened a copy of saved alpha.5 data, created a compound index, and counted one matching document with zero document fetches. Format stayed 10."
+}

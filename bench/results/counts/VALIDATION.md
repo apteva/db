@@ -98,9 +98,12 @@ sample is included in `summary.json`, including the slower original guard.
   regressions also passed under race. Exact release commit Linux/macOS CI and
   local 2-minute cursor/change-feed stress and soak gate tagging. The release
   workflow repeats race/stress/soak on Linux/macOS before publishing four archives.
-- Post-publication verification records will be added under `release-alpha6`:
-  all archive checksums, public module/sumdb, CLI install, embedded count and
-  downloaded daemon/public Go driver count plus snapshot/watch compatibility.
+- Publication verification passed. Records are under `release-alpha6` on main:
+  all four archive checksums, public module/sumdb and exact tagged commit, CLI
+  install, embedded count and downloaded daemon/public Go driver count plus
+  snapshot/watch compatibility. A saved alpha.5 database also passed a public
+  alpha.6 index-only count with format remaining 10. The tag stays on the tested
+  release commit; the follow-up commit contains verification evidence only.
 
 ## Reproduce
 

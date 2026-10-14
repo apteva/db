@@ -1,0 +1,4 @@
+aptevadbctl 0.2.0-alpha.6 (format 10)
+embedded CountDocuments covering/fallback/snapshot passed; exact integer filter, projection, snapshot handoff, shared source/view commit, compaction, persisted capture, replay and membership delete passed
+{"format":10,"version":"0.2.0-alpha.6"}
+Public proxy/sumdb, tagged commit, CLI install and embedded covering/fallback/snapshot count verified.

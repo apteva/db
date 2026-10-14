@@ -18,3 +18,5 @@ go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.6
 ```
 
 Linux/macOS amd64/arm64 CLI/server archives include the updated usage and server guides; verify them using SHA256SUMS.
+
+Post-publication [verification evidence](https://github.com/apteva/db/tree/main/bench/results/counts/release-alpha6) confirms all four archive checksums, public Go proxy/sumdb and CLI install, embedded counts, downloaded daemon/public Go driver counts and leased snapshots, watch compatibility, and alpha.5 directory compatibility. Source and release CI passed on the tagged commit; the evidence-only follow-up leaves the release tag unchanged.
