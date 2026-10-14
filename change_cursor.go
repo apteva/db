@@ -9,6 +9,7 @@ import (
 	"hash/crc32"
 	"io"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -113,7 +114,7 @@ func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
 	}
 	p := &watchPlan{collections: map[string]bool{}, operations: map[ChangeOp]bool{}, prefix: bytes.Clone(o.KeyPrefix), preds: preds}
 	for _, n := range o.Collections {
-		p.collections[n] = true
+		p.collections[strings.Clone(n)] = true
 	}
 	for _, op := range o.Operations {
 		if op != ChangePut && op != ChangeDelete && op != ChangeReset && op != ChangeDrop {
@@ -130,7 +131,7 @@ func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
 			if !computedOutputValid(name) {
 				return nil, o, ErrOptions
 			}
-			fields[name] = true
+			fields[strings.Clone(name)] = true
 		}
 		p.project = &computedCollectionPlan{project: fields, inclusion: true}
 	}
@@ -239,7 +240,7 @@ func (db *DB) Watch(ctx context.Context, o WatchOptions) (*ChangeCursor, error) 
 	f.mu.Unlock()
 	db.mu.RUnlock()
 	ctx, cancel := context.WithCancel(ctx)
-	after := o.After
+	after := strings.Clone(o.After)
 	// The compiled plans own the filter/projection data. Retaining the caller
 	// slices here would both duplicate their cost and keep oversized capacities alive.
 	o.Filter, o.Fields, o.Collections, o.Operations, o.KeyPrefix, o.After = nil, nil, nil, nil, nil, ""
