@@ -210,7 +210,20 @@ func (f *changeFeed) readMarkerAt(at lsn, maxBytes int64, reserve func(*changeFr
 	if err := f.db.wal.readChange(at.gen, at.off+11, b[11:]); err != nil {
 		return nil, err
 	}
-	return f.parseMarker(b, at)
+	frame, err := f.parseMarker(b, at)
+	if err != nil {
+		return nil, err
+	}
+	if frame.charge > maxBytes {
+		return nil, ErrLimit
+	}
+	// Decoded collection-name strings are in addition to the encoded marker.
+	if reserve != nil && frame.charge > charge {
+		if err = reserve(nil, frame.charge-charge); err != nil {
+			return nil, err
+		}
+	}
+	return frame, nil
 }
 func (f *changeFeed) nextFrame(pos, ready lsn, maxBytes int64, reserve func(*changeFrame, int64) error) (*changeFrame, error) {
 	// Cache frames are immutable and safe to share after releasing the mutex.

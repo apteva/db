@@ -172,7 +172,8 @@ file descriptors across application delays. Defaults:
 
 These are accounting limits, not a promise about total RSS or Go GC peaks.
 Existing data/page/WAL buffers, temporary validation and application copies also
-use memory. Snapshot page retention is separate. Resource exhaustion reports
+use memory. Snapshot page retention is separate. Compiled match plans and per-cursor
+projection plans are charged, including when their match plan is shared. Resource exhaustion reports
 ErrLimit (or ErrWatchLimit for cursor count), never partial/truncated values.
 Capture-budget exhaustion rejects the write before logging; reader-budget
 exhaustion terminates only that reader. Large metadata commits may require a

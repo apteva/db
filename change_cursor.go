@@ -24,38 +24,38 @@ type watchPlan struct {
 	prefix      []byte
 	preds       []pred
 	project     *computedCollectionPlan
-	needValue   bool
 }
 
 // ChangeCursor is pull based. Next/Change/Err belong to one goroutine; Close and
 // ResumeToken are safe concurrently. Next blocks until a change, a coalesced
 // progress heartbeat, cancellation, history expiry, or DB close.
 type ChangeCursor struct {
-	f                           *changeFeed
-	ctx                         context.Context
-	cancel                      context.CancelFunc
-	stepMu                      sync.Mutex
-	closed                      atomic.Bool
-	framePin                    *changeFrame
-	closeOnce                   sync.Once
-	opts                        WatchOptions
-	needsValues                 bool
-	projectKey                  [32]byte
-	projectPlan                 *computedCollectionPlan
-	plan                        *watchPlan
-	pos                         lsn
-	frame                       *changeFrame
-	index                       int
-	matches                     []uint64
-	change                      Change
-	err                         error
-	valueBuf                    []byte
-	projectionBuf               []byte
-	held, frameHeld             int64
-	token                       atomic.Value // string, updated only at completed commit boundaries
-	lastProgress                time.Time
-	projectionCharge            int64
-	frameDone, deliveredInFrame bool
+	f                               *changeFeed
+	ctx                             context.Context
+	cancel                          context.CancelFunc
+	stepMu                          sync.Mutex
+	closed                          atomic.Bool
+	framePin                        *changeFrame
+	closeOnce                       sync.Once
+	opts                            WatchOptions
+	needsValues                     bool
+	projectKey                      [32]byte
+	projectPlan                     *computedCollectionPlan
+	plan                            *watchPlan
+	pos                             lsn
+	frame                           *changeFrame
+	index                           int
+	matches                         []uint64
+	change                          Change
+	err                             error
+	valueBuf                        []byte
+	projectionBuf                   []byte
+	held, frameHeld                 int64
+	compiledHeld, privatePlanCharge int64
+	token                           atomic.Value // string, updated only at completed commit boundaries
+	lastProgress                    time.Time
+	projectionCharge                int64
+	frameDone, deliveredInFrame     bool
 }
 
 func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
@@ -78,6 +78,7 @@ func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
 			return nil, o, ErrCollectionName
 		}
 	}
+	matchInput := input
 	for _, field := range o.Fields {
 		input += len(field) + 16
 	}
@@ -133,7 +134,6 @@ func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
 		}
 		p.project = &computedCollectionPlan{project: fields, inclusion: true}
 	}
-	p.needValue = o.IncludeValues || len(preds) > 0
 	// Semantically identical subscription filters share compiled plans and hot
 	// commit bitsets. Values/projection/heartbeat are independent delivery choices.
 	var filter bytes.Buffer
@@ -154,7 +154,7 @@ func compileWatch(o WatchOptions) (*watchPlan, WatchOptions, error) {
 	}{names, ops, o.KeyPrefix, filter.String()})
 	sum := sha256.Sum256(key)
 	p.key = string(sum[:])
-	p.charge = int64(input)*4 + int64(nodes)*96 + 512
+	p.charge = int64(matchInput)*4 + int64(nodes)*96 + 512
 	return p, o, nil
 }
 func (db *DB) Watch(ctx context.Context, o WatchOptions) (*ChangeCursor, error) {
@@ -186,6 +186,14 @@ func (db *DB) Watch(ctx context.Context, o WatchOptions) (*ChangeCursor, error) 
 		return nil, ErrChangeFeedDisabled
 	}
 	projection := p.project
+	p.project = nil // delivery projection belongs to this cursor, not the shared match plan
+	var privatePlanCharge int64
+	if projection != nil {
+		privatePlanCharge = 512
+		for _, field := range o.Fields {
+			privatePlanCharge += int64(len(field)+16) * 4
+		}
+	}
 	fieldList := append([]string(nil), o.Fields...)
 	sort.Strings(fieldList)
 	fieldJSON, _ := json.Marshal(fieldList)
@@ -196,15 +204,20 @@ func (db *DB) Watch(ctx context.Context, o WatchOptions) (*ChangeCursor, error) 
 		db.mu.RUnlock()
 		return nil, ErrWatchLimit
 	}
-	if existing := f.plans[p.key]; existing != nil {
+	existing := f.plans[p.key]
+	extraPlan := privatePlanCharge
+	if existing != nil {
 		p = existing
 	} else {
-		if p.charge > f.cfg.Options.MaxWatchBytes-f.readerBytes-f.planBytes {
-			f.mu.Unlock()
-			db.mu.RUnlock()
-			return nil, ErrLimit
-		}
-		f.planBytes += p.charge
+		extraPlan += p.charge
+	}
+	if p.charge+privatePlanCharge > o.MaxMemoryBytes || extraPlan > f.cfg.Options.MaxWatchBytes-f.readerBytes-f.planBytes {
+		f.mu.Unlock()
+		db.mu.RUnlock()
+		return nil, ErrLimit
+	}
+	f.planBytes += extraPlan
+	if existing == nil {
 		f.nextPlanID++
 		p.id = f.nextPlanID
 		f.plans[p.key] = p
@@ -226,16 +239,20 @@ func (db *DB) Watch(ctx context.Context, o WatchOptions) (*ChangeCursor, error) 
 	f.mu.Unlock()
 	db.mu.RUnlock()
 	ctx, cancel := context.WithCancel(ctx)
-	c := &ChangeCursor{f: f, ctx: ctx, cancel: cancel, opts: o, plan: p, projectPlan: projection, projectKey: fieldKey, needsValues: needsValues, pos: pos, lastProgress: time.Now()}
+	after := o.After
+	// The compiled plans own the filter/projection data. Retaining the caller
+	// slices here would both duplicate their cost and keep oversized capacities alive.
+	o.Filter, o.Fields, o.Collections, o.Operations, o.KeyPrefix, o.After = nil, nil, nil, nil, nil, ""
+	c := &ChangeCursor{held: p.charge + privatePlanCharge, compiledHeld: p.charge + privatePlanCharge, privatePlanCharge: privatePlanCharge, f: f, ctx: ctx, cancel: cancel, opts: o, plan: p, projectPlan: projection, projectKey: fieldKey, needsValues: needsValues, pos: pos, lastProgress: time.Now()}
 	c.token.Store(token)
-	if o.After != "" {
-		pos, err = c.resume(o.After)
+	if after != "" {
+		pos, err = c.resume(after)
 		if err != nil {
 			c.Close()
 			return nil, err
 		}
 		c.pos = pos
-		c.token.Store(o.After)
+		c.token.Store(after)
 	}
 	return c, nil
 }
@@ -581,18 +598,21 @@ func (c *ChangeCursor) detach() {
 				}
 			}
 		}
+		c.f.planBytes -= c.privatePlanCharge
 		c.plan.users--
 		if c.plan.users == 0 {
 			c.f.planBytes -= c.plan.charge
 			delete(c.f.plans, c.plan.key)
 		}
 		c.f.mu.Unlock()
+		c.plan = nil
+		c.projectPlan = nil
 	})
 }
 func (c *ChangeCursor) releaseMemory() {
 	c.releaseFrame()
-	c.f.releaseReader(c.held)
-	c.held = 0
+	c.f.releaseReader(c.held - c.compiledHeld)
+	c.held, c.compiledHeld = 0, 0
 	c.valueBuf = nil
 	c.projectionBuf = nil
 	c.projectionCharge = 0

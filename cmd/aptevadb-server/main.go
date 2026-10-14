@@ -84,6 +84,13 @@ func run() error {
 	case <-ctx.Done():
 		shutdown, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 		defer cancel()
+		// Long-lived watches must be canceled before HTTP shutdown waits for
+		// active requests to drain. Otherwise every live stream waits out the
+		// shutdown timeout, even when its consumer is idle.
+		if err = handler.Close(); err != nil {
+			_ = transport.Close()
+			return err
+		}
 		err = transport.Shutdown(shutdown)
 		if err != nil {
 			_ = transport.Close()

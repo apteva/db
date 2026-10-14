@@ -605,3 +605,42 @@ func TestChangeFeedLargeDocumentColdProjection(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+// Delivery projections must be budgeted even when their metadata match plan
+// was first installed by a cursor with no projection.
+func TestChangeFeedProjectionPlanBudgets(t *testing.T) {
+	d := feedDB(t, Options{ChangeFeed: &ChangeFeedOptions{MaxWatchBytes: 4096}})
+	metadata := feedWatch(t, d, WatchOptions{})
+	before := d.ChangeFeedStats()
+	fields := make([]string, 64)
+	for i := range fields {
+		fields[i] = fmt.Sprintf("field%03d", i)
+	}
+	if c, err := d.Watch(context.Background(), WatchOptions{IncludeValues: true, Fields: fields}); !errors.Is(err, ErrLimit) {
+		if c != nil {
+			c.Close()
+		}
+		t.Fatal(err)
+	}
+	if after := d.ChangeFeedStats(); after.PlanBytes != before.PlanBytes || after.Watchers != before.Watchers {
+		t.Fatal(before, after)
+	}
+	small := feedWatch(t, d, WatchOptions{IncludeValues: true, Fields: []string{"a"}})
+	if d.ChangeFeedStats().PlanBytes <= before.PlanBytes {
+		t.Fatal("projection plan uncharged")
+	}
+	small.Close()
+	if d.ChangeFeedStats().PlanBytes != before.PlanBytes {
+		t.Fatal("projection budget not released")
+	}
+	if c, err := d.Watch(context.Background(), WatchOptions{MaxMemoryBytes: 256}); !errors.Is(err, ErrLimit) {
+		if c != nil {
+			c.Close()
+		}
+		t.Fatal(err)
+	}
+	metadata.Close()
+	if s := d.ChangeFeedStats(); s.ReaderBytes != 0 || s.PlanBytes != 0 || s.Watchers != 0 {
+		t.Fatal(s)
+	}
+}

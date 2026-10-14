@@ -138,7 +138,8 @@ func (x *session) close() {
 	}
 }
 
-// Close releases all transaction snapshots. Stop the HTTP listener first.
+// Close rejects new requests, cancels watches, drains active handlers and
+// releases transaction snapshots. Then shut down the HTTP listener.
 func (s *Server) Close() error {
 	s.mu.Lock()
 	if s.closed {
