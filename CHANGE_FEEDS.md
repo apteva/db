@@ -1,9 +1,8 @@
 # Native change feeds
 
-Available in alpha.5 development source. Public alpha.4 does not contain these
-APIs. To try the validated development implementation, use
-`go get github.com/apteva/db@a6040dc`. Root engine, server and Go client remain
-standard-library-only.
+Available in v0.2.0-alpha.5. Install with
+`go get github.com/apteva/db@v0.2.0-alpha.5`. Root engine, server and Go client
+remain standard-library-only.
 
 ## Enable capture
 

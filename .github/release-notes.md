@@ -1,9 +1,21 @@
-AptevaDB alpha.4 fixes integer aggregation overflow and adds explicit non-null field counting.
+AptevaDB alpha.5 adds native real-time change feeds for embedded Go applications and the HTTP Go driver.
 
-- SUM/AVG accumulate integer inputs exactly in signed 128 bits, including parallel shard merges. Two maximum int64 values now produce a positive SUM of approximately 1.8446744073709552e19 and AVG of approximately 9.223372036854776e18. SUM returns int64 when the final total fits, otherwise float64; floating results have IEEE-754 precision. Cancellation after intermediate overflow preserves integer totals. Maintained computed sums retain their atomic final-int64-overflow rejection.
-- `$countNonNull: "$field.path"` counts present non-null values, matching COUNT(column). Missing/null fields are excluded; zero, false, empty strings, arrays and objects count once. Existing row-count operations keep their behavior. Available in embedded queries, the Go HTTP client and native maintained computed collections.
-- Sequential cursors reuse private value buffers and advance cached slots with less work. Inline callback scans copy keys/values together, use smaller cell references and bypass empty memtable merging. Saved-position resumption, range bounds and scan consistency remain covered by regression tests.
+- Opt-in persistent capture with collection/operation/key-prefix filters, exact document predicates, projected values, and database-bound resume tokens. Filters reuse Query's logical/range/literal-prefix language.
+- Atomic `SnapshotAndWatch` hands off initial state to committed changes without a gap. Source and maintained computed-collection events share one commit; subscribe to a computed collection for live membership updates.
+- Capture reuses original WAL values and appends a final commit marker. Shared hot metadata, matching plans, replay payloads and small projections reduce subscriber duplication. History, compiled plans, reader memory and watcher counts have explicit limits and expiry/errors.
+- HTTP watches use separate capacity and connections, coalesced progress heartbeats, bounded frames, read-only snapshot leases and write-idle deadlines. Client/server closure cancels streams; the daemon drains idle watches promptly on shutdown.
+- Fix synchronous WAL rotation fencing, atomic collection catalog publication and rejected-write index bookkeeping. Add torn-commit/replay, large-document, computed-event, filtering, memory-accounting and concurrency regressions.
 
-Format 9 permanently upgrades formats 3–8 using two durable checkpoints before new writes. **Back up with the original binary first; older binaries refuse the upgraded directory.** This guard protects persisted non-null-count definitions from older writers. Page, document and WAL layouts and logical export version 2 remain unchanged.
+Capture is disabled on a fresh database unless enabled. Stored capture settings survive reopening, including CLI opens; disabling/re-enabling creates a new history identity. Delivery is at least once within retained history. Put includes insertion/replacement; filtered deletes have no after-image. Reset/Drop invalidations pass selected collection scope. See [CHANGE_FEEDS.md](https://github.com/apteva/db/blob/v0.2.0-alpha.5/CHANGE_FEEDS.md) for these contracts, limits and examples.
 
-Install `github.com/apteva/db@v0.2.0-alpha.4` or download the Linux/macOS amd64/arm64 CLI/server archive and verify SHA256SUMS. This remains a public alpha; see README, USAGE, FORMAT and OPERATIONS for contracts and limitations.
+**Format 10 permanently upgrades formats 3–9. Back up with the original binary first; older binaries refuse the upgraded directory.** Format 10 adds persistent capture settings and WAL-only final commit markers. Page/document layouts and logical export/import version 2 remain unchanged. Backups/restores start a new feed identity and do not preserve old replay tokens.
+
+The [validation report](https://github.com/apteva/db/blob/v0.2.0-alpha.5/bench/results/change-feeds/VALIDATION.md) retains 291 benchmark processes against alpha.4, Pebble and C/pure-Go SQLite. On an M1 Pro with async 1,000-row commits, 100 subscriptions sharing a 1% filter measured 944K source rows/s; projected delivery measured 904K/s with about 20–21 MiB process peak RSS. Capture adds measurable write cost and batching matters. Background CPU activity affected some read timings; this is not a claim of universal improvement or HTTP throughput.
+
+```sh
+go get github.com/apteva/db@v0.2.0-alpha.5
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.5
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.5
+```
+
+Linux/macOS amd64/arm64 CLI/server archives include the change-feed guide; verify them using SHA256SUMS. This remains a public prerelease alpha. See README, USAGE, FORMAT and OPERATIONS for other contracts and limitations.

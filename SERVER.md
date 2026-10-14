@@ -99,7 +99,7 @@ IndexCursor API is available to adapters in the owning process; remote clients
 use the ordered streaming Query API.
 
 
-## Native change feeds (alpha.5 development)
+## Native change feeds (v0.2.0-alpha.5)
 
 `POST /v1/watch` serves authenticated NDJSON subscriptions with collection/key/
 operation/document filters, projection, replay tokens and bounded resource errors.

@@ -5,7 +5,7 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
-## [Unreleased — 0.2.0-alpha.5]
+## [0.2.0-alpha.5] - 2026-10-14
 
 - Add opt-in persistent native change feeds with filtered/projected Go and HTTP
   cursors, atomic snapshot handoff, computed-collection events, bounded replay,
@@ -18,6 +18,9 @@ the migration.
 - Format 10 adds WAL-only commit markers and a persistent capture configuration.
   Formats 3–9 upgrade both metadata slots synchronously. Keep an original-binary
   backup; older binaries refuse the upgrade. Export/import remains version 2.
+- Charge compiled match/projection plans against global and per-cursor budgets;
+  own option strings to avoid retaining oversized caller buffers. Cancel live
+  watches before daemon shutdown waits for HTTP handlers.
 - Fence synchronous WAL rotation against in-flight fsyncs and unsynced appends.
   Publish collection creation atomically with its catalog; defer index-build
   touch bookkeeping until staging limits have passed.

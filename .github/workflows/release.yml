@@ -31,7 +31,8 @@ jobs:
         env:
           CURSOR_STRESS: 60s
           SOAK: 60s
-        run: go test -race -count=1 -run 'TestCursorStress|TestSoak' -timeout 8m .
+          CHANGE_FEED_STRESS: 60s
+        run: go test -race -count=1 -run 'TestCursorStress|TestSoak|TestChangeFeedStress' -timeout 8m .
   build:
     needs: verify
     runs-on: ubuntu-latest

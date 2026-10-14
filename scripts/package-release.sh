@@ -13,6 +13,6 @@ mkdir -p "$stage"
 for command in aptevadbctl aptevadb-server; do
   env CGO_ENABLED=0 GOOS="$RELEASE_GOOS" GOARCH="$RELEASE_GOARCH" go build -trimpath -ldflags='-s -w' -o "$stage/$command" "./cmd/$command"
 done
-cp LICENSE README.md USAGE.md OPERATIONS.md SERVER.md DURABILITY.md FORMAT.md CHANGELOG.md "$stage/"
+cp LICENSE README.md USAGE.md OPERATIONS.md SERVER.md DURABILITY.md FORMAT.md CHANGELOG.md CHANGE_FEEDS.md "$stage/"
 archive="dist/aptevadb_${version}_${RELEASE_GOOS}_${RELEASE_GOARCH}.tar.gz"
 tar -czf "$archive" -C "$stage" .

@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.4.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.5.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
-runtime dependencies. The development file format is 10; opening formats 3–9 upgrades them
+runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.4
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.4
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.4
+go get github.com/apteva/db@v0.2.0-alpha.5
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.5
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.5
 ```
 
 ```go
@@ -51,10 +51,10 @@ support concurrent use; writes serialize. Transactions, batches and cursors
 belong to one goroutine. Close snapshots/cursors/transactions promptly: they
 retain older pages and prevent compaction while held.
 
-Development source also supports [native change feeds](CHANGE_FEEDS.md): opt-in
-capture, filtered/projected subscriptions, replay and snapshot handoff for embedded
-apps and the HTTP client. These APIs are not in the public alpha.4 tag. Upgrading
-to development source is a one-way format-10 migration; back up first. The
+Alpha.5 adds [native change feeds](CHANGE_FEEDS.md): opt-in capture,
+filtered/projected subscriptions, replay and snapshot handoff for embedded apps
+and the HTTP Go client. Opening older databases performs a one-way format-10
+migration; back up with the original binary first. The
 [change-feed validation report](bench/results/change-feeds/VALIDATION.md) includes
 all trials, CPU/RSS results and measured capture/fan-out costs.
 
@@ -143,9 +143,9 @@ checkpoint. Dropping a collection drops its rules too.
 
 **Format migration:** opening a format-3 through format-9 database upgrades both
 metadata slots durably to format 10 before returning. Older binaries then refuse
-to open it; keep a backup if you need to use one. Page, log and document layouts
-are unchanged; computed catalogs, group counters and unique constraints require the
-version bump. Other format versions are refused.
+to open it; keep a backup if you need to use one. Format 10 adds optional WAL
+commit markers for change capture; page/document layouts and logical export
+version 2 remain unchanged. Other format versions are refused.
 
 Benchmark the feature with `cd bench` and
 `GOTOOLCHAIN=local GOWORK=off go run . -computed -n 100000 -reps 3`.
