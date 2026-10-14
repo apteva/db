@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.5.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.6.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
 runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.5
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.5
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.5
+go get github.com/apteva/db@v0.2.0-alpha.6
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.6
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.6
 ```
 
 ```go
@@ -481,3 +481,11 @@ Composite indexes, index-only scans, join reordering beyond the one shape
 described above, the `let` and `pipeline` forms of `$lookup`, per-collection
 statistics, buffered (Bε) internal nodes, a runtime page-size option,
 Windows support, and any SQL layer.
+
+The [alpha.6 count validation report](bench/results/counts/VALIDATION.md) records
+all fresh-fixture count comparisons and paired read/write/scan guards.
+Filtered counts use `collection.CountDocuments(ctx, filter, db.CountOptions{})`.
+Scalar equality prefixes of exact compound indexes count without loading
+matching documents when all predicates are covered; other filters retain
+snapshot-consistent document evaluation. See [USAGE.md](USAGE.md#filtered-document-counts)
+for limits, null/sparse/multikey semantics, execution statistics and driver use.

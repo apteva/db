@@ -51,6 +51,7 @@ type Request struct {
 	Operations     []Operation      `json:"operations,omitempty"`
 }
 type Response struct {
+	Count       int64            `json:"count,omitempty"`
 	Change      *db.Change       `json:"change,omitempty"`
 	WatchReady  bool             `json:"watch_ready,omitempty"`
 	ChangeToken string           `json:"change_token,omitempty"`

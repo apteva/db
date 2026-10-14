@@ -260,3 +260,58 @@ rows, err := orders.Aggregate(ctx, []byte(`[
 The same non-null counter is supported in native computed collections and
 through the Go HTTP client. Opening an existing database upgrades formats 3–8
 to format 9; make a backup with the original binary before upgrading.
+
+## Filtered document counts
+
+```go
+var stats db.QueryStats
+n, err := orders.CountDocuments(ctx, []byte(`{"bucket":"b00"}`), db.CountOptions{
+    Stats: &stats,
+})
+// For a covering (bucket ASC, rank ASC) scalar compound index:
+// n == 5000, stats.Plan.Access == "index-count", stats.Plan.IndexOnly == true,
+// stats.IndexEntriesExamined == 5000, stats.DocumentFetches == 0.
+```
+
+`CountDocuments` is available on embedded collections, the default `DB` and
+`Snapshot` collection, and the HTTP Go driver's collections and leased snapshot
+collections. It uses Query's JSON filter syntax and counts encoded documents,
+not raw key/value records. Errors return zero rather than a partial count.
+`Skip` skips matching documents; `Limit: 0` is unlimited. Counting requires no
+sort or result array. For consistent multiple reads, use the same snapshot-bound
+collection for each operation.
+
+The initial covering path proves **all predicates** are scalar equality bindings
+on a contiguous leading prefix of an exact compound index, including nested
+`$and`. Ascending and descending components and exact integer/float comparisons
+are supported. Non-sparse compound indexes normalize missing components to null,
+matching Query's null-equality semantics. Sparse coverage requires non-null
+equality bindings for every indexed component, so missing documents cannot be
+silently omitted. Each scalar compound index has one entry per encoded document.
+Checkpointed indexes count bounded leaf slots; snapshots with buffered inserts,
+updates or deletes merge the snapshot's index entries before counting.
+
+Residual fields, ranges, prefixes, `$or`, and scalar multikey/legacy indexes use
+document evaluation. The fallback can narrow candidates through an applicable
+compound index; multikey entries are never counted as extra documents. `Hint`
+selects a candidate covering index, `$natural` forces document evaluation, and
+an unknown hint returns `ErrNoSuchIndex`. If an existing hinted index cannot
+prove full coverage, the fallback planner may choose a different index or a
+collection scan. Hints cannot force an incorrect count.
+
+`Stats` reports the access path, logical entries examined by the covering scan,
+documents loaded for evaluation, matches returned, and retained query memory.
+`IndexEntriesExamined` specifically measures the covering count path, including
+skipped matches; it is zero on document-evaluation paths. `MaxMemoryBytes` defaults
+to 64 MiB; negative budgets/skip/limit return `ErrPipeline`, and covering bounds
+that exceed the budget return `ErrLimit`. As with Query, snapshots, page caches,
+scan scratch buffers, filter/plan metadata and caller memory are outside this
+retained-query-memory limit. No match-sized result buffer or deduplication set is
+retained. Cancellation is checked between index leaf pages (or each merged entry)
+and evaluated documents. Counts and their index catalog use one snapshot while
+writers continue. Close snapshots after their operations have finished.
+
+`COUNT(column)` remains the separate `$countNonNull: "$column"` aggregation
+accumulator; `CountDocuments` counts matching documents, including null-valued
+fields. Existing Query/aggregation calls retain their behavior; adapters must
+adopt `CountDocuments` to use its covering path.

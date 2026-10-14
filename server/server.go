@@ -356,6 +356,8 @@ func (s *Server) execute(ctx context.Context, r protocol.Request) (protocol.Resp
 		err = c.DropIndex(ctx, r.Name)
 	case "computed_fields":
 		err = c.DefineComputedFields(ctx, r.Definitions)
+	case "count":
+		out.Count, out.QueryStats, err = s.count(ctx, c, r)
 	case "explain":
 		var plan db.QueryPlan
 		plan, err = c.ExplainQuery(ctx, r.Filter, s.queryOptions(r, nil))
@@ -427,14 +429,18 @@ func (s *Server) transaction(ctx context.Context, r protocol.Request) (protocol.
 		return out, x.tx.CommitContext(ctx)
 	}
 	if x.snapshot != nil {
-		if r.Op != "get" {
+		if r.Op != "get" && r.Op != "count" {
 			return out, db.ErrReadOnly
 		}
 		c, err := x.snapshot.Collection(r.Collection)
 		if err != nil {
 			return out, err
 		}
-		out.Value, out.Found, err = c.Find(r.Key, nil)
+		if r.Op == "count" {
+			out.Count, out.QueryStats, err = s.count(ctx, c, r)
+		} else {
+			out.Value, out.Found, err = c.Find(r.Key, nil)
+		}
 		return out, err
 	}
 	c, err := x.tx.Collection(r.Collection)
@@ -521,4 +527,11 @@ func (s *Server) queryOptions(r protocol.Request, stats *db.QueryStats) db.Query
 		memory = s.opts.MaxQueryMemoryBytes
 	}
 	return db.QueryOptions{Skip: r.Skip, Limit: r.Limit, Sort: r.Sort, Hint: r.Hint, KeyDescending: r.KeyDescending, MaxMemoryBytes: memory, Stats: stats}
+}
+
+func (s *Server) count(ctx context.Context, c *db.Collection, r protocol.Request) (int64, *db.QueryStats, error) {
+	stats := &db.QueryStats{}
+	q := s.queryOptions(r, stats)
+	n, err := c.CountDocuments(ctx, r.Filter, db.CountOptions{Skip: q.Skip, Limit: q.Limit, Hint: q.Hint, MaxMemoryBytes: q.MaxMemoryBytes, Stats: stats})
+	return n, stats, err
 }

@@ -249,3 +249,7 @@ func (c *SnapshotCollection) FindJSON(ctx context.Context, key []byte) ([]byte, 
 func (c *SnapshotCollection) Query(ctx context.Context, filter []byte, o db.QueryOptions) (*Cursor, error) {
 	return c.inner.Query(ctx, filter, o)
 }
+
+func (c *SnapshotCollection) CountDocuments(ctx context.Context, filter []byte, opts db.CountOptions) (int64, error) {
+	return c.inner.CountDocuments(ctx, filter, opts)
+}

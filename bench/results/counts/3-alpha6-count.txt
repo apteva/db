@@ -1,0 +1,14 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/db/bench/count
+cpu: Apple M1 Pro
+BenchmarkCountApteva/QueryPipeline-10         	     356	   3156470 ns/op	 1876182 B/op	   15113 allocs/op
+BenchmarkCountApteva/IndexCursor-10           	     661	   2076700 ns/op	   82648 B/op	    5043 allocs/op
+BenchmarkCountApteva/NativeCount-10           	  165404	      6992 ns/op	         0 doc-fetches/op	      5000 index-entries/op	        24.00 retained-B/op	    2488 B/op	      32 allocs/op
+BenchmarkCountApteva/NaturalCount-10          	     129	   9207460 ns/op	   72257 B/op	      50 allocs/op
+BenchmarkCountApteva/ResidualCount-10         	     496	   2441319 ns/op	   86040 B/op	    5085 allocs/op
+BenchmarkCountSQLite/C-10                     	   10000	    116764 ns/op	      32 B/op	       2 allocs/op
+BenchmarkCountSQLite/Go-10                    	    5188	    228491 ns/op	     832 B/op	       8 allocs/op
+2026/10/14 17:46:18 Found 0 WALs
+BenchmarkCountPebble-10                       	    5176	    226573 ns/op	     216 B/op	      14 allocs/op
+PASS

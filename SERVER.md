@@ -110,3 +110,15 @@ heartbeats and WatchWriteTimeout (default 30s) rather than the ordinary request
 execution deadline. The Go client has separate watch connections and no overall
 watch timeout. Capture is opt-in through DB.Options or daemon `-change-feed` and
 persists across later opens; see [CHANGE_FEEDS.md](CHANGE_FEEDS.md).
+
+### Document count RPC
+
+`POST /v1/rpc` accepts `{"op":"count","collection":"orders",
+"filter":{"bucket":"b00"},"skip":0,"limit":0}`. Optional `hint`,
+`max_memory_bytes` and snapshot `transaction` lease IDs use the same envelopes
+as queries. The response contains `count` (omitted for zero) and `query_stats`,
+including `Plan.IndexOnly`, `DocumentFetches` and `IndexEntriesExamined`. The
+server caps the requested memory budget at `MaxQueryMemoryBytes`. Native errors
+and cancellation retain their existing protocol codes. Write transactions do
+not support count; read-only snapshot leases do. Use the Go driver's
+`Collection.CountDocuments(ctx, filter, db.CountOptions{})` for this operation.

@@ -309,7 +309,7 @@ func (c *Client) sendUsing(ctx context.Context, path string, req protocol.Reques
 }
 func mutation(op string) bool {
 	switch op {
-	case "get", "collections", "indexes", "stats", "aggregate", "begin", "rollback", "explain":
+	case "get", "collections", "indexes", "stats", "aggregate", "begin", "rollback", "explain", "count":
 		return false
 	}
 	return true
@@ -572,4 +572,21 @@ func (c *Collection) ExplainQuery(ctx context.Context, filter []byte, opts db.Qu
 		return db.QueryPlan{}, ErrProtocol
 	}
 	return *out.Plan, nil
+}
+
+// CountDocuments counts matching documents and reports native execution statistics.
+func (c *Collection) CountDocuments(ctx context.Context, filter []byte, opts db.CountOptions) (int64, error) {
+	r, err := c.request("count")
+	if err != nil {
+		return 0, err
+	}
+	r.Filter, r.Skip, r.Limit, r.Hint, r.MaxMemoryBytes = filter, opts.Skip, opts.Limit, opts.Hint, opts.MaxMemoryBytes
+	out, err := c.client.call(ctx, r)
+	if out.QueryStats != nil && opts.Stats != nil {
+		*opts.Stats = *out.QueryStats
+	}
+	if err != nil {
+		return 0, err
+	}
+	return out.Count, nil
 }

@@ -1,0 +1,15 @@
+{
+  "baseline_tag": "v0.2.0-alpha.5",
+  "baseline_commit": "2dbc4d428c82e281f1489dd450004a6d33b3adfc",
+  "go_version": "go version go1.25.1 darwin/arm64",
+  "machine": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "fixtures_per_version": 3,
+  "rows": 100000,
+  "matches": 5000,
+  "payload_bytes": 100,
+  "sync": "async load; reads timed separately",
+  "layout": "checkpointed Apteva index; covering SQLite; flushed and compacted Pebble secondary index",
+  "harness_sha256": "11c2b0c000875fcd28f3e1239eac9fd6bc6fb4ce87073e2797a95608baa6d2bf",
+  "count_source_sha256": "60605ad15b39e43d377aea3756d8abda690f62c79f95504c35eaf4ee04a74a96",
+  "local_cpu_snapshots": "kept outside repository in the local benchmark output directory"
+}

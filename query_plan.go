@@ -14,6 +14,7 @@ const DefaultQueryMemoryBytes int64 = 64 << 20
 // QueryPlan describes access and retained query memory, excluding snapshots,
 // page caches, caller allocations and the one current borrowed input document.
 type QueryPlan struct {
+	IndexOnly      bool // True only when document evaluation is provably unnecessary.
 	Access         string
 	Index          string
 	Fields         []IndexField
@@ -23,9 +24,12 @@ type QueryPlan struct {
 	MaxMemoryBytes int64
 }
 type QueryStats struct {
-	Examined, Returned int64
-	PeakMemoryBytes    int64
-	Plan               QueryPlan
+	// DocumentFetches counts candidate documents loaded for evaluation.
+	// IndexEntriesExamined counts entries visited by the index-only count path.
+	DocumentFetches, IndexEntriesExamined int64
+	Examined, Returned                    int64
+	PeakMemoryBytes                       int64
+	Plan                                  QueryPlan
 }
 type queryAccess struct {
 	info   QueryPlan
@@ -357,6 +361,7 @@ func (c *Collection) queryAdvanced(ctx context.Context, preds []pred, opts Query
 	}
 	matches := func(doc []byte) bool {
 		stats.Examined++
+		stats.DocumentFetches++
 		if _, _, ok := docDir(doc); !ok {
 			return false
 		}

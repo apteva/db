@@ -209,3 +209,52 @@ func TestStreamingProtocolRequiresTerminalFrame(t *testing.T) {
 		t.Fatal(cur.Err())
 	}
 }
+
+func TestRemoteCountDocuments(t *testing.T) {
+	_, c, _ := fixture(t, server.Options{MaxQueryMemoryBytes: 1024})
+	ctx := context.Background()
+	if err := c.CreateCollection(ctx, "counts"); err != nil {
+		t.Fatal(err)
+	}
+	rows := c.Collection("counts")
+	if err := rows.CreateCompoundIndex(ctx, "ab", []db.IndexField{{Field: "a"}, {Field: "b"}}, db.IndexOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	for i, doc := range []string{`{"a":"x","b":1}`, `{"a":"x","b":2}`, `{"a":"y","b":1}`} {
+		if err := rows.InsertJSON(ctx, []byte{byte('a' + i)}, []byte(doc)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, tt := range []struct {
+		filter  string
+		opts    db.CountOptions
+		want    int64
+		covered bool
+	}{
+		{`{"a":"x"}`, db.CountOptions{}, 2, true},
+		{`{"a":"missing"}`, db.CountOptions{}, 0, true},
+		{`{"a":"x"}`, db.CountOptions{Skip: 1, Limit: 1}, 1, true},
+		{`{"b":1}`, db.CountOptions{}, 2, false},
+	} {
+		var stats db.QueryStats
+		tt.opts.Stats = &stats
+		n, err := rows.CountDocuments(ctx, []byte(tt.filter), tt.opts)
+		if err != nil || n != tt.want || stats.Plan.IndexOnly != tt.covered || stats.Plan.MaxMemoryBytes != 1024 {
+			t.Fatal(tt, n, err, stats)
+		}
+		if tt.covered && stats.DocumentFetches != 0 {
+			t.Fatal(stats)
+		}
+	}
+	if _, err := rows.CountDocuments(ctx, nil, db.CountOptions{Hint: "absent"}); !errors.Is(err, db.ErrNoSuchIndex) {
+		t.Fatal(err)
+	}
+	if _, err := rows.CountDocuments(ctx, []byte(`{"a":"x"}`), db.CountOptions{MaxMemoryBytes: 1}); !errors.Is(err, db.ErrLimit) {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	cancel()
+	if _, err := rows.CountDocuments(ctx, nil, db.CountOptions{}); !errors.Is(err, context.Canceled) || errors.Is(err, client.ErrCommitUnknown) {
+		t.Fatal(err)
+	}
+}

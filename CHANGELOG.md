@@ -5,6 +5,23 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.6] - 2026-10-14
+
+- Add `CountDocuments(ctx, filter, CountOptions)` for embedded/default and
+  snapshot collections, plus the HTTP Go driver and read-only snapshot leases.
+- Count scalar compound equality prefixes directly from bounded index leaf
+  slots when every predicate is covered. Merge buffered snapshot index entries
+  when necessary; perform zero document fetches on either covering path.
+- Preserve exact integer equality, mixed index directions, null/missing and
+  sparse semantics. Residual predicates, logical OR and multikey indexes use
+  snapshot-consistent document evaluation without sorting/materializing results.
+- Report `Plan.IndexOnly`, `DocumentFetches` and `IndexEntriesExamined`, with
+  cancellation, skip/limit, bounded retained query memory and explicit errors.
+- Add correctness, checkpoint/recovery, concurrent snapshot/catalog and remote
+  API regressions, plus paired alpha.5 and SQLite/Pebble count benchmarks.
+- On-disk format remains 10; no new migration. Existing Query/aggregation APIs
+  retain their behavior. Adapters must adopt CountDocuments for covering counts.
+
 ## [0.2.0-alpha.5] - 2026-10-14
 
 - Add opt-in persistent native change feeds with filtered/projected Go and HTTP

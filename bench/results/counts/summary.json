@@ -1,0 +1,941 @@
+{
+  "alpha5": {
+    "BenchmarkCountApteva/QueryPipeline": {
+      "samples": [
+        {
+          "file": "1-alpha5-count.txt",
+          "ns/op": 2853345.0,
+          "B/op": 1876168.0,
+          "allocs/op": 15113.0
+        },
+        {
+          "file": "2-alpha5-count.txt",
+          "ns/op": 3024039.0,
+          "B/op": 1876167.0,
+          "allocs/op": 15113.0
+        },
+        {
+          "file": "3-alpha5-count.txt",
+          "ns/op": 3214976.0,
+          "B/op": 1876167.0,
+          "allocs/op": 15113.0
+        }
+      ],
+      "median": {
+        "B/op": 1876167.0,
+        "ns/op": 3024039.0,
+        "allocs/op": 15113.0
+      }
+    },
+    "BenchmarkCountApteva/IndexCursor": {
+      "samples": [
+        {
+          "file": "1-alpha5-count.txt",
+          "ns/op": 1941252.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        },
+        {
+          "file": "2-alpha5-count.txt",
+          "ns/op": 2419372.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        },
+        {
+          "file": "3-alpha5-count.txt",
+          "ns/op": 1644708.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        }
+      ],
+      "median": {
+        "B/op": 82648.0,
+        "ns/op": 1941252.0,
+        "allocs/op": 5043.0
+      }
+    },
+    "BenchmarkCountSQLite/C": {
+      "samples": [
+        {
+          "file": "1-alpha5-count.txt",
+          "ns/op": 116711.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        },
+        {
+          "file": "2-alpha5-count.txt",
+          "ns/op": 129318.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        },
+        {
+          "file": "3-alpha5-count.txt",
+          "ns/op": 116970.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        }
+      ],
+      "median": {
+        "B/op": 32.0,
+        "ns/op": 116970.0,
+        "allocs/op": 2.0
+      }
+    },
+    "BenchmarkCountSQLite/Go": {
+      "samples": [
+        {
+          "file": "1-alpha5-count.txt",
+          "ns/op": 227561.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        },
+        {
+          "file": "2-alpha5-count.txt",
+          "ns/op": 233118.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        },
+        {
+          "file": "3-alpha5-count.txt",
+          "ns/op": 232228.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        }
+      ],
+      "median": {
+        "B/op": 832.0,
+        "ns/op": 232228.0,
+        "allocs/op": 8.0
+      }
+    },
+    "BenchmarkCountPebble": {
+      "samples": [
+        {
+          "file": "1-alpha5-count.txt",
+          "ns/op": 234450.0,
+          "B/op": 216.0,
+          "allocs/op": 14.0
+        },
+        {
+          "file": "2-alpha5-count.txt",
+          "ns/op": 242291.0,
+          "B/op": 216.0,
+          "allocs/op": 14.0
+        },
+        {
+          "file": "3-alpha5-count.txt",
+          "ns/op": 255737.0,
+          "B/op": 216.0,
+          "allocs/op": 14.0
+        }
+      ],
+      "median": {
+        "B/op": 216.0,
+        "ns/op": 242291.0,
+        "allocs/op": 14.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Upsert": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 729.8,
+          "B/op": 11.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 850.6,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 553.7,
+          "B/op": 1.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 1.0,
+        "ns/op": 729.8,
+        "allocs/op": 0.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Find": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 397.9,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 570.3,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 569.2,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 0.0,
+        "ns/op": 569.2,
+        "allocs/op": 0.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Scan": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 1746506.0,
+          "ns/row": 17.47,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 1873659.0,
+          "ns/row": 18.74,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 11175994.0,
+          "ns/row": 111.8,
+          "B/op": 74513.0,
+          "allocs/op": 27.0
+        }
+      ],
+      "median": {
+        "B/op": 74512.0,
+        "ns/op": 1873659.0,
+        "allocs/op": 27.0,
+        "ns/row": 18.74
+      }
+    },
+    "BenchmarkRawIteration/Scan": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 1907739.0,
+          "ns/row": 19.08,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 2140527.0,
+          "ns/row": 21.41,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 3147775.0,
+          "ns/row": 31.48,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        }
+      ],
+      "median": {
+        "B/op": 74512.0,
+        "ns/op": 2140527.0,
+        "allocs/op": 27.0,
+        "ns/row": 21.41
+      }
+    },
+    "BenchmarkRawIteration/Cursor": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 3945869.0,
+          "ns/row": 39.46,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 10435748.0,
+          "ns/row": 104.4,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 3928271.0,
+          "ns/row": 39.28,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        }
+      ],
+      "median": {
+        "B/op": 99352.0,
+        "ns/op": 3945869.0,
+        "allocs/op": 1549.0,
+        "ns/row": 39.46
+      }
+    },
+    "BenchmarkRawRange/1": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 586.2,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 945.2,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 986.7,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        }
+      ],
+      "median": {
+        "B/op": 672.0,
+        "ns/op": 945.2,
+        "allocs/op": 7.0
+      }
+    },
+    "BenchmarkRawRange/8": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 1159.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 1373.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 1762.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        }
+      ],
+      "median": {
+        "B/op": 3531.0,
+        "ns/op": 1373.0,
+        "allocs/op": 13.0
+      }
+    },
+    "BenchmarkRawRange/128": {
+      "samples": [
+        {
+          "file": "1-alpha5-guards.txt",
+          "ns/op": 9145.0,
+          "B/op": 51851.0,
+          "allocs/op": 24.0
+        },
+        {
+          "file": "2-alpha5-guards.txt",
+          "ns/op": 9580.0,
+          "B/op": 51851.0,
+          "allocs/op": 24.0
+        },
+        {
+          "file": "3-alpha5-guards.txt",
+          "ns/op": 12729.0,
+          "B/op": 51850.0,
+          "allocs/op": 24.0
+        }
+      ],
+      "median": {
+        "B/op": 51851.0,
+        "ns/op": 9580.0,
+        "allocs/op": 24.0
+      }
+    },
+    "Isolated/BenchmarkChangeFeedDisabledGuard/Find": {
+      "samples": [
+        {
+          "file": "1-alpha5-isolated-reads.txt",
+          "ns/op": 404.6,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha5-isolated-reads.txt",
+          "ns/op": 416.9,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha5-isolated-reads.txt",
+          "ns/op": 421.8,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 0.0,
+        "ns/op": 416.9,
+        "allocs/op": 0.0
+      }
+    },
+    "Isolated/BenchmarkRawIteration/Cursor": {
+      "samples": [
+        {
+          "file": "1-alpha5-isolated-reads.txt",
+          "ns/op": 3913249.0,
+          "ns/row": 39.13,
+          "B/op": 99364.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "2-alpha5-isolated-reads.txt",
+          "ns/op": 3932808.0,
+          "ns/row": 39.33,
+          "B/op": 99359.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "3-alpha5-isolated-reads.txt",
+          "ns/op": 3933559.0,
+          "ns/row": 39.34,
+          "B/op": 99358.0,
+          "allocs/op": 1549.0
+        }
+      ],
+      "median": {
+        "B/op": 99359.0,
+        "ns/op": 3932808.0,
+        "allocs/op": 1549.0,
+        "ns/row": 39.33
+      }
+    }
+  },
+  "alpha6": {
+    "BenchmarkCountApteva/QueryPipeline": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 2824139.0,
+          "B/op": 1876168.0,
+          "allocs/op": 15113.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 3028079.0,
+          "B/op": 1876169.0,
+          "allocs/op": 15113.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 3156470.0,
+          "B/op": 1876182.0,
+          "allocs/op": 15113.0
+        }
+      ],
+      "median": {
+        "B/op": 1876169.0,
+        "ns/op": 3028079.0,
+        "allocs/op": 15113.0
+      }
+    },
+    "BenchmarkCountApteva/IndexCursor": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 1666567.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 1674548.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 2076700.0,
+          "B/op": 82648.0,
+          "allocs/op": 5043.0
+        }
+      ],
+      "median": {
+        "B/op": 82648.0,
+        "ns/op": 1674548.0,
+        "allocs/op": 5043.0
+      }
+    },
+    "BenchmarkCountApteva/NativeCount": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 6355.0,
+          "doc-fetches/op": 0.0,
+          "index-entries/op": 5000.0,
+          "retained-B/op": 24.0,
+          "B/op": 2488.0,
+          "allocs/op": 32.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 6244.0,
+          "doc-fetches/op": 0.0,
+          "index-entries/op": 5000.0,
+          "retained-B/op": 24.0,
+          "B/op": 2488.0,
+          "allocs/op": 32.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 6992.0,
+          "doc-fetches/op": 0.0,
+          "index-entries/op": 5000.0,
+          "retained-B/op": 24.0,
+          "B/op": 2488.0,
+          "allocs/op": 32.0
+        }
+      ],
+      "median": {
+        "ns/op": 6355.0,
+        "retained-B/op": 24.0,
+        "doc-fetches/op": 0.0,
+        "index-entries/op": 5000.0,
+        "B/op": 2488.0,
+        "allocs/op": 32.0
+      }
+    },
+    "BenchmarkCountApteva/NaturalCount": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 9147827.0,
+          "B/op": 72256.0,
+          "allocs/op": 50.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 9335332.0,
+          "B/op": 72256.0,
+          "allocs/op": 50.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 9207460.0,
+          "B/op": 72257.0,
+          "allocs/op": 50.0
+        }
+      ],
+      "median": {
+        "B/op": 72256.0,
+        "ns/op": 9207460.0,
+        "allocs/op": 50.0
+      }
+    },
+    "BenchmarkCountApteva/ResidualCount": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 2679777.0,
+          "B/op": 86041.0,
+          "allocs/op": 5085.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 4100180.0,
+          "B/op": 86041.0,
+          "allocs/op": 5085.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 2441319.0,
+          "B/op": 86040.0,
+          "allocs/op": 5085.0
+        }
+      ],
+      "median": {
+        "B/op": 86041.0,
+        "ns/op": 2679777.0,
+        "allocs/op": 5085.0
+      }
+    },
+    "BenchmarkCountSQLite/C": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 349028.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 125922.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 116764.0,
+          "B/op": 32.0,
+          "allocs/op": 2.0
+        }
+      ],
+      "median": {
+        "B/op": 32.0,
+        "ns/op": 125922.0,
+        "allocs/op": 2.0
+      }
+    },
+    "BenchmarkCountSQLite/Go": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 233081.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 228023.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 228491.0,
+          "B/op": 832.0,
+          "allocs/op": 8.0
+        }
+      ],
+      "median": {
+        "B/op": 832.0,
+        "ns/op": 228491.0,
+        "allocs/op": 8.0
+      }
+    },
+    "BenchmarkCountPebble": {
+      "samples": [
+        {
+          "file": "1-alpha6-count.txt",
+          "ns/op": 228800.0,
+          "B/op": 217.0,
+          "allocs/op": 14.0
+        },
+        {
+          "file": "2-alpha6-count.txt",
+          "ns/op": 221189.0,
+          "B/op": 216.0,
+          "allocs/op": 14.0
+        },
+        {
+          "file": "3-alpha6-count.txt",
+          "ns/op": 226573.0,
+          "B/op": 216.0,
+          "allocs/op": 14.0
+        }
+      ],
+      "median": {
+        "B/op": 216.0,
+        "ns/op": 226573.0,
+        "allocs/op": 14.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Upsert": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 521.4,
+          "B/op": 2.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 588.9,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 817.8,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 0.0,
+        "ns/op": 588.9,
+        "allocs/op": 0.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Find": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 404.8,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 638.8,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 713.2,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 0.0,
+        "ns/op": 638.8,
+        "allocs/op": 0.0
+      }
+    },
+    "BenchmarkChangeFeedDisabledGuard/Scan": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 1698126.0,
+          "ns/row": 16.98,
+          "B/op": 74519.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 1796076.0,
+          "ns/row": 17.96,
+          "B/op": 74520.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 2314664.0,
+          "ns/row": 23.15,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        }
+      ],
+      "median": {
+        "B/op": 74519.0,
+        "ns/op": 1796076.0,
+        "allocs/op": 27.0,
+        "ns/row": 17.96
+      }
+    },
+    "BenchmarkRawIteration/Scan": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 1823625.0,
+          "ns/row": 18.24,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 1807427.0,
+          "ns/row": 18.07,
+          "B/op": 74512.0,
+          "allocs/op": 27.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 2013597.0,
+          "ns/row": 20.14,
+          "B/op": 74522.0,
+          "allocs/op": 27.0
+        }
+      ],
+      "median": {
+        "B/op": 74512.0,
+        "ns/op": 1823625.0,
+        "allocs/op": 27.0,
+        "ns/row": 18.24
+      }
+    },
+    "BenchmarkRawIteration/Cursor": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 3879613.0,
+          "ns/row": 38.8,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 4260260.0,
+          "ns/row": 42.6,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 3976006.0,
+          "ns/row": 39.76,
+          "B/op": 99352.0,
+          "allocs/op": 1549.0
+        }
+      ],
+      "median": {
+        "B/op": 99352.0,
+        "ns/op": 3976006.0,
+        "allocs/op": 1549.0,
+        "ns/row": 39.76
+      }
+    },
+    "BenchmarkRawRange/1": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 604.2,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 607.4,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 601.1,
+          "B/op": 672.0,
+          "allocs/op": 7.0
+        }
+      ],
+      "median": {
+        "B/op": 672.0,
+        "ns/op": 604.2,
+        "allocs/op": 7.0
+      }
+    },
+    "BenchmarkRawRange/8": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 1154.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 1366.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 1203.0,
+          "B/op": 3531.0,
+          "allocs/op": 13.0
+        }
+      ],
+      "median": {
+        "B/op": 3531.0,
+        "ns/op": 1203.0,
+        "allocs/op": 13.0
+      }
+    },
+    "BenchmarkRawRange/128": {
+      "samples": [
+        {
+          "file": "1-alpha6-guards.txt",
+          "ns/op": 9021.0,
+          "B/op": 51852.0,
+          "allocs/op": 24.0
+        },
+        {
+          "file": "2-alpha6-guards.txt",
+          "ns/op": 9421.0,
+          "B/op": 51853.0,
+          "allocs/op": 24.0
+        },
+        {
+          "file": "3-alpha6-guards.txt",
+          "ns/op": 9701.0,
+          "B/op": 51850.0,
+          "allocs/op": 24.0
+        }
+      ],
+      "median": {
+        "B/op": 51852.0,
+        "ns/op": 9421.0,
+        "allocs/op": 24.0
+      }
+    },
+    "Isolated/BenchmarkChangeFeedDisabledGuard/Find": {
+      "samples": [
+        {
+          "file": "1-alpha6-isolated-reads.txt",
+          "ns/op": 401.9,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "2-alpha6-isolated-reads.txt",
+          "ns/op": 403.2,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "file": "3-alpha6-isolated-reads.txt",
+          "ns/op": 405.5,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median": {
+        "B/op": 0.0,
+        "ns/op": 403.2,
+        "allocs/op": 0.0
+      }
+    },
+    "Isolated/BenchmarkRawIteration/Cursor": {
+      "samples": [
+        {
+          "file": "1-alpha6-isolated-reads.txt",
+          "ns/op": 3977768.0,
+          "ns/row": 39.78,
+          "B/op": 99364.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "2-alpha6-isolated-reads.txt",
+          "ns/op": 3924269.0,
+          "ns/row": 39.24,
+          "B/op": 99358.0,
+          "allocs/op": 1549.0
+        },
+        {
+          "file": "3-alpha6-isolated-reads.txt",
+          "ns/op": 3934825.0,
+          "ns/row": 39.35,
+          "B/op": 99364.0,
+          "allocs/op": 1549.0
+        }
+      ],
+      "median": {
+        "B/op": 99364.0,
+        "ns/op": 3934825.0,
+        "allocs/op": 1549.0,
+        "ns/row": 39.35
+      }
+    }
+  }
+}

@@ -195,3 +195,42 @@ func TestRemoteWatchUsesSeparateConnections(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+func TestRemoteSnapshotCountDocuments(t *testing.T) {
+	_, c := watchFixture(t, server.Options{})
+	ctx := context.Background()
+	if err := c.CreateCollection(ctx, "counts"); err != nil {
+		t.Fatal(err)
+	}
+	rows := c.Collection("counts")
+	if err := rows.CreateCompoundIndex(ctx, "a", []db.IndexField{{Field: "a"}}, db.IndexOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := rows.InsertJSON(ctx, []byte("a"), []byte(`{"a":"x"}`)); err != nil {
+		t.Fatal(err)
+	}
+	snap, watch, err := c.SnapshotAndWatch(ctx, db.WatchOptions{Collections: []string{"counts"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer watch.Close()
+	defer snap.Close()
+	if err := rows.InsertJSON(ctx, []byte("b"), []byte(`{"a":"x"}`)); err != nil {
+		t.Fatal(err)
+	}
+	var stats db.QueryStats
+	n, err := snap.Collection("counts").CountDocuments(ctx, []byte(`{"a":"x"}`), db.CountOptions{Stats: &stats})
+	if err != nil || n != 1 || !stats.Plan.IndexOnly || stats.DocumentFetches != 0 {
+		t.Fatal(n, err, stats)
+	}
+	n, err = rows.CountDocuments(ctx, []byte(`{"a":"x"}`), db.CountOptions{})
+	if err != nil || n != 2 {
+		t.Fatal(n, err)
+	}
+	if err := snap.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := snap.Collection("counts").CountDocuments(ctx, nil, db.CountOptions{}); !errors.Is(err, db.ErrClosed) {
+		t.Fatal(err)
+	}
+}

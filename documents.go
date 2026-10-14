@@ -171,6 +171,7 @@ func (c *Collection) Query(ctx context.Context, filter []byte, opts QueryOptions
 			return false
 		}
 		stats.Examined++
+		stats.DocumentFetches++
 		if _, _, ok := docDir(doc); !ok {
 			return true
 		}

@@ -1,0 +1,7 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/db
+cpu: Apple M1 Pro
+BenchmarkChangeFeedDisabledGuard/Find-10         	 8846380	       404.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRawIteration/Cursor-10                  	     916	   3913249 ns/op	        39.13 ns/row	   99364 B/op	    1549 allocs/op
+PASS
