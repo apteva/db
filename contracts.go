@@ -356,9 +356,23 @@ func (db *DB) markFailed(err error) {
 			db.cond.Broadcast()
 		}
 		db.mu.Unlock()
+		if db.feed != nil {
+			db.feed.stop(err)
+		}
 	}
 }
-func (db *DB) syncWrite(w *wal, l lsn) error { err := w.sync(l); db.markFailed(err); return err }
+func (db *DB) syncWrite(w *wal, l lsn) error {
+	err := w.sync(l)
+	db.markFailed(err)
+	if db.feed != nil {
+		if err != nil {
+			db.feed.stop(err)
+		} else {
+			db.feed.syncReady(w.changeDurable())
+		}
+	}
+	return err
+}
 
 // Health reports whether the database can safely continue accepting requests.
 func (db *DB) Health() error {
@@ -377,6 +391,14 @@ func (db *DB) Health() error {
 
 // OpenCollection returns an existing collection without creating one.
 func (db *DB) OpenCollection(name string) (*Collection, error) {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	if db.closed {
+		return nil, ErrClosed
+	}
+	if db.failed != nil {
+		return nil, db.failed
+	}
 	c, ok := db.lookupCollection(name)
 	if !ok {
 		return nil, ErrNoSuchCollection

@@ -53,13 +53,16 @@ type wal struct {
 	bufStore, spareStore, inflightStore []byte // owned storage for the rotating buffers
 	kick                                chan struct{}
 
-	syncing  bool       // an fsync is in progress; its leader holds no lock meanwhile
-	syncDone *sync.Cond // broadcast when it finishes: every covered waiter returns at once
-	waiters  int        // writers waiting on the fsync in progress
-	grouped  bool       // the last fsync had waiters: the next leader lets a group form
-	syncFn   func(fileLike) error
-	maxFlush time.Duration // longest single flush write, for diagnostics
-	heapOnly bool          // bounded-cache mode preserves the original allocation policy
+	syncing    bool       // an fsync is in progress; its leader holds no lock meanwhile
+	syncDone   *sync.Cond // broadcast when it finishes: every covered waiter returns at once
+	waiters    int        // writers waiting on the fsync in progress
+	grouped    bool       // the last fsync had waiters: the next leader lets a group form
+	syncFn     func(fileLike) error
+	maxFlush   time.Duration      // longest single flush write, for diagnostics
+	retain     *ChangeFeedOptions // immutable during a live Open
+	strictSync bool               // rotation must fence concurrent synchronous commits
+	changeGens []changeGeneration // protected by mu
+	heapOnly   bool               // bounded-cache mode preserves the original allocation policy
 }
 
 func walPath(dir string, gen uint64) string {
@@ -177,9 +180,29 @@ func (w *wal) rotate() error {
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
+	for w.syncing {
+		w.syncDone.Wait()
+	}
 	if err := w.flushLocked(); err != nil { // also waits for an in-flight write
 		f.Close()
 		return err
+	}
+	if w.strictSync && w.durable < w.base {
+		if err := w.syncFn(w.f); err != nil {
+			w.err = err
+			f.Close()
+			return err
+		}
+		w.durable = w.base
+	}
+	if w.retain != nil {
+		for i := range w.changeGens {
+			if w.changeGens[i].gen == w.gen {
+				w.changeGens[i].size = w.base
+				w.changeGens[i].modified = time.Now()
+			}
+		}
+		w.changeGens = append(w.changeGens, changeGeneration{next, size, time.Now()})
 	}
 	w.switchLocked(f, next, size)
 	return nil
@@ -212,6 +235,10 @@ func (w *wal) size() uint64 {
 
 // dropBefore deletes generation files older than gen.
 func (w *wal) dropBefore(gen uint64) {
+	if w.retain != nil {
+		w.dropChangeBefore(gen)
+		return
+	}
 	gens, err := walGens(w.dir)
 	if err != nil {
 		return
@@ -579,9 +606,18 @@ func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bo
 			break
 		}
 		flags := rec[0]
+		if flags & ^byte(flagMore|flagDelete|flagFeed) != 0 {
+			break
+		}
 		klen := int(le.Uint16(rec[1:]))
 		if 3+klen > plen {
 			break
+		}
+		if flags&flagFeed != 0 {
+			p := rec[3:]
+			if flags != flagFeed || klen != 0 || len(p) < changeHeaderBytes+16 || string(p[:8]) != changeMagic || string(p[len(p)-8:]) != changeFooter || int(le.Uint32(p[len(p)-12:])) != plen+8 {
+				break
+			}
 		}
 		cur += 8 + uint64(plen)
 		if flags&flagMore != 0 {
@@ -595,8 +631,10 @@ func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bo
 			}
 		}
 		pending = pending[:0]
-		if err := fn(rec[3:3+klen], rec[3+klen:], flags&flagDelete != 0); err != nil {
-			return pos, err
+		if flags&flagFeed == 0 {
+			if err := fn(rec[3:3+klen], rec[3+klen:], flags&flagDelete != 0); err != nil {
+				return pos, err
+			}
 		}
 		pos = cur
 	}

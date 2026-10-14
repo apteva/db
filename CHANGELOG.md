@@ -5,6 +5,23 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [Unreleased — 0.2.0-alpha.5]
+
+- Add opt-in persistent native change feeds with filtered/projected Go and HTTP
+  cursors, atomic snapshot handoff, computed-collection events, bounded replay,
+  database-bound resume tokens and explicit history/resource errors.
+- Reuse original WAL values and add final commit markers instead of a second
+  value journal. Share hot metadata, match plans, replay data and small projections;
+  keep filtering outside the writer lock and avoid per-subscriber queues.
+- Add separate HTTP watch capacity/connections, heartbeat/write-idle handling,
+  leased read-only snapshots, close/cancellation cleanup and daemon capture flags.
+- Format 10 adds WAL-only commit markers and a persistent capture configuration.
+  Formats 3–9 upgrade both metadata slots synchronously. Keep an original-binary
+  backup; older binaries refuse the upgrade. Export/import remains version 2.
+- Fence synchronous WAL rotation against in-flight fsyncs and unsynced appends.
+  Publish collection creation atomically with its catalog; defer index-build
+  touch bookkeeping until staging limits have passed.
+
 ## [0.2.0-alpha.4] - 2026-10-13
 
 - Fix integer SUM/AVG overflow in serial aggregation and parallel shard merges.

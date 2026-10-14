@@ -497,6 +497,9 @@ func (db *DB) Close() error {
 		return ErrClosed
 	}
 	db.closed = true
+	if db.feed != nil {
+		db.feed.stop(ErrClosed)
+	}
 	db.cond.Broadcast()
 	if e := db.wal.close(); err == nil {
 		err = e
@@ -539,6 +542,9 @@ func (db *DB) crash() {
 	db.stopCheckpointer()
 	db.mu.Lock()
 	db.closed = true
+	if db.feed != nil {
+		db.feed.stop(ErrClosed)
+	}
 	db.cond.Broadcast()
 	db.wal.close()
 	db.pager.close()
@@ -596,7 +602,7 @@ func (db *DB) compact(ctx context.Context) error {
 	}
 	tmp := filepath.Join(db.dir, "compact.tmp")
 	os.RemoveAll(tmp)
-	ndb, err := db.copySnapshot(ctx, s, tmp, db.opts)
+	ndb, err := db.copySnapshot(ctx, s, tmp, db.opts, true)
 	s.Close()
 	if err != nil {
 		os.RemoveAll(tmp)
@@ -761,9 +767,10 @@ func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
 
 // copySnapshot writes the contents of s into a new database at dir and
 // returns it open, without its background goroutines.
-func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Options) (*DB, error) {
+func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Options, preserveFeed bool) (*DB, error) {
 	opts.MemtableBytes = -1
 	opts.Sync = false
+	opts.ChangeFeed = nil
 	ndb, err := Open(dir, opts)
 	if err != nil {
 		return nil, err
@@ -782,6 +789,14 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 	err = db.scan(view{db, s}, nil, nil, func(k, v []byte) bool {
 		if n++; n&4095 == 0 {
 			if cerr = ctx.Err(); cerr != nil {
+				return false
+			}
+		}
+		if !preserveFeed && string(k) == string(changeConfigKey) {
+			var err error
+			v, err = resetCopiedFeed(v)
+			if err != nil {
+				cerr = err
 				return false
 			}
 		}
@@ -870,7 +885,7 @@ func (db *DB) Backup(ctx context.Context, dir string) error {
 		return err
 	}
 	defer s.Close()
-	ndb, err := db.copySnapshot(ctx, s, dir, Options{})
+	ndb, err := db.copySnapshot(ctx, s, dir, Options{}, false)
 	if err != nil {
 		os.RemoveAll(dir)
 		return err

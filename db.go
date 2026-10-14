@@ -55,6 +55,8 @@ type Options struct {
 	// cache limit; 0 (inserts go straight to the tree) without one. Set to
 	// -1 to disable with a cache limit.
 	MemtableBytes int64
+	// ChangeFeed enables persistent opt-in change capture; see CHANGE_FEEDS.md.
+	ChangeFeed *ChangeFeedOptions
 }
 
 var (
@@ -67,11 +69,11 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.4"
+const Version = "0.2.0-alpha.5"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
-// formats 3 through 8 and upgrades them before returning; see FORMAT.md for the policy.
-const FormatVersion = 9
+// formats 3 through 9 and upgrades them before returning; see FORMAT.md for the policy.
+const FormatVersion = 10
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
@@ -124,13 +126,14 @@ type DB struct {
 	ckptReq       chan ckptRequest         // to the background checkpointer
 	ckptDone      chan struct{}            // closed when the checkpointer exits
 	ckptOnce      sync.Once
-	cond          *sync.Cond // signalled when imm drains or a checkpoint commits
-	failed        error      // set after an I/O error left in-memory state unsure; writes refuse
-	computedCount int        // configured collections; writer lock held
-	legacyFormat  bool       // recovery selected format 3; upgraded before Open returns
-	upgradeFormat bool       // either valid meta slot carries an older format
-	legacyViews   bool       // selected meta predates computed collections
-	derivedCount  int        // writer lock held
+	cond          *sync.Cond  // signalled when imm drains or a checkpoint commits
+	failed        error       // set after an I/O error left in-memory state unsure; writes refuse
+	computedCount int         // configured collections; writer lock held
+	legacyFormat  bool        // recovery selected format 3; upgraded before Open returns
+	upgradeFormat bool        // either valid meta slot carries an older format
+	legacyViews   bool        // selected meta predates computed collections
+	derivedCount  int         // writer lock held
+	feed          *changeFeed // immutable after Open; nil when capture is disabled
 }
 
 const metaMagic = "NDBMETA1"
@@ -150,6 +153,11 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	if opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
 		return nil, ErrOptions
+	}
+	if opts.ChangeFeed != nil {
+		if _, err := normalizeChangeOptions(*opts.ChangeFeed); err != nil {
+			return nil, err
+		}
 	}
 	absoluteDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -233,6 +241,11 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	w := newWAL(dir)
 	w.heapOnly = opts.CacheBytes > 0
+	w.strictSync = opts.Sync
+	if opts.ChangeFeed != nil && !opts.ChangeFeed.Disabled {
+		normalized, _ := normalizeChangeOptions(*opts.ChangeFeed)
+		w.retain = &normalized
+	}
 	switch opts.SyncMode {
 	case SyncBarrier:
 		w.syncFn = syncBarrier
@@ -296,6 +309,9 @@ func Open(dir string, opts Options) (*DB, error) {
 		db.legacyViews = false
 		db.upgradeFormat = false
 	}
+	if err == nil {
+		err = db.openChangeFeed()
+	}
 	if err != nil {
 		// release the lock and descriptors: a failed open must not wedge the next one
 		w.close()
@@ -345,6 +361,9 @@ func (db *DB) recover() error {
 			return err
 		}
 	}
+	if err := db.loadChangeRetention(); err != nil {
+		return err
+	}
 	db.activeStart = lsn{m.walGen, m.walOffset}
 	lastGen, end, err := db.wal.replayFrom(m.walGen, m.walOffset, db.putLocked)
 	if err != nil {
@@ -357,6 +376,11 @@ func (db *DB) recover() error {
 	if f, err := os.OpenFile(walPath(db.dir, lastGen), os.O_RDWR, 0); err == nil {
 		f.Truncate(int64(end))
 		f.Close()
+	}
+	if db.wal.retain != nil {
+		if err := db.wal.initChangeHistory(); err != nil {
+			return err
+		}
 	}
 	db.wal.dropBefore(m.walGen)
 	if db.memtableFull() {
@@ -668,6 +692,15 @@ func (b *Batch) commitLocked() (lsn, error) {
 		b.reset()
 		return lsn{}, ErrTransactionTooLarge
 	}
+	var frame *changeFrame
+	if db.feed != nil {
+		var err error
+		frame, err = db.feed.capture(b.buf)
+		if err != nil {
+			b.reset()
+			return lsn{}, err
+		}
+	}
 	if !b.internal && db.hasIndexes() {
 		if err := b.addIndexOpsLocked(); err != nil {
 			b.reset()
@@ -682,8 +715,20 @@ func (b *Batch) commitLocked() (lsn, error) {
 	last := b.buf[b.lastOff:]
 	last[8] &^= flagMore
 	le.PutUint32(last[4:], crc32.Checksum(last[8:], db.wal.crcTab))
+	if frame != nil {
+		last[8] |= flagMore
+		le.PutUint32(last[4:], crc32.Checksum(last[8:], db.wal.crcTab))
+		le.PutUint64(frame.encoded[11+48:], uint64(len(b.buf)))
+		le.PutUint32(frame.encoded[4:], crc32.Checksum(frame.encoded[8:], db.wal.crcTab))
+	}
 	db.noteActiveStartLocked()
-	l, err := db.wal.appendRaw(b.buf)
+	var l lsn
+	var err error
+	if frame != nil {
+		l, err = db.wal.appendFeed(b.buf, frame.encoded)
+	} else {
+		l, err = db.wal.appendRaw(b.buf)
+	}
 	if err == nil {
 		for off := 0; off < len(b.buf); {
 			plen := int(le.Uint32(b.buf[off:]))
@@ -697,6 +742,11 @@ func (b *Batch) commitLocked() (lsn, error) {
 	}
 	if err != nil {
 		db.failed = err
+		if db.feed != nil {
+			db.feed.stop(err)
+		}
+	} else if frame != nil {
+		db.feed.stage(frame, l)
 	}
 	b.reset()
 	return l, err
@@ -763,6 +813,14 @@ func (b *Batch) addIndexOpsLocked() error {
 	if err := db.validateUniqueDocumentsLocked(pending, db.indexDefs()); err != nil {
 		return err
 	}
+	if ib.n > 0 {
+		if b.limit != 0 && len(b.buf)+len(ib.buf) > b.limit {
+			return ErrTransactionTooLarge
+		}
+		b.buf = append(b.buf, ib.buf...)
+		b.lastOff = len(b.buf) - (len(ib.buf) - ib.lastOff)
+		b.n += ib.n
+	}
 	for key := range pending {
 		cid, uk, ok := splitKey([]byte(key))
 		if !ok {
@@ -773,14 +831,6 @@ func (b *Batch) addIndexOpsLocked() error {
 				t[string(uk)] = struct{}{}
 			}
 		}
-	}
-	if ib.n > 0 {
-		if b.limit != 0 && len(b.buf)+len(ib.buf) > b.limit {
-			return ErrTransactionTooLarge
-		}
-		b.buf = append(b.buf, ib.buf...)
-		b.lastOff = len(b.buf) - (len(ib.buf) - ib.lastOff)
-		b.n += ib.n
 	}
 	return nil
 }

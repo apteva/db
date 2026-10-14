@@ -27,29 +27,44 @@ type Options struct {
 	MaxRequestBytes                                          int64
 	MaxQueryMemoryBytes                                      int64
 	MaxConcurrentRequests, MaxTransactions, MaxAggregateRows int
+	MaxWatchers                                              int
+	WatchWriteTimeout                                        time.Duration
 	RequestTimeout, TransactionTTL                           time.Duration
 }
 type Server struct {
-	db         *db.DB
-	opts       Options
-	token      [32]byte
-	slots      chan struct{}
-	mu         sync.Mutex
-	sessions   map[string]*session
-	closed     bool
-	stop, done chan struct{}
-	wg         sync.WaitGroup
+	db          *db.DB
+	opts        Options
+	token       [32]byte
+	watchSlots  chan struct{}
+	watchCtx    context.Context
+	stopWatches context.CancelFunc
+	slots       chan struct{}
+	mu          sync.Mutex
+	sessions    map[string]*session
+	closed      bool
+	stop, done  chan struct{}
+	wg          sync.WaitGroup
 }
 type session struct {
-	mu      sync.Mutex
-	tx      *db.Tx
-	expires time.Time
-	closed  bool
+	mu       sync.Mutex
+	tx       *db.Tx
+	snapshot *db.Snapshot
+	expires  time.Time
+	closed   bool
 }
 
 func New(database *db.DB, opts Options) (*Server, error) {
 	if database == nil || len(opts.Token) < 16 {
 		return nil, errors.New("aptevadb: server requires a database and a token of at least 16 bytes")
+	}
+	if opts.MaxWatchers == 0 {
+		opts.MaxWatchers = 128
+	}
+	if opts.WatchWriteTimeout == 0 {
+		opts.WatchWriteTimeout = 30 * time.Second
+	}
+	if opts.MaxWatchers < 1 || opts.WatchWriteTimeout < time.Millisecond {
+		return nil, protocol.ErrBadRequest
 	}
 	if opts.MaxQueryMemoryBytes == 0 {
 		opts.MaxQueryMemoryBytes = db.DefaultQueryMemoryBytes
@@ -76,6 +91,8 @@ func New(database *db.DB, opts Options) (*Server, error) {
 		return nil, protocol.ErrBadRequest
 	}
 	s := &Server{db: database, opts: opts, token: sha256.Sum256([]byte(opts.Token)), slots: make(chan struct{}, opts.MaxConcurrentRequests), sessions: map[string]*session{}, stop: make(chan struct{}), done: make(chan struct{})}
+	s.watchCtx, s.stopWatches = context.WithCancel(context.Background())
+	s.watchSlots = make(chan struct{}, opts.MaxWatchers)
 	s.opts.Token = ""
 	go s.reap()
 	return s, nil
@@ -113,7 +130,11 @@ func (x *session) close() {
 	defer x.mu.Unlock()
 	if !x.closed {
 		x.closed = true
-		x.tx.Rollback()
+		if x.snapshot != nil {
+			x.snapshot.Close()
+		} else {
+			x.tx.Rollback()
+		}
 	}
 }
 
@@ -125,6 +146,7 @@ func (s *Server) Close() error {
 		return nil
 	}
 	s.closed = true
+	s.stopWatches()
 	close(s.stop)
 	all := s.sessions
 	s.sessions = map[string]*session{}
@@ -155,9 +177,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer s.wg.Done()
+	requestCtx := r.Context()
+	watchRequest := r.Method == http.MethodPost && r.URL.Path == "/v1/watch"
+	slots := s.slots
+	if watchRequest {
+		slots = s.watchSlots
+	}
 	select {
-	case s.slots <- struct{}{}:
-		defer func() { <-s.slots }()
+	case slots <- struct{}{}:
+		defer func() { <-slots }()
 	default:
 		s.respond(w, http.StatusServiceUnavailable, protocol.Response{Error: protocol.FromError(protocol.ErrBusy)})
 		return
@@ -174,11 +202,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.respond(w, status, protocol.Response{Version: db.Version, Format: db.FormatVersion, Error: protocol.FromError(err)})
 		return
 	}
-	if r.Method != http.MethodPost || (r.URL.Path != "/v1/rpc" && r.URL.Path != "/v1/query") {
+	if r.Method != http.MethodPost || (r.URL.Path != "/v1/rpc" && r.URL.Path != "/v1/query" && r.URL.Path != "/v1/watch") {
 		s.respond(w, http.StatusNotFound, protocol.Response{Error: protocol.FromError(protocol.ErrBadRequest)})
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, s.opts.MaxRequestBytes)
+	bodyLimit := s.opts.MaxRequestBytes
+	if watchRequest {
+		bodyLimit = min(bodyLimit, 1<<20)
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, bodyLimit)
 	defer r.Body.Close()
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -194,6 +226,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := s.db.Health(); err != nil {
 		s.respond(w, http.StatusServiceUnavailable, protocol.Response{Error: protocol.FromError(err)})
+		return
+	}
+	if watchRequest {
+		s.watch(w, r.WithContext(requestCtx), req)
+		return
+	}
+	if req.Watch != nil || req.WatchSnapshot {
+		s.respond(w, http.StatusBadRequest, protocol.Response{Error: protocol.FromError(protocol.ErrBadRequest)})
 		return
 	}
 	if r.URL.Path == "/v1/query" {
@@ -356,7 +396,11 @@ func (s *Server) transaction(ctx context.Context, r protocol.Request) (protocol.
 	x.mu.Lock()
 	defer x.mu.Unlock()
 	if x.closed || !time.Now().Before(x.expires) {
-		x.tx.Rollback()
+		if x.snapshot != nil {
+			x.snapshot.Close()
+		} else {
+			x.tx.Rollback()
+		}
 		x.closed = true
 		return out, db.ErrClosed
 	}
@@ -368,11 +412,29 @@ func (s *Server) transaction(ctx context.Context, r protocol.Request) (protocol.
 		s.mu.Lock()
 		delete(s.sessions, r.Transaction)
 		s.mu.Unlock()
+		if x.snapshot != nil {
+			x.snapshot.Close()
+			if r.Op == "rollback" {
+				return out, nil
+			}
+			return out, db.ErrReadOnly
+		}
 		if r.Op == "rollback" {
 			x.tx.Rollback()
 			return out, nil
 		}
 		return out, x.tx.CommitContext(ctx)
+	}
+	if x.snapshot != nil {
+		if r.Op != "get" {
+			return out, db.ErrReadOnly
+		}
+		c, err := x.snapshot.Collection(r.Collection)
+		if err != nil {
+			return out, err
+		}
+		out.Value, out.Found, err = c.Find(r.Key, nil)
+		return out, err
 	}
 	c, err := x.tx.Collection(r.Collection)
 	if err != nil {
@@ -395,11 +457,26 @@ func (s *Server) transaction(ctx context.Context, r protocol.Request) (protocol.
 	return out, err
 }
 func (s *Server) query(w http.ResponseWriter, r *http.Request, req protocol.Request) {
+	var c *db.Collection
+	var err error
 	if req.Transaction != "" {
-		s.respond(w, http.StatusBadRequest, protocol.Response{Error: protocol.FromError(protocol.ErrBadRequest)})
-		return
+		s.mu.Lock()
+		x := s.sessions[req.Transaction]
+		s.mu.Unlock()
+		if x == nil {
+			s.respond(w, http.StatusBadRequest, protocol.Response{Error: protocol.FromError(db.ErrClosed)})
+			return
+		}
+		x.mu.Lock()
+		defer x.mu.Unlock()
+		if x.closed || x.snapshot == nil || !time.Now().Before(x.expires) {
+			s.respond(w, http.StatusBadRequest, protocol.Response{Error: protocol.FromError(db.ErrClosed)})
+			return
+		}
+		c, err = x.snapshot.Collection(req.Collection)
+	} else {
+		c, err = s.db.OpenCollection(req.Collection)
 	}
-	c, err := s.db.OpenCollection(req.Collection)
 	if err != nil {
 		s.respond(w, http.StatusBadRequest, protocol.Response{Error: protocol.FromError(err)})
 		return

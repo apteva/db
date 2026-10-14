@@ -38,6 +38,11 @@ jobs:
           CURSOR_STRESS: 10m
           GOTRACEBACK: all
         run: go test -count=1 -timeout 25m -run '^TestCursorStress$' -v . 2>&1 | grep -E "^(--- |ok|FAIL|panic|fatal error|unexpected fault)"
+      - name: change feed stress
+        env:
+          CHANGE_FEED_STRESS: 10m
+          GOTRACEBACK: all
+        run: go test -count=1 -timeout 25m -run '^TestChangeFeedStress$' -v .
       - name: soak
         env:
           SOAK: ${{ github.event.inputs.duration || '60m' }}

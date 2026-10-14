@@ -51,6 +51,10 @@ jobs:
           cache-dependency-path: bench/go.sum
       - name: race pass
         run: go test -race -count=1 -timeout 45m ./...
+      - name: change feed stress
+        env:
+          CHANGE_FEED_STRESS: 2m
+        run: go test -race -count=1 -timeout 10m -run '^TestChangeFeedStress$' .
 
   fuzz:
     name: fuzz smoke (ubuntu)
@@ -70,3 +74,6 @@ jobs:
         run: go test -run='^$' -fuzz='^FuzzPage$' -fuzztime=45s .
       - name: wide page splits
         run: go test -run='^$' -fuzz='^FuzzWidePageSplit$' -fuzztime=45s .
+
+      - name: change markers
+        run: go test -run='^$' -fuzz='^FuzzChangeMarker$' -fuzztime=45s .

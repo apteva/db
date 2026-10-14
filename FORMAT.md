@@ -1,6 +1,6 @@
 # On-disk format
 
-Format version **9**, as `aptevadb.FormatVersion`. This document is the
+Format version **10**, as `aptevadb.FormatVersion`. This document is the
 contract for what a build writes and reads; the policy for changing it is at
 the end.
 
@@ -186,9 +186,9 @@ checkpoint is dropped at close and after compaction.
 
 ## Compatibility policy
 
-- `Open` reads formats 3 through 9. Older supported formats are upgraded with
+- `Open` reads formats 3 through 10. Older supported formats are upgraded with
   two synchronous full checkpoints, replacing both alternating meta slots
-  before `Open` returns. Format 9 is durable before non-null-count definitions
+  before `Open` returns. Format 10 is durable before change markers
   can enter the WAL. Older binaries refuse it,
   including after a crash or a damaged newest meta page. This is a one-way
   upgrade; retain a backup for older binaries. Other versions are refused with
@@ -247,3 +247,14 @@ checkpoint is dropped at close and after compaction.
   reject the format before recovery so they cannot replay or update definitions
   whose contribution semantics they do not support. Existing format-8 definitions
   and rows retain their meaning; queries gain widened integer SUM/AVG accumulation.
+
+
+- Format 10 adds persistent change-capture configuration under reserved key
+  `\x00F` and WAL-only final commit markers with flag bit 2. A marker has key
+  length zero, magic CFMARK10, capture/run identities, timestamp, referenced raw
+  group length, dictionary-encoded collection names and final-operation/key
+  references. Its footer contains its framed length and CFEND010. The group is
+  atomic only when that marker is intact; replay skips the marker itself.
+  Retention may preserve checkpointed WAL files for replay. Marker values are
+  references to original records, not copies of document payloads. See
+  CHANGE_FEEDS.md for lifecycle, limits and migration. Export version stays 2.

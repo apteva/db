@@ -183,12 +183,16 @@ func (p *computedCollectionPlan) matches(doc []byte) bool {
 	return matchAll(p.preds, func(path string) value { return pathValue(value{k: kDoc, s: doc}, path) })
 }
 func (p *computedCollectionPlan) projectDoc(doc []byte) ([]byte, error) {
+	return p.projectDocCapacity(doc, len(doc))
+}
+
+func (p *computedCollectionPlan) projectDocCapacity(doc []byte, capacity int) ([]byte, error) {
 	if p.project == nil {
 		return doc, nil
 	}
 	n, dir, _ := docDir(doc)
 	contentEnd := docContentEnd(doc, n, dir)
-	out := make([]byte, 0, len(doc))
+	out := make([]byte, 0, capacity)
 	var smallOffsets [32]uint32
 	offsets := smallOffsets[:]
 	if n > len(offsets) {
@@ -403,4 +407,51 @@ func (db *DB) scanLocked(ctx context.Context, start, end []byte, keysOnly bool, 
 		return err
 	}
 	return emitMem(nil)
+}
+
+// Watch projection reserves only selected bytes, keeping large omitted payloads
+// out of per-subscriber output buffers. Called after document validation.
+func (p *computedCollectionPlan) projectCapacity(doc []byte) int {
+	n, dir, _ := docDir(doc)
+	end := docContentEnd(doc, n, dir)
+	bytes, count := 0, 0
+	for i := 0; i < n; i++ {
+		off := docOffset(dir, n, i)
+		next := end
+		if i+1 < n {
+			next = docOffset(dir, n, i+1)
+		}
+		name := string(doc[off+1 : off+1+int(doc[off])])
+		keep := p.project[name]
+		if name == "_id" {
+			keep = true
+			if x, ok := p.project[name]; ok {
+				keep = x
+			}
+		}
+		if keep {
+			bytes += next - off
+			count++
+		}
+	}
+	return bytes + count*4 + 9
+}
+
+func (p *computedCollectionPlan) projectKeepsAll(doc []byte) bool {
+	n, dir, _ := docDir(doc)
+	for i := 0; i < n; i++ {
+		off := docOffset(dir, n, i)
+		name := string(doc[off+1 : off+1+int(doc[off])])
+		keep := p.project[name]
+		if name == "_id" {
+			keep = true
+			if x, ok := p.project[name]; ok {
+				keep = x
+			}
+		}
+		if !keep {
+			return false
+		}
+	}
+	return true
 }

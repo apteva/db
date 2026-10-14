@@ -1,0 +1,4 @@
+package main
+import("context";"os";db "github.com/apteva/db")
+func must(e error){if e!=nil{panic(e)}}
+func main(){d,e:=db.Open(os.Args[1],db.Options{Sync:true,SyncMode:db.SyncOS});must(e);c,e:=d.Collection("source");must(e);must(c.InsertJSON([]byte("a"),[]byte(`{"n":9007199254740993,"v":0}`)));must(c.InsertJSON([]byte("b"),[]byte(`{"v":null}`)));_,e=d.CreateComputedCollection(context.Background(),"present","source",[]byte(`[{"$group":{"_id":null,"n":{"$countNonNull":"$v"}}}]`));must(e);must(d.Checkpoint());must(d.Close())}

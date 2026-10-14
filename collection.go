@@ -226,7 +226,15 @@ func (db *DB) Collection(name string) (*Collection, error) {
 	b := db.NewBatch()
 	b.internal = true
 	b.add(collCatalogKey(name), meta, false)
-	if err := b.Commit(); err != nil {
+	db.mu.Lock()
+	if err := db.maintenanceReadyLocked(context.Background()); err != nil {
+		db.mu.Unlock()
+		return nil, err
+	}
+	w := db.wal
+	l, err := b.commitLocked()
+	if err != nil {
+		db.mu.Unlock()
 		return nil, err
 	}
 	c := newCollection(db, name, id)
@@ -235,6 +243,16 @@ func (db *DB) Collection(name string) (*Collection, error) {
 	db.colls.byID[id] = c
 	db.colls.nextID = id + 1
 	db.colls.mu.Unlock()
+	need := db.needCheckpoint()
+	db.mu.Unlock()
+	if db.opts.Sync {
+		if err = db.syncWrite(w, l); err != nil {
+			return nil, err
+		}
+	}
+	if need {
+		db.requestCheckpoint()
+	}
 	return c, nil
 }
 
@@ -368,13 +386,31 @@ func (c *Collection) write(key, val []byte, del bool) error {
 				return err
 			}
 		}
+		var frame *changeFrame
+		if db.feed != nil {
+			frame, err = db.feed.captureOne(c, key[len(c.pfx):], key, val, del, nil)
+			if err != nil {
+				db.mu.Unlock()
+				return err
+			}
+		}
 		db.noteActiveStartLocked()
-		l, err = w.append(key, val, del)
+		if frame != nil {
+			l, err = w.appendOneFeed(key, val, del, frame.encoded)
+		} else {
+			l, err = w.append(key, val, del)
+		}
 		if err == nil {
 			err = db.putLocked(key, val, del)
 		}
+		if err == nil && frame != nil {
+			db.feed.stage(frame, l)
+		}
 		if err != nil {
 			db.failed = err
+			if db.feed != nil {
+				db.feed.stop(err)
+			}
 		}
 	}
 	needCkpt := db.needCheckpoint()

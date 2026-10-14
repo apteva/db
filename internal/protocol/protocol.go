@@ -25,30 +25,35 @@ type Operation struct {
 	Value      []byte `json:"value,omitempty"`
 }
 type Request struct {
-	Op             string          `json:"op"`
-	Collection     string          `json:"collection,omitempty"`
-	Name           string          `json:"name,omitempty"`
-	Field          string          `json:"field,omitempty"`
-	Source         string          `json:"source,omitempty"`
-	Transaction    string          `json:"transaction,omitempty"`
-	Key            []byte          `json:"key,omitempty"`
-	Value          []byte          `json:"value,omitempty"`
-	Fields         []db.IndexField `json:"fields,omitempty"`
-	NullsDistinct  bool            `json:"nulls_distinct,omitempty"`
-	Sparse         bool            `json:"sparse,omitempty"`
-	Sort           []db.IndexField `json:"sort,omitempty"`
-	Hint           string          `json:"hint,omitempty"`
-	KeyDescending  bool            `json:"key_descending,omitempty"`
-	MaxMemoryBytes int64           `json:"max_memory_bytes,omitempty"`
-	Unique         bool            `json:"unique,omitempty"`
-	Pipeline       json.RawMessage `json:"pipeline,omitempty"`
-	Definitions    json.RawMessage `json:"definitions,omitempty"`
-	Filter         json.RawMessage `json:"filter,omitempty"`
-	Skip           int             `json:"skip,omitempty"`
-	Limit          int             `json:"limit,omitempty"`
-	Operations     []Operation     `json:"operations,omitempty"`
+	Watch          *db.WatchOptions `json:"watch,omitempty"`
+	WatchSnapshot  bool             `json:"watch_snapshot,omitempty"`
+	Op             string           `json:"op"`
+	Collection     string           `json:"collection,omitempty"`
+	Name           string           `json:"name,omitempty"`
+	Field          string           `json:"field,omitempty"`
+	Source         string           `json:"source,omitempty"`
+	Transaction    string           `json:"transaction,omitempty"`
+	Key            []byte           `json:"key,omitempty"`
+	Value          []byte           `json:"value,omitempty"`
+	Fields         []db.IndexField  `json:"fields,omitempty"`
+	NullsDistinct  bool             `json:"nulls_distinct,omitempty"`
+	Sparse         bool             `json:"sparse,omitempty"`
+	Sort           []db.IndexField  `json:"sort,omitempty"`
+	Hint           string           `json:"hint,omitempty"`
+	KeyDescending  bool             `json:"key_descending,omitempty"`
+	MaxMemoryBytes int64            `json:"max_memory_bytes,omitempty"`
+	Unique         bool             `json:"unique,omitempty"`
+	Pipeline       json.RawMessage  `json:"pipeline,omitempty"`
+	Definitions    json.RawMessage  `json:"definitions,omitempty"`
+	Filter         json.RawMessage  `json:"filter,omitempty"`
+	Skip           int              `json:"skip,omitempty"`
+	Limit          int              `json:"limit,omitempty"`
+	Operations     []Operation      `json:"operations,omitempty"`
 }
 type Response struct {
+	Change      *db.Change       `json:"change,omitempty"`
+	WatchReady  bool             `json:"watch_ready,omitempty"`
+	ChangeToken string           `json:"change_token,omitempty"`
 	Plan        *db.QueryPlan    `json:"plan,omitempty"`
 	QueryStats  *db.QueryStats   `json:"query_stats,omitempty"`
 	Error       *Error           `json:"error,omitempty"`
@@ -78,6 +83,7 @@ var codes = map[string]error{
 	"computed_exists": db.ErrComputedCollectionExists, "document": db.ErrDocument, "collection_name": db.ErrCollectionName,
 	"computed": db.ErrComputedCollection, "computed_field": db.ErrComputedField, "computed_nonempty": db.ErrComputedNonEmpty,
 	"too_large": db.ErrTransactionTooLarge, "key_size": db.ErrKeySize, "value_size": db.ErrValueSize, "limit": db.ErrLimit, "pipeline": db.ErrPipeline,
+	"change_disabled": db.ErrChangeFeedDisabled, "history_expired": db.ErrHistoryExpired, "resume_invalid": db.ErrResumeInvalid, "watch_limit": db.ErrWatchLimit,
 	"cancelled": context.Canceled, "timeout": context.DeadlineExceeded, "bad_request": ErrBadRequest, "unauthorized": ErrUnauthorized, "busy": ErrBusy,
 }
 

@@ -42,6 +42,10 @@ func (db *DB) readSnapshot() (*Snapshot, error) { return db.snapshot(false) }
 func (db *DB) snapshot(logPosition bool) (*Snapshot, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
+	return db.snapshotLocked(logPosition)
+}
+
+func (db *DB) snapshotLocked(logPosition bool) (*Snapshot, error) {
 	if db.closed {
 		return nil, ErrClosed
 	}

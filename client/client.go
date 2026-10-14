@@ -28,11 +28,17 @@ var ErrCommitUnknown = errors.New("aptevadb: write outcome unknown; do not retry
 
 type Error = protocol.Error
 type Options struct {
-	Token      string
-	HTTPClient *http.Client
+	MaxWatchers int
+	Token       string
+	HTTPClient  *http.Client
 }
 type Client struct {
 	baseURL, token string
+	watchHTTP      *http.Client
+	watchCtx       context.Context
+	stopWatch      context.CancelFunc
+	watchSlots     chan struct{}
+	watchOwned     bool
 	http           *http.Client
 	owned          bool
 	closed         atomic.Bool
@@ -67,10 +73,35 @@ func New(baseURL string, opts Options) (*Client, error) {
 	// write's method/location. Copy a provided client without altering it.
 	copyClient := *h
 	copyClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	return &Client{baseURL: strings.TrimSuffix(baseURL, "/"), token: opts.Token, http: &copyClient, owned: owned}, nil
+	watchClient := copyClient
+	watchClient.Timeout = 0
+	watchOwned := false
+	if transport, ok := copyClient.Transport.(*http.Transport); ok {
+		wt := transport.Clone()
+		wt.MaxConnsPerHost = 0
+		wt.MaxIdleConnsPerHost = 8
+		wt.MaxIdleConns = 16
+		if wt.ResponseHeaderTimeout == 0 {
+			wt.ResponseHeaderTimeout = 35 * time.Second
+		}
+		watchClient.Transport = wt
+		watchOwned = true
+	}
+	if opts.MaxWatchers == 0 {
+		opts.MaxWatchers = 128
+	}
+	if opts.MaxWatchers < 1 {
+		return nil, db.ErrOptions
+	}
+	watchCtx, stopWatch := context.WithCancel(context.Background())
+	return &Client{watchHTTP: &watchClient, watchCtx: watchCtx, stopWatch: stopWatch, watchSlots: make(chan struct{}, opts.MaxWatchers), watchOwned: watchOwned, baseURL: strings.TrimSuffix(baseURL, "/"), token: opts.Token, http: &copyClient, owned: owned}, nil
 }
 func (c *Client) Close() error {
 	c.closed.Store(true)
+	c.stopWatch()
+	if c.watchOwned {
+		c.watchHTTP.CloseIdleConnections()
+	}
 	if c.owned {
 		c.http.CloseIdleConnections()
 	}
@@ -244,6 +275,9 @@ func (e *notSentError) Error() string { return e.cause.Error() }
 func (e *notSentError) Unwrap() error { return e.cause }
 
 func (c *Client) send(ctx context.Context, path string, req protocol.Request) (*http.Response, error) {
+	return c.sendUsing(ctx, path, req, c.http)
+}
+func (c *Client) sendUsing(ctx context.Context, path string, req protocol.Request, h *http.Client) (*http.Response, error) {
 	if c.closed.Load() {
 		return nil, &notSentError{db.ErrClosed}
 	}
@@ -271,7 +305,7 @@ func (c *Client) send(ctx context.Context, path string, req protocol.Request) (*
 	}
 	r.Header.Set("Authorization", "Bearer "+c.token)
 	r.Header.Set("Content-Type", "application/json")
-	return c.http.Do(r)
+	return h.Do(r)
 }
 func mutation(op string) bool {
 	switch op {

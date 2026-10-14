@@ -46,7 +46,7 @@ not repair arbitrary corruption. Keep verified backups on separate storage and
 regularly restore one into a disposable directory to check your recovery process.
 
 `aptevadbctl format ./data` reads metadata without opening or upgrading.
-Open upgrades formats 3–8 to 9 synchronously and permanently. Back up with the
+Open upgrades formats 3–9 to 10 synchronously and permanently. Back up with the
 original binary before upgrading; retain that binary for the original backup.
 Older binaries refuse the upgraded directory. Format 9 adds non-null counts in maintained definitions; format 8 permits wider index cells; format 7 introduced exact/compound index encodings and extended documents;
 see FORMAT.md and the real historical fixture under testdata/format5.
@@ -102,3 +102,10 @@ for large-cardinality parallel groups. Close snapshots and cursors promptly.
 Logical exports now write version 2, preserving compound directions and nullable
 constraints; Import still reads version 1. Older binaries reject version-2 exports
 instead of silently losing new index contracts.
+
+
+Native capture settings persist once enabled; nil options preserve them. Use
+CHANGE_FEEDS.md for history windows, snapshot leases and limits. Logical expiry
+can precede segment deletion; the recovery tail is retained. Backups/restores
+start a fresh change-stream identity and do not carry its history. Format-10
+upgrades are permanent and older binaries cannot open the directory.

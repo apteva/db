@@ -97,3 +97,16 @@ by default). Its frame/request limit is now 32 MiB, allowing base64 encoding of
 transport encoding/decoding and snapshot/page-cache storage. The embedded physical
 IndexCursor API is available to adapters in the owning process; remote clients
 use the ordered streaming Query API.
+
+
+## Native change feeds (alpha.5 development)
+
+`POST /v1/watch` serves authenticated NDJSON subscriptions with collection/key/
+operation/document filters, projection, replay tokens and bounded resource errors.
+`watch_snapshot:true` creates an expiring read-only snapshot session whose get,
+query and rollback operations use the existing transaction token field. Live
+streams use a separate MaxWatchers limit (default 128), caller/server cancellation,
+heartbeats and WatchWriteTimeout (default 30s) rather than the ordinary request
+execution deadline. The Go client has separate watch connections and no overall
+watch timeout. Capture is opt-in through DB.Options or daemon `-change-feed` and
+persists across later opens; see [CHANGE_FEEDS.md](CHANGE_FEEDS.md).

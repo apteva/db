@@ -26,6 +26,9 @@ func run() error {
 	listen := flag.String("listen", "127.0.0.1:5282", "listen address")
 	cert := flag.String("tls-cert", "", "TLS certificate file")
 	key := flag.String("tls-key", "", "TLS private-key file")
+	feed := flag.Bool("change-feed", false, "enable persistent native change capture")
+	feedBytes := flag.Int64("change-history-bytes", 256<<20, "logical change history byte window")
+	feedAge := flag.Duration("change-history-age", time.Hour, "change history age window")
 	version := flag.Bool("version", false, "print version")
 	flag.Parse()
 	if *version {
@@ -47,7 +50,11 @@ func run() error {
 	if len(token) < 16 {
 		return errors.New("set APTEVADB_TOKEN to a random token of at least 16 bytes")
 	}
-	database, err := db.Open(*dir, db.DurableOptions())
+	opts := db.DurableOptions()
+	if *feed {
+		opts.ChangeFeed = &db.ChangeFeedOptions{RetentionBytes: *feedBytes, RetentionAge: *feedAge}
+	}
+	database, err := db.Open(*dir, opts)
 	if err != nil {
 		return err
 	}
