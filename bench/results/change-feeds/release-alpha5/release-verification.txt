@@ -1,0 +1,11 @@
+aptevadbctl 0.2.0-alpha.5 (format 10)
+AptevaDB 0.2.0-alpha.5 (format 10, HTTP v1)
+Public go install: aptevadbctl 0.2.0-alpha.5 (format 10)
+embedded: exact integer filter, projection, snapshot handoff, shared source/view commit, compaction, persisted capture, replay and membership delete passed
+{"format":10,"version":"0.2.0-alpha.5"}
+ok
+public Go HTTP driver: filtered/projected watch, leased snapshot find/query and resume passed
+{"format":10,"version":"0.2.0-alpha.5"}
+{"downloaded_daemon_idle_watch_shutdown_seconds": 0.01754408294800669, "exit_code": 0, "public_module_version": "v0.2.0-alpha.5"}
+ok
+All four archives/checksums, public module/install, embedded API, public HTTP driver and downloaded daemon verified.

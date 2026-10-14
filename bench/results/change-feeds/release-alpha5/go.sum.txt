@@ -1,0 +1,2 @@
+github.com/apteva/db v0.2.0-alpha.5 h1:srqnpPwygVrSBtbvEBD/7ErRNvwFjxaOEZEl48f+F0M=
+github.com/apteva/db v0.2.0-alpha.5/go.mod h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc=

@@ -1,6 +1,6 @@
 # Native change feeds: validation and performance
 
-Final runtime: `a6040dc781d5b29337e1d6fc231ed93ffdbb184e` (main, alpha.5 development). Public alpha.4 baseline: `bff9d0e956989bb566c48addb34377955a402f50`. No alpha.5 release tag is part of this change. See [the API and contracts](../../../CHANGE_FEEDS.md).
+Benchmark runtime: `a6040dc781d5b29337e1d6fc231ed93ffdbb184e`. Public alpha.4 baseline: `bff9d0e956989bb566c48addb34377955a402f50`. Alpha.5 was subsequently released at `2dbc4d428c82e281f1489dd450004a6d33b3adfc`; the engine/server/client Go source is unchanged. Release verification is below. See [the API and contracts](../../../CHANGE_FEEDS.md).
 
 Native embedded and HTTP Go watches support collection/operation/key-prefix filters, Query document predicates, projection, commit-boundary resume tokens, and atomic SnapshotAndWatch. Source and computed-collection events share their original committed WAL group; values are not logged twice. Capture is opt-in and persistent. Default shared hot cache is 8 MiB, aggregate plan/reader budget is 64 MiB, and history is a logical 256 MiB / one hour. These are accounting limits, not total RSS caps. Segment boundaries and the active recovery tail can make physical WAL retention larger.
 
@@ -122,3 +122,40 @@ retains all results. Resource/footprint collection here targets macOS; Linux
 needs the runner's sysctl metadata calls replaced with its hardware metadata.
 The embedded consumer can also be run from native-consumer/ with
 `GOWORK=off go run . /path/to/fresh-data`.
+
+
+## Published alpha.5 release verification
+
+[v0.2.0-alpha.5](https://github.com/apteva/db/releases/tag/v0.2.0-alpha.5) is a
+published public prerelease, tagged at `2dbc4d428c82e281f1489dd450004a6d33b3adfc`.
+The release preparation updates documentation/packaging and adds change-feed
+stress to release verification; production Go source is unchanged from the
+benchmarked/validated runtime. The tag remains on the verified release commit;
+this evidence follow-up changes no runtime code.
+
+- [Exact release-commit source CI](https://github.com/apteva/db/actions/runs/38547185723)
+  passed Linux/macOS vet, build, unit tests, full race suites, two-minute feed
+  stress and Ubuntu fuzzing. Local 60-second cursor/feed/soak tests under race
+  detection passed in 190.058 seconds before the tag was pushed.
+- [Release workflow](https://github.com/apteva/db/actions/runs/38548706415)
+  passed tag/version matching, Linux/macOS vet/full race and 60-second
+  cursor/feed/soak checks, all four builds and publication. Duplicate
+  tag-triggered source CI was canceled because the same commit had already
+  passed source CI; independent release verification completed successfully.
+- Downloaded all Linux/macOS amd64/arm64 archives and verified every SHA256SUMS
+  entry. Each archive includes CHANGE_FEEDS.md and the alpha.5 README.
+- Downloaded native CLI/server report alpha.5, format 10. The CLI verified both
+  the embedded smoke database and the stopped daemon database.
+- A fresh public consumer resolves alpha.5 through proxy.golang.org with
+  sum.golang.org checksum verification, no local replace and no workspace.
+  Its origin hash equals the release commit. Public go install also passes.
+- The public embedded API verified exact integer filtering, projection,
+  consistent snapshot handoff, source/view events in one commit, compaction,
+  reopen with persistent capture, resume and computed-membership Delete.
+- The downloaded daemon plus public HTTP Go client verified snapshot find/query,
+  filtered/projected delivery and reconnect/resume. SIGTERM with an idle watch
+  completed in 17.5 ms with exit code zero.
+
+Metadata, checksums, logs, the public consumer source and verification script
+are retained under release-alpha5/. The original benchmark caveats above remain
+applicable; publication does not turn noisy timings into a no-regression claim.

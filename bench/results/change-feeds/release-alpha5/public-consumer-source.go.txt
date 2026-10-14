@@ -1,0 +1,51 @@
+package main
+
+import (
+ "context"
+ "encoding/json"
+ "fmt"
+ "os"
+ "time"
+ db "github.com/apteva/db"
+ "github.com/apteva/db/client"
+)
+func must(err error) { if err != nil { panic(err) } }
+func require(ok bool, what any) { if !ok { panic(what) } }
+func embedded(dir string) {
+ ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second);defer cancel()
+ opts:=db.DurableOptions();opts.SyncMode=db.SyncOS;opts.ChangeFeed=&db.ChangeFeedOptions{}
+ d,err:=db.Open(dir,opts);must(err)
+ c,err:=d.Collection("orders");must(err)
+ must(c.InsertJSON([]byte("a"),[]byte(`{"paid":true,"n":9007199254740993,"omit":"unused"}`)))
+ _,err=d.CreateComputedCollection(ctx,"paid","orders",[]byte(`[{"$match":{"paid":true}},{"$project":{"n":1}}]`));must(err)
+ s,w,err:=d.SnapshotAndWatch(ctx,db.WatchOptions{Collections:[]string{"orders","paid"},Filter:[]byte(`{"n":{"$gte":9007199254740993}}`),IncludeValues:true,Fields:[]string{"n"}});must(err)
+ must(c.UpsertJSON([]byte("a"),[]byte(`{"paid":true,"n":9007199254740994,"omit":"unused"}`)))
+ sc,err:=s.Collection("orders");must(err);var initial map[string]any;ok,err:=sc.FindDocument([]byte("a"),&initial);must(err);require(ok&&initial["n"]==int64(9007199254740993),initial)
+ seen:=map[string]bool{};token:=""
+ for i:=0;i<2;i++ { require(w.Next(),w.Err());change:=w.Change();var row map[string]any;must(change.Decode(&row));require(len(row)==1&&row["n"]==int64(9007199254740994),row);if token=="" { token=change.CommitToken };require(token==change.CommitToken,change);seen[change.Collection]=true;require(change.EndOfCommit==(i==1),change) }
+ require(seen["orders"]&&seen["paid"],seen)
+ must(w.Close());s.Close();must(d.Compact(ctx));must(d.Close())
+ d,err=db.Open(dir,db.DurableOptions());must(err);defer d.Close()
+ c,err=d.OpenCollection("orders");must(err)
+ w,err=d.Watch(ctx,db.WatchOptions{Collections:[]string{"paid"},After:token});must(err);defer w.Close()
+ must(c.UpsertJSON([]byte("a"),[]byte(`{"paid":false,"n":42}`)))
+ require(w.Next(),w.Err());require(w.Change().Operation==db.ChangeDelete&&w.Change().EndOfCommit,w.Change())
+ fmt.Println("embedded: exact integer filter, projection, snapshot handoff, shared source/view commit, compaction, persisted capture, replay and membership delete passed")
+}
+func remote(url,token string) {
+ ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second);defer cancel()
+ c,err:=client.New(url,client.Options{Token:token});must(err);defer c.Close()
+ must(c.CreateCollection(ctx,"live"));collection:=c.Collection("live")
+ must(collection.InsertJSON(ctx,[]byte("a"),[]byte(`{"n":1,"omit":"unused"}`)))
+ s,w,err:=c.SnapshotAndWatch(ctx,db.WatchOptions{Collections:[]string{"live"},Filter:[]byte(`{"n":{"$gte":1}}`),IncludeValues:true,Fields:[]string{"n"}});must(err)
+ must(collection.UpsertJSON(ctx,[]byte("a"),[]byte(`{"n":2,"omit":"unused"}`)))
+ var initial map[string]any;ok,err:=s.Collection("live").FindDocument(ctx,[]byte("a"),&initial);must(err);require(ok&&initial["n"]==int64(1),initial)
+ q,err:=s.Collection("live").Query(ctx,[]byte(`{}`),db.QueryOptions{});must(err);count:=0;for q.Next(){count++};must(q.Err());must(q.Close());require(count==1,count)
+ require(w.Next(),w.Err());change:=w.Change();var row map[string]any;must(change.Decode(&row));require(change.EndOfCommit&&len(row)==1&&row["n"]==int64(2),row);saved:=change.CommitToken
+ must(s.Close());must(w.Close())
+ w,err=c.Watch(ctx,db.WatchOptions{Collections:[]string{"live"},After:saved,IncludeValues:true});must(err);defer w.Close()
+ must(collection.InsertJSON(ctx,[]byte("b"),[]byte(`{"n":3}`)))
+ require(w.Next(),w.Err());require(string(w.Change().Key)=="b"&&w.Change().EndOfCommit,w.Change())
+ fmt.Println("public Go HTTP driver: filtered/projected watch, leased snapshot find/query and resume passed")
+}
+func main(){require(db.Version=="0.2.0-alpha.5"&&db.FormatVersion==10,db.Version);if os.Args[1]=="embedded" {embedded(os.Args[2])} else {remote(os.Args[2],os.Getenv("APTEVADB_TOKEN"))};b,_:=json.Marshal(map[string]any{"version":db.Version,"format":db.FormatVersion});fmt.Println(string(b))}
