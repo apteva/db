@@ -1,0 +1,3 @@
+ok
+{"health": {"version": "0.2.0-alpha.5", "format": 10}, "watch_replay": true, "idle_watch_shutdown_seconds": 0.017031166004016995, "exit_code": 0}
+OLD BINARY REFUSAL 1  aptevadbctl: aptevadb: unsupported file format version: file is format 10, this build reads 9 data/WAL hashes unchanged

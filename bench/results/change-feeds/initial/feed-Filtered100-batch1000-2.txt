@@ -1,0 +1,4 @@
+=== RUN   TestChangeFeedResourceProbe
+FEED_PROBE {"allocated_bytes":6879448,"allocations":16350,"batch_size":1000,"commit_to_last_subscriber_ns":[1178041,1020709,1079875,978666,1416833,977750,1032166,1060042,1031458,1048000],"feed_stats":{"Enabled":true,"Watchers":100,"CacheBytes":2593905,"ReaderBytes":0,"PeakReaderBytes":258537,"PlanBytes":656,"FilterGroups":1,"RetentionBytes":268435456,"RetentionAge":3600000000000},"heap_alloc_bytes":9876808,"heap_sys_bytes":15728640,"mode":"Filtered100","rows":10000,"rows_per_second":923819.5318544523,"seconds":0.010824625,"version":"0.2.0-alpha.5","write_ns_per_row":395.5666}
+--- PASS: TestChangeFeedResourceProbe (0.06s)
+PASS

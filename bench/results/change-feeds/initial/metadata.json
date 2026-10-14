@@ -1,0 +1,15 @@
+{
+  "runtime_commit": "0178fcfe53b8a38c7659248af05896191b159ced",
+  "baseline": "bff9d0e956989bb566c48addb34377955a402f50",
+  "os": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "go": "go version go1.25.1 darwin/arm64",
+  "cpu": "Apple M1 Pro",
+  "memory": "17179869184",
+  "date": "2026-10-14 10:18:26 +0200",
+  "binary_sha256": {
+    "alpha4.test": "d51a3e8a8dabe1556cafa78dad7a36f8eeb56217b9aed88ee091274def0bbbfe",
+    "current.test": "76cda9f786cf142c69a3b124e6f2970b0cfa5f339f29e7fa6d920146784c8ec3",
+    "alpha4-bench": "682b8e9f0ffe3c500fe3c9c9a78a359b3a8c346bde93eb8ea24b42b0500c5893",
+    "current-bench": "5185e6044897107bcf9bd351572277aa09e7b84fa1b7b0a24b2e946ae8f1e7b0"
+  }
+}

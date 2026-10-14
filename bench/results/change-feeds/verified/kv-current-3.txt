@@ -1,0 +1,23 @@
+ours               random insert              745 ns/op     1343068 ops/s
+ours               random settle              587 ns/op     1703813 ops/s
+ours               random find-hit            646 ns/op     1548274 ops/s
+ours               random find-miss           429 ns/op     2329369 ops/s
+ours               random scan                 39 ns/op    25906987 ops/s
+ours               random find-hit-par10       93 ns/op    10796343 ops/s
+ours               seq    insert              181 ns/op     5521698 ops/s
+ours               seq    settle              556 ns/op     1799559 ops/s
+ours               seq    find-hit            957 ns/op     1044537 ops/s
+ours               seq    find-miss           881 ns/op     1135099 ops/s
+ours               seq    scan                 38 ns/op    26150371 ops/s
+ours               seq    find-hit-par10      146 ns/op     6835352 ops/s
+
+keys=1000000  key=16B  value=100B  cpu=arm64  GOMAXPROCS=10
+
+workload=random (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours                          745            587            646            429             39             93      128MB
+
+workload=seq (ns/op, lower is better)
+engine                     insert         settle       find-hit      find-miss           scan find-hit-par10       disk
+ours                          181            556            957            881             38            146      128MB
+

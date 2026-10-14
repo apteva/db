@@ -1,0 +1,13 @@
+ours             load                     9051.418 ns/op 2735.5 Go bytes/op
+ours             build-wide-index         27176.351 ns/op 38282.6 Go bytes/op
+ours             ordered-100-row-page     1800762.920 ns/op 435241.9 Go bytes/op
+ours             reused-resume-100-row-page 380367.920 ns/op 444080.0 Go bytes/op
+pebble-manual    load                     13243.311 ns/op 19031.8 Go bytes/op
+pebble-manual    build-wide-index         11332.763 ns/op 25423.7 Go bytes/op
+pebble-manual    ordered-100-row-page     432679.170 ns/op 162251.3 Go bytes/op
+sqlite-c         load                     44403.863 ns/op 1600.1 Go bytes/op
+sqlite-c         build-wide-index         22600.455 ns/op 0.0 Go bytes/op
+sqlite-c         ordered-100-row-page     685430.000 ns/op 155262.7 Go bytes/op
+sqlite-go        load                     60584.413 ns/op 1536.7 Go bytes/op
+sqlite-go        build-wide-index         42375.982 ns/op 0.7 Go bytes/op
+sqlite-go        ordered-100-row-page     2573305.830 ns/op 153630.7 Go bytes/op

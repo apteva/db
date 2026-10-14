@@ -1,0 +1,27 @@
+ours       load 0.03s index 0.13s  9.9ms  1.5ms  9.1ms  0.0ms  2.1ms  0.0ms  1.6ms
+ours-par   load 0.02s index 0.12s  3.6ms  1.1ms  6.3ms  0.0ms  1.6ms  0.0ms  1.2ms
+sqlite-c   load 0.04s index 0.04s  13.9ms  0.7ms  13.2ms  0.0ms  2.3ms  12.6ms  0.8ms
+sqlite-go  load 0.04s index 0.09s  26.5ms  1.2ms  24.1ms  0.0ms  6.1ms  0.0ms  1.4ms
+
+joins: 5000 users, 50000 orders (ms per query, best of 5; lower is better; ours = one core, ours-par = all cores)
+
+no secondary indexes
+query                                                        ours     ours-par     sqlite-c    sqlite-go
+orders JOIN users, group by country: count, sum              10.0          3.6         20.8         37.8
+shipped orders of FR users: count, avg                        9.1          4.5          4.0          6.8
+top 10 spenders (existing users only)                         9.3          5.0         20.7         34.3
+one user's orders (point join)                                6.5          6.5          1.4          2.7
+users with no orders (anti-join)                              8.8          7.8         21.0         46.7
+
+with indexes
+query                                                        ours     ours-par     sqlite-c    sqlite-go
+orders JOIN users, group by country: count, sum               9.9          3.6         13.9         26.5
+shipped orders of FR users: count, avg                        1.5          1.1          0.7          1.2
+top 10 spenders (existing users only)                         9.1          6.3         13.2         24.1
+one user's orders (point join)                                0.0          0.0          0.0          0.0
+users with no orders (anti-join)                              2.1          1.6          2.3          6.1
+indexed: orders > 999.9 JOIN users, by country                0.0          0.0         12.6          0.0
+indexed: FR users JOIN their orders, per user                 1.6          1.2          0.8          1.4
+
+load both collections (seconds)                              0.03         0.02         0.04         0.04
+build indexes (seconds)                                      0.13         0.12         0.04         0.09

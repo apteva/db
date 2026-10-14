@@ -54,7 +54,9 @@ retain older pages and prevent compaction while held.
 Development source also supports [native change feeds](CHANGE_FEEDS.md): opt-in
 capture, filtered/projected subscriptions, replay and snapshot handoff for embedded
 apps and the HTTP client. These APIs are not in the public alpha.4 tag. Upgrading
-to development source is a one-way format-10 migration; back up first.
+to development source is a one-way format-10 migration; back up first. The
+[change-feed validation report](bench/results/change-feeds/VALIDATION.md) includes
+all trials, CPU/RSS results and measured capture/fan-out costs.
 
 The [alpha.4 aggregation and release report](bench/results/alpha4/VALIDATION.md)
 records exact integer accumulation/parallel merges, non-null field counting,

@@ -1,7 +1,9 @@
 # Native change feeds
 
 Available in alpha.5 development source. Public alpha.4 does not contain these
-APIs. Root engine, server and Go client remain standard-library-only.
+APIs. To try the validated development implementation, use
+`go get github.com/apteva/db@a6040dc`. Root engine, server and Go client remain
+standard-library-only.
 
 ## Enable capture
 
@@ -75,7 +77,9 @@ Next/Change/Err belong to one goroutine; Close and ResumeToken are safe concurre
 
 Filters reuse Query predicates: exact int64 comparisons, equality/ranges,
 `$in`, `$and`, `$or`, literal `$prefix`, nested paths and array semantics.
-Document predicates inspect Put's exact committed value. They do not fetch the
+Document predicates inspect Put's exact committed encoded document. Opaque raw
+values without a document directory do not match. Projection requires a valid
+binary document and reports ErrDocument for invalid/opaque values. They do not fetch the
 latest database row. Delete has no post-image and cannot match a document filter.
 Filter size, nesting and node limits apply (64 KiB, depth 32, 1,024 nodes/items).
 

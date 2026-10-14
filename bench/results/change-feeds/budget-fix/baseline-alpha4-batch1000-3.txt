@@ -1,0 +1,4 @@
+=== RUN   TestChangeFeedBaselineProbe
+FEED_PROBE {"allocated_bytes":388760,"allocations":229,"batch_size":1000,"heap_alloc_bytes":4871544,"heap_sys_bytes":7897088,"mode":"BaselineOff","rows":20000,"rows_per_second":6390286.764118539,"seconds":0.00312975,"version":"0.2.0-alpha.4","write_ns_per_row":117.4625}
+--- PASS: TestChangeFeedBaselineProbe (0.04s)
+PASS

@@ -1,0 +1,15 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/db
+cpu: Apple M1 Pro
+BenchmarkNativeChangeFeeds/Off-10         	     100	    152568 ns/op	       152.6 end-to-end-ns/row	         0 peak-reader-B	         0 shared-cache-B	       119.3 write-ns/row	    5181 B/op	      10 allocs/op
+BenchmarkNativeChangeFeeds/Capture-10     	     100	    320360 ns/op	       320.4 end-to-end-ns/row	         0 peak-reader-B	   8329867 shared-cache-B	       286.9 write-ns/row	  447755 B/op	    1066 allocs/op
+BenchmarkNativeChangeFeeds/Metadata1-10   	     100	    355166 ns/op	       355.2 end-to-end-ns/row	     91537 peak-reader-B	   8329867 shared-cache-B	       271.6 write-ns/row	  448843 B/op	    1078 allocs/op
+BenchmarkNativeChangeFeeds/Metadata10-10  	     100	    486313 ns/op	       486.3 end-to-end-ns/row	     91537 peak-reader-B	   8329867 shared-cache-B	       288.8 write-ns/row	  451328 B/op	    1124 allocs/op
+BenchmarkNativeChangeFeeds/Metadata100-10 	     100	   1276234 ns/op	      1276 end-to-end-ns/row	     91537 peak-reader-B	   8329867 shared-cache-B	       315.9 write-ns/row	  476752 B/op	    1575 allocs/op
+BenchmarkNativeChangeFeeds/Filtered100-10 	     100	    959560 ns/op	       959.6 end-to-end-ns/row	    258537 peak-reader-B	   8273184 shared-cache-B	       320.6 write-ns/row	  649319 B/op	    1582 allocs/op
+BenchmarkNativeChangeFeeds/Tenants100-10  	     100	   4079672 ns/op	      4080 end-to-end-ns/row	    258537 peak-reader-B	   8273184 shared-cache-B	       328.2 write-ns/row	  651075 B/op	    1513 allocs/op
+BenchmarkNativeChangeFeeds/Values10-10    	     100	   1550423 ns/op	      1550 end-to-end-ns/row	    258537 peak-reader-B	   8273184 shared-cache-B	       309.0 write-ns/row	 5503357 B/op	   81124 allocs/op
+BenchmarkNativeChangeFeeds/Projection100-10         	     100	   1046438 ns/op	      1046 end-to-end-ns/row	    258667 peak-reader-B	   8273184 shared-cache-B	       313.5 write-ns/row	  998784 B/op	    5609 allocs/op
+BenchmarkNativeChangeFeeds/Slow100-10               	     100	    361899 ns/op	       361.9 end-to-end-ns/row	         0 peak-reader-B	   8329867 shared-cache-B	       326.5 write-ns/row	  447705 B/op	    1066 allocs/op
+PASS
