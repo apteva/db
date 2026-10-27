@@ -1,0 +1,1 @@
+ok  	github.com/apteva/db/client	20.953s

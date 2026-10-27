@@ -1,0 +1,549 @@
+{
+  "conclusion": "success",
+  "headSha": "4124a0f592168c6109e06d864d7c9535f4486001",
+  "jobs": [
+    {
+      "completedAt": "2026-10-27T12:27:21Z",
+      "conclusion": "success",
+      "databaseId": 122182439649,
+      "name": "verify (macos-latest)",
+      "startedAt": "2026-10-27T12:14:33Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:14:35Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:14:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:38Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:14:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:41Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:14:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:43Z",
+          "conclusion": "success",
+          "name": "version matches tag",
+          "number": 4,
+          "startedAt": "2026-10-27T12:14:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:49Z",
+          "conclusion": "success",
+          "name": "Run go vet ./...",
+          "number": 5,
+          "startedAt": "2026-10-27T12:14:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:24:06Z",
+          "conclusion": "success",
+          "name": "Run go test -race -count=1 -timeout 35m ./...",
+          "number": 6,
+          "startedAt": "2026-10-27T12:14:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:27:17Z",
+          "conclusion": "success",
+          "name": "stress and soak",
+          "number": 7,
+          "startedAt": "2026-10-27T12:24:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:27:18Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 13,
+          "startedAt": "2026-10-27T12:27:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:27:18Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 14,
+          "startedAt": "2026-10-27T12:27:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:27:20Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-27T12:27:18Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122182439649"
+    },
+    {
+      "completedAt": "2026-10-27T12:33:10Z",
+      "conclusion": "success",
+      "databaseId": 122182440122,
+      "name": "verify (ubuntu-latest)",
+      "startedAt": "2026-10-27T12:14:33Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:14:36Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:14:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:37Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:14:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:40Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:14:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:47Z",
+          "conclusion": "success",
+          "name": "version matches tag",
+          "number": 4,
+          "startedAt": "2026-10-27T12:14:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:14:57Z",
+          "conclusion": "success",
+          "name": "Run go vet ./...",
+          "number": 5,
+          "startedAt": "2026-10-27T12:14:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:29:55Z",
+          "conclusion": "success",
+          "name": "Run go test -race -count=1 -timeout 35m ./...",
+          "number": 6,
+          "startedAt": "2026-10-27T12:14:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:07Z",
+          "conclusion": "success",
+          "name": "stress and soak",
+          "number": 7,
+          "startedAt": "2026-10-27T12:29:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:08Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 13,
+          "startedAt": "2026-10-27T12:33:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:08Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 14,
+          "startedAt": "2026-10-27T12:33:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:08Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-27T12:33:08Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122182440122"
+    },
+    {
+      "completedAt": "2026-10-27T12:33:43Z",
+      "conclusion": "success",
+      "databaseId": 122190763543,
+      "name": "build (linux, amd64)",
+      "startedAt": "2026-10-27T12:33:12Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:33:14Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:33:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:15Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:33:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:16Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:33:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:40Z",
+          "conclusion": "success",
+          "name": "package",
+          "number": 4,
+          "startedAt": "2026-10-27T12:33:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:41Z",
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "number": 5,
+          "startedAt": "2026-10-27T12:33:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:41Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 9,
+          "startedAt": "2026-10-27T12:33:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:41Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 10,
+          "startedAt": "2026-10-27T12:33:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:41Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 11,
+          "startedAt": "2026-10-27T12:33:41Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122190763543"
+    },
+    {
+      "completedAt": "2026-10-27T12:33:47Z",
+      "conclusion": "success",
+      "databaseId": 122190763708,
+      "name": "build (linux, arm64)",
+      "startedAt": "2026-10-27T12:33:13Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:33:15Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:33:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:16Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:33:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:18Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:33:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:42Z",
+          "conclusion": "success",
+          "name": "package",
+          "number": 4,
+          "startedAt": "2026-10-27T12:33:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:44Z",
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "number": 5,
+          "startedAt": "2026-10-27T12:33:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 9,
+          "startedAt": "2026-10-27T12:33:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 10,
+          "startedAt": "2026-10-27T12:33:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:44Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 11,
+          "startedAt": "2026-10-27T12:33:44Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122190763708"
+    },
+    {
+      "completedAt": "2026-10-27T12:33:59Z",
+      "conclusion": "success",
+      "databaseId": 122190763718,
+      "name": "build (darwin, amd64)",
+      "startedAt": "2026-10-27T12:33:13Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:33:16Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:33:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:18Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:33:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:24Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:33:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:54Z",
+          "conclusion": "success",
+          "name": "package",
+          "number": 4,
+          "startedAt": "2026-10-27T12:33:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:56Z",
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "number": 5,
+          "startedAt": "2026-10-27T12:33:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:57Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 9,
+          "startedAt": "2026-10-27T12:33:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:57Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 10,
+          "startedAt": "2026-10-27T12:33:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:57Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 11,
+          "startedAt": "2026-10-27T12:33:57Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122190763718"
+    },
+    {
+      "completedAt": "2026-10-27T12:33:41Z",
+      "conclusion": "success",
+      "databaseId": 122190763789,
+      "name": "build (darwin, arm64)",
+      "startedAt": "2026-10-27T12:33:12Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:33:14Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:33:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:16Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:33:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:17Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 3,
+          "startedAt": "2026-10-27T12:33:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:37Z",
+          "conclusion": "success",
+          "name": "package",
+          "number": 4,
+          "startedAt": "2026-10-27T12:33:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:39Z",
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "number": 5,
+          "startedAt": "2026-10-27T12:33:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:39Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+          "number": 9,
+          "startedAt": "2026-10-27T12:33:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:39Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 10,
+          "startedAt": "2026-10-27T12:33:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:33:39Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 11,
+          "startedAt": "2026-10-27T12:33:39Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122190763789"
+    },
+    {
+      "completedAt": "2026-10-27T12:34:11Z",
+      "conclusion": "success",
+      "databaseId": 122191134521,
+      "name": "publish",
+      "startedAt": "2026-10-27T12:34:01Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-27T12:34:03Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-27T12:34:02Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:34:04Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-10-27T12:34:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:34:06Z",
+          "conclusion": "success",
+          "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+          "number": 3,
+          "startedAt": "2026-10-27T12:34:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:34:09Z",
+          "conclusion": "success",
+          "name": "checksum and publish",
+          "number": 4,
+          "startedAt": "2026-10-27T12:34:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:34:09Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 8,
+          "startedAt": "2026-10-27T12:34:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-27T12:34:09Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "startedAt": "2026-10-27T12:34:09Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/apteva/db/actions/runs/40502212771/job/122191134521"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/apteva/db/actions/runs/40502212771"
+}

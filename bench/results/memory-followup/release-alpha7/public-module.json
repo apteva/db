@@ -1,0 +1,16 @@
+{
+  "Path": "github.com/apteva/db",
+  "Version": "v0.2.0-alpha.7",
+  "Info": "/Users/marcoschwartz/Documents/aptevadb-releases/v0.2.0-alpha.7/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.7.info",
+  "GoMod": "/Users/marcoschwartz/Documents/aptevadb-releases/v0.2.0-alpha.7/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.7.mod",
+  "Zip": "/Users/marcoschwartz/Documents/aptevadb-releases/v0.2.0-alpha.7/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.7.zip",
+  "Dir": "/Users/marcoschwartz/Documents/aptevadb-releases/v0.2.0-alpha.7/public-gopath/pkg/mod/github.com/apteva/db@v0.2.0-alpha.7",
+  "Sum": "h1:arYjgQAJ9fk33/i0JiQdK9l9jRDRvN7EAOXCY6v7w40=",
+  "GoModSum": "h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc=",
+  "Origin": {
+    "VCS": "git",
+    "URL": "https://github.com/apteva/db",
+    "Hash": "4124a0f592168c6109e06d864d7c9535f4486001",
+    "Ref": "refs/tags/v0.2.0-alpha.7"
+  }
+}

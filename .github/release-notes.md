@@ -17,3 +17,5 @@ go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.7
 ```
 
 Linux/macOS amd64/arm64 CLI/server archives include the usage and operations guides. Verify downloads against `SHA256SUMS`.
+
+Post-publication [verification evidence](https://github.com/apteva/db/tree/main/bench/results/memory-followup/release-alpha7) confirms all four archive checksums, public Go proxy/sumdb and CLI installation, embedded and HTTP-driver checks, bounded large-value/snapshot/compaction recovery, and alpha.6 directory compatibility. Source and release CI passed. A duplicate tag CI run exposed pre-existing test-harness issues (an unlocked diagnostic counter read and a 100-ms RPC fixture timeout); test-only fixes and repeated race checks are documented with the evidence. The published engine and tag are unchanged.

@@ -1,0 +1,89 @@
+package main
+
+import (
+ "context"
+ "bytes"
+ "encoding/json"
+ "fmt"
+ "os"
+ "time"
+ db "github.com/apteva/db"
+ "github.com/apteva/db/client"
+)
+func must(err error) { if err != nil { panic(err) } }
+func require(ok bool, what any) { if !ok { panic(what) } }
+func embedded(dir string) {
+ ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second);defer cancel()
+ opts:=db.DurableOptions();opts.SyncMode=db.SyncOS;opts.ChangeFeed=&db.ChangeFeedOptions{}
+ d,err:=db.Open(dir,opts);must(err)
+ c,err:=d.Collection("orders");must(err)
+ must(c.CreateCompoundIndex(ctx,"paid_n",[]db.IndexField{{Field:"paid"},{Field:"n"}}))
+ must(c.InsertJSON([]byte("a"),[]byte(`{"paid":true,"n":9007199254740993,"omit":"unused"}`)))
+ var stats db.QueryStats
+ count,err:=c.CountDocuments(ctx,[]byte(`{"paid":true}`),db.CountOptions{Stats:&stats});must(err);require(count==1&&stats.Plan.IndexOnly&&stats.DocumentFetches==0&&stats.IndexEntriesExamined==1,stats)
+ _,err=d.CreateComputedCollection(ctx,"paid","orders",[]byte(`[{"$match":{"paid":true}},{"$project":{"n":1}}]`));must(err)
+ s,w,err:=d.SnapshotAndWatch(ctx,db.WatchOptions{Collections:[]string{"orders","paid"},Filter:[]byte(`{"n":{"$gte":9007199254740993}}`),IncludeValues:true,Fields:[]string{"n"}});must(err)
+ must(c.UpsertJSON([]byte("a"),[]byte(`{"paid":true,"n":9007199254740994,"omit":"unused"}`)))
+ sc,err:=s.Collection("orders");must(err);var initial map[string]any;ok,err:=sc.FindDocument([]byte("a"),&initial);must(err);require(ok&&initial["n"]==int64(9007199254740993),initial)
+ count,err=sc.CountDocuments(ctx,[]byte(`{"paid":true,"n":9007199254740993}`),db.CountOptions{Stats:&stats});must(err);require(count==1&&stats.Plan.IndexOnly&&stats.DocumentFetches==0,stats)
+ count,err=c.CountDocuments(ctx,[]byte(`{"paid":true,"n":9007199254740993}`),db.CountOptions{});must(err);require(count==0,count)
+ count,err=c.CountDocuments(ctx,[]byte(`{"paid":true,"omit":"unused"}`),db.CountOptions{Stats:&stats});must(err);require(count==1&&!stats.Plan.IndexOnly&&stats.DocumentFetches>0,stats)
+ seen:=map[string]bool{};token:=""
+ for i:=0;i<2;i++ { require(w.Next(),w.Err());change:=w.Change();var row map[string]any;must(change.Decode(&row));require(len(row)==1&&row["n"]==int64(9007199254740994),row);if token=="" { token=change.CommitToken };require(token==change.CommitToken,change);seen[change.Collection]=true;require(change.EndOfCommit==(i==1),change) }
+ require(seen["orders"]&&seen["paid"],seen)
+ must(w.Close());s.Close();must(d.Compact(ctx));must(d.Close())
+ d,err=db.Open(dir,db.DurableOptions());must(err);defer d.Close()
+ c,err=d.OpenCollection("orders");must(err)
+ w,err=d.Watch(ctx,db.WatchOptions{Collections:[]string{"paid"},After:token});must(err);defer w.Close()
+ must(c.UpsertJSON([]byte("a"),[]byte(`{"paid":false,"n":42}`)))
+ require(w.Next(),w.Err());require(w.Change().Operation==db.ChangeDelete&&w.Change().EndOfCommit,w.Change())
+ fmt.Println("embedded CountDocuments covering/fallback/snapshot passed; exact integer filter, projection, snapshot handoff, shared source/view commit, compaction, persisted capture, replay and membership delete passed")
+}
+func remote(url,token string) {
+ ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second);defer cancel()
+ c,err:=client.New(url,client.Options{Token:token});must(err);defer c.Close()
+ must(c.CreateCollection(ctx,"live"));collection:=c.Collection("live")
+ must(collection.CreateCompoundIndex(ctx,"n",[]db.IndexField{{Field:"n"}},db.IndexOptions{}))
+ must(collection.InsertJSON(ctx,[]byte("a"),[]byte(`{"n":1,"omit":"unused"}`)))
+ s,w,err:=c.SnapshotAndWatch(ctx,db.WatchOptions{Collections:[]string{"live"},Filter:[]byte(`{"n":{"$gte":1}}`),IncludeValues:true,Fields:[]string{"n"}});must(err)
+ must(collection.UpsertJSON(ctx,[]byte("a"),[]byte(`{"n":2,"omit":"unused"}`)))
+ var initial map[string]any;ok,err:=s.Collection("live").FindDocument(ctx,[]byte("a"),&initial);must(err);require(ok&&initial["n"]==int64(1),initial)
+ var stats db.QueryStats
+ n,err:=s.Collection("live").CountDocuments(ctx,[]byte(`{"n":1}`),db.CountOptions{Stats:&stats});must(err);require(n==1&&stats.Plan.IndexOnly&&stats.DocumentFetches==0,stats)
+ n,err=collection.CountDocuments(ctx,[]byte(`{"n":1}`),db.CountOptions{});must(err);require(n==0,n)
+ n,err=collection.CountDocuments(ctx,[]byte(`{"n":2}`),db.CountOptions{Stats:&stats});must(err);require(n==1&&stats.Plan.IndexOnly&&stats.DocumentFetches==0,stats)
+ q,err:=s.Collection("live").Query(ctx,[]byte(`{}`),db.QueryOptions{});must(err);count:=0;for q.Next(){count++};must(q.Err());must(q.Close());require(count==1,count)
+ require(w.Next(),w.Err());change:=w.Change();var row map[string]any;must(change.Decode(&row));require(change.EndOfCommit&&len(row)==1&&row["n"]==int64(2),row);saved:=change.CommitToken
+ must(s.Close());must(w.Close())
+ w,err=c.Watch(ctx,db.WatchOptions{Collections:[]string{"live"},After:saved,IncludeValues:true});must(err);defer w.Close()
+ must(collection.InsertJSON(ctx,[]byte("b"),[]byte(`{"n":3}`)))
+ require(w.Next(),w.Err());require(string(w.Change().Key)=="b"&&w.Change().EndOfCommit,w.Change())
+ fmt.Println("public Go HTTP CountDocuments and snapshot count passed; filtered/projected watch, leased snapshot find/query and resume passed")
+}
+
+func memory(dir string) {
+ ctx,cancel:=context.WithTimeout(context.Background(),60*time.Second);defer cancel()
+ opts:=db.Options{CacheBytes:8<<20}
+ d,err:=db.Open(dir,opts);must(err)
+ a,b:=bytes.Repeat([]byte{0x41},128<<10),bytes.Repeat([]byte{0x42},128<<10)
+ for i:=0;i<80;i++ { must(d.Upsert([]byte(fmt.Sprintf("b%03d",i)),a)) }
+ must(d.Checkpoint());s,err:=d.Snapshot();must(err)
+ for i:=0;i<80;i++ { must(d.Upsert([]byte(fmt.Sprintf("b%03d",i)),b)) }
+ must(d.Checkpoint())
+ for i:=0;i<80;i++ { v,ok,e:=s.Find([]byte(fmt.Sprintf("b%03d",i)),nil);must(e);require(ok&&bytes.Equal(v,a),i) }
+ s.Close();must(d.Checkpoint());must(d.Compact(ctx));must(d.Verify(ctx));must(d.Close())
+ d,err=db.Open(dir,opts);must(err);defer d.Close()
+ for i:=0;i<80;i++ { v,ok,e:=d.Find([]byte(fmt.Sprintf("b%03d",i)),nil);must(e);require(ok&&bytes.Equal(v,b),i) }
+ must(d.Verify(ctx))
+ fmt.Println("bounded native buffers: 10-MiB WAL/large values, snapshot retention, checkpoint, compaction and reopen passed")
+}
+func compat(dir string) {
+ ctx:=context.Background()
+ d,err:=db.Open(dir,db.Options{CacheBytes:8<<20});must(err)
+ for i:=0;i<50;i++ { v,ok,e:=d.Find([]byte(fmt.Sprintf("old%03d",i)),nil);must(e);require(ok&&bytes.Equal(v,bytes.Repeat([]byte{byte(i)},80<<10)),i) }
+ must(d.Verify(ctx));must(d.Upsert([]byte("new"),[]byte("alpha7")));must(d.Close())
+ d,err=db.Open(dir,db.Options{});must(err);defer d.Close();v,ok,err:=d.Find([]byte("new"),nil);must(err);require(ok&&string(v)=="alpha7",string(v));must(d.Verify(ctx))
+ fmt.Println("alpha.6 directory compatibility: large values, updates and reopen passed")
+}
+
+func main(){require(db.Version=="0.2.0-alpha.7"&&db.FormatVersion==10,db.Version);switch os.Args[1] { case "embedded": embedded(os.Args[2]); case "remote": remote(os.Args[2],os.Getenv("APTEVADB_TOKEN")); case "memory": memory(os.Args[2]); case "compat": compat(os.Args[2]); default: panic("invalid mode") };b,_:=json.Marshal(map[string]any{"version":db.Version,"format":db.FormatVersion});fmt.Println(string(b))}

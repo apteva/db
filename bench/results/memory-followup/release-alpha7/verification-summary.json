@@ -1,0 +1,20 @@
+{
+  "version": "v0.2.0-alpha.7",
+  "format": 10,
+  "tag_commit": "4124a0f592168c6109e06d864d7c9535f4486001",
+  "source_ci": 40501997556,
+  "release_ci": 40502212771,
+  "published_archives_verified": 4,
+  "public_proxy_and_sumdb": true,
+  "public_go_install": true,
+  "embedded_counts_snapshots_computed_and_feeds": true,
+  "bounded_large_values_wal_snapshot_checkpoint_compaction_reopen": true,
+  "downloaded_daemon_public_http_driver": true,
+  "previous_alpha6_directory_compatibility": true,
+  "tag_ci_harness_failure": 40502212749,
+  "test_only_fix_commit": "e3f7de9e674a799c36503e0451c9f426d16d5efd",
+  "test_fix_ci": 40505284518,
+  "test_fix_ci_at_evidence_capture": "in_progress",
+  "test_fix_local_race_repetitions": 15,
+  "production_engine_changed_after_tag": false
+}
