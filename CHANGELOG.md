@@ -5,6 +5,25 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.8] - 2026-10-27
+
+- Add native AggregateEach/RunEach and collecting WithOptions APIs, with proven
+  compound-index streaming groups, early group limits and explicit strategy stats.
+- Add opt-in bounded hash-partition aggregation and stable external sorting;
+  preserve typed/exact integer state, one snapshot, cancellation, shared disk
+  quotas, execution leases and automatic abandoned scratch cleanup.
+- Account for private page/descriptor/memtable/WAL allocations and aggregation
+  reservations, including leased and temporary native stores. Expose MemoryStats,
+  opt-in cold mapped-page reclamation/TrimMemory and managed-buffer admission
+  with pre-WAL pressure errors or cancellable waiting for retained views.
+- Preserve default cache policy and file format 10. New streaming/options APIs
+  are embedded Go features; no new HTTP streaming endpoint. Existing format-10
+  databases require no new migration.
+- Retain 110 final benchmark trials against alpha.7, including one-million-document
+  guards. Ordered groups reduce CPU/peak memory and reclamation reduces idle RSS;
+  opt-in disk spill trades speed for bounded execution. Some guard medians remain
+  slower; the report does not claim zero regressions or a universal advantage.
+
 ## [0.2.0-alpha.7] - 2026-10-27
 
 - Reduce retained native memory with stable file segments, explicit ownership of

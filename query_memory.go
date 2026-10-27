@@ -8,8 +8,11 @@ import (
 // Budgets count conservative retained execution allocations, including group
 // slabs, row maps, join keys and sort storage. They are not a process RSS cap.
 type memoryBudget struct {
-	max  int64
-	used atomic.Int64
+	owner     *memoryTracker
+	max       int64
+	used      atomic.Int64
+	peak      int64
+	trackPeak bool
 }
 
 func (b *memoryBudget) reserve(bytes int64) error {
@@ -21,6 +24,21 @@ func (b *memoryBudget) reserve(bytes int64) error {
 		b.used.Add(-bytes)
 		return fmt.Errorf("%w: query working memory exceeds %d bytes", ErrLimit, b.max)
 	}
+	if b.owner != nil && b.owner.limit > 0 {
+		b.owner.queries.Add(bytes)
+		if bytes < 0 {
+			b.owner.signal()
+		}
+		if bytes > 0 && b.owner.limit > 0 && b.owner.total() > b.owner.limit {
+			b.owner.queries.Add(-bytes)
+			b.used.Add(-bytes)
+			return ErrMemoryPressure
+		}
+	}
+	if b.trackPeak && used > b.peak {
+		b.peak = used
+	}
+
 	return nil
 }
 func (l Limits) budget() (*memoryBudget, error) {
@@ -51,5 +69,15 @@ func valueMemory(v any) int64 {
 		return n
 	default:
 		return 16
+	}
+}
+
+func (b *memoryBudget) close() {
+	if b != nil && b.owner != nil {
+		if b.owner.limit > 0 {
+			b.owner.queries.Add(-b.used.Swap(0))
+			b.owner.signal()
+		}
+		b.owner.untrack(b)
 	}
 }

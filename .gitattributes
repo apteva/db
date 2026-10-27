@@ -1,0 +1,4 @@
+# Preserve generated benchmark evidence: patch context, CSV CRLF and build metadata.
+bench/results/aggregation-memory/*.patch -whitespace
+bench/results/aggregation-memory/**/*.csv -whitespace
+bench/results/aggregation-memory/build-info*.txt -whitespace

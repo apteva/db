@@ -156,7 +156,9 @@ func (db *DB) maintenanceReadyLocked(ctx context.Context) error {
 	if db.failed != nil {
 		return db.failed
 	}
-	db.stallLocked()
+	if err := db.stallLocked(ctx); err != nil {
+		return err
+	}
 	if db.closed {
 		return ErrClosed
 	}

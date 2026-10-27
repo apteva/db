@@ -31,6 +31,17 @@ memtables, readers and sync policy. Record background load; do not benchmark bes
 builds, tests or soak runs. Historical results under bench/results refer to their
 original builds. They do not establish release performance or a universal lead.
 
+## Bounded aggregation and resident-memory controls (alpha.8)
+
+The [validation report](bench/results/aggregation-memory/REPORT.md) compares
+released alpha.7 with the final source in 110 fresh processes, including
+one-million-document guards. Ordered aggregation reduces CPU and peak memory;
+opt-in reclamation reduces idle RSS. Disk spill completes constrained workloads
+at a documented speed cost. Some guard medians remain slower, so these results
+do not establish zero regressions or a universal advantage. All trials, ranges,
+source identities and correctness/build evidence are retained, with the earlier
+90-process candidate cohort kept separate.
+
 ## Memory optimization validation (alpha.7)
 
 The [latest validation](bench/results/memory-followup/native/REPORT.md) keeps

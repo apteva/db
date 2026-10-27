@@ -33,6 +33,7 @@ const (
 // applies a batch only once its final record is intact, so a batch is
 // all-or-nothing after a crash. flags bit 1 marks a tombstone.
 type wal struct {
+	memory        *memoryTracker
 	rotateMu      sync.Mutex    // serialize generation preparation/switching, not appends
 	compactionPin atomic.Uint64 // replay floor + 1; zero means no private copy needs it
 	dir           string

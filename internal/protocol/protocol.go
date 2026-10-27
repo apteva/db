@@ -83,7 +83,7 @@ var codes = map[string]error{
 	"computed_read_only": db.ErrComputedCollectionReadOnly, "computed_dependency": db.ErrComputedCollectionDependency, "computed_limit": db.ErrComputedCollectionLimit,
 	"computed_exists": db.ErrComputedCollectionExists, "document": db.ErrDocument, "collection_name": db.ErrCollectionName,
 	"computed": db.ErrComputedCollection, "computed_field": db.ErrComputedField, "computed_nonempty": db.ErrComputedNonEmpty,
-	"too_large": db.ErrTransactionTooLarge, "key_size": db.ErrKeySize, "value_size": db.ErrValueSize, "limit": db.ErrLimit, "pipeline": db.ErrPipeline,
+	"too_large": db.ErrTransactionTooLarge, "key_size": db.ErrKeySize, "value_size": db.ErrValueSize, "limit": db.ErrLimit, "memory_pressure": db.ErrMemoryPressure, "disk_limit": db.ErrDiskLimit, "pipeline": db.ErrPipeline,
 	"change_disabled": db.ErrChangeFeedDisabled, "history_expired": db.ErrHistoryExpired, "resume_invalid": db.ErrResumeInvalid, "watch_limit": db.ErrWatchLimit,
 	"cancelled": context.Canceled, "timeout": context.DeadlineExceeded, "bad_request": ErrBadRequest, "unauthorized": ErrUnauthorized, "busy": ErrBusy,
 }

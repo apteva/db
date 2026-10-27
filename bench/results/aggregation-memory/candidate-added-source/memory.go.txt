@@ -1,0 +1,454 @@
+package db
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+	"unsafe"
+)
+
+// ErrMemoryPressure is returned before logging a write when retained engine
+// storage cannot be reclaimed to the configured target. Contextual batches may
+// wait for views to close; ordinary writes fail rather than deadlocking a caller
+// that owns the snapshot preventing progress.
+var ErrMemoryPressure = errors.New("aptevadb: retained storage exceeds managed memory target")
+
+type memoryTracker struct {
+	queryMu                               sync.Mutex
+	budgets                               map[*memoryBudget]struct{}
+	notifyMu                              sync.Mutex
+	wake                                  chan struct{}
+	pages, nodes, memtables, wal, queries atomic.Int64
+	limit                                 int64
+}
+
+func (m *memoryTracker) total() int64 {
+	if m == nil {
+		return 0
+	}
+	return m.pages.Load() + m.nodes.Load() + m.memtables.Load() + m.wal.Load() + m.queries.Load()
+}
+
+// MemoryStats separates allocated buffers, file page-cache residency, the
+// tracked mapped working-set estimate and process RSS. These are not additive.
+// SnapshotPinnedBytes and CheckpointPinnedBytes overlap allocated categories;
+// PinnedBytes is their union plus retired memtable leases, never an extra total.
+// MetadataEstimateBytes is conservative Go bookkeeping, not measured Go RSS.
+// ManagedBufferBytes includes private page/descriptor/memtable/WAL storage,
+// including temporary compaction/backup storage owned by the same database.
+type MemoryStats struct {
+	ProcessResidentBytes                                               int64
+	MappedResidentEstimateBytes                                        int64
+	PrivatePageBytes, DescriptorBytes, MemtableBytes, WALBytes         int64
+	ActiveMemtableBytes, ImmutableMemtableBytes, RetainedMemtableBytes int64
+	SnapshotPinnedBytes, CheckpointPinnedBytes, PinnedBytes            int64
+	QueryWorkingBytes, ManagedBufferBytes, MetadataEstimateBytes       int64
+	MappedVirtualBytes, MappedPageCacheBytes, MappedTargetBytes        int64
+	PageCacheResidencyMeasured                                         bool
+	ReclaimedMappedBytes                                               int64
+	ManagedTargetBytes                                                 int64
+}
+
+func storageBytes(s *memtableStorage) int64 {
+	if s == nil {
+		return 0
+	}
+	var n int64
+	for _, a := range s.arenas {
+		n += int64(len(a))
+	}
+	return n
+}
+func (db *DB) newMemtable() *memtable {
+	t := newMemtable(db.opts.MemtableBytes)
+	t.storage.memory = db.memory
+	db.memory.memtables.Add(storageBytes(t.storage))
+	return t
+}
+func (db *DB) memoryStatsLocked() MemoryStats {
+	m := db.memory
+	s := MemoryStats{PrivatePageBytes: m.pages.Load(), DescriptorBytes: m.nodes.Load(), MemtableBytes: m.memtables.Load(), WALBytes: m.wal.Load(), QueryWorkingBytes: m.queryBytes(), ManagedTargetBytes: db.opts.ManagedMemoryBytes, MappedTargetBytes: db.opts.MappedCacheBytes, ReclaimedMappedBytes: db.reclaimedMapped}
+	if db.mt != nil {
+		s.ActiveMemtableBytes = storageBytes(db.mt.storage)
+	}
+	if db.imm != nil {
+		s.ImmutableMemtableBytes = storageBytes(db.imm.storage)
+	}
+	s.RetainedMemtableBytes = max(0, s.MemtableBytes-s.ActiveMemtableBytes-s.ImmutableMemtableBytes)
+	s.ManagedBufferBytes = s.PrivatePageBytes + s.DescriptorBytes + s.MemtableBytes + s.WALBytes
+	all := map[*pageBufferArena]bool{}
+	snap := map[*pageBufferArena]bool{}
+	snapMT := map[*memtableStorage]bool{}
+	for _, v := range db.snaps {
+		for _, a := range v.buffers {
+			snap[a] = true
+			all[a] = true
+		}
+		for _, a := range v.memStores {
+			snapMT[a] = true
+		}
+		s.MetadataEstimateBytes += int64(256 + len(v.mem)*64 + len(v.overlay)*64)
+	}
+	for a := range snap {
+		s.SnapshotPinnedBytes += int64(len(a.data))
+	}
+	for a := range snapMT {
+		s.SnapshotPinnedBytes += storageBytes(a)
+	}
+	if cs := db.activeCapture; cs != nil {
+		pages := map[*pageBufferArena]bool{}
+		nodes := map[*nodeArena]bool{}
+		for _, p := range cs.pages {
+			if p.buffer != nil {
+				pages[p.buffer] = true
+				all[p.buffer] = true
+			}
+		}
+		for _, n := range cs.nodes {
+			if n.arena != nil {
+				nodes[n.arena] = true
+			}
+		}
+		for a := range pages {
+			s.CheckpointPinnedBytes += int64(len(a.data))
+		}
+		for a := range nodes {
+			s.CheckpointPinnedBytes += int64(len(a.data))
+			s.PinnedBytes += int64(len(a.data))
+		}
+	}
+	for a := range all {
+		s.PinnedBytes += int64(len(a.data))
+	}
+	// All retired memtable arenas have external leases. Live active/immutable
+	// arenas are also pinned when shared with any snapshot or unlocked cursor.
+	s.PinnedBytes += s.RetainedMemtableBytes
+	if db.mt != nil && db.mt.storage.refs.Load() > 1 {
+		s.PinnedBytes += s.ActiveMemtableBytes
+	}
+	if db.imm != nil && db.imm.storage.refs.Load() > 1 {
+		s.PinnedBytes += s.ImmutableMemtableBytes
+	}
+	pg := db.pager
+	s.MetadataEstimateBytes += int64(cap(pg.pages))*8 + int64(cap(pg.verified)+cap(pg.discarded))*8
+	for _, m := range pg.maps {
+		s.MappedVirtualBytes += int64(len(m))
+	}
+	return s
+}
+
+// MemoryStats measures file page-cache residency using mincore on supported target
+// platforms. This is distinct from process RSS and the conservative tracked
+// mapped working-set estimate; private allocations are separate again.
+// This is an explicit diagnostic syscall, never performed per point lookup.
+func (db *DB) MemoryStats(ctx context.Context) (MemoryStats, error) {
+	ctx = orBackground(ctx)
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	if db.closed {
+		return MemoryStats{}, ErrClosed
+	}
+	s := db.memoryStatsLocked()
+	var working int64
+	n, err := db.pager.mappedResidency(ctx, func(mi, length int, vec []byte) error {
+		osPage := syscall.Getpagesize()
+		for off := 0; off < length; off += mappedReclaimChunk {
+			chunk := (uint64(mi)*minMapBytes + uint64(off)) / mappedReclaimChunk
+			if db.pager.cold != nil && db.pager.cold[chunk/64].Load()&(uint64(1)<<(chunk%64)) != 0 {
+				continue
+			}
+			end := min(off+mappedReclaimChunk, length)
+			for _, b := range vec[off/osPage : (end+osPage-1)/osPage] {
+				if b&1 != 0 {
+					working += int64(osPage)
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return s, err
+	}
+	s.MappedPageCacheBytes = n
+	s.MappedResidentEstimateBytes = working
+	s.ProcessResidentBytes, err = processResidentBytes()
+	if err != nil {
+		return s, err
+	}
+	s.PageCacheResidencyMeasured = true
+	return s, nil
+}
+func (pg *pager) mappedResidency(ctx context.Context, visit func(int, int, []byte) error) (int64, error) {
+	left := int64(pg.hwm) * PageSize
+	osPage := syscall.Getpagesize()
+	var resident int64
+	for index, m := range pg.maps {
+		if left <= 0 {
+			break
+		}
+		length := int(min(int64(len(m)), left))
+		vec := make([]byte, (length+osPage-1)/osPage)
+		if err := ctx.Err(); err != nil {
+			return resident, err
+		}
+		_, _, errno := syscall.Syscall(syscall.SYS_MINCORE, uintptr(unsafe.Pointer(&m[0])), uintptr(length), uintptr(unsafe.Pointer(&vec[0])))
+		if errno != 0 {
+			return resident, fmt.Errorf("aptevadb: mapped residency: %w", errno)
+		}
+		for _, b := range vec {
+			if b&1 != 0 {
+				resident += int64(osPage)
+			}
+		}
+		if visit != nil {
+			if err := visit(index, length, vec); err != nil {
+				return resident, err
+			}
+		}
+		left -= int64(length)
+	}
+	return resident, nil
+}
+
+const mappedReclaimChunk = 1 << 20
+
+func (pg *pager) noteMappedRead(id uint32) {
+	if pg.hot == nil {
+		return
+	}
+	chunk := uint64(id) * PageSize / mappedReclaimChunk
+	word, bit := chunk/64, uint64(1)<<(chunk%64)
+	if pg.cold[word].Load()&bit != 0 {
+		pg.cold[word].And(^bit)
+	}
+	if pg.hot[word].Load()&bit == 0 {
+		pg.hot[word].Or(bit)
+	}
+}
+
+// TrimMemory drops cold file translations to the target while preserving
+// mapping addresses/contents. Recently accessed chunks survive this sweep;
+// a hot working set may exceed the soft target. Call again after an idle
+// interval, or configure MappedCacheBytes for automatic periodic sweeps.
+func (db *DB) TrimMemory(ctx context.Context, targetBytes int64) (int64, error) {
+	if targetBytes < 0 {
+		return 0, ErrOptions
+	}
+	ctx = orBackground(ctx)
+	db.mu.Lock()
+	defer db.mu.Unlock()
+	if db.closed {
+		return 0, ErrClosed
+	}
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	pg := db.pager
+	// If tracking was not enabled, the first request establishes recency rather
+	// than treating every live mapped page as cold immediately.
+	if pg.hot == nil {
+		pg.trackMapped = true
+		pg.growHot()
+		for i := range pg.hot {
+			pg.hot[i].Store(^uint64(0))
+		}
+		return 0, nil
+	}
+	var chunks []struct {
+		mapIndex, offset, length int
+		resident                 int64
+		hot                      bool
+	}
+	_, err := pg.mappedResidency(ctx, func(mi, length int, vec []byte) error {
+		osPage := syscall.Getpagesize()
+		for off := 0; off < length; off += mappedReclaimChunk {
+			end := min(off+mappedReclaimChunk, length)
+			var n int64
+			for _, b := range vec[off/osPage : (end+osPage-1)/osPage] {
+				if b&1 != 0 {
+					n += int64(osPage)
+				}
+			}
+			id := (uint64(mi)*minMapBytes + uint64(off)) / mappedReclaimChunk
+			word, bit := id/64, uint64(1)<<(id%64)
+			old := pg.hot[word].And(^bit)
+			if pg.cold[word].Load()&bit != 0 {
+				n = 0
+			}
+			chunks = append(chunks, struct {
+				mapIndex, offset, length int
+				resident                 int64
+				hot                      bool
+			}{mi, off, end - off, n, old&bit != 0})
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	var reclaimed, resident int64
+	for _, c := range chunks {
+		resident += c.resident
+	}
+	for _, c := range chunks {
+		if resident-reclaimed <= targetBytes {
+			break
+		}
+		if c.hot || c.resident == 0 {
+			continue
+		}
+		if err := ctx.Err(); err != nil {
+			return reclaimed, err
+		}
+		address := uintptr(unsafe.Pointer(&pg.maps[c.mapIndex][c.offset]))
+		off := int64(c.mapIndex)*minMapBytes + int64(c.offset)
+		_, _, errno := syscall.Syscall6(syscall.SYS_MMAP, address, uintptr(c.length), syscall.PROT_READ, syscall.MAP_SHARED|syscall.MAP_FIXED, pg.f.Fd(), uintptr(off))
+		if errno != 0 {
+			if errno == syscall.EBADF || errno == syscall.EINVAL || errno == syscall.ENOTSUP {
+				return reclaimed, fmt.Errorf("aptevadb: reclaim mapped pages: %w", errno)
+			}
+			// Other MAP_FIXED failures may partially unmap the old range. Match the
+			// pager's existing fail-stop rule rather than exposing dangling views.
+			panic("aptevadb: cannot reclaim page mapping safely: " + errno.Error())
+		}
+		id := (uint64(c.mapIndex)*minMapBytes + uint64(c.offset)) / mappedReclaimChunk
+		pg.cold[id/64].Or(uint64(1) << (id % 64))
+		reclaimed += c.resident
+	}
+	db.reclaimedMapped += reclaimed
+	return reclaimed, nil
+}
+func (pg *pager) growHot() {
+	if !pg.trackMapped {
+		return
+	}
+	n := int((uint64(pg.hwm)*PageSize/mappedReclaimChunk)/64) + 1
+	if n > len(pg.hot) {
+		out := make([]atomic.Uint64, n)
+		for i := range pg.hot {
+			out[i].Store(pg.hot[i].Load())
+		}
+		pg.hot = out
+		cold := make([]atomic.Uint64, n)
+		for i := range pg.cold {
+			cold[i].Store(pg.cold[i].Load())
+		}
+		pg.cold = cold
+	}
+}
+func (db *DB) memoryWorker() {
+	defer close(db.memoryDone)
+	t := time.NewTicker(time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-db.stop:
+			return
+		case <-t.C:
+			_, _ = db.TrimMemory(context.Background(), db.opts.MappedCacheBytes)
+		}
+	}
+}
+
+// pressureLocked may release the writer lock while checkpointing or waiting.
+// No record has entered the WAL yet. Accounting includes pinned/retired native
+// buffers, so checkpointing alone cannot make snapshot retention disappear.
+func (db *DB) pressureLocked(ctx context.Context) error {
+	target := db.opts.ManagedMemoryBytes
+	if target == 0 || db.memory.total() <= target {
+		return nil
+	}
+	ctx = orBackground(ctx)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	db.stalls++
+	db.mu.Unlock()
+	err := db.runCheckpoint(true)
+	db.mu.Lock()
+	if err != nil {
+		return err
+	}
+	if db.memory.total() <= target {
+		return nil
+	}
+	if ctx.Done() == nil {
+		return ErrMemoryPressure
+	}
+	for db.memory.total() > target && !db.closed && db.failed == nil {
+		wake := db.memory.subscribe()
+		if db.memory.total() <= target {
+			break
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if len(db.snaps) == 0 && db.memoryStatsLocked().RetainedMemtableBytes == 0 {
+			return ErrMemoryPressure
+		}
+		db.mu.Unlock()
+		select {
+		case <-wake:
+		case <-ctx.Done():
+		}
+		db.mu.Lock()
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	if db.closed {
+		return ErrClosed
+	}
+	return db.failed
+}
+
+func (m *memoryTracker) subscribe() <-chan struct{} {
+	m.notifyMu.Lock()
+	defer m.notifyMu.Unlock()
+	if m.wake == nil {
+		m.wake = make(chan struct{})
+	}
+	return m.wake
+}
+func (m *memoryTracker) signal() {
+	if m == nil || m.limit == 0 {
+		return
+	}
+	m.notifyMu.Lock()
+	if m.wake != nil {
+		close(m.wake)
+		m.wake = nil
+	}
+	m.notifyMu.Unlock()
+}
+
+func (m *memoryTracker) track(b *memoryBudget) {
+	m.queryMu.Lock()
+	if m.budgets == nil {
+		m.budgets = map[*memoryBudget]struct{}{}
+	}
+	m.budgets[b] = struct{}{}
+	m.queryMu.Unlock()
+}
+func (m *memoryTracker) untrack(b *memoryBudget) {
+	m.queryMu.Lock()
+	delete(m.budgets, b)
+	m.queryMu.Unlock()
+}
+func (m *memoryTracker) queryBytes() int64 {
+	if m.limit > 0 {
+		return m.queries.Load()
+	}
+	m.queryMu.Lock()
+	defer m.queryMu.Unlock()
+	var n int64
+	for b := range m.budgets {
+		n += b.used.Load()
+	}
+	return n
+}

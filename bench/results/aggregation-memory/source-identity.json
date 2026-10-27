@@ -1,0 +1,13 @@
+{
+  "baseline_tag": "v0.2.0-alpha.7",
+  "baseline_commit": "4124a0f592168c6109e06d864d7c9535f4486001",
+  "baseline_archive_sha256": "2b921fd6fc13728d0f3f364c7387de6d9f0ecc36bc3b6db3d14989d888bcc20b",
+  "candidate_parent": "9ff2cd091d96214c380042da7e3dce330dc9ebc1",
+  "candidate_state": "unreleased working tree; candidate-source-sha256.json plus patch and added-source text",
+  "final_binaries_sha256": {
+    "alpha7": "564091b1dd416ef55c2bd766d1d5b81c2648816a7dd9ced51cbabd0f2559bcdf",
+    "current": "a30f74e5eddb484b10d6168a98936d1e490fc22f7fe688bbb25908e67c97d17f"
+  },
+  "source_archive_external": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-aggregation-memory/alpha7-source.tar",
+  "earlier_pilots_external": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-aggregation-memory"
+}

@@ -571,6 +571,15 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
 	if err := c.check(); err != nil {
 		return nil, err
 	}
+	if p.orderedCandidate() {
+		_, _, ordered, _, err := c.aggregateSource(ctx, p, AggregateOptions{})
+		if err != nil {
+			return nil, err
+		}
+		if ordered {
+			return c.runCollect(ctx, p, AggregateOptions{})
+		}
+	}
 	pl := p.plan()
 	if q, from, ok := c.reorder(p, &pl); ok {
 		return from.Run(ctx, q)
@@ -579,6 +588,9 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
 	if err != nil {
 		return nil, err
 	}
+	budget.owner = c.db.memory
+	budget.owner.track(budget)
+	defer budget.close()
 	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
 	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
 		if err := budget.reserve(ip.memory); err != nil {
@@ -711,6 +723,9 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
 	if err := c.check(); err != nil {
 		return nil, err
 	}
+	if p.orderedCandidate() {
+		return c.Run(ctx, p)
+	}
 	pl := p.plan()
 	if q, from, ok := c.reorder(p, &pl); ok {
 		return from.RunParallel(ctx, q, shards)
@@ -719,6 +734,9 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
 	if err != nil {
 		return nil, err
 	}
+	budget.owner = c.db.memory
+	budget.owner.track(budget)
+	defer budget.close()
 	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
 	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
 		if err := budget.reserve(ip.memory); err != nil {

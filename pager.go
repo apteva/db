@@ -49,6 +49,10 @@ func (n *node) pageType() byte {
 // With a page limit, clean pages are evicted by a CLOCK sweep. Dirty pages
 // are never evicted, and a checkpoint runs when they crowd the limit.
 type pager struct {
+	memory      *memoryTracker
+	trackMapped bool
+	hot         []atomic.Uint64
+	cold        []atomic.Uint64
 	f           fileLike
 	maps        [][]byte               // stable read-only file segments
 	pages       []atomic.Pointer[node] // indexed by physical id; grown only under the writer lock
@@ -108,11 +112,17 @@ func (pg *pager) ensureMapped(n uint32) error {
 func (pg *pager) close() error {
 	for _, a := range pg.nodeArenas {
 		syscall.Munmap(a.data)
+		if pg.memory != nil {
+			pg.memory.nodes.Add(-int64(len(a.data)))
+		}
 	}
 	pg.nodeArenas = nil
 	pg.nodeTail, pg.internalNodeTail = nil, nil
 	for _, a := range pg.bufferArenas {
 		syscall.Munmap(a.data)
+		if pg.memory != nil {
+			pg.memory.pages.Add(-int64(len(a.data)))
+		}
 	}
 	pg.bufferArenas, pg.bufferTail = nil, nil
 	for _, m := range pg.maps {
@@ -130,6 +140,7 @@ func (pg *pager) mappedPage(id uint32) page {
 }
 
 func (pg *pager) growTo(n uint32) {
+	pg.growHot()
 	if int(n) > len(pg.pages) {
 		size := int(n) + int(n)/2 + 64
 		np := make([]atomic.Pointer[node], size)
@@ -172,6 +183,9 @@ func (pg *pager) loaded(id uint32) *node {
 // get returns the resident node for id, loading it if needed.
 func (pg *pager) get(id uint32) (*node, error) {
 	if n := pg.pages[id].Load(); n != nil {
+		if pg.hot != nil && n.mapped {
+			pg.noteMappedRead(id)
+		}
 		if pg.limit > 0 && !n.ref.Load() {
 			n.ref.Store(true)
 		}
@@ -186,7 +200,13 @@ func (pg *pager) get(id uint32) (*node, error) {
 // Writers still use get to obtain and pin mutable node state.
 func (pg *pager) read(id uint32) (page, error) {
 	if n := pg.pages[id].Load(); n != nil {
+		if pg.hot != nil && n.mapped {
+			pg.noteMappedRead(id)
+		}
 		return n.data, nil
+	}
+	if pg.hot != nil {
+		pg.noteMappedRead(id)
 	}
 	if !pg.verify || pg.isVerified(id) {
 		return pg.mappedPage(id), nil
@@ -204,6 +224,9 @@ func (pg *pager) load(id uint32) (*node, error) {
 	defer pg.loadMu.Unlock()
 	if n := pg.pages[id].Load(); n != nil {
 		return n, nil
+	}
+	if pg.hot != nil {
+		pg.noteMappedRead(id)
 	}
 	p := pg.mappedPage(id)
 	n := pg.newNode(p.typ())

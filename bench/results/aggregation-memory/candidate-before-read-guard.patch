@@ -1,0 +1,977 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index f31560a..184ecf5 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -5,6 +5,20 @@ versions follow semantic versioning. Before 1.0, a minor version may change
+ the API or the on-disk format; both are listed here when it happens, with
+ the migration.
+ 
++## [Unreleased]
++
++- Add native AggregateEach/RunEach and collecting WithOptions APIs, with proven
++  compound-index streaming groups, early group limits and explicit strategy stats.
++- Add opt-in bounded hash-partition aggregation and stable external sorting;
++  preserve typed/exact integer state, one snapshot, cancellation, shared disk
++  quotas, execution leases and automatic abandoned scratch cleanup.
++- Account for private page/descriptor/memtable/WAL allocations and aggregation
++  reservations, including leased and temporary native stores. Expose MemoryStats,
++  opt-in cold mapped-page reclamation/TrimMemory and managed-buffer admission
++  with pre-WAL pressure errors or cancellable waiting for retained views.
++- Preserve default cache policy and file format 10. New streaming/options APIs
++  are embedded Go features; no release/tag or HTTP streaming endpoint yet.
++
+ ## [0.2.0-alpha.7] - 2026-10-27
+ 
+ - Reduce retained native memory with stable file segments, explicit ownership of
+diff --git a/OPERATIONS.md b/OPERATIONS.md
+index 3b95b71..ade876e 100644
+--- a/OPERATIONS.md
++++ b/OPERATIONS.md
+@@ -109,3 +109,55 @@ CHANGE_FEEDS.md for history windows, snapshot leases and limits. Logical expiry
+ can precede segment deletion; the recovery tail is retained. Backups/restores
+ start a fresh change-stream identity and do not carry its history. Format-10
+ upgrades are permanent and older binaries cannot open the directory.
++
++## Resident-memory controls (unreleased)
++
++```go
++opts := db.DurableOptions()
++opts.CacheBytes = 64 << 20
++opts.MappedCacheBytes = 32 << 20
++opts.ManagedMemoryBytes = 256 << 20
++handle, err := db.Open("./data", opts)
++// ...
++stats, err := handle.MemoryStats(ctx)
++reclaimedEstimate, err := handle.TrimMemory(ctx, 32 << 20)
++```
++
++Both new targets default to zero (disabled). MappedCacheBytes enables recency
++tracking and a sweep once per second. TrimMemory establishes tracking on its
++first call if disabled; subsequent sweeps reclaim cold clean file translations
++in 1 MiB chunks while preserving mapping addresses and contents. Recent chunks
++survive a sweep, so a hot working set may exceed the soft target. Refaulting a
++reclaimed page costs work on a later read. TrimMemory's return and
++ReclaimedMappedBytes estimate resident file-backed bytes remapped, rather than
++measure a process-RSS delta. Reclamation does not force garbage collection.
++
++MemoryStats separates process RSS from allocated private page buffers,
++descriptors, memtable arenas and WAL stores, including retired stores leased by
++snapshots/cursors and temporary native compaction/backup buffers. Active,
++immutable and retained memtables are separate. SnapshotPinnedBytes and
++CheckpointPinnedBytes are overlapping subsets of those categories; PinnedBytes
++counts their union and other leased memtables once. They are not additional
++allocated memory. QueryWorkingBytes covers registered aggregation budgets.
++MetadataEstimateBytes estimates Go bookkeeping separately.
++
++MappedPageCacheBytes comes from mincore and describes OS file page-cache
++residency; it is not process mapped RSS. MappedResidentEstimateBytes excludes
++explicitly reclaimed chunks until they are read again, and remains an estimate.
++MappedVirtualBytes is address space. None of those values should be summed with
++ProcessResidentBytes. Diagnostics perform residency syscalls on explicit request,
++not on ordinary reads.
++
++ManagedMemoryBytes is a soft pre-write admission target for owned native buffers
++and registered aggregation reservations. It is not a hard process RSS cap;
++metadata, snapshots' bookkeeping, Go/caller allocations and mapped file pages
++are separate, and one atomic operation, checkpoint or in-flight copy can overshoot.
++Above target, admission attempts checkpoint/reclamation before logging a write.
++An ordinary write returns ErrMemoryPressure if retained storage still prevents
++progress, avoiding a deadlock when its caller owns the retaining snapshot.
++Batch.CommitContext with a cancellable context may wait for leases to close;
++cancellation/pressure rejection occurs before entering the WAL. Close snapshots
++and cursors promptly and configure a target large enough for ordinary engine
++buffers plus workload bursts. Aggregations can return ErrMemoryPressure if the
++shared managed target is exhausted. Do not treat either option as an OS memory
++limit or a promise to outperform another engine on every workload.
+diff --git a/README.md b/README.md
+index 001259b..4c471ed 100644
+--- a/README.md
++++ b/README.md
+@@ -83,6 +83,10 @@ Other historical results under `bench/results/` describe their original builds.
+ KV comparisons use `Upsert` (matching the other engines' replacement behavior);
+ `Insert` now performs a duplicate-key check. See [BENCHMARKS.md](BENCHMARKS.md).
+ 
++The working tree adds [bounded native aggregation](USAGE.md#bounded-native-aggregation-unreleased)
++and [resident-memory controls](OPERATIONS.md#resident-memory-controls-unreleased).
++These features are **unreleased**; the alpha.7 download above does not include them.
++
+ ## Stored computed fields
+ 
+ Define deterministic scalar fields on an **empty collection**, then write source
+diff --git a/USAGE.md b/USAGE.md
+index 2d9eac0..89b6664 100644
+--- a/USAGE.md
++++ b/USAGE.md
+@@ -112,8 +112,9 @@ err := users.Query(ctx, []byte(`{"age":{"$gte":18}}`),
+ 
+ Query uses the $match filter syntax, applicable indexes and primary-key order.
+ Skip/Limit are nonnegative; zero Limit means unlimited. It streams without
+-retaining a result array. Aggregation supports group/sort/lookup and materializes
+-results under Pipeline Limits. SetLimits before sharing a compiled pipeline;
++retaining a result array. Aggregation supports group/sort/lookup. Aggregate/Run
++materialize results under Pipeline Limits; AggregateEach/RunEach stream results
++with bounded group and sort operators (see below). SetLimits before sharing a compiled pipeline;
+ mutating the package-level DefaultLimits during concurrent execution is unsafe.
+ Snapshot queries preserve that snapshot's catalog and row versions.
+ 
+@@ -258,8 +259,8 @@ rows, err := orders.Aggregate(ctx, []byte(`[
+ ```
+ 
+ The same non-null counter is supported in native computed collections and
+-through the Go HTTP client. Opening an existing database upgrades formats 3–8
+-to format 9; make a backup with the original binary before upgrading.
++through the Go HTTP client. Opening an existing database upgrades formats 3–9
++to format 10; make a backup with the original binary before upgrading.
+ 
+ ## Filtered document counts
+ 
+@@ -315,3 +316,73 @@ writers continue. Close snapshots after their operations have finished.
+ accumulator; `CountDocuments` counts matching documents, including null-valued
+ fields. Existing Query/aggregation calls retain their behavior; adapters must
+ adopt `CountDocuments` to use its covering path.
++
++## Bounded native aggregation (unreleased)
++
++Use the embedded Go streaming API when output cardinality may exceed RAM:
++
++```go
++var stats db.AggregateStats
++err := orders.AggregateEach(ctx, []byte(`[
++  {"$group":{"_id":"$customer","total":{"$sum":"$amount"},"n":{"$count":{}}}}
++]`), db.AggregateOptions{
++    MaxMemoryBytes: 16 << 20,
++    AllowDiskUse: true,
++    MaxDiskBytes: 1 << 30,
++    Stats: &stats,
++}, func(row map[string]any) bool {
++    // Consume a completed group. The map is owned and may be retained.
++    return true // false stops early and releases execution resources
++})
++```
++
++DB/default collections and snapshots also expose AggregateEach. A compiled
++pipeline uses Collection.RunEach, or Pipeline.RunEach with a caller-provided
++Source. The latter has no native index planner/snapshot ownership or $lookup
++collection resolver; prefer the collection method for database queries.
++AggregateWithOptions and Pipeline.RunWithOptions collect results against the
++same memory budget; large result sets can still return ErrLimit after spilling.
++Existing Aggregate/Run calls remain materializing and do not opt into disk use.
++These new execution options are currently native Go APIs, without a new HTTP
++streaming endpoint.
++
++The planner streams groups from an exact scalar compound index when all varying
++group components are contiguous in its order; equality prefixes, mixed directions
++and permutations of grouping fields are supported. Sparse coverage must be proven;
++multikey and reverse traversal use the safe fallback. Typed groups sharing a
++coarser numeric or null index key remain separate. Explicit match/sort/group
++prefixes may also accelerate existing Aggregate/Run calls. With no explicit sort,
++only the new APIs may choose index group order; $first/$last preserve source order
++and prevent that automatic choice. Group output order without an explicit sort
++is unspecified. A downstream limit can stop an ordered aggregation before reading
++the remaining groups.
++
++Unordered groups spill chronological partial accumulator states into bounded
++hash partitions and recursively repartition oversized partitions. External sorts
++use bounded runs and stable merges. Signed 128-bit integer subtotals, types,
++counts, min/max and first/last state survive spill without JSON conversion.
++Floating accumulation uses IEEE-754 arithmetic: changing partial-merge order may
++change rounding; bitwise equality with serial floating accumulation is not promised.
++All database stages, including lookups, read the same snapshot. Context checks
++cover input, partition and merge work. A stream can emit rows before a later error;
++consumers requiring atomic output must stage it themselves.
++
++MaxMemoryBytes defaults to the pipeline budget (64 MiB by default). The shared
++budget charges retained group state, result maps in collecting APIs, sort buffers
++and spill I/O workspace. One state/record and minimum I/O workspace must fit or
++execution returns ErrLimit. It excludes the current borrowed input, snapshot/page
++cache, Go runtime overhead and maps retained by the caller. MaxGroups remains an
++output-cardinality guard. Splitting budget among blocking operators can cause an
++opted-in spill earlier than an entirely in-memory execution.
++
++Disk use is opt-in. MaxDiskBytes zero means 1 GiB per execution, shared by all
++operators and counting merge inputs and output simultaneously. Exceeding it returns
++ErrDiskLimit. Stats reports Strategy (hash, ordered-index, external-hash or
++ordered-index+spill), Index, input/groups/results, peak accounted memory,
++cumulative bytes written, peak temporary bytes, spill files and merge passes.
++It is updated before return; do not read or share the Stats pointer concurrently.
++Scratch defaults to <database>/aggregate-tmp (the OS temp root for a standalone
++Source), with private execution files. Completion, callback stop, cancellation
++and errors close and remove scratch. Open cleans abandoned default executions;
++call CleanupAggregationTemp(ctx, customRoot) for a custom root after a crash.
++Live executions hold OS leases and are skipped. Cleanup errors are returned.
+diff --git a/aggregate.go b/aggregate.go
+index b0f32b0..4d0fd5e 100644
+--- a/aggregate.go
++++ b/aggregate.go
+@@ -634,28 +634,28 @@ type groupState struct {
+ }
+ 
+ type grouper struct {
+-	spec   *groupSpec
+-	groups map[string]*groupState
+-	single *groupState // the one group when _id is null
+-	order  []*groupState
+-	keyBuf []byte
+-	max    int
+-	states []groupState
+-	ids    []scalar
+-	accs   []accState
+-	used   int
+-	budget *memoryBudget
++	spec     *groupSpec
++	groups   map[string]*groupState
++	single   *groupState // the one group when _id is null
++	order    []*groupState
++	keyBuf   []byte
++	max      int
++	states   []groupState
++	ids      []scalar
++	accs     []accState
++	used     int
++	budget   *memoryBudget
++	capBytes int64
++	charge   int64
++	slab     int // nonzero: bounded streaming/spill allocation granularity
+ }
+ 
+ // Groups own query-local slabs: addresses remain stable through shard merges,
+ // while large cardinalities do not allocate three objects for every group.
+ func (g *grouper) allocGroup() (*groupState, error) {
+ 	if g.used == len(g.states) {
+-		n := 256
+-		if g.states == nil {
+-			n = 8
+-		}
+-		if err := g.budget.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
++		n := g.nextSlab()
++		if err := g.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
+ 			return nil, err
+ 		}
+ 		g.states = make([]groupState, n)
+@@ -706,7 +706,7 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
+ 	var gs *groupState
+ 	if len(idIdx) == 0 {
+ 		if g.single == nil {
+-			if err := g.budget.reserve(160 + int64(len(spec.accs))*80); err != nil {
++			if err := g.reserve(160 + int64(len(spec.accs))*80); err != nil {
+ 				return err
+ 			}
+ 			g.single = &groupState{accs: make([]accState, len(spec.accs))}
+@@ -748,7 +748,7 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
+ 				continue
+ 			}
+ 			if !st.hasExt {
+-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
++				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+ 					return err
+ 				}
+ 				st.ext, st.hasExt = toScalar(v), true
+@@ -756,20 +756,20 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
+ 			}
+ 			c := compareValues(v, st.ext.view())
+ 			if (a.op == accMin && c < 0) || (a.op == accMax && c > 0) {
+-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
++				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+ 					return err
+ 				}
+ 				st.ext = toScalar(v)
+ 			}
+ 		case accFirst:
+ 			if !st.hasExt {
+-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
++				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+ 					return err
+ 				}
+ 				st.ext, st.hasExt = toScalar(v), true
+ 			}
+ 		case accLast:
+-			if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
++			if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+ 				return err
+ 			}
+ 			st.ext, st.hasExt = toScalar(v), true
+@@ -793,7 +793,7 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
+ 	if needed > cap(g.keyBuf) {
+ 		capacity := max(needed, 2*cap(g.keyBuf))
+ 		capacity = (capacity + 15) &^ 15
+-		if err := g.budget.reserve(int64(capacity - cap(g.keyBuf))); err != nil {
++		if err := g.reserve(int64(capacity - cap(g.keyBuf))); err != nil {
+ 			return nil, err
+ 		}
+ 		g.keyBuf = make([]byte, 0, capacity)
+@@ -818,7 +818,7 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
+ 		if len(g.groups) >= g.max {
+ 			return nil, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
+ 		}
+-		if err := g.budget.reserve(int64(len(kb)) + 160); err != nil {
++		if err := g.reserve(int64(len(kb)) + 160); err != nil {
+ 			return nil, err
+ 		}
+ 		var err error
+@@ -1904,3 +1904,23 @@ func validateFilterNumbers(v any) error {
+ 	}
+ 	return nil
+ }
++
++func (g *grouper) nextSlab() int {
++	if g.slab > 0 {
++		return g.slab
++	}
++	if g.states == nil {
++		return 8
++	}
++	return 256
++}
++func (g *grouper) reserve(n int64) error {
++	if err := g.budget.reserve(n); err != nil {
++		return err
++	}
++	if g.slab > 0 {
++		g.charge += n
++	}
++	return nil
++}
++func (g *grouper) release() { _ = g.budget.reserve(-g.charge); g.charge = 0 }
+diff --git a/checkpoint.go b/checkpoint.go
+index d247670..14c9021 100644
+--- a/checkpoint.go
++++ b/checkpoint.go
+@@ -111,7 +111,7 @@ func (db *DB) runCheckpoint(full bool) error {
+ 		return db.failed
+ 	}
+ 	if full && db.mt != nil && db.imm == nil && db.mt.len() > 0 {
+-		db.imm, db.mt = db.mt, newMemtable(db.opts.MemtableBytes)
++		db.imm, db.mt = db.mt, db.newMemtable()
+ 	}
+ 	db.mu.Unlock()
+ 
+@@ -513,6 +513,9 @@ func (db *DB) releaseCaptureBuffers(cs *captureSet) {
+ func (db *DB) stopFlusher() {
+ 	db.stopOnce.Do(func() { close(db.stop) })
+ 	<-db.done
++	if db.memoryDone != nil {
++		<-db.memoryDone
++	}
+ }
+ 
+ // Close checkpoints and releases the files.
+@@ -529,6 +532,7 @@ func (db *DB) Close() error {
+ 		return ErrClosed
+ 	}
+ 	db.closed = true
++	db.memory.signal()
+ 	if db.feed != nil {
+ 		db.feed.stop(ErrClosed)
+ 	}
+@@ -575,6 +579,7 @@ func (db *DB) crash() {
+ 	db.stopCheckpointer()
+ 	db.mu.Lock()
+ 	db.closed = true
++	db.memory.signal()
+ 	if db.feed != nil {
+ 		db.feed.stop(ErrClosed)
+ 	}
+@@ -779,7 +784,7 @@ func (db *DB) compact(ctx context.Context) error {
+ 	db.freelistPages, db.dirtyOverflow = ndb.freelistPages, ndb.dirtyOverflow
+ 	if db.mt != nil {
+ 		db.mt.releaseBuffers()
+-		db.mt = newMemtable(db.opts.MemtableBytes) // every record is in the new tree now
++		db.mt = db.newMemtable() // every record is in the new tree now
+ 	}
+ 	db.imm.releaseBuffers()
+ 	db.imm = nil
+@@ -821,6 +826,9 @@ func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
+ 		db.mu.RLock()
+ 		end := min(start+32, int(limit), int(pg.hwm))
+ 		for i := start; i < end; i++ {
++			if pg.hot != nil && i >= 2 {
++				pg.noteMappedRead(uint32(i))
++			}
+ 			n := pg.pages[i].Load()
+ 			if n != nil && n.mapped && n.kind != 0 && n.data.typ() != n.kind {
+ 				db.mu.RUnlock()
+@@ -851,7 +859,7 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
+ 	opts.MemtableBytes = -1
+ 	opts.Sync = false
+ 	opts.ChangeFeed = nil
+-	ndb, err := Open(dir, opts)
++	ndb, err := openWithMemory(dir, opts, db.memory)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+@@ -941,6 +949,7 @@ func (db *DB) putDirect(key, val []byte, del bool) error {
+ func (db *DB) closeQuiet() {
+ 	db.mu.Lock()
+ 	db.closed = true
++	db.memory.signal()
+ 	db.wal.close()
+ 	db.releaseMemtables()
+ 	db.pager.close()
+diff --git a/collection.go b/collection.go
+index 35f3f48..63ebdc6 100644
+--- a/collection.go
++++ b/collection.go
+@@ -571,6 +571,15 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
+ 	if err := c.check(); err != nil {
+ 		return nil, err
+ 	}
++	if p.orderedCandidate() {
++		_, _, ordered, _, err := c.aggregateSource(ctx, p, AggregateOptions{})
++		if err != nil {
++			return nil, err
++		}
++		if ordered {
++			return c.runCollect(ctx, p, AggregateOptions{})
++		}
++	}
+ 	pl := p.plan()
+ 	if q, from, ok := c.reorder(p, &pl); ok {
+ 		return from.Run(ctx, q)
+@@ -579,6 +588,9 @@ func (c *Collection) Run(ctx context.Context, p *Pipeline) ([]map[string]any, er
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	budget.owner = c.db.memory
++	budget.owner.track(budget)
++	defer budget.close()
+ 	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
+ 	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
+ 		if err := budget.reserve(ip.memory); err != nil {
+@@ -711,6 +723,9 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
+ 	if err := c.check(); err != nil {
+ 		return nil, err
+ 	}
++	if p.orderedCandidate() {
++		return c.Run(ctx, p)
++	}
+ 	pl := p.plan()
+ 	if q, from, ok := c.reorder(p, &pl); ok {
+ 		return from.RunParallel(ctx, q, shards)
+@@ -719,6 +734,9 @@ func (c *Collection) RunParallel(ctx context.Context, p *Pipeline, shards int) (
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	budget.owner = c.db.memory
++	budget.owner.track(budget)
++	defer budget.close()
+ 	e := &env{ctx: ctx, c: c, count: -1, budget: budget}
+ 	if ip, ok := c.indexPlanBudget(pl.preds, budget.max); ok {
+ 		if err := budget.reserve(ip.memory); err != nil {
+diff --git a/computed.go b/computed.go
+index 259a378..35a0ba9 100644
+--- a/computed.go
++++ b/computed.go
+@@ -76,7 +76,10 @@ func (c *Collection) DefineComputedFields(ctx context.Context, definitions []byt
+ 		db.mu.Unlock()
+ 		return err
+ 	}
+-	db.stallLocked()
++	if err := db.stallLocked(ctx); err != nil {
++		db.mu.Unlock()
++		return err
++	}
+ 	if db.closed {
+ 		db.mu.Unlock()
+ 		return ErrClosed
+diff --git a/computed_collection.go b/computed_collection.go
+index 64cc72d..a44f9db 100644
+--- a/computed_collection.go
++++ b/computed_collection.go
+@@ -60,7 +60,10 @@ func (db *DB) CreateComputedCollection(ctx context.Context, name, source string,
+ 		db.mu.Unlock()
+ 		return nil, err
+ 	}
+-	db.stallLocked()
++	if err := db.stallLocked(ctx); err != nil {
++		db.mu.Unlock()
++		return nil, err
++	}
+ 	if db.closed || db.failed != nil {
+ 		err := db.failed
+ 		if db.closed {
+diff --git a/contracts.go b/contracts.go
+index bb28f22..b13ec99 100644
+--- a/contracts.go
++++ b/contracts.go
+@@ -156,7 +156,9 @@ func (db *DB) maintenanceReadyLocked(ctx context.Context) error {
+ 	if db.failed != nil {
+ 		return db.failed
+ 	}
+-	db.stallLocked()
++	if err := db.stallLocked(ctx); err != nil {
++		return err
++	}
+ 	if db.closed {
+ 		return ErrClosed
+ 	}
+diff --git a/db.go b/db.go
+index a6b8090..72030dd 100644
+--- a/db.go
++++ b/db.go
+@@ -28,6 +28,14 @@ const (
+ 
+ // Options tunes durability and checkpointing.
+ type Options struct {
++	// ManagedMemoryBytes is a soft target for owned engine buffers and tracked
++	// aggregate working memory. Admission happens before a write enters the WAL;
++	// one atomic write or in-flight copy may temporarily exceed it. Zero disables.
++	ManagedMemoryBytes int64
++	// MappedCacheBytes enables cold mapped-page recency tracking and one-second
++	// reclamation sweeps. It is a soft resident target; hot mappings survive.
++	MappedCacheBytes int64
++
+ 	// Sync flushes the log before a write returns. Default false (async).
+ 	// Use DurableOptions for power-loss-safe writes. Concurrent writes share flushes.
+ 	Sync bool
+@@ -79,6 +87,9 @@ const FormatVersion = 10
+ 
+ // DB is a single-writer, multi-reader key-value store.
+ type DB struct {
++	memory             *memoryTracker
++	memoryDone         chan struct{}
++	reclaimedMapped    int64
+ 	checkpointPages    []ioPage
+ 	checkpointNodes    []*node
+ 	checkpointReleased []uint32
+@@ -157,11 +168,13 @@ type meta struct {
+ }
+ 
+ // Open opens or creates the database in dir.
+-func Open(dir string, opts Options) (*DB, error) {
++func Open(dir string, opts Options) (*DB, error) { return openWithMemory(dir, opts, nil) }
++
++func openWithMemory(dir string, opts Options, shared *memoryTracker) (*DB, error) {
+ 	if dir == "" {
+ 		return nil, fmt.Errorf("%w: directory is required", ErrOptions)
+ 	}
+-	if opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
++	if opts.ManagedMemoryBytes < 0 || opts.MappedCacheBytes < 0 || opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
+ 		return nil, ErrOptions
+ 	}
+ 	if opts.ChangeFeed != nil {
+@@ -249,7 +262,12 @@ func Open(dir string, opts Options) (*DB, error) {
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	memory := shared
++	if memory == nil {
++		memory = &memoryTracker{limit: opts.ManagedMemoryBytes}
++	}
+ 	w := newWAL(dir)
++	w.memory = memory
+ 	w.strictSync = opts.Sync
+ 	if opts.ChangeFeed != nil && !opts.ChangeFeed.Disabled {
+ 		normalized, _ := normalizeChangeOptions(*opts.ChangeFeed)
+@@ -276,11 +294,13 @@ func Open(dir string, opts Options) (*DB, error) {
+ 		f.Close()
+ 		return nil, err
+ 	}
+-	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
++	pg.memory = memory
++	pg.trackMapped = opts.MappedCacheBytes > 0
++	db := &DB{memory: memory, dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
+ 		stop: make(chan struct{}), done: make(chan struct{}), ckptReq: make(chan ckptRequest, 16), ckptDone: make(chan struct{})}
+ 	db.cond = sync.NewCond(&db.mu)
+ 	if opts.MemtableBytes > 0 {
+-		db.mt = newMemtable(opts.MemtableBytes)
++		db.mt = db.newMemtable()
+ 	}
+ 	st, err := f.Stat()
+ 	if err == nil {
+@@ -330,10 +350,20 @@ func Open(dir string, opts Options) (*DB, error) {
+ 	}
+ 	// Cleanup only after validating/recovering an owned database. A rejected
+ 	// format/corrupt directory must keep its fallback and unfinished copy.
++	if _, err := CleanupAggregationTemp(context.Background(), filepath.Join(dir, "aggregate-tmp")); err != nil {
++		db.releaseMemtables()
++		w.close()
++		pg.close()
++		return nil, err
++	}
+ 	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
+ 	os.Remove(oldPath)
+ 	lockOwned = false
+ 	db.opening = false
++	if opts.MappedCacheBytes > 0 {
++		db.memoryDone = make(chan struct{})
++		go db.memoryWorker()
++	}
+ 	go db.flusher()
+ 	go db.checkpointer()
+ 	return db, nil
+@@ -477,8 +507,24 @@ func (db *DB) noteActiveStartLocked() {
+ // memtable being applied has not drained and the active one has grown to
+ // twice its budget, i.e. when writes outrun the disk for a sustained
+ // stretch. Writer lock held on entry and exit.
+-func (db *DB) stallLocked() error {
++func (db *DB) stallLocked(contexts ...context.Context) error {
++	var ctx context.Context
++	if len(contexts) > 0 {
++		ctx = contexts[0]
++	}
++	if err := db.pressureLocked(ctx); err != nil {
++		return err
++	}
++	if ctx != nil && ctx.Done() != nil {
++		stop := context.AfterFunc(ctx, func() { db.mu.Lock(); db.cond.Broadcast(); db.mu.Unlock() })
++		defer stop()
++	}
+ 	for db.mt != nil && int64(db.mt.bufferedBytes())/2 >= db.opts.MemtableBytes && !db.closed && db.failed == nil {
++		if ctx != nil {
++			if err := ctx.Err(); err != nil {
++				return err
++			}
++		}
+ 		db.stalls++
+ 		if db.opening {
+ 			// Open has not published the handle or started its workers. Recovery
+@@ -496,6 +542,11 @@ func (db *DB) stallLocked() error {
+ 		}
+ 		db.cond.Wait()
+ 	}
++	if ctx != nil {
++		if err := ctx.Err(); err != nil {
++			return err
++		}
++	}
+ 	if db.closed {
+ 		return ErrClosed
+ 	}
+@@ -636,7 +687,7 @@ func (b *Batch) CommitContext(ctx context.Context) error {
+ 		}
+ 		return err
+ 	}
+-	if err := db.stallLocked(); err != nil {
++	if err := db.stallLocked(ctx); err != nil {
+ 		db.mu.Unlock()
+ 		return err
+ 	}
+diff --git a/internal/protocol/protocol.go b/internal/protocol/protocol.go
+index 1be8fd7..9e2645c 100644
+--- a/internal/protocol/protocol.go
++++ b/internal/protocol/protocol.go
+@@ -83,7 +83,7 @@ var codes = map[string]error{
+ 	"computed_read_only": db.ErrComputedCollectionReadOnly, "computed_dependency": db.ErrComputedCollectionDependency, "computed_limit": db.ErrComputedCollectionLimit,
+ 	"computed_exists": db.ErrComputedCollectionExists, "document": db.ErrDocument, "collection_name": db.ErrCollectionName,
+ 	"computed": db.ErrComputedCollection, "computed_field": db.ErrComputedField, "computed_nonempty": db.ErrComputedNonEmpty,
+-	"too_large": db.ErrTransactionTooLarge, "key_size": db.ErrKeySize, "value_size": db.ErrValueSize, "limit": db.ErrLimit, "pipeline": db.ErrPipeline,
++	"too_large": db.ErrTransactionTooLarge, "key_size": db.ErrKeySize, "value_size": db.ErrValueSize, "limit": db.ErrLimit, "memory_pressure": db.ErrMemoryPressure, "disk_limit": db.ErrDiskLimit, "pipeline": db.ErrPipeline,
+ 	"change_disabled": db.ErrChangeFeedDisabled, "history_expired": db.ErrHistoryExpired, "resume_invalid": db.ErrResumeInvalid, "watch_limit": db.ErrWatchLimit,
+ 	"cancelled": context.Canceled, "timeout": context.DeadlineExceeded, "bad_request": ErrBadRequest, "unauthorized": ErrUnauthorized, "busy": ErrBusy,
+ }
+diff --git a/memtable.go b/memtable.go
+index 43bad23..f580f70 100644
+--- a/memtable.go
++++ b/memtable.go
+@@ -238,8 +238,10 @@ func (t *memtable) snapshot() []mtEntry {
+ }
+ 
+ func (t *memtable) reset() {
++	memory := t.storage.memory
+ 	t.releaseBuffers()
+ 	t.storage = newMemtableStorage()
++	t.storage.memory = memory
+ 	leaf := t.newLeaf()
+ 	t.slots = nil
+ 	t.root, t.first = leaf, leaf
+diff --git a/memtable_buffers.go b/memtable_buffers.go
+index e061c79..1fd0143 100644
+--- a/memtable_buffers.go
++++ b/memtable_buffers.go
+@@ -13,6 +13,7 @@ import (
+ const memtableArenaBytes = 1 << 20
+ 
+ type memtableStorage struct {
++	memory *memoryTracker
+ 	refs   atomic.Int64
+ 	arenas [][]byte
+ 	tail   []byte
+@@ -35,6 +36,9 @@ func (s *memtableStorage) alloc(n int) []byte {
+ 		if err != nil {
+ 			panic("aptevadb: cannot allocate memtable arena: " + err.Error())
+ 		}
++		if s.memory != nil {
++			s.memory.memtables.Add(int64(len(data)))
++		}
+ 		s.arenas = append(s.arenas, data)
+ 		s.tail = data
+ 	}
+@@ -49,6 +53,10 @@ func (s *memtableStorage) release() {
+ 	if s.refs.Add(-1) == 0 {
+ 		for _, data := range s.arenas {
+ 			syscall.Munmap(data)
++			if s.memory != nil {
++				s.memory.memtables.Add(-int64(len(data)))
++				s.memory.signal()
++			}
+ 		}
+ 		s.arenas, s.tail = nil, nil
+ 	}
+diff --git a/node_buffers.go b/node_buffers.go
+index f1beaf3..4c89922 100644
+--- a/node_buffers.go
++++ b/node_buffers.go
+@@ -28,6 +28,9 @@ func (pg *pager) newNode(kind byte) *node {
+ 			panic("aptevadb: cannot allocate page descriptors: " + err.Error())
+ 		}
+ 		a = &nodeArena{data: data, nodes: unsafe.Slice((*node)(unsafe.Pointer(unsafe.SliceData(data))), PageSize/int(unsafe.Sizeof(node{})))}
++		if pg.memory != nil {
++			pg.memory.nodes.Add(int64(len(data)))
++		}
+ 		pg.nodeArenas = append(pg.nodeArenas, a)
+ 		*tail = a
+ 	}
+@@ -53,6 +56,10 @@ func (pg *pager) releaseUnusedNodes() {
+ 	kept := pg.nodeArenas[:0]
+ 	for _, a := range pg.nodeArenas {
+ 		if a.live == 0 && syscall.Munmap(a.data) == nil {
++			if pg.memory != nil {
++				pg.memory.nodes.Add(-int64(len(a.data)))
++				pg.memory.signal()
++			}
+ 			if pg.nodeTail == a {
+ 				pg.nodeTail = nil
+ 			}
+diff --git a/page_buffers.go b/page_buffers.go
+index 7d5ad23..95a9323 100644
+--- a/page_buffers.go
++++ b/page_buffers.go
+@@ -31,6 +31,9 @@ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
+ 			panic("aptevadb: cannot allocate writable page arena: " + err.Error())
+ 		}
+ 		a = &pageBufferArena{data: data}
++		if pg.memory != nil {
++			pg.memory.pages.Add(int64(len(data)))
++		}
+ 		pg.bufferArenas = append(pg.bufferArenas, a)
+ 		pg.bufferTail = a
+ 	}
+@@ -48,6 +51,9 @@ func (pg *pager) allocInternalPageBuffer() (page, *pageBufferArena) {
+ 		panic("aptevadb: cannot allocate internal page buffer: " + err.Error())
+ 	}
+ 	a := &pageBufferArena{data: data, next: PageSize, live: 1}
++	if pg.memory != nil {
++		pg.memory.pages.Add(int64(len(data)))
++	}
+ 	pg.bufferArenas = append(pg.bufferArenas, a)
+ 	return page(data), a
+ }
+@@ -78,6 +84,10 @@ func (pg *pager) releaseUnusedBuffers() {
+ 	kept := pg.bufferArenas[:0]
+ 	for _, a := range pg.bufferArenas {
+ 		if a.live == 0 && syscall.Munmap(a.data) == nil {
++			if pg.memory != nil {
++				pg.memory.pages.Add(-int64(len(a.data)))
++				pg.memory.signal()
++			}
+ 			if pg.bufferTail == a {
+ 				pg.bufferTail = nil
+ 			}
+diff --git a/pager.go b/pager.go
+index f538739..f878462 100644
+--- a/pager.go
++++ b/pager.go
+@@ -49,6 +49,10 @@ func (n *node) pageType() byte {
+ // With a page limit, clean pages are evicted by a CLOCK sweep. Dirty pages
+ // are never evicted, and a checkpoint runs when they crowd the limit.
+ type pager struct {
++	memory      *memoryTracker
++	trackMapped bool
++	hot         []atomic.Uint64
++	cold        []atomic.Uint64
+ 	f           fileLike
+ 	maps        [][]byte               // stable read-only file segments
+ 	pages       []atomic.Pointer[node] // indexed by physical id; grown only under the writer lock
+@@ -108,11 +112,17 @@ func (pg *pager) ensureMapped(n uint32) error {
+ func (pg *pager) close() error {
+ 	for _, a := range pg.nodeArenas {
+ 		syscall.Munmap(a.data)
++		if pg.memory != nil {
++			pg.memory.nodes.Add(-int64(len(a.data)))
++		}
+ 	}
+ 	pg.nodeArenas = nil
+ 	pg.nodeTail, pg.internalNodeTail = nil, nil
+ 	for _, a := range pg.bufferArenas {
+ 		syscall.Munmap(a.data)
++		if pg.memory != nil {
++			pg.memory.pages.Add(-int64(len(a.data)))
++		}
+ 	}
+ 	pg.bufferArenas, pg.bufferTail = nil, nil
+ 	for _, m := range pg.maps {
+@@ -130,6 +140,7 @@ func (pg *pager) mappedPage(id uint32) page {
+ }
+ 
+ func (pg *pager) growTo(n uint32) {
++	pg.growHot()
+ 	if int(n) > len(pg.pages) {
+ 		size := int(n) + int(n)/2 + 64
+ 		np := make([]atomic.Pointer[node], size)
+@@ -172,6 +183,9 @@ func (pg *pager) loaded(id uint32) *node {
+ // get returns the resident node for id, loading it if needed.
+ func (pg *pager) get(id uint32) (*node, error) {
+ 	if n := pg.pages[id].Load(); n != nil {
++		if pg.hot != nil && n.mapped {
++			pg.noteMappedRead(id)
++		}
+ 		if pg.limit > 0 && !n.ref.Load() {
+ 			n.ref.Store(true)
+ 		}
+@@ -185,6 +199,7 @@ func (pg *pager) get(id uint32) (*node, error) {
+ // does not evict mapped file pages, so read-only cache churn needs no objects.
+ // Writers still use get to obtain and pin mutable node state.
+ func (pg *pager) read(id uint32) (page, error) {
++	pg.noteMappedRead(id)
+ 	if n := pg.pages[id].Load(); n != nil {
+ 		return n.data, nil
+ 	}
+@@ -205,6 +220,9 @@ func (pg *pager) load(id uint32) (*node, error) {
+ 	if n := pg.pages[id].Load(); n != nil {
+ 		return n, nil
+ 	}
++	if pg.hot != nil {
++		pg.noteMappedRead(id)
++	}
+ 	p := pg.mappedPage(id)
+ 	n := pg.newNode(p.typ())
+ 	n.data, n.id, n.onDisk, n.mapped, n.kind = p, id, true, true, p.typ()
+diff --git a/query_memory.go b/query_memory.go
+index 034d9df..c1543bc 100644
+--- a/query_memory.go
++++ b/query_memory.go
+@@ -8,8 +8,11 @@ import (
+ // Budgets count conservative retained execution allocations, including group
+ // slabs, row maps, join keys and sort storage. They are not a process RSS cap.
+ type memoryBudget struct {
+-	max  int64
+-	used atomic.Int64
++	owner     *memoryTracker
++	max       int64
++	used      atomic.Int64
++	peak      int64
++	trackPeak bool
+ }
+ 
+ func (b *memoryBudget) reserve(bytes int64) error {
+@@ -21,6 +24,21 @@ func (b *memoryBudget) reserve(bytes int64) error {
+ 		b.used.Add(-bytes)
+ 		return fmt.Errorf("%w: query working memory exceeds %d bytes", ErrLimit, b.max)
+ 	}
++	if b.owner != nil && b.owner.limit > 0 {
++		b.owner.queries.Add(bytes)
++		if bytes < 0 {
++			b.owner.signal()
++		}
++		if bytes > 0 && b.owner.limit > 0 && b.owner.total() > b.owner.limit {
++			b.owner.queries.Add(-bytes)
++			b.used.Add(-bytes)
++			return ErrMemoryPressure
++		}
++	}
++	if b.trackPeak && used > b.peak {
++		b.peak = used
++	}
++
+ 	return nil
+ }
+ func (l Limits) budget() (*memoryBudget, error) {
+@@ -53,3 +71,13 @@ func valueMemory(v any) int64 {
+ 		return 16
+ 	}
+ }
++
++func (b *memoryBudget) close() {
++	if b != nil && b.owner != nil {
++		if b.owner.limit > 0 {
++			b.owner.queries.Add(-b.used.Swap(0))
++			b.owner.signal()
++		}
++		b.owner.untrack(b)
++	}
++}
+diff --git a/snapshot.go b/snapshot.go
+index 7fb1215..0c56475 100644
+--- a/snapshot.go
++++ b/snapshot.go
+@@ -4,6 +4,7 @@ import (
+ 	"context"
+ 	"errors"
+ 	"sort"
++	"unsafe"
+ )
+ 
+ // Snapshot is a consistent read view: the tree and memtable as they were
+@@ -110,6 +111,8 @@ func (s *Snapshot) Close() {
+ 	// have stable addresses until the database closes.
+ 	db.pager.releaseUnusedBuffers()
+ 	db.releaseQuarantineLocked()
++	db.cond.Broadcast()
++	db.memory.signal()
+ }
+ 
+ // minSnapEpoch is the oldest open snapshot's epoch, or 0 when none.
+@@ -262,6 +265,10 @@ func (v view) page(id uint32) (page, error) {
+ 			return nil, ErrClosed
+ 		}
+ 		if p, ok := v.snap.overlay[id]; ok {
++			pg := v.db.pager
++			if pg.hot != nil && unsafe.SliceData(p) == unsafe.SliceData(pg.mappedPage(id)) {
++				pg.noteMappedRead(id)
++			}
+ 			return p, nil
+ 		}
+ 	}
+diff --git a/wal.go b/wal.go
+index 9d1fe59..bdee892 100644
+--- a/wal.go
++++ b/wal.go
+@@ -33,6 +33,7 @@ const (
+ // applies a batch only once its final record is intact, so a batch is
+ // all-or-nothing after a crash. flags bit 1 marks a tombstone.
+ type wal struct {
++	memory        *memoryTracker
+ 	rotateMu      sync.Mutex    // serialize generation preparation/switching, not appends
+ 	compactionPin atomic.Uint64 // replay floor + 1; zero means no private copy needs it
+ 	dir           string
+diff --git a/wal_buffer.go b/wal_buffer.go
+index 009fab2..9fa5e9e 100644
+--- a/wal_buffer.go
++++ b/wal_buffer.go
+@@ -45,6 +45,9 @@ func (w *wal) reserveBuffer(extra int) {
+ 	}
+ 	copy(buf, w.buf)
+ 	old := w.bufStore
++	if w.memory != nil {
++		w.memory.wal.Add(int64(len(buf) - len(old)))
++	}
+ 	w.buf, w.bufStore = buf[:len(w.buf)], buf
+ 	if !w.heapOnly {
+ 		releaseWALBuffer(old)
+@@ -52,6 +55,9 @@ func (w *wal) reserveBuffer(extra int) {
+ }
+ 
+ func (w *wal) releaseBuffers() {
++	if w.memory != nil {
++		w.memory.wal.Add(-int64(len(w.bufStore) + len(w.spareStore)))
++	}
+ 	if w.bufStore != nil && !w.heapOnly {
+ 		releaseWALBuffer(w.bufStore)
+ 	}
+@@ -69,10 +75,16 @@ func (w *wal) releaseBurstBuffers() {
+ 		return
+ 	}
+ 	if len(w.bufStore) > walHeapBufferBytes {
++		if w.memory != nil {
++			w.memory.wal.Add(-int64(len(w.bufStore)))
++		}
+ 		releaseWALBuffer(w.bufStore)
+ 		w.buf, w.bufStore = nil, nil
+ 	}
+ 	if len(w.spareStore) > walHeapBufferBytes {
++		if w.memory != nil {
++			w.memory.wal.Add(-int64(len(w.spareStore)))
++		}
+ 		releaseWALBuffer(w.spareStore)
+ 		w.spare, w.spareStore = nil, nil
+ 	}

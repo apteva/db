@@ -28,6 +28,14 @@ const (
 
 // Options tunes durability and checkpointing.
 type Options struct {
+	// ManagedMemoryBytes is a soft target for owned engine buffers and tracked
+	// aggregate working memory. Admission happens before a write enters the WAL;
+	// one atomic write or in-flight copy may temporarily exceed it. Zero disables.
+	ManagedMemoryBytes int64
+	// MappedCacheBytes enables cold mapped-page recency tracking and one-second
+	// reclamation sweeps. It is a soft resident target; hot mappings survive.
+	MappedCacheBytes int64
+
 	// Sync flushes the log before a write returns. Default false (async).
 	// Use DurableOptions for power-loss-safe writes. Concurrent writes share flushes.
 	Sync bool
@@ -71,7 +79,7 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.7"
+const Version = "0.2.0-alpha.8"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
 // formats 3 through 9 and upgrades them before returning; see FORMAT.md for the policy.
@@ -79,6 +87,9 @@ const FormatVersion = 10
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
+	memory             *memoryTracker
+	memoryDone         chan struct{}
+	reclaimedMapped    int64
 	checkpointPages    []ioPage
 	checkpointNodes    []*node
 	checkpointReleased []uint32
@@ -157,11 +168,13 @@ type meta struct {
 }
 
 // Open opens or creates the database in dir.
-func Open(dir string, opts Options) (*DB, error) {
+func Open(dir string, opts Options) (*DB, error) { return openWithMemory(dir, opts, nil) }
+
+func openWithMemory(dir string, opts Options, shared *memoryTracker) (*DB, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("%w: directory is required", ErrOptions)
 	}
-	if opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
+	if opts.ManagedMemoryBytes < 0 || opts.MappedCacheBytes < 0 || opts.SyncMode > SyncOS || opts.CacheBytes < 0 || opts.MemtableBytes < -1 || opts.LogFlushInterval < 0 || opts.Parallelism < 0 {
 		return nil, ErrOptions
 	}
 	if opts.ChangeFeed != nil {
@@ -249,7 +262,12 @@ func Open(dir string, opts Options) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	memory := shared
+	if memory == nil {
+		memory = &memoryTracker{limit: opts.ManagedMemoryBytes}
+	}
 	w := newWAL(dir)
+	w.memory = memory
 	w.strictSync = opts.Sync
 	if opts.ChangeFeed != nil && !opts.ChangeFeed.Disabled {
 		normalized, _ := normalizeChangeOptions(*opts.ChangeFeed)
@@ -276,11 +294,13 @@ func Open(dir string, opts Options) (*DB, error) {
 		f.Close()
 		return nil, err
 	}
-	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
+	pg.memory = memory
+	pg.trackMapped = opts.MappedCacheBytes > 0
+	db := &DB{memory: memory, dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
 		stop: make(chan struct{}), done: make(chan struct{}), ckptReq: make(chan ckptRequest, 16), ckptDone: make(chan struct{})}
 	db.cond = sync.NewCond(&db.mu)
 	if opts.MemtableBytes > 0 {
-		db.mt = newMemtable(opts.MemtableBytes)
+		db.mt = db.newMemtable()
 	}
 	st, err := f.Stat()
 	if err == nil {
@@ -330,10 +350,20 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	// Cleanup only after validating/recovering an owned database. A rejected
 	// format/corrupt directory must keep its fallback and unfinished copy.
+	if _, err := CleanupAggregationTemp(context.Background(), filepath.Join(dir, "aggregate-tmp")); err != nil {
+		db.releaseMemtables()
+		w.close()
+		pg.close()
+		return nil, err
+	}
 	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
 	os.Remove(oldPath)
 	lockOwned = false
 	db.opening = false
+	if opts.MappedCacheBytes > 0 {
+		db.memoryDone = make(chan struct{})
+		go db.memoryWorker()
+	}
 	go db.flusher()
 	go db.checkpointer()
 	return db, nil
@@ -477,8 +507,24 @@ func (db *DB) noteActiveStartLocked() {
 // memtable being applied has not drained and the active one has grown to
 // twice its budget, i.e. when writes outrun the disk for a sustained
 // stretch. Writer lock held on entry and exit.
-func (db *DB) stallLocked() error {
+func (db *DB) stallLocked(contexts ...context.Context) error {
+	var ctx context.Context
+	if len(contexts) > 0 {
+		ctx = contexts[0]
+	}
+	if err := db.pressureLocked(ctx); err != nil {
+		return err
+	}
+	if ctx != nil && ctx.Done() != nil {
+		stop := context.AfterFunc(ctx, func() { db.mu.Lock(); db.cond.Broadcast(); db.mu.Unlock() })
+		defer stop()
+	}
 	for db.mt != nil && int64(db.mt.bufferedBytes())/2 >= db.opts.MemtableBytes && !db.closed && db.failed == nil {
+		if ctx != nil {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+		}
 		db.stalls++
 		if db.opening {
 			// Open has not published the handle or started its workers. Recovery
@@ -495,6 +541,11 @@ func (db *DB) stallLocked() error {
 			db.requestCheckpoint()
 		}
 		db.cond.Wait()
+	}
+	if ctx != nil {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 	}
 	if db.closed {
 		return ErrClosed
@@ -636,7 +687,7 @@ func (b *Batch) CommitContext(ctx context.Context) error {
 		}
 		return err
 	}
-	if err := db.stallLocked(); err != nil {
+	if err := db.stallLocked(ctx); err != nil {
 		db.mu.Unlock()
 		return err
 	}

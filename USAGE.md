@@ -112,8 +112,9 @@ err := users.Query(ctx, []byte(`{"age":{"$gte":18}}`),
 
 Query uses the $match filter syntax, applicable indexes and primary-key order.
 Skip/Limit are nonnegative; zero Limit means unlimited. It streams without
-retaining a result array. Aggregation supports group/sort/lookup and materializes
-results under Pipeline Limits. SetLimits before sharing a compiled pipeline;
+retaining a result array. Aggregation supports group/sort/lookup. Aggregate/Run
+materialize results under Pipeline Limits; AggregateEach/RunEach stream results
+with bounded group and sort operators (see below). SetLimits before sharing a compiled pipeline;
 mutating the package-level DefaultLimits during concurrent execution is unsafe.
 Snapshot queries preserve that snapshot's catalog and row versions.
 
@@ -258,8 +259,8 @@ rows, err := orders.Aggregate(ctx, []byte(`[
 ```
 
 The same non-null counter is supported in native computed collections and
-through the Go HTTP client. Opening an existing database upgrades formats 3–8
-to format 9; make a backup with the original binary before upgrading.
+through the Go HTTP client. Opening an existing database upgrades formats 3–9
+to format 10; make a backup with the original binary before upgrading.
 
 ## Filtered document counts
 
@@ -315,3 +316,73 @@ writers continue. Close snapshots after their operations have finished.
 accumulator; `CountDocuments` counts matching documents, including null-valued
 fields. Existing Query/aggregation calls retain their behavior; adapters must
 adopt `CountDocuments` to use its covering path.
+
+## Bounded native aggregation (alpha.8)
+
+Use the embedded Go streaming API when output cardinality may exceed RAM:
+
+```go
+var stats db.AggregateStats
+err := orders.AggregateEach(ctx, []byte(`[
+  {"$group":{"_id":"$customer","total":{"$sum":"$amount"},"n":{"$count":{}}}}
+]`), db.AggregateOptions{
+    MaxMemoryBytes: 16 << 20,
+    AllowDiskUse: true,
+    MaxDiskBytes: 1 << 30,
+    Stats: &stats,
+}, func(row map[string]any) bool {
+    // Consume a completed group. The map is owned and may be retained.
+    return true // false stops early and releases execution resources
+})
+```
+
+DB/default collections and snapshots also expose AggregateEach. A compiled
+pipeline uses Collection.RunEach, or Pipeline.RunEach with a caller-provided
+Source. The latter has no native index planner/snapshot ownership or $lookup
+collection resolver; prefer the collection method for database queries.
+AggregateWithOptions and Pipeline.RunWithOptions collect results against the
+same memory budget; large result sets can still return ErrLimit after spilling.
+Existing Aggregate/Run calls remain materializing and do not opt into disk use.
+These new execution options are currently native Go APIs, without a new HTTP
+streaming endpoint.
+
+The planner streams groups from an exact scalar compound index when all varying
+group components are contiguous in its order; equality prefixes, mixed directions
+and permutations of grouping fields are supported. Sparse coverage must be proven;
+multikey and reverse traversal use the safe fallback. Typed groups sharing a
+coarser numeric or null index key remain separate. Explicit match/sort/group
+prefixes may also accelerate existing Aggregate/Run calls. With no explicit sort,
+only the new APIs may choose index group order; $first/$last preserve source order
+and prevent that automatic choice. Group output order without an explicit sort
+is unspecified. A downstream limit can stop an ordered aggregation before reading
+the remaining groups.
+
+Unordered groups spill chronological partial accumulator states into bounded
+hash partitions and recursively repartition oversized partitions. External sorts
+use bounded runs and stable merges. Signed 128-bit integer subtotals, types,
+counts, min/max and first/last state survive spill without JSON conversion.
+Floating accumulation uses IEEE-754 arithmetic: changing partial-merge order may
+change rounding; bitwise equality with serial floating accumulation is not promised.
+All database stages, including lookups, read the same snapshot. Context checks
+cover input, partition and merge work. A stream can emit rows before a later error;
+consumers requiring atomic output must stage it themselves.
+
+MaxMemoryBytes defaults to the pipeline budget (64 MiB by default). The shared
+budget charges retained group state, result maps in collecting APIs, sort buffers
+and spill I/O workspace. One state/record and minimum I/O workspace must fit or
+execution returns ErrLimit. It excludes the current borrowed input, snapshot/page
+cache, Go runtime overhead and maps retained by the caller. MaxGroups remains an
+output-cardinality guard. Splitting budget among blocking operators can cause an
+opted-in spill earlier than an entirely in-memory execution.
+
+Disk use is opt-in. MaxDiskBytes zero means 1 GiB per execution, shared by all
+operators and counting merge inputs and output simultaneously. Exceeding it returns
+ErrDiskLimit. Stats reports Strategy (hash, ordered-index, external-hash or
+ordered-index+spill), Index, input/groups/results, peak accounted memory,
+cumulative bytes written, peak temporary bytes, spill files and merge passes.
+It is updated before return; do not read or share the Stats pointer concurrently.
+Scratch defaults to <database>/aggregate-tmp (the OS temp root for a standalone
+Source), with private execution files. Completion, callback stop, cancellation
+and errors close and remove scratch. Open cleans abandoned default executions;
+call CleanupAggregationTemp(ctx, customRoot) for a custom root after a crash.
+Live executions hold OS leases and are skipped. Cleanup errors are returned.

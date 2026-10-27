@@ -28,6 +28,9 @@ func (pg *pager) newNode(kind byte) *node {
 			panic("aptevadb: cannot allocate page descriptors: " + err.Error())
 		}
 		a = &nodeArena{data: data, nodes: unsafe.Slice((*node)(unsafe.Pointer(unsafe.SliceData(data))), PageSize/int(unsafe.Sizeof(node{})))}
+		if pg.memory != nil {
+			pg.memory.nodes.Add(int64(len(data)))
+		}
 		pg.nodeArenas = append(pg.nodeArenas, a)
 		*tail = a
 	}
@@ -53,6 +56,10 @@ func (pg *pager) releaseUnusedNodes() {
 	kept := pg.nodeArenas[:0]
 	for _, a := range pg.nodeArenas {
 		if a.live == 0 && syscall.Munmap(a.data) == nil {
+			if pg.memory != nil {
+				pg.memory.nodes.Add(-int64(len(a.data)))
+				pg.memory.signal()
+			}
 			if pg.nodeTail == a {
 				pg.nodeTail = nil
 			}

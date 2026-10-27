@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.7.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.8.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
 runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.7
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.7
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.7
+go get github.com/apteva/db@v0.2.0-alpha.8
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.8
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.8
 ```
 
 ```go
@@ -82,6 +82,11 @@ Other historical results under `bench/results/` describe their original builds. 
 `bench` module compares SQLite and Pebble without adding engine dependencies.
 KV comparisons use `Upsert` (matching the other engines' replacement behavior);
 `Insert` now performs a duplicate-key check. See [BENCHMARKS.md](BENCHMARKS.md).
+
+Alpha.8 adds [bounded native aggregation](USAGE.md#bounded-native-aggregation-alpha8)
+and [resident-memory controls](OPERATIONS.md#resident-memory-controls-alpha8).
+The [comparison with alpha.7](bench/results/aggregation-memory/REPORT.md) records
+110 final trials, correctness checks and remaining performance tradeoffs.
 
 ## Stored computed fields
 

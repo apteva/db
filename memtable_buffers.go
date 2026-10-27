@@ -13,6 +13,7 @@ import (
 const memtableArenaBytes = 1 << 20
 
 type memtableStorage struct {
+	memory *memoryTracker
 	refs   atomic.Int64
 	arenas [][]byte
 	tail   []byte
@@ -35,6 +36,9 @@ func (s *memtableStorage) alloc(n int) []byte {
 		if err != nil {
 			panic("aptevadb: cannot allocate memtable arena: " + err.Error())
 		}
+		if s.memory != nil {
+			s.memory.memtables.Add(int64(len(data)))
+		}
 		s.arenas = append(s.arenas, data)
 		s.tail = data
 	}
@@ -49,6 +53,10 @@ func (s *memtableStorage) release() {
 	if s.refs.Add(-1) == 0 {
 		for _, data := range s.arenas {
 			syscall.Munmap(data)
+			if s.memory != nil {
+				s.memory.memtables.Add(-int64(len(data)))
+				s.memory.signal()
+			}
 		}
 		s.arenas, s.tail = nil, nil
 	}

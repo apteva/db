@@ -60,7 +60,10 @@ func (db *DB) CreateComputedCollection(ctx context.Context, name, source string,
 		db.mu.Unlock()
 		return nil, err
 	}
-	db.stallLocked()
+	if err := db.stallLocked(ctx); err != nil {
+		db.mu.Unlock()
+		return nil, err
+	}
 	if db.closed || db.failed != nil {
 		err := db.failed
 		if db.closed {

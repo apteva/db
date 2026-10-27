@@ -1,0 +1,15 @@
+Baseline: git archive v0.2.0-alpha.7 (tag commit 4124a0f592168c6109e06d864d7c9535f4486001)
+Candidate parent: 9ff2cd0 (working tree, unreleased)
+Before final read guard: GOCACHE=/private/tmp/apteva-db-go-cache go test -race -count=1 -timeout 20m ./... [PASS]
+GOCACHE=/private/tmp/apteva-db-go-cache go vet ./... [PASS]
+GOCACHE=/private/tmp/apteva-db-go-cache CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./... [PASS]
+GOCACHE=/private/tmp/apteva-db-go-cache CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./... [PASS]
+GOCACHE=/private/tmp/apteva-db-go-cache GOWORK=off go -C bench/aggregation_memory vet ./... [PASS]
+No resource timing while these builds/tests execute.
+
+Final source: GOCACHE=/private/tmp/apteva-db-go-cache go test -count=1 -timeout 12m ./... [PASS]
+Final source: GOCACHE=/private/tmp/apteva-db-go-cache go test -race -count=1 -run '^TestAggregate|^TestAggregationTemp|^TestPipelineSource|^TestMemory|^TestColdMapped|^TestSnapshot|^TestPointReadsAcrossWriterLifetimes|^TestReader' -timeout 8m . [PASS]
+Final source: root go vet and both listed CGO-disabled crossbuilds repeated [PASS]
+Final harness: GOWORK=off go -C bench/aggregation_memory vet ./... [PASS]
+Final archive raw sample counts verified: 90 earlier + 90 final + 20 million-document guards.
+Final engine Go source SHA manifest verified against current files.

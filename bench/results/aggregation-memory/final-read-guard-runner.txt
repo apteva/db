@@ -1,0 +1,180 @@
+RUN cold-current-r1
+DONE cold-current-r1 CPU 0.0156 wall 0.0156 RSS 43.0 error False
+RUN low-stream-current-r1
+DONE low-stream-current-r1 CPU 0.0275 wall 0.0272 RSS 85.5 error False
+RUN crud-current-r1
+DONE crud-current-r1 CPU 0.2773 wall 0.2764 RSS 87.7 error False
+RUN crud-random-current-r1
+DONE crud-random-current-r1 CPU 0.2737 wall 0.2732 RSS 88.3 error False
+RUN spill-versus-ram-alpha7-r1
+DONE spill-versus-ram-alpha7-r1 CPU 0.1029 wall 0.0764 RSS 137.8 error False
+RUN ordered-limit-stream-current-r1
+DONE ordered-limit-stream-current-r1 CPU 0.0001 wall 0.0001 RSS 132.8 error False
+RUN low-parallel-alpha7-r1
+DONE low-parallel-alpha7-r1 CPU 0.0447 wall 0.0084 RSS 86.1 error False
+RUN spill-same-budget-current-r1
+DONE spill-same-budget-current-r1 CPU 0.4368 wall 0.2749 RSS 86.4 error False
+RUN ordered-limit-legacy-alpha7-r1
+DONE ordered-limit-legacy-alpha7-r1 CPU 0.6258 wall 0.316 RSS 351.4 error False
+RUN hash-parallel-alpha7-r1
+DONE hash-parallel-alpha7-r1 CPU 0.3054 wall 0.0841 RSS 216.7 error False
+RUN ordered-limit-stream-alpha7-r1
+DONE ordered-limit-stream-alpha7-r1 CPU 0.5865 wall 0.3138 RSS 377.4 error False
+RUN hash-legacy-alpha7-r1
+DONE hash-legacy-alpha7-r1 CPU 0.1091 wall 0.0793 RSS 137.9 error False
+RUN low-legacy-alpha7-r1
+DONE low-legacy-alpha7-r1 CPU 0.0258 wall 0.0255 RSS 85.3 error False
+RUN ordered-stream-current-r1
+DONE ordered-stream-current-r1 CPU 0.1283 wall 0.124 RSS 136.8 error False
+RUN cold-alpha7-r1
+DONE cold-alpha7-r1 CPU 0.0 wall 0.0 RSS 201.8 error False
+RUN low-parallel-current-r1
+DONE low-parallel-current-r1 CPU 0.0377 wall 0.0075 RSS 84.8 error False
+RUN spill-same-budget-alpha7-r1
+DONE spill-same-budget-alpha7-r1 CPU 0.0117 wall 0.0089 RSS 86.1 error True
+RUN ordered-legacy-alpha7-r1
+DONE ordered-legacy-alpha7-r1 CPU 0.6588 wall 0.329 RSS 338.3 error False
+RUN hash-stream-current-r1
+DONE hash-stream-current-r1 CPU 0.0985 wall 0.0767 RSS 126.0 error False
+RUN spill-versus-ram-current-r1
+DONE spill-versus-ram-current-r1 CPU 0.3563 wall 0.258 RSS 90.0 error False
+RUN crud-random-alpha7-r1
+DONE crud-random-alpha7-r1 CPU 0.2796 wall 0.2794 RSS 87.0 error False
+RUN ordered-limit-legacy-current-r1
+DONE ordered-limit-legacy-current-r1 CPU 0.0001 wall 0.0001 RSS 137.5 error False
+RUN low-legacy-current-r1
+DONE low-legacy-current-r1 CPU 0.0272 wall 0.027 RSS 85.7 error False
+RUN hash-parallel-current-r1
+DONE hash-parallel-current-r1 CPU 0.3152 wall 0.0919 RSS 222.0 error False
+RUN hash-stream-alpha7-r1
+DONE hash-stream-alpha7-r1 CPU 0.0981 wall 0.079 RSS 139.0 error False
+RUN ordered-stream-alpha7-r1
+DONE ordered-stream-alpha7-r1 CPU 0.6208 wall 0.3136 RSS 349.8 error False
+RUN crud-alpha7-r1
+DONE crud-alpha7-r1 CPU 0.2827 wall 0.2819 RSS 88.4 error False
+RUN low-stream-alpha7-r1
+DONE low-stream-alpha7-r1 CPU 0.0276 wall 0.0273 RSS 85.5 error False
+RUN hash-legacy-current-r1
+DONE hash-legacy-current-r1 CPU 0.1067 wall 0.0822 RSS 138.5 error False
+RUN ordered-legacy-current-r1
+DONE ordered-legacy-current-r1 CPU 0.1728 wall 0.1381 RSS 141.0 error False
+RUN ordered-legacy-current-r2
+DONE ordered-legacy-current-r2 CPU 0.1791 wall 0.1426 RSS 138.9 error False
+RUN spill-versus-ram-current-r2
+DONE spill-versus-ram-current-r2 CPU 0.4146 wall 0.2761 RSS 86.8 error False
+RUN cold-alpha7-r2
+DONE cold-alpha7-r2 CPU 0.0 wall 0.0 RSS 196.1 error False
+RUN hash-stream-alpha7-r2
+DONE hash-stream-alpha7-r2 CPU 0.1092 wall 0.0803 RSS 137.9 error False
+RUN cold-current-r2
+DONE cold-current-r2 CPU 0.0167 wall 0.0167 RSS 42.7 error False
+RUN crud-random-current-r2
+DONE crud-random-current-r2 CPU 0.2419 wall 0.2413 RSS 86.8 error False
+RUN ordered-limit-legacy-alpha7-r2
+DONE ordered-limit-legacy-alpha7-r2 CPU 0.6033 wall 0.295 RSS 333.9 error False
+RUN hash-stream-current-r2
+DONE hash-stream-current-r2 CPU 0.0922 wall 0.072 RSS 131.6 error False
+RUN low-legacy-current-r2
+DONE low-legacy-current-r2 CPU 0.0251 wall 0.0249 RSS 85.5 error False
+RUN ordered-limit-stream-alpha7-r2
+DONE ordered-limit-stream-alpha7-r2 CPU 0.606 wall 0.294 RSS 349.2 error False
+RUN hash-parallel-alpha7-r2
+DONE hash-parallel-alpha7-r2 CPU 0.3148 wall 0.0854 RSS 225.2 error False
+RUN ordered-stream-alpha7-r2
+DONE ordered-stream-alpha7-r2 CPU 0.5891 wall 0.3105 RSS 348.8 error False
+RUN hash-parallel-current-r2
+DONE hash-parallel-current-r2 CPU 0.3079 wall 0.0882 RSS 210.0 error False
+RUN hash-legacy-alpha7-r2
+DONE hash-legacy-alpha7-r2 CPU 0.1484 wall 0.1222 RSS 137.9 error False
+RUN low-stream-current-r2
+DONE low-stream-current-r2 CPU 0.0296 wall 0.0383 RSS 85.9 error False
+RUN crud-alpha7-r2
+DONE crud-alpha7-r2 CPU 0.2487 wall 0.2484 RSS 89.3 error False
+RUN spill-versus-ram-alpha7-r2
+DONE spill-versus-ram-alpha7-r2 CPU 0.1107 wall 0.0754 RSS 139.6 error False
+RUN low-legacy-alpha7-r2
+DONE low-legacy-alpha7-r2 CPU 0.0253 wall 0.025 RSS 86.1 error False
+RUN crud-current-r2
+DONE crud-current-r2 CPU 0.2466 wall 0.2465 RSS 87.5 error False
+RUN crud-random-alpha7-r2
+DONE crud-random-alpha7-r2 CPU 0.2675 wall 0.2682 RSS 87.7 error False
+RUN ordered-legacy-alpha7-r2
+DONE ordered-legacy-alpha7-r2 CPU 0.6125 wall 0.3453 RSS 341.0 error False
+RUN hash-legacy-current-r2
+DONE hash-legacy-current-r2 CPU 0.1121 wall 0.0764 RSS 139.0 error False
+RUN ordered-limit-stream-current-r2
+DONE ordered-limit-stream-current-r2 CPU 0.0001 wall 0.0001 RSS 134.1 error False
+RUN low-parallel-alpha7-r2
+DONE low-parallel-alpha7-r2 CPU 0.0451 wall 0.009 RSS 86.2 error False
+RUN ordered-stream-current-r2
+DONE ordered-stream-current-r2 CPU 0.1335 wall 0.1314 RSS 138.7 error False
+RUN ordered-limit-legacy-current-r2
+DONE ordered-limit-legacy-current-r2 CPU 0.0001 wall 0.0001 RSS 135.5 error False
+RUN low-stream-alpha7-r2
+DONE low-stream-alpha7-r2 CPU 0.0251 wall 0.0247 RSS 86.1 error False
+RUN spill-same-budget-current-r2
+DONE spill-same-budget-current-r2 CPU 0.4051 wall 0.261 RSS 86.7 error False
+RUN spill-same-budget-alpha7-r2
+DONE spill-same-budget-alpha7-r2 CPU 0.0137 wall 0.0102 RSS 86.0 error True
+RUN low-parallel-current-r2
+DONE low-parallel-current-r2 CPU 0.0455 wall 0.0086 RSS 85.9 error False
+RUN hash-stream-alpha7-r3
+DONE hash-stream-alpha7-r3 CPU 0.0975 wall 0.077 RSS 138.5 error False
+RUN spill-same-budget-alpha7-r3
+DONE spill-same-budget-alpha7-r3 CPU 0.02 wall 0.0133 RSS 86.1 error True
+RUN crud-random-alpha7-r3
+DONE crud-random-alpha7-r3 CPU 0.2469 wall 0.2465 RSS 87.9 error False
+RUN ordered-limit-stream-current-r3
+DONE ordered-limit-stream-current-r3 CPU 0.0001 wall 0.0001 RSS 146.2 error False
+RUN low-parallel-alpha7-r3
+DONE low-parallel-alpha7-r3 CPU 0.0425 wall 0.0079 RSS 85.8 error False
+RUN ordered-stream-current-r3
+DONE ordered-stream-current-r3 CPU 0.1346 wall 0.1305 RSS 139.7 error False
+RUN ordered-limit-stream-alpha7-r3
+DONE ordered-limit-stream-alpha7-r3 CPU 0.611 wall 0.2966 RSS 335.4 error False
+RUN ordered-stream-alpha7-r3
+DONE ordered-stream-alpha7-r3 CPU 0.6439 wall 0.2917 RSS 336.0 error False
+RUN low-legacy-current-r3
+DONE low-legacy-current-r3 CPU 0.0249 wall 0.0248 RSS 83.9 error False
+RUN ordered-legacy-current-r3
+DONE ordered-legacy-current-r3 CPU 0.1718 wall 0.1363 RSS 134.3 error False
+RUN low-legacy-alpha7-r3
+DONE low-legacy-alpha7-r3 CPU 0.0258 wall 0.0256 RSS 85.7 error False
+RUN spill-versus-ram-current-r3
+DONE spill-versus-ram-current-r3 CPU 0.425 wall 0.2624 RSS 87.2 error False
+RUN low-stream-current-r3
+DONE low-stream-current-r3 CPU 0.0263 wall 0.0261 RSS 85.8 error False
+RUN hash-parallel-current-r3
+DONE hash-parallel-current-r3 CPU 0.3306 wall 0.0787 RSS 206.5 error False
+RUN cold-alpha7-r3
+DONE cold-alpha7-r3 CPU 0.0 wall 0.0 RSS 200.8 error False
+RUN spill-same-budget-current-r3
+DONE spill-same-budget-current-r3 CPU 0.4405 wall 0.268 RSS 86.5 error False
+RUN spill-versus-ram-alpha7-r3
+DONE spill-versus-ram-alpha7-r3 CPU 0.0997 wall 0.0738 RSS 137.9 error False
+RUN crud-alpha7-r3
+DONE crud-alpha7-r3 CPU 0.2495 wall 0.249 RSS 87.9 error False
+RUN ordered-limit-legacy-current-r3
+DONE ordered-limit-legacy-current-r3 CPU 0.0001 wall 0.0001 RSS 147.1 error False
+RUN low-stream-alpha7-r3
+DONE low-stream-alpha7-r3 CPU 0.0253 wall 0.0297 RSS 86.2 error False
+RUN crud-random-current-r3
+DONE crud-random-current-r3 CPU 0.2467 wall 0.2461 RSS 87.0 error False
+RUN crud-current-r3
+DONE crud-current-r3 CPU 0.2514 wall 0.2511 RSS 88.0 error False
+RUN ordered-legacy-alpha7-r3
+DONE ordered-legacy-alpha7-r3 CPU 0.6403 wall 0.3094 RSS 336.7 error False
+RUN hash-parallel-alpha7-r3
+DONE hash-parallel-alpha7-r3 CPU 0.3092 wall 0.0777 RSS 208.8 error False
+RUN hash-legacy-current-r3
+DONE hash-legacy-current-r3 CPU 0.0967 wall 0.0752 RSS 138.4 error False
+RUN ordered-limit-legacy-alpha7-r3
+DONE ordered-limit-legacy-alpha7-r3 CPU 0.6481 wall 0.3008 RSS 329.4 error False
+RUN cold-current-r3
+DONE cold-current-r3 CPU 0.0144 wall 0.0143 RSS 42.6 error False
+RUN hash-stream-current-r3
+DONE hash-stream-current-r3 CPU 0.0982 wall 0.0731 RSS 131.7 error False
+RUN low-parallel-current-r3
+DONE low-parallel-current-r3 CPU 0.0357 wall 0.0061 RSS 85.0 error False
+RUN hash-legacy-alpha7-r3
+DONE hash-legacy-alpha7-r3 CPU 0.0988 wall 0.0753 RSS 137.8 error False

@@ -45,6 +45,9 @@ func (w *wal) reserveBuffer(extra int) {
 	}
 	copy(buf, w.buf)
 	old := w.bufStore
+	if w.memory != nil {
+		w.memory.wal.Add(int64(len(buf) - len(old)))
+	}
 	w.buf, w.bufStore = buf[:len(w.buf)], buf
 	if !w.heapOnly {
 		releaseWALBuffer(old)
@@ -52,6 +55,9 @@ func (w *wal) reserveBuffer(extra int) {
 }
 
 func (w *wal) releaseBuffers() {
+	if w.memory != nil {
+		w.memory.wal.Add(-int64(len(w.bufStore) + len(w.spareStore)))
+	}
 	if w.bufStore != nil && !w.heapOnly {
 		releaseWALBuffer(w.bufStore)
 	}
@@ -69,10 +75,16 @@ func (w *wal) releaseBurstBuffers() {
 		return
 	}
 	if len(w.bufStore) > walHeapBufferBytes {
+		if w.memory != nil {
+			w.memory.wal.Add(-int64(len(w.bufStore)))
+		}
 		releaseWALBuffer(w.bufStore)
 		w.buf, w.bufStore = nil, nil
 	}
 	if len(w.spareStore) > walHeapBufferBytes {
+		if w.memory != nil {
+			w.memory.wal.Add(-int64(len(w.spareStore)))
+		}
 		releaseWALBuffer(w.spareStore)
 		w.spare, w.spareStore = nil, nil
 	}

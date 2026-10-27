@@ -238,8 +238,10 @@ func (t *memtable) snapshot() []mtEntry {
 }
 
 func (t *memtable) reset() {
+	memory := t.storage.memory
 	t.releaseBuffers()
 	t.storage = newMemtableStorage()
+	t.storage.memory = memory
 	leaf := t.newLeaf()
 	t.slots = nil
 	t.root, t.first = leaf, leaf

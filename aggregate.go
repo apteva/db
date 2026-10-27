@@ -634,28 +634,28 @@ type groupState struct {
 }
 
 type grouper struct {
-	spec   *groupSpec
-	groups map[string]*groupState
-	single *groupState // the one group when _id is null
-	order  []*groupState
-	keyBuf []byte
-	max    int
-	states []groupState
-	ids    []scalar
-	accs   []accState
-	used   int
-	budget *memoryBudget
+	spec     *groupSpec
+	groups   map[string]*groupState
+	single   *groupState // the one group when _id is null
+	order    []*groupState
+	keyBuf   []byte
+	max      int
+	states   []groupState
+	ids      []scalar
+	accs     []accState
+	used     int
+	budget   *memoryBudget
+	capBytes int64
+	charge   int64
+	slab     int // nonzero: bounded streaming/spill allocation granularity
 }
 
 // Groups own query-local slabs: addresses remain stable through shard merges,
 // while large cardinalities do not allocate three objects for every group.
 func (g *grouper) allocGroup() (*groupState, error) {
 	if g.used == len(g.states) {
-		n := 256
-		if g.states == nil {
-			n = 8
-		}
-		if err := g.budget.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
+		n := g.nextSlab()
+		if err := g.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
 			return nil, err
 		}
 		g.states = make([]groupState, n)
@@ -706,7 +706,7 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 	var gs *groupState
 	if len(idIdx) == 0 {
 		if g.single == nil {
-			if err := g.budget.reserve(160 + int64(len(spec.accs))*80); err != nil {
+			if err := g.reserve(160 + int64(len(spec.accs))*80); err != nil {
 				return err
 			}
 			g.single = &groupState{accs: make([]accState, len(spec.accs))}
@@ -748,7 +748,7 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 				continue
 			}
 			if !st.hasExt {
-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
 					return err
 				}
 				st.ext, st.hasExt = toScalar(v), true
@@ -756,20 +756,20 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 			}
 			c := compareValues(v, st.ext.view())
 			if (a.op == accMin && c < 0) || (a.op == accMax && c > 0) {
-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
 					return err
 				}
 				st.ext = toScalar(v)
 			}
 		case accFirst:
 			if !st.hasExt {
-				if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+				if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
 					return err
 				}
 				st.ext, st.hasExt = toScalar(v), true
 			}
 		case accLast:
-			if err := g.budget.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
+			if err := g.reserve(int64(len(v.s) - len(st.ext.s))); err != nil {
 				return err
 			}
 			st.ext, st.hasExt = toScalar(v), true
@@ -793,7 +793,7 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 	if needed > cap(g.keyBuf) {
 		capacity := max(needed, 2*cap(g.keyBuf))
 		capacity = (capacity + 15) &^ 15
-		if err := g.budget.reserve(int64(capacity - cap(g.keyBuf))); err != nil {
+		if err := g.reserve(int64(capacity - cap(g.keyBuf))); err != nil {
 			return nil, err
 		}
 		g.keyBuf = make([]byte, 0, capacity)
@@ -818,7 +818,7 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 		if len(g.groups) >= g.max {
 			return nil, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
 		}
-		if err := g.budget.reserve(int64(len(kb)) + 160); err != nil {
+		if err := g.reserve(int64(len(kb)) + 160); err != nil {
 			return nil, err
 		}
 		var err error
@@ -1904,3 +1904,23 @@ func validateFilterNumbers(v any) error {
 	}
 	return nil
 }
+
+func (g *grouper) nextSlab() int {
+	if g.slab > 0 {
+		return g.slab
+	}
+	if g.states == nil {
+		return 8
+	}
+	return 256
+}
+func (g *grouper) reserve(n int64) error {
+	if err := g.budget.reserve(n); err != nil {
+		return err
+	}
+	if g.slab > 0 {
+		g.charge += n
+	}
+	return nil
+}
+func (g *grouper) release() { _ = g.budget.reserve(-g.charge); g.charge = 0 }

@@ -31,6 +31,9 @@ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
 			panic("aptevadb: cannot allocate writable page arena: " + err.Error())
 		}
 		a = &pageBufferArena{data: data}
+		if pg.memory != nil {
+			pg.memory.pages.Add(int64(len(data)))
+		}
 		pg.bufferArenas = append(pg.bufferArenas, a)
 		pg.bufferTail = a
 	}
@@ -48,6 +51,9 @@ func (pg *pager) allocInternalPageBuffer() (page, *pageBufferArena) {
 		panic("aptevadb: cannot allocate internal page buffer: " + err.Error())
 	}
 	a := &pageBufferArena{data: data, next: PageSize, live: 1}
+	if pg.memory != nil {
+		pg.memory.pages.Add(int64(len(data)))
+	}
 	pg.bufferArenas = append(pg.bufferArenas, a)
 	return page(data), a
 }
@@ -78,6 +84,10 @@ func (pg *pager) releaseUnusedBuffers() {
 	kept := pg.bufferArenas[:0]
 	for _, a := range pg.bufferArenas {
 		if a.live == 0 && syscall.Munmap(a.data) == nil {
+			if pg.memory != nil {
+				pg.memory.pages.Add(-int64(len(a.data)))
+				pg.memory.signal()
+			}
 			if pg.bufferTail == a {
 				pg.bufferTail = nil
 			}

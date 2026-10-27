@@ -1,0 +1,40 @@
+RUN crud-random-alpha7-r1
+DONE crud-random-alpha7-r1 CPU 1.0402 wall 1.3759 RSS 240.6 error False
+RUN crud-random-current-r1
+DONE crud-random-current-r1 CPU 0.9929 wall 0.9908 RSS 240.5 error False
+RUN crud-current-r1
+DONE crud-current-r1 CPU 1.0018 wall 1.0014 RSS 241.3 error False
+RUN crud-alpha7-r1
+DONE crud-alpha7-r1 CPU 1.0283 wall 1.0278 RSS 239.1 error False
+RUN crud-current-r2
+DONE crud-current-r2 CPU 1.0152 wall 1.0144 RSS 241.7 error False
+RUN crud-alpha7-r2
+DONE crud-alpha7-r2 CPU 1.0024 wall 1.0025 RSS 239.9 error False
+RUN crud-random-alpha7-r2
+DONE crud-random-alpha7-r2 CPU 1.0005 wall 0.9988 RSS 241.5 error False
+RUN crud-random-current-r2
+DONE crud-random-current-r2 CPU 1.0109 wall 1.0104 RSS 242.1 error False
+RUN crud-alpha7-r3
+DONE crud-alpha7-r3 CPU 1.0042 wall 1.0036 RSS 240.4 error False
+RUN crud-random-current-r3
+DONE crud-random-current-r3 CPU 0.996 wall 0.9947 RSS 241.1 error False
+RUN crud-current-r3
+DONE crud-current-r3 CPU 0.9929 wall 0.9915 RSS 240.8 error False
+RUN crud-random-alpha7-r3
+DONE crud-random-alpha7-r3 CPU 0.9879 wall 0.9882 RSS 241.0 error False
+RUN crud-random-alpha7-r4
+DONE crud-random-alpha7-r4 CPU 1.0091 wall 1.0116 RSS 240.6 error False
+RUN crud-random-current-r4
+DONE crud-random-current-r4 CPU 1.181 wall 1.4557 RSS 238.8 error False
+RUN crud-current-r4
+DONE crud-current-r4 CPU 1.1151 wall 1.2453 RSS 240.1 error False
+RUN crud-alpha7-r4
+DONE crud-alpha7-r4 CPU 1.0842 wall 1.1634 RSS 237.9 error False
+RUN crud-random-current-r5
+DONE crud-random-current-r5 CPU 0.9921 wall 0.9904 RSS 241.1 error False
+RUN crud-current-r5
+DONE crud-current-r5 CPU 0.9814 wall 0.9797 RSS 241.3 error False
+RUN crud-alpha7-r5
+DONE crud-alpha7-r5 CPU 0.9891 wall 0.9891 RSS 240.3 error False
+RUN crud-random-alpha7-r5
+DONE crud-random-alpha7-r5 CPU 1.0016 wall 1.0009 RSS 240.9 error False

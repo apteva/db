@@ -76,7 +76,10 @@ func (c *Collection) DefineComputedFields(ctx context.Context, definitions []byt
 		db.mu.Unlock()
 		return err
 	}
-	db.stallLocked()
+	if err := db.stallLocked(ctx); err != nil {
+		db.mu.Unlock()
+		return err
+	}
 	if db.closed {
 		db.mu.Unlock()
 		return ErrClosed

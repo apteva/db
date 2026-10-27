@@ -111,7 +111,7 @@ func (db *DB) runCheckpoint(full bool) error {
 		return db.failed
 	}
 	if full && db.mt != nil && db.imm == nil && db.mt.len() > 0 {
-		db.imm, db.mt = db.mt, newMemtable(db.opts.MemtableBytes)
+		db.imm, db.mt = db.mt, db.newMemtable()
 	}
 	db.mu.Unlock()
 
@@ -513,6 +513,9 @@ func (db *DB) releaseCaptureBuffers(cs *captureSet) {
 func (db *DB) stopFlusher() {
 	db.stopOnce.Do(func() { close(db.stop) })
 	<-db.done
+	if db.memoryDone != nil {
+		<-db.memoryDone
+	}
 }
 
 // Close checkpoints and releases the files.
@@ -529,6 +532,7 @@ func (db *DB) Close() error {
 		return ErrClosed
 	}
 	db.closed = true
+	db.memory.signal()
 	if db.feed != nil {
 		db.feed.stop(ErrClosed)
 	}
@@ -575,6 +579,7 @@ func (db *DB) crash() {
 	db.stopCheckpointer()
 	db.mu.Lock()
 	db.closed = true
+	db.memory.signal()
 	if db.feed != nil {
 		db.feed.stop(ErrClosed)
 	}
@@ -779,7 +784,7 @@ func (db *DB) compact(ctx context.Context) error {
 	db.freelistPages, db.dirtyOverflow = ndb.freelistPages, ndb.dirtyOverflow
 	if db.mt != nil {
 		db.mt.releaseBuffers()
-		db.mt = newMemtable(db.opts.MemtableBytes) // every record is in the new tree now
+		db.mt = db.newMemtable() // every record is in the new tree now
 	}
 	db.imm.releaseBuffers()
 	db.imm = nil
@@ -821,6 +826,9 @@ func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
 		db.mu.RLock()
 		end := min(start+32, int(limit), int(pg.hwm))
 		for i := start; i < end; i++ {
+			if pg.hot != nil && i >= 2 {
+				pg.noteMappedRead(uint32(i))
+			}
 			n := pg.pages[i].Load()
 			if n != nil && n.mapped && n.kind != 0 && n.data.typ() != n.kind {
 				db.mu.RUnlock()
@@ -851,7 +859,7 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 	opts.MemtableBytes = -1
 	opts.Sync = false
 	opts.ChangeFeed = nil
-	ndb, err := Open(dir, opts)
+	ndb, err := openWithMemory(dir, opts, db.memory)
 	if err != nil {
 		return nil, err
 	}
@@ -941,6 +949,7 @@ func (db *DB) putDirect(key, val []byte, del bool) error {
 func (db *DB) closeQuiet() {
 	db.mu.Lock()
 	db.closed = true
+	db.memory.signal()
 	db.wal.close()
 	db.releaseMemtables()
 	db.pager.close()

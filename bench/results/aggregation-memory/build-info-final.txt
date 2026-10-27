@@ -1,0 +1,37 @@
+/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-aggregation-memory/current-bench: go1.25.1
+	path	github.com/apteva/db/bench/aggregation_memory
+	mod	github.com/apteva/db/bench/aggregation_memory	(devel)	
+	dep	github.com/apteva/db	v0.0.0
+	=>	../..	(devel)	
+	
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=arm64
+	build	GOOS=darwin
+	build	GOARM64=v8.0
+	build	vcs=git
+	build	vcs.revision=9ff2cd091d96214c380042da7e3dce330dc9ebc1
+	build	vcs.time=2026-10-27T12:39:40Z
+	build	vcs.modified=true
+/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-aggregation-memory/alpha7-bench: go1.25.1
+	path	github.com/apteva/db/bench/aggregation_memory
+	mod	github.com/apteva/db/bench/aggregation_memory	(devel)	
+	dep	github.com/apteva/db	v0.0.0
+	=>	../..	(devel)	
+	
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-tags=alpha7
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=arm64
+	build	GOOS=darwin
+	build	GOARM64=v8.0

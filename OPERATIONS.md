@@ -109,3 +109,55 @@ CHANGE_FEEDS.md for history windows, snapshot leases and limits. Logical expiry
 can precede segment deletion; the recovery tail is retained. Backups/restores
 start a fresh change-stream identity and do not carry its history. Format-10
 upgrades are permanent and older binaries cannot open the directory.
+
+## Resident-memory controls (alpha.8)
+
+```go
+opts := db.DurableOptions()
+opts.CacheBytes = 64 << 20
+opts.MappedCacheBytes = 32 << 20
+opts.ManagedMemoryBytes = 256 << 20
+handle, err := db.Open("./data", opts)
+// ...
+stats, err := handle.MemoryStats(ctx)
+reclaimedEstimate, err := handle.TrimMemory(ctx, 32 << 20)
+```
+
+Both new targets default to zero (disabled). MappedCacheBytes enables recency
+tracking and a sweep once per second. TrimMemory establishes tracking on its
+first call if disabled; subsequent sweeps reclaim cold clean file translations
+in 1 MiB chunks while preserving mapping addresses and contents. Recent chunks
+survive a sweep, so a hot working set may exceed the soft target. Refaulting a
+reclaimed page costs work on a later read. TrimMemory's return and
+ReclaimedMappedBytes estimate resident file-backed bytes remapped, rather than
+measure a process-RSS delta. Reclamation does not force garbage collection.
+
+MemoryStats separates process RSS from allocated private page buffers,
+descriptors, memtable arenas and WAL stores, including retired stores leased by
+snapshots/cursors and temporary native compaction/backup buffers. Active,
+immutable and retained memtables are separate. SnapshotPinnedBytes and
+CheckpointPinnedBytes are overlapping subsets of those categories; PinnedBytes
+counts their union and other leased memtables once. They are not additional
+allocated memory. QueryWorkingBytes covers registered aggregation budgets.
+MetadataEstimateBytes estimates Go bookkeeping separately.
+
+MappedPageCacheBytes comes from mincore and describes OS file page-cache
+residency; it is not process mapped RSS. MappedResidentEstimateBytes excludes
+explicitly reclaimed chunks until they are read again, and remains an estimate.
+MappedVirtualBytes is address space. None of those values should be summed with
+ProcessResidentBytes. Diagnostics perform residency syscalls on explicit request,
+not on ordinary reads.
+
+ManagedMemoryBytes is a soft pre-write admission target for owned native buffers
+and registered aggregation reservations. It is not a hard process RSS cap;
+metadata, snapshots' bookkeeping, Go/caller allocations and mapped file pages
+are separate, and one atomic operation, checkpoint or in-flight copy can overshoot.
+Above target, admission attempts checkpoint/reclamation before logging a write.
+An ordinary write returns ErrMemoryPressure if retained storage still prevents
+progress, avoiding a deadlock when its caller owns the retaining snapshot.
+Batch.CommitContext with a cancellable context may wait for leases to close;
+cancellation/pressure rejection occurs before entering the WAL. Close snapshots
+and cursors promptly and configure a target large enough for ordinary engine
+buffers plus workload bursts. Aggregations can return ErrMemoryPressure if the
+shared managed target is exhausted. Do not treat either option as an OS memory
+limit or a promise to outperform another engine on every workload.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"unsafe"
 )
 
 // Snapshot is a consistent read view: the tree and memtable as they were
@@ -110,6 +111,8 @@ func (s *Snapshot) Close() {
 	// have stable addresses until the database closes.
 	db.pager.releaseUnusedBuffers()
 	db.releaseQuarantineLocked()
+	db.cond.Broadcast()
+	db.memory.signal()
 }
 
 // minSnapEpoch is the oldest open snapshot's epoch, or 0 when none.
@@ -262,6 +265,10 @@ func (v view) page(id uint32) (page, error) {
 			return nil, ErrClosed
 		}
 		if p, ok := v.snap.overlay[id]; ok {
+			pg := v.db.pager
+			if pg.hot != nil && unsafe.SliceData(p) == unsafe.SliceData(pg.mappedPage(id)) {
+				pg.noteMappedRead(id)
+			}
 			return p, nil
 		}
 	}
