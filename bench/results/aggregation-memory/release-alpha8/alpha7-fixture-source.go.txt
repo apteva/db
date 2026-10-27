@@ -1,0 +1,4 @@
+package main
+import("bytes";"context";"fmt";"os";db "github.com/apteva/db")
+func must(err error){if err!=nil{panic(err)}}
+func main(){if db.Version!="0.2.0-alpha.7"{panic(db.Version)};d,err:=db.Open(os.Args[1],db.Options{CacheBytes:8<<20});must(err);for i:=0;i<50;i++{must(d.Upsert([]byte(fmt.Sprintf("old%03d",i)),bytes.Repeat([]byte{byte(i)},80<<10)))};must(d.Checkpoint());must(d.Compact(context.Background()));must(d.Close());fmt.Println("Public alpha.7 created format-10 compatibility fixture")}

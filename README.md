@@ -87,6 +87,9 @@ Alpha.8 adds [bounded native aggregation](USAGE.md#bounded-native-aggregation-al
 and [resident-memory controls](OPERATIONS.md#resident-memory-controls-alpha8).
 The [comparison with alpha.7](bench/results/aggregation-memory/REPORT.md) records
 110 final trials, correctness checks and remaining performance tradeoffs.
+The [publication verification](bench/results/aggregation-memory/release-alpha8/RELEASE.md)
+confirms Linux/macOS CI, public Go installation, all four archive checksums,
+the downloaded server/driver and alpha.7 directory compatibility.
 
 ## Stored computed fields
 

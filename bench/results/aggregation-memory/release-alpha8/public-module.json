@@ -1,0 +1,16 @@
+{
+  "Path": "github.com/apteva/db",
+  "Version": "v0.2.0-alpha.8",
+  "Info": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-alpha8-release/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.8.info",
+  "GoMod": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-alpha8-release/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.8.mod",
+  "Zip": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-alpha8-release/public-gopath/pkg/mod/cache/download/github.com/apteva/db/@v/v0.2.0-alpha.8.zip",
+  "Dir": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-alpha8-release/public-gopath/pkg/mod/github.com/apteva/db@v0.2.0-alpha.8",
+  "Sum": "h1:F80dig0G9JYW3StxhqFmrtrERT+ktW5Aqq+q7SOk4xM=",
+  "GoModSum": "h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc=",
+  "Origin": {
+    "VCS": "git",
+    "URL": "https://github.com/apteva/db",
+    "Hash": "4f57eb9b66baa03f292977e442323cedd821f68e",
+    "Ref": "refs/tags/v0.2.0-alpha.8"
+  }
+}
