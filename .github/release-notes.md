@@ -1,22 +1,19 @@
-AptevaDB alpha.6 adds native filtered document counts for embedded Go applications and the HTTP Go driver.
+AptevaDB alpha.7 improves memory ownership, checkpoint I/O and scanning, and fixes WAL buffering and interrupted-checkpoint recovery.
 
-- `Collection.CountDocuments(ctx, filter, db.CountOptions{})` counts scalar compound equality prefixes without loading documents when every predicate is covered. Checkpointed indexes count bounded leaf slots directly; buffered snapshot writes use the index merge scanner.
-- Preserve exact integer equality, mixed index directions, null/missing and sparse semantics. Residual predicates, logical OR and multikey indexes fall back to document evaluation, with no matching result array or sort retained.
-- Counts use one snapshot and support cancellation, skip/limit, memory budgets, index hints and explicit errors. `QueryStats.Plan.IndexOnly`, `DocumentFetches` and `IndexEntriesExamined` expose the execution path. The Go driver also counts through leased read-only snapshots.
-- Add native/driver correctness, concurrency, checkpoint/reopen and budget regressions, plus fresh-fixture count comparisons and paired alpha.5 guards. See the [validation report](https://github.com/apteva/db/blob/v0.2.0-alpha.6/bench/results/counts/VALIDATION.md) for all samples and the reproduction.
+- Stable file mappings and explicitly owned page, descriptor and memtable buffers release retired storage without waiting for Go GC. Snapshots, cursors and checkpoint captures retain the buffers they need.
+- Stream compaction, batch contiguous checkpoint writes using immutable staging copies, and reuse tree descent between scan leaves. Keep the existing data-sync/metadata-sync durability order.
+- Bound ordinary WAL backlog at 4 MiB, flush complete records before buffer growth, and release oversized burst buffers at replay barriers. Large records and atomic batches remain supported.
+- Fix recovery deadlock during startup cleanup with bounded memtables. Keep snapshot-retired page IDs unavailable for reuse until both readers finish and the replacement metadata is durable, including retirements during checkpoint I/O.
+- Add `Stats.InFlightPages` and `Stats.WALBufferBytes`. `CacheBytes` remains a logical page-cache target, not a total-process memory limit.
 
-On three fresh 100,000-row fixtures with 5,000 matches, the covering count median was **0.006355 ms**, versus **3.024039 ms** for alpha.5 Query/count and **0.125922 ms** for SQLite C: about **476×** and **20×** faster for this checkpointed case, with zero document fetches. All samples, allocation counts and slower guard observations are retained in the validation report. Background activity remained present; this is not a universal database ranking.
+The [benchmark report](https://github.com/apteva/db/blob/v0.2.0-alpha.7/bench/results/memory-followup/native/REPORT.md) retains every sample, source hashes and limitations. In four tested dataset/order combinations, peak RSS was 58–63% lower than original alpha.6. Compared with the preceding memory-optimization candidate, bulk-load elapsed time improved 9–25% and CPU use fell 13–35%. Physical footprint was 10–24% below Pebble reference runs; RSS remained 2–11% above them. The largest random load remained 3.3% slower than original alpha.6, and some other timing regressions remain. Background activity was present; native and competitor cohorts are reported separately. The complete-key routing-map experiment was rejected and is excluded from this release.
 
-Adapters must adopt `CountDocuments` to use this path; existing Query/aggregation behavior is unchanged. `COUNT(column)` remains the `$countNonNull` accumulator. See [USAGE.md](https://github.com/apteva/db/blob/v0.2.0-alpha.6/USAGE.md#filtered-document-counts) for coverage, hints, memory exclusions and examples.
-
-**Format remains 10; alpha.5 directories need no new migration.** Opening formats 3–9 still permanently upgrades them to format 10; back up with the original binary first. This remains a public prerelease alpha.
+**Format remains 10; alpha.5/alpha.6 directories need no new migration.** Opening formats 3–9 still permanently upgrades them to format 10; back up with the original binary first. This remains a public prerelease alpha.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.6
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.6
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.6
+go get github.com/apteva/db@v0.2.0-alpha.7
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.7
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.7
 ```
 
-Linux/macOS amd64/arm64 CLI/server archives include the updated usage and server guides; verify them using SHA256SUMS.
-
-Post-publication [verification evidence](https://github.com/apteva/db/tree/main/bench/results/counts/release-alpha6) confirms all four archive checksums, public Go proxy/sumdb and CLI install, embedded counts, downloaded daemon/public Go driver counts and leased snapshots, watch compatibility, and alpha.5 directory compatibility. Source and release CI passed on the tagged commit; the evidence-only follow-up leaves the release tag unchanged.
+Linux/macOS amd64/arm64 CLI/server archives include the usage and operations guides. Verify downloads against `SHA256SUMS`.

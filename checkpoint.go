@@ -94,6 +94,8 @@ func (db *DB) stopCheckpointer() {
 func (db *DB) runCheckpoint(full bool) error {
 	db.ckptMu.Lock()
 	defer db.ckptMu.Unlock()
+	workStart := time.Now()
+	defer func() { db.mu.Lock(); db.noteHold("checkpoint-work", workStart); db.mu.Unlock() }()
 	if full && db.wal.size() >= walRotateBytes {
 		if err := db.wal.rotate(); err != nil {
 			return err
@@ -109,7 +111,7 @@ func (db *DB) runCheckpoint(full bool) error {
 		return db.failed
 	}
 	if full && db.mt != nil && db.imm == nil && db.mt.len() > 0 {
-		db.imm, db.mt = db.mt, newMemtable()
+		db.imm, db.mt = db.mt, newMemtable(db.opts.MemtableBytes)
 	}
 	db.mu.Unlock()
 
@@ -148,21 +150,32 @@ func (db *DB) applyImmutable() error {
 	if imm == nil {
 		return nil
 	}
-	entries := imm.snapshot()
 	const chunk = 256
-	for start := 0; start < len(entries); start += chunk {
-		end := min(len(entries), start+chunk)
+	var entries [chunk]mtEntry
+	leaf, index := imm.first, 0
+	for leaf != nil {
+		count := 0
+		for count < chunk && leaf != nil {
+			if index == len(leaf.keys) {
+				leaf, index = leaf.next, 0
+				continue
+			}
+			value := leaf.vals[index]
+			entries[count] = mtEntry{k: leaf.keys[index], v: value.v, del: value.del}
+			count++
+			index++
+		}
 		db.mu.Lock()
 		t := time.Now()
 		db.sortedApply = true // the chunk is in key order: split leaves at the insertion point
 		si := sortedInserter{db: db}
-		for _, e := range entries[start:end] {
+		for _, e := range entries[:count] {
 			var err error
 			if e.del {
-				err = db.deleteTree([]byte(e.k))
+				err = db.deleteTree(immutableMemtableKey(e.k))
 				si.valid = false
 			} else {
-				err = si.insert([]byte(e.k), e.v)
+				err = si.insert(immutableMemtableKey(e.k), e.v)
 			}
 			if err != nil {
 				db.sortedApply = false
@@ -181,6 +194,7 @@ func (db *DB) applyImmutable() error {
 		}
 	}
 	db.mu.Lock()
+	db.imm.releaseBuffers()
 	db.imm = nil
 	db.cond.Broadcast()
 	db.mu.Unlock()
@@ -245,7 +259,10 @@ func (db *DB) flushPass(full bool) error {
 
 // captureLocked prepares everything a checkpoint will write, in memory.
 func (db *DB) captureLocked(full bool) (*captureSet, error) {
-	cs := &captureSet{full: full}
+	db.pager.releaseUnusedNodes()
+	db.pager.reclaimCopiedPages()
+	cs := &captureSet{full: full, pages: db.checkpointPages[:0], nodes: db.checkpointNodes[:0], toRelease: db.checkpointReleased[:0]}
+	db.activeCapture = cs
 	walGen, walOff := db.wal.position()
 	switch {
 	case db.metaLogPos != nil:
@@ -267,6 +284,10 @@ func (db *DB) captureLocked(full bool) (*captureSet, error) {
 		}
 		db.captureNode(cs, n)
 	}
+	for _, n := range db.dirtyOverflow {
+		releaseNode(n)
+	}
+	clear(db.dirtyOverflow)
 	db.dirtyOverflow = db.dirtyOverflow[:0]
 	root, err := db.pager.get(db.root)
 	if err != nil {
@@ -285,7 +306,10 @@ func (db *DB) captureLocked(full bool) (*captureSet, error) {
 	cs.toRelease = append(cs.toRelease, db.pager.pending...)
 	db.pager.pending = db.pager.pending[:0]
 	cs.meta = meta{db.ckpt + 1, db.root, db.pager.hwm, walGen, walOff, freeHead}
-	cs.metaBuf = make(page, PageSize)
+	if db.checkpointMeta == nil {
+		db.checkpointMeta = make(page, PageSize)
+	}
+	cs.metaBuf = db.checkpointMeta
 	db.encodeMeta(cs.metaBuf, cs.meta)
 	return cs, nil
 }
@@ -316,6 +340,7 @@ func (db *DB) captureNode(cs *captureSet, n *node) uint32 {
 		n.buffer.live++
 	}
 	cs.pages = append(cs.pages, ioPage{id: n.id, data: n.data, buffer: n.buffer})
+	retainNode(n)
 	cs.nodes = append(cs.nodes, n)
 	return n.id
 }
@@ -400,18 +425,8 @@ func (db *DB) captureFreelist(cs *captureSet) (uint32, error) {
 // writeCapture does the I/O of a checkpoint without any lock held.
 func (db *DB) writeCapture(cs *captureSet) error {
 	f := db.pager.f
-	scratch := make(page, PageSize)
-	for _, p := range cs.pages {
-		buf := p.data
-		if buf.typ() == pageLeaf {
-			// never write into a frozen buffer: a writer may be copying it
-			copy(scratch, buf)
-			scratch.setCrc(pageCrc(scratch))
-			buf = scratch
-		}
-		if err := writeAt(f, buf, int64(p.id)*PageSize); err != nil {
-			return err
-		}
+	if err := db.writeCheckpointPages(cs.pages); err != nil {
+		return err
 	}
 	if err := db.wal.syncFn(f); err != nil {
 		return err
@@ -443,7 +458,7 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
 	// only ids freed by this capture: anything freed while the I/O ran is
 	// still referenced by the meta just written and waits for the next one
 	if len(db.snaps) > 0 {
-		db.quarantineIDs(cs.toRelease)
+		db.quarantineUntil(cs.toRelease, db.ckpt)
 	} else if trailing := pg.releaseIDs(cs.toRelease); trailing > 0 {
 		truncateTo = int64(pg.hwm) * PageSize
 	}
@@ -452,9 +467,16 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
 	}
 	// The capture's I/O has finished. Readers are excluded by the writer
 	// lock; snapshots are the only remaining possible aliases of old
-	// private buffers or superseded file mappings.
+	// private buffers. File mappings retain stable addresses.
 	db.releaseCaptureBuffers(cs)
-	pg.releaseUnusedBuffers(len(db.snaps) == 0)
+	// Dirty and in-flight pages could not be evicted during apply/I/O.
+	// Recheck now: verified reads no longer create descriptors that would
+	// otherwise trigger a later sweep.
+	pg.loadMu.Lock()
+	pg.evictLocked(nil)
+	pg.loadMu.Unlock()
+	pg.releaseUnusedNodes()
+	pg.releaseUnusedBuffers()
 	db.cond.Broadcast()
 	return truncateTo, dropGen, nil
 }
@@ -466,13 +488,23 @@ func (db *DB) releaseCaptureBuffers(cs *captureSet) {
 	if cs == nil {
 		return
 	}
+	if db.activeCapture == cs {
+		db.activeCapture = nil
+	}
 	for _, p := range cs.pages {
 		if p.buffer != nil {
 			p.buffer.live--
 		}
 	}
-	cs.pages, cs.nodes = nil, nil
-	db.pager.releaseUnusedBuffers(false)
+	for _, n := range cs.nodes {
+		releaseNode(n)
+	}
+	clear(cs.pages)
+	clear(cs.nodes)
+	db.checkpointPages, db.checkpointNodes = cs.pages[:0], cs.nodes[:0]
+	db.checkpointReleased = cs.toRelease[:0]
+	cs.pages, cs.nodes, cs.toRelease = nil, nil, nil
+	db.pager.releaseUnusedBuffers()
 }
 
 // ---- lifecycle
@@ -504,6 +536,7 @@ func (db *DB) Close() error {
 	if e := db.wal.close(); err == nil {
 		err = e
 	}
+	db.releaseMemtables()
 	if e := db.pager.close(); err == nil {
 		err = e
 	}
@@ -547,6 +580,7 @@ func (db *DB) crash() {
 	}
 	db.cond.Broadcast()
 	db.wal.close()
+	db.releaseMemtables()
 	db.pager.close()
 	if db.dirLock != nil {
 		db.dirLock.Close()
@@ -578,6 +612,8 @@ func (db *DB) Compact(ctx context.Context) error {
 }
 
 func (db *DB) compact(ctx context.Context) error {
+	db.compactMu.Lock()
+	defer db.compactMu.Unlock()
 	db.mu.Lock()
 	if db.closed {
 		db.mu.Unlock()
@@ -596,10 +632,18 @@ func (db *DB) compact(ctx context.Context) error {
 		return ErrSnapshotsOpen
 	}
 	db.mu.Unlock()
+	// Registration excludes checkpoint log deletion until the replay pin is
+	// visible. It remains after closing the page snapshot, through final swap.
+	db.ckptMu.Lock()
 	s, err := db.Snapshot()
+	if err == nil {
+		db.wal.compactionPin.Store(s.pos.gen + 1)
+	}
+	db.ckptMu.Unlock()
 	if err != nil {
 		return err
 	}
+	defer db.wal.compactionPin.Store(0)
 	tmp := filepath.Join(db.dir, "compact.tmp")
 	os.RemoveAll(tmp)
 	ndb, err := db.copySnapshot(ctx, s, tmp, db.opts, true)
@@ -617,7 +661,7 @@ func (db *DB) compact(ctx context.Context) error {
 	// rounds until it is small, checkpoint the copy once, then shrink the
 	// delta that accumulated during that checkpoint
 	pos := s.pos
-	catchUp := func() (int, error) {
+	catchUp := func(flushPages bool) (int, error) {
 		g, off, err := db.wal.flushAndPosition()
 		if err != nil {
 			return 0, err
@@ -625,8 +669,14 @@ func (db *DB) compact(ctx context.Context) error {
 		n := 0
 		if _, _, err := db.wal.replayFrom(pos.gen, pos.off, func(k, v []byte, del bool) error {
 			n++
-			return ndb.putDirect(k, v, del)
-		}); err != nil {
+			if err := ndb.putDirect(k, v, del); err != nil {
+				return err
+			}
+			if flushPages && ndb.dirtyPressure() {
+				return ndb.flushPass(false)
+			}
+			return nil
+		}, lsn{g, off}); err != nil {
 			return 0, err
 		}
 		pos = lsn{g, off}
@@ -636,7 +686,7 @@ func (db *DB) compact(ctx context.Context) error {
 		if err := ctx.Err(); err != nil {
 			return fail(err)
 		}
-		n, err := catchUp()
+		n, err := catchUp(true)
 		if err != nil {
 			return fail(err)
 		}
@@ -648,14 +698,13 @@ func (db *DB) compact(ctx context.Context) error {
 	if err := ndb.runCheckpoint(true); err != nil {
 		return fail(err)
 	}
-	// from here no checkpoint may be in flight against the old file
-	db.ckptMu.Lock()
-	defer db.ckptMu.Unlock()
+	// Catch up while the old checkpointer can still drain writer buffers.
+	// The replay pin protects the log independently of page checkpoints.
 	for round := 0; round < 20; round++ {
 		if err := ctx.Err(); err != nil {
 			return fail(err)
 		}
-		n, err := catchUp()
+		n, err := catchUp(true)
 		if err != nil {
 			return fail(err)
 		}
@@ -663,31 +712,49 @@ func (db *DB) compact(ctx context.Context) error {
 			break
 		}
 	}
+	// Exclude an old-file checkpoint only for one memory-only catch-up and
+	// the swap. Repeated disk-backed rounds here would starve its writers.
+	db.ckptMu.Lock()
+	defer db.ckptMu.Unlock()
+	finalizeStart := time.Now()
+	defer func() { db.mu.Lock(); db.noteHold("compaction-finalize", finalizeStart); db.mu.Unlock() }()
+	if _, err := catchUp(false); err != nil {
+		return fail(err)
+	}
 	// final tail under the lock, in memory only, then swap
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	t := time.Now()
+	if db.closed {
+		return fail(ErrClosed)
+	}
+	if db.failed != nil {
+		return fail(db.failed)
+	}
 	defer db.noteHold("compact-swap", t)
 	db.treeGen++
 	if len(db.snaps) > 0 {
 		return fail(ErrSnapshotsOpen)
 	}
 	t1 := time.Now()
-	if _, _, err := db.wal.flushAndPosition(); err != nil {
+	tailGen, tailOff, err := db.wal.flushAndPosition()
+	if err != nil {
 		return fail(err)
 	}
 	db.noteHold("swap-flush", t1)
 	t1 = time.Now()
-	if _, _, err := db.wal.replayFrom(pos.gen, pos.off, ndb.putDirect); err != nil {
+	if _, _, err := db.wal.replayFrom(pos.gen, pos.off, ndb.putDirect, lsn{tailGen, tailOff}); err != nil {
 		return fail(err)
 	}
 	db.noteHold("swap-replay", t1)
 	t1 = time.Now()
 	ndb.wal.close()
+	ndb.releaseMemtables()
 	if ndb.dirLock != nil {
 		ndb.dirLock.Close()
 		ndb.dirLock = nil
 	}
+	db.releaseMemtables()
 	db.pager.close()
 	db.noteHold("swap-close", t1)
 	t1 = time.Now()
@@ -707,11 +774,14 @@ func (db *DB) compact(ctx context.Context) error {
 	}
 	db.noteHold("swap-rename", t1)
 	// the new tree lives on; the existing log stays the log
+	ndb.pager.limit = db.pager.limit
 	db.pager, db.root, db.ckpt = ndb.pager, ndb.root, ndb.ckpt
 	db.freelistPages, db.dirtyOverflow = ndb.freelistPages, ndb.dirtyOverflow
 	if db.mt != nil {
-		db.mt = newMemtable() // every record is in the new tree now
+		db.mt.releaseBuffers()
+		db.mt = newMemtable(db.opts.MemtableBytes) // every record is in the new tree now
 	}
+	db.imm.releaseBuffers()
 	db.imm = nil
 	g, off := db.wal.position()
 	db.activeStart = lsn{g, off}
@@ -728,7 +798,7 @@ func (db *DB) compact(ctx context.Context) error {
 		publishErr = syncCompactionDirectory(db.dir)
 	}
 	var warmErr error
-	if publishErr == nil && pg.limit == 0 {
+	if publishErr == nil {
 		warmErr = db.warmCompactedPages(pg, warmLimit)
 	}
 	db.mu.Lock() // matched by deferred unlock
@@ -756,6 +826,16 @@ func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
 				db.mu.RUnlock()
 				return fmt.Errorf("%w: compacted page %d type", ErrCorrupt, n.id)
 			}
+			if i >= 2 && n == nil && pg.isVerified(uint32(i)) {
+				// Bounded caches may have evicted the descriptor, but the
+				// copy already verified/wrote these bytes. Fault the header
+				// without allocating a descriptor or warming the old tree.
+				typ := pg.mappedPage(uint32(i)).typ()
+				if typ < pageLeaf || typ > pageFreelist {
+					db.mu.RUnlock()
+					return fmt.Errorf("%w: compacted page %d type", ErrCorrupt, i)
+				}
+			}
 		}
 		done := end >= min(int(limit), int(pg.hwm))
 		db.mu.RUnlock()
@@ -780,13 +860,17 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 	// The initial empty root is durable. Start the private builder on a
 	// fresh id so completed leaves can be written once without relocating
 	// their ids or patching already-built parents.
-	stream := opts.CacheBytes <= 0
-	ndb.sortedLoad, ndb.streamCopy = stream, stream
+	// Completed leaves are file-backed; keep their small node descriptors
+	// while building so publishing the copy preserves the warm read layout.
+	limit := ndb.pager.limit
+	ndb.pager.limit = 0
+	ndb.sortedLoad, ndb.streamCopy = true, true
 	si := sortedInserter{db: ndb}
 	writer := copyPageWriter{pg: ndb.pager}
+	defer writer.close()
 	n := 0
 	var cerr error
-	err = db.scan(view{db, s}, nil, nil, func(k, v []byte) bool {
+	err = db.scanWithRetirement(view{db, s}, nil, nil, func(k, v []byte) bool {
 		if n++; n&4095 == 0 {
 			if cerr = ctx.Err(); cerr != nil {
 				return false
@@ -799,10 +883,6 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 				cerr = err
 				return false
 			}
-		}
-		if !stream {
-			cerr = ndb.insertTree(k, v)
-			return cerr == nil
 		}
 		if n == 1 {
 			oldRoot, rerr := ndb.pager.get(ndb.root)
@@ -825,10 +905,13 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 		// Overflow chains are immutable and already written by streamCopy.
 		// Drop the tracking entries after each row, keeping the builder's
 		// working set bounded even for very large values.
+		for _, n := range ndb.dirtyOverflow {
+			releaseNode(n)
+		}
 		clear(ndb.dirtyOverflow)
 		ndb.dirtyOverflow = ndb.dirtyOverflow[:0]
 		return true
-	})
+	}, preserveFeed && db.opts.CacheBytes > 0)
 	ndb.sortedLoad, ndb.streamCopy = false, false
 	if err == nil {
 		err = cerr
@@ -843,6 +926,7 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
 		ndb.closeQuiet()
 		return nil, err
 	}
+	ndb.pager.limit = limit
 	return ndb, nil
 }
 
@@ -858,6 +942,7 @@ func (db *DB) closeQuiet() {
 	db.mu.Lock()
 	db.closed = true
 	db.wal.close()
+	db.releaseMemtables()
 	db.pager.close()
 	if db.dirLock != nil {
 		db.dirLock.Close()

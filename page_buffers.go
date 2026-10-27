@@ -21,7 +21,11 @@ type pageBufferArena struct {
 func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
 	a := pg.bufferTail
 	if a == nil || a.next+PageSize > len(a.data) {
-		data, err := syscall.Mmap(-1, 0, pageBufferArenaBytes,
+		size := pageBufferArenaBytes
+		if pg.limit > 0 {
+			size = 256 << 10
+		}
+		data, err := syscall.Mmap(-1, 0, size,
 			syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
 		if err != nil {
 			panic("aptevadb: cannot allocate writable page arena: " + err.Error())
@@ -36,6 +40,18 @@ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
 	return page(a.data[start:a.next:a.next]), a
 }
 
+// Sparse parents use one-page mappings so a retained parent cannot pin a
+// mostly empty leaf arena. They still share the same explicit view/I/O leases.
+func (pg *pager) allocInternalPageBuffer() (page, *pageBufferArena) {
+	data, err := syscall.Mmap(-1, 0, PageSize, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+	if err != nil {
+		panic("aptevadb: cannot allocate internal page buffer: " + err.Error())
+	}
+	a := &pageBufferArena{data: data, next: PageSize, live: 1}
+	pg.bufferArenas = append(pg.bufferArenas, a)
+	return page(data), a
+}
+
 func (pg *pager) releasePageBuffer(n *node) {
 	if n.buffer != nil {
 		n.buffer.live--
@@ -46,8 +62,8 @@ func (pg *pager) releasePageBuffer(n *node) {
 func (pg *pager) copyPageBuffer(n *node) {
 	var buf page
 	var a *pageBufferArena
-	if pg.limit > 0 || n.kind == pageInternal {
-		buf = make(page, PageSize)
+	if n.pageType() == pageInternal {
+		buf, a = pg.allocInternalPageBuffer()
 	} else {
 		buf, a = pg.allocPageBuffer()
 	}
@@ -57,10 +73,8 @@ func (pg *pager) copyPageBuffer(n *node) {
 }
 
 // releaseUnusedBuffers runs under the writer lock. Explicit references keep
-// current nodes, snapshot overlays and captured I/O alive. File mappings may
-// be released only after a committed checkpoint with no snapshots, once
-// ensureMapped has repointed resident mapped nodes.
-func (pg *pager) releaseUnusedBuffers(releaseMappings bool) {
+// current nodes, snapshot overlays and captured I/O alive.
+func (pg *pager) releaseUnusedBuffers() {
 	kept := pg.bufferArenas[:0]
 	for _, a := range pg.bufferArenas {
 		if a.live == 0 && syscall.Munmap(a.data) == nil {
@@ -73,15 +87,4 @@ func (pg *pager) releaseUnusedBuffers(releaseMappings bool) {
 	}
 	clear(pg.bufferArenas[len(kept):])
 	pg.bufferArenas = kept
-	if !releaseMappings {
-		return
-	}
-	old := pg.oldMaps[:0]
-	for _, m := range pg.oldMaps {
-		if syscall.Munmap(m) != nil {
-			old = append(old, m)
-		}
-	}
-	clear(pg.oldMaps[len(old):])
-	pg.oldMaps = old
 }

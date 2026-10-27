@@ -363,7 +363,10 @@ func (c *Collection) write(key, val []byte, del bool) error {
 		}
 		return err
 	}
-	db.stallLocked()
+	if err := db.stallLocked(); err != nil {
+		db.mu.Unlock()
+		return err
+	}
 	if err := c.check(); err != nil {
 		db.mu.Unlock()
 		return err
@@ -502,7 +505,14 @@ func (c *Collection) NewCursor() *Cursor {
 		cur.owned = s
 		cur.c, cur.v = cc, view{c.db, s}
 	}
-	cur.snap = cur.c.snap.mem
+	c.db.mu.RLock()
+	if c.db.closed || cur.c.snap.closed {
+		cur.err = ErrClosed
+	} else {
+		cur.snap = cur.c.snap.mem
+		cur.memStores = cur.v.retainMemtables()
+	}
+	c.db.mu.RUnlock()
 	return cur
 }
 

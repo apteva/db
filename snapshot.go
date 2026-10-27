@@ -16,6 +16,7 @@ type Snapshot struct {
 	revision    uint64
 	epoch       uint64
 	root        uint32
+	memStores   []*memtableStorage
 	mem         []mtEntry          // memtables as of the snapshot, merged and sorted
 	overlay     map[uint32]page    // page id -> its contents at the snapshot
 	buffers     []*pageBufferArena // retained private-page storage for overlay entries
@@ -27,11 +28,12 @@ type Snapshot struct {
 
 var ErrSnapshotsOpen = errors.New("aptevadb: operation not allowed while snapshots are open")
 
-// quarantined ids were freed at a given epoch; they may be reused once no
-// snapshot from that epoch or earlier is open.
+// Page reuse requires both the last snapshot reader to finish and a durable
+// checkpoint that no longer references the retired id.
 type quarantine struct {
-	epoch uint64
-	ids   []uint32
+	epoch           uint64
+	afterCheckpoint uint64
+	ids             []uint32
 }
 
 // Snapshot takes a consistent view. Close it when done.
@@ -56,12 +58,14 @@ func (db *DB) snapshotLocked(logPosition bool) (*Snapshot, error) {
 	s := &Snapshot{db: db, epoch: db.epoch, root: db.root, overlay: map[uint32]page{}}
 	s.revision = db.revision
 	s.mem = db.memSnapshotLocked()
+	s.memStores = (view{db, nil}).retainMemtables()
 	var g, off uint64
 	var err error
 	if logPosition {
 		g, off, err = db.wal.flushAndPosition()
 	}
 	if err != nil {
+		releaseMemtableStores(s.memStores)
 		return nil, err
 	}
 	s.pos = lsn{g, off}
@@ -99,10 +103,12 @@ func (s *Snapshot) Close() {
 		a.live--
 	}
 	s.buffers, s.overlay = nil, nil
+	releaseMemtableStores(s.memStores)
+	s.memStores, s.mem = nil, nil
 	// Captures retain their own references, so unused private arenas can
-	// be released even if checkpoint I/O is in progress. File mappings
-	// wait until that I/O has committed.
-	db.pager.releaseUnusedBuffers(false)
+	// be released even if checkpoint I/O is in progress. File segments
+	// have stable addresses until the database closes.
+	db.pager.releaseUnusedBuffers()
 	db.releaseQuarantineLocked()
 }
 
@@ -137,6 +143,7 @@ func (db *DB) preserveForSnapshots(n *node) {
 // after n's last modification may still read the current buffer, that
 // buffer is left to the snapshot and a copy is modified instead.
 func (db *DB) writable(n *node) page {
+	reclaim := n.mapped && len(db.snaps) == 0 && !n.writing
 	preserve := len(db.snaps) > 0 && db.epoch > n.modEpoch
 	if preserve {
 		db.preserveForSnapshots(n)
@@ -147,6 +154,15 @@ func (db *DB) writable(n *node) page {
 	}
 	db.pager.markDirty(n)
 	n.modEpoch = db.epoch
+	if reclaim {
+		// A previously discarded mapping may have faulted back in since its
+		// last checkpoint. This copy supersedes those translations again.
+		db.pager.discarded[n.id/64] &^= uint64(1) << (n.id % 64)
+		db.pager.copiedPages = append(db.pager.copiedPages, n.id)
+		if len(db.pager.copiedPages) >= 16 {
+			db.pager.reclaimCopiedPages()
+		}
+	}
 	return n.data
 }
 
@@ -157,33 +173,55 @@ func (db *DB) freePage(n *node) {
 		db.pager.releasePageBuffer(n)
 		if db.pager.pages[n.id].Load() == n {
 			db.pager.pages[n.id].Store(nil)
+			releaseNode(n)
 			db.pager.resident.Add(-1)
 		}
 		if n.dirty {
 			db.pager.dirtyN--
 			n.dirty = false
 		}
-		db.quarantineIDs([]uint32{n.id})
+		if n.onDisk {
+			db.quarantineIDs([]uint32{n.id})
+		} else {
+			db.quarantineUntil([]uint32{n.id}, db.ckpt)
+		}
 		return
 	}
 	db.pager.freePage(n)
 }
 
 func (db *DB) quarantineIDs(ids []uint32) {
+	after := db.ckpt + 1
+	if db.activeCapture != nil {
+		// A capture already in flight may still reference the retired page.
+		// Its successor is the first checkpoint that can exclude that page.
+		after++
+	}
+	db.quarantineUntil(ids, after)
+}
+
+func (db *DB) quarantineUntil(ids []uint32, after uint64) {
 	if len(ids) == 0 {
 		return
 	}
-	db.quar = append(db.quar, quarantine{epoch: db.epoch, ids: append([]uint32(nil), ids...)})
+	db.quar = append(db.quar, quarantine{epoch: db.epoch, afterCheckpoint: after, ids: append([]uint32(nil), ids...)})
 }
 
-// releaseQuarantineLocked returns ids no open snapshot can reference.
+// releaseQuarantineLocked moves snapshot-retired ids to free or pending,
+// depending on whether their durable checkpoint barrier has completed.
 func (db *DB) releaseQuarantineLocked() {
 	min := db.minSnapEpoch()
 	kept := db.quar[:0]
 	var freed []uint32
 	for _, q := range db.quar {
 		if min == 0 || min > q.epoch {
-			freed = append(freed, q.ids...)
+			if q.afterCheckpoint <= db.ckpt {
+				freed = append(freed, q.ids...)
+			} else {
+				// No snapshot needs these bytes, but the durable root may.
+				// The next capture releases them only after its meta is synced.
+				db.pager.pending = append(db.pager.pending, q.ids...)
+			}
 		} else {
 			kept = append(kept, q)
 		}
@@ -193,6 +231,9 @@ func (db *DB) releaseQuarantineLocked() {
 		pg := db.pager
 		pg.free = append(pg.free, freed...)
 		sort.Slice(pg.free, func(i, j int) bool { return pg.free[i] > pg.free[j] })
+		if !db.closed && len(freed) >= 64 {
+			pg.discardFreePages()
+		}
 	}
 }
 
@@ -224,11 +265,7 @@ func (v view) page(id uint32) (page, error) {
 			return p, nil
 		}
 	}
-	n, err := v.db.pager.get(id)
-	if err != nil {
-		return nil, err
-	}
-	return n.data, nil
+	return v.db.pager.read(id)
 }
 
 // memGet looks a key up in the memtable view: active first, then the one

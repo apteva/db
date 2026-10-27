@@ -11,16 +11,17 @@ import (
 // leaf while its generation is unchanged; other movements descend the tree.
 // No lock is held between calls.
 type Cursor struct {
-	owned  *Snapshot
-	closed bool
-	c      *Collection
-	v      view
-	snap   []mtEntry
-	ikey   []byte // internal key of the current position
-	key    []byte // user key
-	val    []byte
-	valid  bool
-	err    error
+	owned     *Snapshot
+	closed    bool
+	c         *Collection
+	v         view
+	memStores []*memtableStorage
+	snap      []mtEntry
+	ikey      []byte // internal key of the current position
+	key       []byte // user key
+	val       []byte
+	valid     bool
+	err       error
 
 	// the leaf and slot of the tree key found last, valid while the tree
 	// generation is unchanged: a step then moves within the leaf instead
@@ -365,6 +366,8 @@ func (c *Cursor) Close() error {
 			c.owned.Close()
 			c.owned = nil
 		}
+		releaseMemtableStores(c.memStores)
+		c.memStores = nil
 		c.snap = nil
 		c.key, c.val = nil, nil
 	}

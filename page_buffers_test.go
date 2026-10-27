@@ -73,8 +73,8 @@ func testWritableBufferLifetime(t *testing.T, opts Options) {
 	if err := db.Checkpoint(); err != nil {
 		t.Fatal(err)
 	}
-	if len(db.pager.bufferArenas) != 0 || len(db.pager.oldMaps) != 0 {
-		t.Fatalf("checkpoint retained unused buffers: arenas=%d maps=%d", len(db.pager.bufferArenas), len(db.pager.oldMaps))
+	if len(db.pager.bufferArenas) != 0 {
+		t.Fatalf("checkpoint retained unused buffers: arenas=%d", len(db.pager.bufferArenas))
 	}
 	checkView(db.Find, 2)
 	if err := db.Close(); err != nil {

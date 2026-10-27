@@ -1,0 +1,127 @@
+{
+  "started_at": "2026-10-27T12:03:23.780193+00:00",
+  "n": 250000,
+  "reps": 1,
+  "readers": 10,
+  "value_bytes": 1024,
+  "resource_crud": true,
+  "read_passes": 2,
+  "scan_passes": 5,
+  "cache_mb": 64,
+  "ours_cache_mb": 64,
+  "workloads": [
+    "random"
+  ],
+  "cpu": "Apple M1 Pro",
+  "logical_cpus": "10",
+  "memory_bytes": "17179869184",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428",
+  "go": "go version go1.25.1 darwin/arm64",
+  "git_head": "65cedd31a494bb561485cfc07c3dd0aeed06be06",
+  "git_status": "M ../BENCHMARKS.md\n M ../CHANGELOG.md\n M ../README.md\n M resources.go\n M run_resources.py\n M ../checkpoint.go\n M ../collection.go\n M ../copy_builder.go\n M ../cursor.go\n M ../db.go\n M ../engine_test.go\n M ../latency_test.go\n M ../memtable.go\n M ../memtable_test.go\n M ../overflow.go\n M ../page_buffers.go\n M ../page_buffers_test.go\n M ../pager.go\n M ../scan.go\n M ../snapshot.go\n M ../wal.go\n M ../wal_buffer.go\n M ../wal_buffer_test.go\n?? report_large_cpu.py\n?? report_memory_comparison.py\n?? report_memory_final.py\n?? report_memory_followup.py\n?? report_memory_release_candidate.py\n?? resource_crud.go\n?? results/cpu-large-alpha6/\n?? results/memory-followup/\n?? results/memory-optimization/\n?? run_large_cpu.py\n?? run_memory_comparison.py\n?? summarize_large_cpu.py\n?? ../checkpoint_io.go\n?? ../checkpoint_io_test.go\n?? ../compaction_wal_test.go\n?? ../leaf_walk.go\n?? ../memory_lifetime_test.go\n?? ../memtable_buffers.go\n?? ../node_buffers.go\n?? ../pager_mapping_test.go\n?? ../pager_reclaim.go\n?? ../scan_retirement_test.go\n?? ../snapshot_recovery_test.go\n?? ../wal_boundary_test.go",
+  "binary_sha256": "157b81c8ac56b7abaf685bb18f26965710ed12fcdcaad36cbc108cd7c83151b4",
+  "baseline_binary_sha256": null,
+  "prior_binary_sha256": null,
+  "background_initial": {
+    "at": "2026-10-27T12:03:24.066753+00:00",
+    "summed_cpu_percent": 464.1,
+    "top": [
+      {
+        "pid": 50655,
+        "cpu_percent": 144.8,
+        "command": "/Users/marcoschwartz/.apteva/apps/tables/0.2.18/bin"
+      },
+      {
+        "pid": 50991,
+        "cpu_percent": 72.0,
+        "command": "/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"
+      },
+      {
+        "pid": 72547,
+        "cpu_percent": 53.8,
+        "command": "/System/Library/PrivateFrameworks/StorageManagement.framework/PlugIns/ApplicationsStorageExtension.appex/Contents/MacOS/ApplicationsStorageExtension"
+      },
+      {
+        "pid": 72522,
+        "cpu_percent": 38.9,
+        "command": "/System/Library/PrivateFrameworks/StorageManagement.framework/PlugIns/StorageManagementService"
+      },
+      {
+        "pid": 57134,
+        "cpu_percent": 22.7,
+        "command": "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python"
+      },
+      {
+        "pid": 503,
+        "cpu_percent": 21.7,
+        "command": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+      },
+      {
+        "pid": 97160,
+        "cpu_percent": 21.4,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 47209,
+        "cpu_percent": 14.2,
+        "command": "/System/Library/PrivateFrameworks/CacheDelete.framework/deleted"
+      }
+    ],
+    "swap": "vm.swapusage: total = 6144.00M  used = 5144.12M  free = 999.88M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2",
+    "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     3580.\nPages active:                                 195024.\nPages inactive:                               191801.\nPages speculative:                              2454.\nPages throttled:                                   0.\nPages wired down:                             288696.\nPages purgeable:                                   0.\n\"Translation faults\":                    48053803210.\nPages copy-on-write:                      1429936770.\nPages zero filled:                       26430785555.\nPages reactivated:                       10700216407.\nPages purged:                              515090751.\nFile-backed pages:                            144985.\nAnonymous pages:                              244295.\nPages stored in compressor:                   695962.\nPages occupied by compressor:                 325921.\nDecompressions:                          10331876720.\nCompressions:                            11376544047.\nPageins:                                  2219921161.\nPageouts:                                   13601984.\nSwapins:                                    51369164.\nSwapouts:                                   63107966."
+  },
+  "profiles": {
+    "bounded64": "64 MiB Pebble/SQLite cache setting (SQLite per connection); 64 MiB AptevaDB cache (0=default/unlimited); Pebble additionally has 64 MiB memtable",
+    "ours-default": "AptevaDB default unlimited page cache; comparison to its bounded64 setting"
+  },
+  "method": "Serial fresh subprocesses/directories; deterministic rotated trial order; retain all observations, report median/min/max. Async writes. Workload fixtures included in process RSS. No cold OS-cache claim.",
+  "finished_at": "2026-10-27T12:03:36.029425+00:00",
+  "background_final": {
+    "at": "2026-10-27T12:03:36.085337+00:00",
+    "summed_cpu_percent": 253.9,
+    "top": [
+      {
+        "pid": 50991,
+        "cpu_percent": 64.5,
+        "command": "/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"
+      },
+      {
+        "pid": 72547,
+        "cpu_percent": 60.5,
+        "command": "/System/Library/PrivateFrameworks/StorageManagement.framework/PlugIns/ApplicationsStorageExtension.appex/Contents/MacOS/ApplicationsStorageExtension"
+      },
+      {
+        "pid": 72522,
+        "cpu_percent": 27.8,
+        "command": "/System/Library/PrivateFrameworks/StorageManagement.framework/PlugIns/StorageManagementService"
+      },
+      {
+        "pid": 503,
+        "cpu_percent": 19.4,
+        "command": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+      },
+      {
+        "pid": 50655,
+        "cpu_percent": 16.9,
+        "command": "/Users/marcoschwartz/.apteva/apps/tables/0.2.18/bin"
+      },
+      {
+        "pid": 50638,
+        "cpu_percent": 10.9,
+        "command": "/Users/marcoschwartz/.apteva/bin/apteva-server"
+      },
+      {
+        "pid": 764,
+        "cpu_percent": 9.8,
+        "command": "/System/Library/ExtensionKit/Extensions/WallpaperAerialsExtension.appex/Contents/MacOS/WallpaperAerialsExtension"
+      },
+      {
+        "pid": 59719,
+        "cpu_percent": 5.5,
+        "command": "/System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService"
+      }
+    ],
+    "swap": "vm.swapusage: total = 6144.00M  used = 5144.12M  free = 999.88M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2",
+    "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    59889.\nPages active:                                 172118.\nPages inactive:                               167105.\nPages speculative:                              4149.\nPages throttled:                                   0.\nPages wired down:                             286993.\nPages purgeable:                                  60.\n\"Translation faults\":                    48054656047.\nPages copy-on-write:                      1429942422.\nPages zero filled:                       26431134900.\nPages reactivated:                       10700552117.\nPages purged:                              515098309.\nFile-backed pages:                            119990.\nAnonymous pages:                              223382.\nPages stored in compressor:                   684099.\nPages occupied by compressor:                 317227.\nDecompressions:                          10332050884.\nCompressions:                            11376730363.\nPageins:                                  2219934883.\nPageouts:                                   13602165.\nSwapins:                                    51369244.\nSwapouts:                                   63107966."
+  }
+}

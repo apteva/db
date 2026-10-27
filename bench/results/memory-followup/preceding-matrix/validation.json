@@ -1,0 +1,33 @@
+{
+  "source_stage": "October 27 final half-cache dirty-page pressure. Exact source and rebuilt original alpha.6 baseline captured in source-provenance.json.",
+  "macos_full_tests": {
+    "passed": true,
+    "command": "env GOCACHE=/private/tmp/apteva-db-go-cache go test ./... -timeout 10m",
+    "seconds": 217.152
+  },
+  "macos_targeted_race": {
+    "passed": true,
+    "seconds": 23.35,
+    "scope": "Concurrent read views during compaction reclamation; WAL in-flight growth/barrier retirement; immutable checkpoint staging/short writes; interrupted index builds/drops; cache bounds, captured descriptors, stable mappings and memtable budgets."
+  },
+  "vet": {
+    "root": true,
+    "benchmark_module": true
+  },
+  "cross_builds": {
+    "linux/arm64": true,
+    "darwin/amd64": true
+  },
+  "linux_runtime_tests": {
+    "run": false,
+    "reason": "Docker daemon unavailable; cross-build passed. Prior revision Linux checks remain in the separate prior report."
+  },
+  "no_release_published": true,
+  "method": "48 new serial interleaved fresh-process trials. Rebuilt original alpha.6 engine with identical harness, final candidate, Pebble, C SQLite; three repetitions per dataset/order. No agent tests/builds/profiling/VM during measurement. User/system background activity recorded.",
+  "earlier_data": "October 15 full 48-trial cohort retained separately. Native dirty-page batching changes are not pooled with that earlier source.",
+  "exploratory_runs": "October 27 isolated half-cache and three-quarter-cache probes are retained under 2026-10-27-tuning. Probe baseline labels are explained in each PROFILE-NOTE.json; they are not original alpha.6.",
+  "selected": false,
+  "completed_trials": 48,
+  "final_source_report": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-27-memory-release-candidate/REPORT.md",
+  "reason": "Intermediate smaller-table policy regressed ingestion. Final native code preserves prior policy and fixes WAL boundary allocation and snapshot retirement durability."
+}

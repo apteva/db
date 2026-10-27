@@ -451,8 +451,8 @@ func TestEvictionKeepsResidentBounded(t *testing.T) {
 	if st.Evictions == 0 || st.HighWaterPages < 4*limit {
 		t.Fatalf("eviction did not engage: %+v", st)
 	}
-	// allowance: eviction slack, pinned dirty pages, and internal pages (never evicted)
-	if allowed := limit + limit/16 + st.DirtyPages + st.HighWaterPages/50 + 8; st.ResidentPages > allowed {
+	// allowance: eviction slack, pinned dirty/in-flight pages, and internal pages (never evicted)
+	if allowed := limit + limit/16 + st.DirtyPages + st.InFlightPages + st.HighWaterPages/50 + 8; st.ResidentPages > allowed {
 		t.Fatalf("resident pages %d exceed limit %d (allowed %d)", st.ResidentPages, limit, allowed)
 	}
 	// updates with size changes and a scan while evicting

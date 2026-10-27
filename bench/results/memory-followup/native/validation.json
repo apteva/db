@@ -1,0 +1,48 @@
+{
+  "source_stage": "Final restored buffering policy, WAL pre-growth boundary fix, and snapshot-retirement checkpoint barrier.",
+  "macos_full_tests": {
+    "passed": true,
+    "command": "env GOCACHE=/private/tmp/apteva-db-go-cache go test ./... -timeout 10m",
+    "seconds": 246.996
+  },
+  "macos_targeted_race": {
+    "passed": true,
+    "seconds": 26.611,
+    "scope": "New snapshot recovery cases before metadata publication and during paused checkpoint I/O; snapshot isolation; WAL buffer-budget boundaries for record/raw and heap/native storage; WAL in-flight growth; capture immutability/short writes; concurrent compaction, cache bounds and mapping lifetimes."
+  },
+  "regression_proofs": {
+    "old_snapshot_recovery": "Both cases fail verification on previous code after data sync without meta publication: recovered leaf key out of range.",
+    "new_snapshot_recovery": "Both cases pass, including three repeated runs and race detector.",
+    "old_wal_boundary": "Ordinary boundary allocates 8,388,544 native bytes (or 5,251,072 heap bytes) with a 4,194,304-byte backlog bound.",
+    "new_wal_boundary": "All four record/raw \u00d7 native/heap cases stay within the bound and replay both full values correctly."
+  },
+  "vet": {
+    "root": true,
+    "benchmark_module": true
+  },
+  "cross_builds": {
+    "linux/arm64": true,
+    "darwin/amd64": true
+  },
+  "linux_runtime_tests": {
+    "run": false,
+    "reason": "Docker daemon unavailable; no Linux runtime claim for this revision."
+  },
+  "no_release_published": true,
+  "comparison_method": "36 serial fresh native fixtures: final, original alpha.6, and prior warmed memory candidate, three repetitions per dataset/order; identical harness. Competitor columns retained from separately completed preceding 48-trial October 27 matrix. Never pool intermediate native candidates.",
+  "rejected_tuning": "CacheBytes/4 memtable and larger dirty-page targets reduced some peaks but regressed ingestion; final restores prior CacheBytes/2 memtable and CacheBytes/4 dirty-page policy.",
+  "completed_competitor_source": "../2026-10-27-memory-final/cpu-summary.json",
+  "completed_final_native_trials": 36,
+  "completed_preceding_matrix_trials": 48,
+  "measured_go_source_matches_current": true,
+  "performance_gate_file": "performance-gates.json",
+  "all_metrics_target_achieved": false,
+  "additional_isolated_probe": {
+    "selected": false,
+    "corrected_trials": 6,
+    "all_fixtures_passed": true,
+    "routing_confirmed_active": true,
+    "report": "readcache-experiment/REPORT.md",
+    "main_go_sources_unchanged": true
+  }
+}

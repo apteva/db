@@ -1,0 +1,80 @@
+{
+  "base_revision": "65cedd31a494bb561485cfc07c3dd0aeed06be06",
+  "macos_full_tests": {
+    "command": "go test ./...",
+    "passed": true,
+    "seconds": 197.476,
+    "scope": "final warm-up and in-flight accounting source"
+  },
+  "macos_full_race_memory_changes": {
+    "command": "go test -race ./...",
+    "passed": true,
+    "seconds": 450.579,
+    "note": "Before subsequent WAL pin/finalization fixes; final changes also passed targeted race."
+  },
+  "macos_final_targeted_race": {
+    "passed": true,
+    "seconds": 63.778,
+    "scope": "final policy and reclamation: cache bounds, memtable ownership/hash/overflow-safe budgets, cursor storage, descriptor capture, mapping segments/reclamation, concurrent compaction"
+  },
+  "linux_full_tests": {
+    "command": "docker run golang:1.25-bookworm go test ./...",
+    "passed": true,
+    "seconds": 361.859,
+    "architecture": "linux/arm64",
+    "CI": true
+  },
+  "vet": {
+    "root": true,
+    "benchmark_module": true
+  },
+  "source_archive_sha256": "f34515498d809211827bba273406702185a2c44c6e922b0d5760b47a4dd3dfbc",
+  "candidate_sha256": "5f40089130a0064d36c8cb3ff5245f1fe5930ff15a8ffd406b464bb9b18e4e25",
+  "no_release_published": true,
+  "linux_final_targeted_tests": {
+    "passed": true,
+    "seconds": 26.412,
+    "architecture": "linux/arm64",
+    "CI": true,
+    "scope": "final policy and reclamation: cache bounds, memtable ownership/hash/budget extremes, cursor storage, descriptor capture, mapping growth/reclamation and compactions"
+  },
+  "macos_prior_policy_targeted_race": {
+    "passed": true,
+    "seconds": 295.321,
+    "scope": "two-budget writer waits and compaction/replay; before final cache sweep"
+  },
+  "repeated_cache_bound_tests": {
+    "passed": true,
+    "count": 5,
+    "seconds": 10.671
+  },
+  "diagnostic_candidates": "Earlier 16 MiB/single-burst matrix and subsequent one-trial tuning probes are separate, retained, and not pooled with these final trials.",
+  "cross_builds": {
+    "linux/amd64": true,
+    "darwin/amd64": true
+  },
+  "source_stage": "Final native warm-up and in-flight accounting correction after the four-engine matrix.",
+  "macos_final_correction_tests": {
+    "passed": true,
+    "seconds": 8.816,
+    "scope": "compaction/crash-during-compaction/backup/checksum/corruption/eviction/stable mapping/capture descriptors"
+  },
+  "macos_final_correction_race": {
+    "passed": true,
+    "seconds": 10.613,
+    "scope": "compactions/cache bounds/captured descriptors/mapping reclamation"
+  },
+  "linux_final_correction_tests": {
+    "passed": true,
+    "seconds": 32.732,
+    "repetitions": 3,
+    "architecture": "linux/arm64",
+    "CI": true,
+    "scope": "compaction/crash-during-compaction/backup/checksum/corruption/eviction/stable mapping/capture descriptors"
+  },
+  "comparison_method": "24 new native-only interleaved trials, unchanged alpha.6 versus final candidate. Comparator columns retained from separate prior 48-trial matrix. Do not pool versions/cohorts.",
+  "completed_native_trials": 24,
+  "completed_comparator_matrix_trials": 48,
+  "measured_go_source_matches_current": true,
+  "all_final_native_cpu_medians_lower_than_unchanged_build": true
+}

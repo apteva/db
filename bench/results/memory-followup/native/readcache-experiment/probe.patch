@@ -1,0 +1,99 @@
+--- selected/db.go
++++ probe/db.go
+@@ -79,6 +79,8 @@
+ 
+ // DB is a single-writer, multi-reader key-value store.
+ type DB struct {
++	probeIndex         map[string]probeLocation
++	probeGeneration    uint64
+ 	checkpointPages    []ioPage
+ 	checkpointNodes    []*node
+ 	checkpointReleased []uint32
+@@ -892,6 +894,18 @@
+ 		}
+ 		return append(dst[:0], mv...), true, nil
+ 	}
++	if v.snap == nil && db.probeIndex != nil && db.probeGeneration == db.treeGen {
++		loc, ok := db.probeIndex[string(key)]
++		if !ok {
++			return dst[:0], false, nil
++		}
++		p, err := v.page(loc.page)
++		if err != nil {
++			return dst[:0], false, err
++		}
++		out, err := v.leafValue(p, loc.slot, dst)
++		return out, err == nil, err
++	}
+ 	p, err := v.page(v.root())
+ 	if err != nil {
+ 		return dst[:0], false, err
+--- selected/checkpoint.go
++++ probe/checkpoint.go
+@@ -608,7 +608,15 @@
+ 	if err := db.compact(ctx); err != nil {
+ 		return err
+ 	}
+-	return db.trimLog()
++	if err := db.trimLog(); err != nil {
++		return err
++	}
++	db.mu.Lock()
++	defer db.mu.Unlock()
++	if db.closed {
++		return ErrClosed
++	}
++	return db.buildProbeIndex()
+ }
+ 
+ func (db *DB) compact(ctx context.Context) error {
+--- selected/readcache_probe.go
++++ probe/readcache_probe.go
+@@ -0,0 +1,35 @@
++package db
++
++import "fmt"
++
++type probeLocation struct {
++	page uint32
++	slot int
++}
++
++// Experimental complete routing map. Caller holds the writer lock.
++func (db *DB) buildProbeIndex() error {
++	m := make(map[string]probeLocation)
++	var walk leafWalk
++	v := view{db: db}
++	for {
++		p, _, err := walk.next(v, nil)
++		if err != nil {
++			return err
++		}
++		if p == nil {
++			break
++		}
++		for i := 0; i < p.numCells(); i++ {
++			m[string(p.leafKey(i))] = probeLocation{walk.id, i}
++		}
++	}
++	db.probeIndex, db.probeGeneration = m, db.treeGen
++	return nil
++}
++
++func (db *DB) ProbeStatus() string {
++	db.mu.RLock()
++	defer db.mu.RUnlock()
++	return fmt.Sprintf("keys=%d active=%v generation=%d tree=%d", len(db.probeIndex), db.probeIndex != nil && db.probeGeneration == db.treeGen, db.probeGeneration, db.treeGen)
++}
+--- selected/bench/resources.go
++++ probe/bench/resources.go
+@@ -131,6 +131,9 @@
+ 	record := func(phase string, ops int, fn func() error) {
+ 		r := measureResource(phase, ops, fn)
+ 		phases = append(phases, r)
++		if d, ok := db.(*ours); ok {
++			fmt.Fprintf(os.Stderr, "probe %s %s\n", phase, d.db.ProbeStatus())
++		}
+ 		if os.Getenv("APTEVA_RESOURCE_DIAGNOSTICS") != "" {
+ 			if d, ok := db.(*ours); ok {
+ 				fmt.Fprintf(os.Stderr, "stats %s %+v\n", phase, d.db.Stats())

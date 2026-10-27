@@ -1,0 +1,5346 @@
+[
+  {
+    "rows": 100000,
+    "value_bytes": 1024,
+    "workload": "random",
+    "engine": "ours",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.500359,
+            "wall_seconds": 0.859460709,
+            "cpu_seconds_per_million_ops": 5.00359,
+            "ops_per_second": 116352.0320973742,
+            "average_cores": 0.5821778642821006,
+            "go_allocated_bytes_per_op": 54.57792
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.519497,
+            "wall_seconds": 0.911165292,
+            "cpu_seconds_per_million_ops": 5.19497,
+            "ops_per_second": 109749.57110196863,
+            "average_cores": 0.5701457293875939,
+            "go_allocated_bytes_per_op": 54.65064
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.51278,
+            "wall_seconds": 0.8984530420000001,
+            "cpu_seconds_per_million_ops": 5.1278,
+            "ops_per_second": 111302.42241419223,
+            "average_cores": 0.5707365616554949,
+            "go_allocated_bytes_per_op": 54.60496
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.51278,
+            "min": 0.500359,
+            "max": 0.519497
+          },
+          "wall_seconds": {
+            "median": 0.8984530420000001,
+            "min": 0.859460709,
+            "max": 0.911165292
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 5.1278,
+            "min": 5.00359,
+            "max": 5.19497
+          },
+          "ops_per_second": {
+            "median": 111302.42241419223,
+            "min": 109749.57110196863,
+            "max": 116352.0320973742
+          },
+          "average_cores": {
+            "median": 0.5707365616554949,
+            "min": 0.5701457293875939,
+            "max": 0.5821778642821006
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 54.60496,
+            "min": 54.57792,
+            "max": 54.65064
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.12142799999999998,
+            "wall_seconds": 0.120950333,
+            "cpu_seconds_per_million_ops": 0.6071399999999999,
+            "ops_per_second": 1653571.30517367,
+            "average_cores": 1.003949282223142,
+            "go_allocated_bytes_per_op": 0.00536
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.123083,
+            "wall_seconds": 0.12260725,
+            "cpu_seconds_per_million_ops": 0.615415,
+            "ops_per_second": 1631224.9071731076,
+            "average_cores": 1.003880276247938,
+            "go_allocated_bytes_per_op": 0.00536
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.12948500000000002,
+            "wall_seconds": 0.129076292,
+            "cpu_seconds_per_million_ops": 0.647425,
+            "ops_per_second": 1549471.2228020928,
+            "average_cores": 1.003166406422645,
+            "go_allocated_bytes_per_op": 0.00536
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.123083,
+            "min": 0.12142799999999998,
+            "max": 0.12948500000000002
+          },
+          "wall_seconds": {
+            "median": 0.12260725,
+            "min": 0.120950333,
+            "max": 0.129076292
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.615415,
+            "min": 0.6071399999999999,
+            "max": 0.647425
+          },
+          "ops_per_second": {
+            "median": 1631224.9071731076,
+            "min": 1549471.2228020928,
+            "max": 1653571.30517367
+          },
+          "average_cores": {
+            "median": 1.003880276247938,
+            "min": 1.003166406422645,
+            "max": 1.003949282223142
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.00536,
+            "min": 0.00536,
+            "max": 0.00536
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.048207,
+            "wall_seconds": 0.048104375,
+            "cpu_seconds_per_million_ops": 0.241035,
+            "ops_per_second": 4157625.9955565375,
+            "average_cores": 1.00213338183897,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.04767799999999994,
+            "wall_seconds": 0.047565875,
+            "cpu_seconds_per_million_ops": 0.2383899999999997,
+            "ops_per_second": 4204695.067629892,
+            "average_cores": 1.0023572571722887,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.050974000000000075,
+            "wall_seconds": 0.050880084,
+            "cpu_seconds_per_million_ops": 0.2548700000000004,
+            "ops_per_second": 3930811.1205162317,
+            "average_cores": 1.0018458302859734,
+            "go_allocated_bytes_per_op": 0.0
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.048207,
+            "min": 0.04767799999999994,
+            "max": 0.050974000000000075
+          },
+          "wall_seconds": {
+            "median": 0.048104375,
+            "min": 0.047565875,
+            "max": 0.050880084
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.241035,
+            "min": 0.2383899999999997,
+            "max": 0.2548700000000004
+          },
+          "ops_per_second": {
+            "median": 4157625.9955565375,
+            "min": 3930811.1205162317,
+            "max": 4204695.067629892
+          },
+          "average_cores": {
+            "median": 1.00213338183897,
+            "min": 1.0018458302859734,
+            "max": 1.0023572571722887
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.03836800000000001,
+            "wall_seconds": 0.038121667,
+            "cpu_seconds_per_million_ops": 0.07673600000000003,
+            "ops_per_second": 13115900.729105053,
+            "average_cores": 1.0064617583486057,
+            "go_allocated_bytes_per_op": 0.594
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.03770200000000007,
+            "wall_seconds": 0.037511709,
+            "cpu_seconds_per_million_ops": 0.07540400000000014,
+            "ops_per_second": 13329171.432845144,
+            "average_cores": 1.005072842722257,
+            "go_allocated_bytes_per_op": 0.594
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.039488999999999996,
+            "wall_seconds": 0.039276833,
+            "cpu_seconds_per_million_ops": 0.07897799999999998,
+            "ops_per_second": 12730150.62085072,
+            "average_cores": 1.0054018357335481,
+            "go_allocated_bytes_per_op": 0.594
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.03836800000000001,
+            "min": 0.03770200000000007,
+            "max": 0.039488999999999996
+          },
+          "wall_seconds": {
+            "median": 0.038121667,
+            "min": 0.037511709,
+            "max": 0.039276833
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.07673600000000003,
+            "min": 0.07540400000000014,
+            "max": 0.07897799999999998
+          },
+          "ops_per_second": {
+            "median": 13115900.729105053,
+            "min": 12730150.62085072,
+            "max": 13329171.432845144
+          },
+          "average_cores": {
+            "median": 1.0054018357335481,
+            "min": 1.005072842722257,
+            "max": 1.0064617583486057
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.594,
+            "min": 0.594,
+            "max": 0.594
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.13992300000000008,
+            "wall_seconds": 0.022243333,
+            "cpu_seconds_per_million_ops": 0.6996150000000004,
+            "ops_per_second": 8991458.249534816,
+            "average_cores": 6.2905590632483035,
+            "go_allocated_bytes_per_op": 0.12304
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.14110899999999998,
+            "wall_seconds": 0.023369584,
+            "cpu_seconds_per_million_ops": 0.7055449999999999,
+            "ops_per_second": 8558132.656533381,
+            "average_cores": 6.038147705153844,
+            "go_allocated_bytes_per_op": 0.1252
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.14094699999999993,
+            "wall_seconds": 0.023160333,
+            "cpu_seconds_per_million_ops": 0.7047349999999997,
+            "ops_per_second": 8635454.421143252,
+            "average_cores": 6.085706971484388,
+            "go_allocated_bytes_per_op": 0.11176
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.14094699999999993,
+            "min": 0.13992300000000008,
+            "max": 0.14110899999999998
+          },
+          "wall_seconds": {
+            "median": 0.023160333,
+            "min": 0.022243333,
+            "max": 0.023369584
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7047349999999997,
+            "min": 0.6996150000000004,
+            "max": 0.7055449999999999
+          },
+          "ops_per_second": {
+            "median": 8635454.421143252,
+            "min": 8558132.656533381,
+            "max": 8991458.249534816
+          },
+          "average_cores": {
+            "median": 6.085706971484388,
+            "min": 6.038147705153844,
+            "max": 6.2905590632483035
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.12304,
+            "min": 0.11176,
+            "max": 0.1252
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 10000,
+            "cpu_seconds": 0.18728700000000004,
+            "wall_seconds": 0.366534084,
+            "cpu_seconds_per_million_ops": 18.728700000000003,
+            "ops_per_second": 27282.59236049655,
+            "average_cores": 0.5109674875420318,
+            "go_allocated_bytes_per_op": 58.4584
+          },
+          {
+            "repetition": 2,
+            "ops": 10000,
+            "cpu_seconds": 0.18659599999999987,
+            "wall_seconds": 0.36956725,
+            "cpu_seconds_per_million_ops": 18.659599999999987,
+            "ops_per_second": 27058.674706700876,
+            "average_cores": 0.5049040465571554,
+            "go_allocated_bytes_per_op": 58.348
+          },
+          {
+            "repetition": 3,
+            "ops": 10000,
+            "cpu_seconds": 0.196575,
+            "wall_seconds": 0.381717042,
+            "cpu_seconds_per_million_ops": 19.6575,
+            "ops_per_second": 26197.415623900804,
+            "average_cores": 0.51497569762683,
+            "go_allocated_bytes_per_op": 58.4376
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 10000,
+            "min": 10000,
+            "max": 10000
+          },
+          "cpu_seconds": {
+            "median": 0.18728700000000004,
+            "min": 0.18659599999999987,
+            "max": 0.196575
+          },
+          "wall_seconds": {
+            "median": 0.36956725,
+            "min": 0.366534084,
+            "max": 0.381717042
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 18.728700000000003,
+            "min": 18.659599999999987,
+            "max": 19.6575
+          },
+          "ops_per_second": {
+            "median": 27058.674706700876,
+            "min": 26197.415623900804,
+            "max": 27282.59236049655
+          },
+          "average_cores": {
+            "median": 0.5109674875420318,
+            "min": 0.5049040465571554,
+            "max": 0.51497569762683
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 58.4376,
+            "min": 58.348,
+            "max": 58.4584
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.28452000000000005,
+            "wall_seconds": 0.47512591699999995,
+            "cpu_seconds_per_million_ops": 2.8452000000000006,
+            "ops_per_second": 210470.52249098846,
+            "average_cores": 0.5988307305913604,
+            "go_allocated_bytes_per_op": 6.19648
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.2786460000000001,
+            "wall_seconds": 0.5327428750000001,
+            "cpu_seconds_per_million_ops": 2.7864600000000013,
+            "ops_per_second": 187707.81307962118,
+            "average_cores": 0.5230403128338414,
+            "go_allocated_bytes_per_op": 6.2
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.28479799999999994,
+            "wall_seconds": 0.488617001,
+            "cpu_seconds_per_million_ops": 2.8479799999999993,
+            "ops_per_second": 204659.27259047623,
+            "average_cores": 0.5828655151522244,
+            "go_allocated_bytes_per_op": 6.19552
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.28452000000000005,
+            "min": 0.2786460000000001,
+            "max": 0.28479799999999994
+          },
+          "wall_seconds": {
+            "median": 0.488617001,
+            "min": 0.47512591699999995,
+            "max": 0.5327428750000001
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 2.8452000000000006,
+            "min": 2.7864600000000013,
+            "max": 2.8479799999999993
+          },
+          "ops_per_second": {
+            "median": 204659.27259047623,
+            "min": 187707.81307962118,
+            "max": 210470.52249098846
+          },
+          "average_cores": {
+            "median": 0.5828655151522244,
+            "min": 0.5230403128338414,
+            "max": 0.5988307305913604
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 6.19648,
+            "min": 6.19552,
+            "max": 6.2
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 10000,
+            "cpu_seconds": 0.17828300000000008,
+            "wall_seconds": 0.327969125,
+            "cpu_seconds_per_million_ops": 17.82830000000001,
+            "ops_per_second": 30490.67499875179,
+            "average_cores": 0.5435969010802468,
+            "go_allocated_bytes_per_op": 57.2976
+          },
+          {
+            "repetition": 2,
+            "ops": 10000,
+            "cpu_seconds": 0.17435499999999993,
+            "wall_seconds": 0.347899583,
+            "cpu_seconds_per_million_ops": 17.43549999999999,
+            "ops_per_second": 28743.92637601983,
+            "average_cores": 0.5011647283290935,
+            "go_allocated_bytes_per_op": 57.424
+          },
+          {
+            "repetition": 3,
+            "ops": 10000,
+            "cpu_seconds": 0.17660599999999993,
+            "wall_seconds": 0.327574458,
+            "cpu_seconds_per_million_ops": 17.660599999999995,
+            "ops_per_second": 30527.41065666359,
+            "average_cores": 0.5391323886430728,
+            "go_allocated_bytes_per_op": 57.3424
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 10000,
+            "min": 10000,
+            "max": 10000
+          },
+          "cpu_seconds": {
+            "median": 0.17660599999999993,
+            "min": 0.17435499999999993,
+            "max": 0.17828300000000008
+          },
+          "wall_seconds": {
+            "median": 0.327969125,
+            "min": 0.327574458,
+            "max": 0.347899583
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 17.660599999999995,
+            "min": 17.43549999999999,
+            "max": 17.82830000000001
+          },
+          "ops_per_second": {
+            "median": 30490.67499875179,
+            "min": 28743.92637601983,
+            "max": 30527.41065666359
+          },
+          "average_cores": {
+            "median": 0.5391323886430728,
+            "min": 0.5011647283290935,
+            "max": 0.5435969010802468
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 57.3424,
+            "min": 57.2976,
+            "max": 57.424
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 450000,
+            "cpu_seconds": 0.035870999999999986,
+            "wall_seconds": 0.035627833,
+            "cpu_seconds_per_million_ops": 0.0797133333333333,
+            "ops_per_second": 12630574.528627662,
+            "average_cores": 1.006825197592006,
+            "go_allocated_bytes_per_op": 0.66
+          },
+          {
+            "repetition": 2,
+            "ops": 450000,
+            "cpu_seconds": 0.0348679999999999,
+            "wall_seconds": 0.034667875,
+            "cpu_seconds_per_million_ops": 0.07748444444444422,
+            "ops_per_second": 12980316.791842591,
+            "average_cores": 1.0057726353288137,
+            "go_allocated_bytes_per_op": 0.66
+          },
+          {
+            "repetition": 3,
+            "ops": 450000,
+            "cpu_seconds": 0.03427100000000005,
+            "wall_seconds": 0.034086958,
+            "cpu_seconds_per_million_ops": 0.0761577777777779,
+            "ops_per_second": 13201530.039729564,
+            "average_cores": 1.0053991910923834,
+            "go_allocated_bytes_per_op": 0.66
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 450000,
+            "min": 450000,
+            "max": 450000
+          },
+          "cpu_seconds": {
+            "median": 0.0348679999999999,
+            "min": 0.03427100000000005,
+            "max": 0.035870999999999986
+          },
+          "wall_seconds": {
+            "median": 0.034667875,
+            "min": 0.034086958,
+            "max": 0.035627833
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.07748444444444422,
+            "min": 0.0761577777777779,
+            "max": 0.0797133333333333
+          },
+          "ops_per_second": {
+            "median": 12980316.791842591,
+            "min": 12630574.528627662,
+            "max": 13201530.039729564
+          },
+          "average_cores": {
+            "median": 1.0057726353288137,
+            "min": 1.0053991910923834,
+            "max": 1.006825197592006
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.66,
+            "min": 0.66,
+            "max": 0.66
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 293617664,
+      "min": 291012608,
+      "max": 300367872
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 247006120,
+      "min": 237224848,
+      "max": 247481232
+    },
+    "disk_bytes": {
+      "median": 99075536,
+      "min": 99075536,
+      "max": 99075536
+    },
+    "fixture_rss_bytes": {
+      "median": 128761856,
+      "min": 128024576,
+      "max": 129286144
+    }
+  },
+  {
+    "rows": 100000,
+    "value_bytes": 1024,
+    "workload": "random",
+    "engine": "ours-before",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.6450819999999999,
+            "wall_seconds": 0.809271958,
+            "cpu_seconds_per_million_ops": 6.4508199999999984,
+            "ops_per_second": 123567.85504731402,
+            "average_cores": 0.7971139906963142,
+            "go_allocated_bytes_per_op": 4519.9072
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.691472,
+            "wall_seconds": 1.003029625,
+            "cpu_seconds_per_million_ops": 6.91472,
+            "ops_per_second": 99697.95259038337,
+            "average_cores": 0.6893834267357757,
+            "go_allocated_bytes_per_op": 6334.23264
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.5041910000000001,
+            "wall_seconds": 0.763123208,
+            "cpu_seconds_per_million_ops": 5.041910000000001,
+            "ops_per_second": 131040.43875441933,
+            "average_cores": 0.6606940985602944,
+            "go_allocated_bytes_per_op": 4325.6732
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.6450819999999999,
+            "min": 0.5041910000000001,
+            "max": 0.691472
+          },
+          "wall_seconds": {
+            "median": 0.809271958,
+            "min": 0.763123208,
+            "max": 1.003029625
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 6.4508199999999984,
+            "min": 5.041910000000001,
+            "max": 6.91472
+          },
+          "ops_per_second": {
+            "median": 123567.85504731402,
+            "min": 99697.95259038337,
+            "max": 131040.43875441933
+          },
+          "average_cores": {
+            "median": 0.6893834267357757,
+            "min": 0.6606940985602944,
+            "max": 0.7971139906963142
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 4519.9072,
+            "min": 4325.6732,
+            "max": 6334.23264
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.15739400000000003,
+            "wall_seconds": 0.15664,
+            "cpu_seconds_per_million_ops": 0.7869700000000002,
+            "ops_per_second": 1276813.0745658835,
+            "average_cores": 1.0048135852911135,
+            "go_allocated_bytes_per_op": 27.83352
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.14116499999999998,
+            "wall_seconds": 0.14052675,
+            "cpu_seconds_per_million_ops": 0.7058249999999998,
+            "ops_per_second": 1423216.576203463,
+            "average_cores": 1.004541839898809,
+            "go_allocated_bytes_per_op": 27.83352
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.13243900000000003,
+            "wall_seconds": 0.131958209,
+            "cpu_seconds_per_million_ops": 0.6621950000000002,
+            "ops_per_second": 1515631.3617442322,
+            "average_cores": 1.003643509590222,
+            "go_allocated_bytes_per_op": 27.83352
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.14116499999999998,
+            "min": 0.13243900000000003,
+            "max": 0.15739400000000003
+          },
+          "wall_seconds": {
+            "median": 0.14052675,
+            "min": 0.131958209,
+            "max": 0.15664
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7058249999999998,
+            "min": 0.6621950000000002,
+            "max": 0.7869700000000002
+          },
+          "ops_per_second": {
+            "median": 1423216.576203463,
+            "min": 1276813.0745658835,
+            "max": 1515631.3617442322
+          },
+          "average_cores": {
+            "median": 1.004541839898809,
+            "min": 1.003643509590222,
+            "max": 1.0048135852911135
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 27.83352,
+            "min": 27.83352,
+            "max": 27.83352
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.06371599999999994,
+            "wall_seconds": 0.063428084,
+            "cpu_seconds_per_million_ops": 0.3185799999999997,
+            "ops_per_second": 3153177.3843271066,
+            "average_cores": 1.0045392510989288,
+            "go_allocated_bytes_per_op": 24.6832
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.06421300000000008,
+            "wall_seconds": 0.059229375,
+            "cpu_seconds_per_million_ops": 0.3210650000000004,
+            "ops_per_second": 3376702.8607004546,
+            "average_cores": 1.0841411039707929,
+            "go_allocated_bytes_per_op": 24.68328
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.05493899999999996,
+            "wall_seconds": 0.054848542,
+            "cpu_seconds_per_million_ops": 0.2746949999999998,
+            "ops_per_second": 3646405.0402652454,
+            "average_cores": 1.0016492325356607,
+            "go_allocated_bytes_per_op": 24.6832
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.06371599999999994,
+            "min": 0.05493899999999996,
+            "max": 0.06421300000000008
+          },
+          "wall_seconds": {
+            "median": 0.059229375,
+            "min": 0.054848542,
+            "max": 0.063428084
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.3185799999999997,
+            "min": 0.2746949999999998,
+            "max": 0.3210650000000004
+          },
+          "ops_per_second": {
+            "median": 3376702.8607004546,
+            "min": 3153177.3843271066,
+            "max": 3646405.0402652454
+          },
+          "average_cores": {
+            "median": 1.0045392510989288,
+            "min": 1.0016492325356607,
+            "max": 1.0841411039707929
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 24.6832,
+            "min": 24.6832,
+            "max": 24.68328
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.044969999999999954,
+            "wall_seconds": 0.044710875,
+            "cpu_seconds_per_million_ops": 0.08993999999999991,
+            "ops_per_second": 11182961.639645837,
+            "average_cores": 1.0057955698697456,
+            "go_allocated_bytes_per_op": 4.685936
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.04255099999999995,
+            "wall_seconds": 0.042408417,
+            "cpu_seconds_per_million_ops": 0.0851019999999999,
+            "ops_per_second": 11790112.326050747,
+            "average_cores": 1.0033621391715695,
+            "go_allocated_bytes_per_op": 4.685936
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.04121999999999998,
+            "wall_seconds": 0.040992292,
+            "cpu_seconds_per_million_ops": 0.08243999999999996,
+            "ops_per_second": 12197415.065251779,
+            "average_cores": 1.0055548979793563,
+            "go_allocated_bytes_per_op": 4.685936
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.04255099999999995,
+            "min": 0.04121999999999998,
+            "max": 0.044969999999999954
+          },
+          "wall_seconds": {
+            "median": 0.042408417,
+            "min": 0.040992292,
+            "max": 0.044710875
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.0851019999999999,
+            "min": 0.08243999999999996,
+            "max": 0.08993999999999991
+          },
+          "ops_per_second": {
+            "median": 11790112.326050747,
+            "min": 11182961.639645837,
+            "max": 12197415.065251779
+          },
+          "average_cores": {
+            "median": 1.0055548979793563,
+            "min": 1.0033621391715695,
+            "max": 1.0057955698697456
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 4.685936,
+            "min": 4.685936,
+            "max": 4.685936
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 200000,
+            "cpu_seconds": 0.30357600000000007,
+            "wall_seconds": 0.084996459,
+            "cpu_seconds_per_million_ops": 1.5178800000000003,
+            "ops_per_second": 2353039.2013154337,
+            "average_cores": 3.5716311428926715,
+            "go_allocated_bytes_per_op": 27.75
+          },
+          {
+            "repetition": 2,
+            "ops": 200000,
+            "cpu_seconds": 0.2639369999999999,
+            "wall_seconds": 0.076037375,
+            "cpu_seconds_per_million_ops": 1.3196849999999998,
+            "ops_per_second": 2630285.4352875804,
+            "average_cores": 3.47114823466749,
+            "go_allocated_bytes_per_op": 27.72088
+          },
+          {
+            "repetition": 3,
+            "ops": 200000,
+            "cpu_seconds": 0.259824,
+            "wall_seconds": 0.076264125,
+            "cpu_seconds_per_million_ops": 1.29912,
+            "ops_per_second": 2622465.0187752103,
+            "average_cores": 3.4068967551912515,
+            "go_allocated_bytes_per_op": 27.83288
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 200000,
+            "min": 200000,
+            "max": 200000
+          },
+          "cpu_seconds": {
+            "median": 0.2639369999999999,
+            "min": 0.259824,
+            "max": 0.30357600000000007
+          },
+          "wall_seconds": {
+            "median": 0.076264125,
+            "min": 0.076037375,
+            "max": 0.084996459
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.3196849999999998,
+            "min": 1.29912,
+            "max": 1.5178800000000003
+          },
+          "ops_per_second": {
+            "median": 2622465.0187752103,
+            "min": 2353039.2013154337,
+            "max": 2630285.4352875804
+          },
+          "average_cores": {
+            "median": 3.47114823466749,
+            "min": 3.4068967551912515,
+            "max": 3.5716311428926715
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 27.75,
+            "min": 27.72088,
+            "max": 27.83288
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 10000,
+            "cpu_seconds": 0.34054300000000004,
+            "wall_seconds": 0.515881208,
+            "cpu_seconds_per_million_ops": 34.054300000000005,
+            "ops_per_second": 19384.30755942558,
+            "average_cores": 0.6601190249209465,
+            "go_allocated_bytes_per_op": 21903.3952
+          },
+          {
+            "repetition": 2,
+            "ops": 10000,
+            "cpu_seconds": 0.281798,
+            "wall_seconds": 0.429806251,
+            "cpu_seconds_per_million_ops": 28.1798,
+            "ops_per_second": 23266.297260064748,
+            "average_cores": 0.6556396035291725,
+            "go_allocated_bytes_per_op": 21902.3464
+          },
+          {
+            "repetition": 3,
+            "ops": 10000,
+            "cpu_seconds": 0.30419300000000005,
+            "wall_seconds": 0.539296292,
+            "cpu_seconds_per_million_ops": 30.419300000000007,
+            "ops_per_second": 18542.682655789522,
+            "average_cores": 0.5640554265112583,
+            "go_allocated_bytes_per_op": 21903.4576
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 10000,
+            "min": 10000,
+            "max": 10000
+          },
+          "cpu_seconds": {
+            "median": 0.30419300000000005,
+            "min": 0.281798,
+            "max": 0.34054300000000004
+          },
+          "wall_seconds": {
+            "median": 0.515881208,
+            "min": 0.429806251,
+            "max": 0.539296292
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 30.419300000000007,
+            "min": 28.1798,
+            "max": 34.054300000000005
+          },
+          "ops_per_second": {
+            "median": 19384.30755942558,
+            "min": 18542.682655789522,
+            "max": 23266.297260064748
+          },
+          "average_cores": {
+            "median": 0.6556396035291725,
+            "min": 0.5640554265112583,
+            "max": 0.6601190249209465
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 21903.3952,
+            "min": 21902.3464,
+            "max": 21903.4576
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.42150299999999974,
+            "wall_seconds": 0.6078262919999999,
+            "cpu_seconds_per_million_ops": 4.215029999999998,
+            "ops_per_second": 164520.68842063186,
+            "average_cores": 0.6934596373136156,
+            "go_allocated_bytes_per_op": 2536.87792
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.38524400000000003,
+            "wall_seconds": 0.5435391669999999,
+            "cpu_seconds_per_million_ops": 3.8524400000000005,
+            "ops_per_second": 183979.38193109093,
+            "average_cores": 0.7087695301266119,
+            "go_allocated_bytes_per_op": 2536.88792
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.3872699999999999,
+            "wall_seconds": 0.540017042,
+            "cpu_seconds_per_million_ops": 3.8726999999999987,
+            "ops_per_second": 185179.34106235113,
+            "average_cores": 0.7171440341321671,
+            "go_allocated_bytes_per_op": 2536.87344
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.3872699999999999,
+            "min": 0.38524400000000003,
+            "max": 0.42150299999999974
+          },
+          "wall_seconds": {
+            "median": 0.5435391669999999,
+            "min": 0.540017042,
+            "max": 0.6078262919999999
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 3.8726999999999987,
+            "min": 3.8524400000000005,
+            "max": 4.215029999999998
+          },
+          "ops_per_second": {
+            "median": 183979.38193109093,
+            "min": 164520.68842063186,
+            "max": 185179.34106235113
+          },
+          "average_cores": {
+            "median": 0.7087695301266119,
+            "min": 0.6934596373136156,
+            "max": 0.7171440341321671
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 2536.87792,
+            "min": 2536.87344,
+            "max": 2536.88792
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 10000,
+            "cpu_seconds": 0.295899,
+            "wall_seconds": 0.452386167,
+            "cpu_seconds_per_million_ops": 29.5899,
+            "ops_per_second": 22105.00835230004,
+            "average_cores": 0.6540849866437229,
+            "go_allocated_bytes_per_op": 19772.288
+          },
+          {
+            "repetition": 2,
+            "ops": 10000,
+            "cpu_seconds": 0.24466899999999991,
+            "wall_seconds": 0.36802433399999995,
+            "cpu_seconds_per_million_ops": 24.466899999999992,
+            "ops_per_second": 27172.11628728877,
+            "average_cores": 0.6648174519894653,
+            "go_allocated_bytes_per_op": 19772.0488
+          },
+          {
+            "repetition": 3,
+            "ops": 10000,
+            "cpu_seconds": 0.2474289999999998,
+            "wall_seconds": 0.371263,
+            "cpu_seconds_per_million_ops": 24.74289999999998,
+            "ops_per_second": 26935.083754642936,
+            "average_cores": 0.6664520838327541,
+            "go_allocated_bytes_per_op": 19772.6752
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 10000,
+            "min": 10000,
+            "max": 10000
+          },
+          "cpu_seconds": {
+            "median": 0.2474289999999998,
+            "min": 0.24466899999999991,
+            "max": 0.295899
+          },
+          "wall_seconds": {
+            "median": 0.371263,
+            "min": 0.36802433399999995,
+            "max": 0.452386167
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 24.74289999999998,
+            "min": 24.466899999999992,
+            "max": 29.5899
+          },
+          "ops_per_second": {
+            "median": 26935.083754642936,
+            "min": 22105.00835230004,
+            "max": 27172.11628728877
+          },
+          "average_cores": {
+            "median": 0.6648174519894653,
+            "min": 0.6540849866437229,
+            "max": 0.6664520838327541
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 19772.288,
+            "min": 19772.0488,
+            "max": 19772.6752
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 450000,
+            "cpu_seconds": 0.03766399999999992,
+            "wall_seconds": 0.037484125,
+            "cpu_seconds_per_million_ops": 0.0836977777777776,
+            "ops_per_second": 12005082.151444111,
+            "average_cores": 1.0047986981155335,
+            "go_allocated_bytes_per_op": 4.739822222222222
+          },
+          {
+            "repetition": 2,
+            "ops": 450000,
+            "cpu_seconds": 0.03698200000000029,
+            "wall_seconds": 0.036810584,
+            "cpu_seconds_per_million_ops": 0.08218222222222286,
+            "ops_per_second": 12224744.926622191,
+            "average_cores": 1.0046567041696566,
+            "go_allocated_bytes_per_op": 4.739822222222222
+          },
+          {
+            "repetition": 3,
+            "ops": 450000,
+            "cpu_seconds": 0.037594000000000016,
+            "wall_seconds": 0.037375417,
+            "cpu_seconds_per_million_ops": 0.08354222222222225,
+            "ops_per_second": 12039999.446695136,
+            "average_cores": 1.005848309331238,
+            "go_allocated_bytes_per_op": 4.739822222222222
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 450000,
+            "min": 450000,
+            "max": 450000
+          },
+          "cpu_seconds": {
+            "median": 0.037594000000000016,
+            "min": 0.03698200000000029,
+            "max": 0.03766399999999992
+          },
+          "wall_seconds": {
+            "median": 0.037375417,
+            "min": 0.036810584,
+            "max": 0.037484125
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.08354222222222225,
+            "min": 0.08218222222222286,
+            "max": 0.0836977777777776
+          },
+          "ops_per_second": {
+            "median": 12039999.446695136,
+            "min": 12005082.151444111,
+            "max": 12224744.926622191
+          },
+          "average_cores": {
+            "median": 1.0047986981155335,
+            "min": 1.0046567041696566,
+            "max": 1.005848309331238
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 4.739822222222222,
+            "min": 4.739822222222222,
+            "max": 4.739822222222222
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 711639040,
+      "min": 706707456,
+      "max": 762626048
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 466420840,
+      "min": 457278592,
+      "max": 521045192
+    },
+    "disk_bytes": {
+      "median": 99075536,
+      "min": 99075536,
+      "max": 99075536
+    },
+    "fixture_rss_bytes": {
+      "median": 128270336,
+      "min": 128122880,
+      "max": 128450560
+    }
+  },
+  {
+    "rows": 250000,
+    "value_bytes": 1024,
+    "workload": "random",
+    "engine": "ours",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 250000,
+            "cpu_seconds": 1.589712,
+            "wall_seconds": 2.3514824169999997,
+            "cpu_seconds_per_million_ops": 6.358848,
+            "ops_per_second": 106315.91297159166,
+            "average_cores": 0.6760467305675798,
+            "go_allocated_bytes_per_op": 27.710976
+          },
+          {
+            "repetition": 2,
+            "ops": 250000,
+            "cpu_seconds": 1.605767,
+            "wall_seconds": 2.794187418,
+            "cpu_seconds_per_million_ops": 6.423068,
+            "ops_per_second": 89471.45005002667,
+            "average_cores": 0.5746812077299247,
+            "go_allocated_bytes_per_op": 27.69104
+          },
+          {
+            "repetition": 3,
+            "ops": 250000,
+            "cpu_seconds": 1.608428,
+            "wall_seconds": 2.346898916,
+            "cpu_seconds_per_million_ops": 6.433712,
+            "ops_per_second": 106523.54828562203,
+            "average_cores": 0.6853418308877859,
+            "go_allocated_bytes_per_op": 27.701696
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 250000,
+            "min": 250000,
+            "max": 250000
+          },
+          "cpu_seconds": {
+            "median": 1.605767,
+            "min": 1.589712,
+            "max": 1.608428
+          },
+          "wall_seconds": {
+            "median": 2.3514824169999997,
+            "min": 2.346898916,
+            "max": 2.794187418
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 6.423068,
+            "min": 6.358848,
+            "max": 6.433712
+          },
+          "ops_per_second": {
+            "median": 106315.91297159166,
+            "min": 89471.45005002667,
+            "max": 106523.54828562203
+          },
+          "average_cores": {
+            "median": 0.6760467305675798,
+            "min": 0.5746812077299247,
+            "max": 0.6853418308877859
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 27.701696,
+            "min": 27.69104,
+            "max": 27.710976
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.33993799999999985,
+            "wall_seconds": 0.338696708,
+            "cpu_seconds_per_million_ops": 0.6798759999999997,
+            "ops_per_second": 1476247.002672373,
+            "average_cores": 1.003664907188882,
+            "go_allocated_bytes_per_op": 0.002144
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.32484899999999983,
+            "wall_seconds": 0.323624916,
+            "cpu_seconds_per_million_ops": 0.6496979999999997,
+            "ops_per_second": 1544998.4697717156,
+            "average_cores": 1.0037824158137436,
+            "go_allocated_bytes_per_op": 0.002144
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.3375260000000001,
+            "wall_seconds": 0.336261834,
+            "cpu_seconds_per_million_ops": 0.6750520000000002,
+            "ops_per_second": 1486936.5162625029,
+            "average_cores": 1.0037594691760354,
+            "go_allocated_bytes_per_op": 0.002144
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.3375260000000001,
+            "min": 0.32484899999999983,
+            "max": 0.33993799999999985
+          },
+          "wall_seconds": {
+            "median": 0.336261834,
+            "min": 0.323624916,
+            "max": 0.338696708
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.6750520000000002,
+            "min": 0.6496979999999997,
+            "max": 0.6798759999999997
+          },
+          "ops_per_second": {
+            "median": 1486936.5162625029,
+            "min": 1476247.002672373,
+            "max": 1544998.4697717156
+          },
+          "average_cores": {
+            "median": 1.0037594691760354,
+            "min": 1.003664907188882,
+            "max": 1.0037824158137436
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.002144,
+            "min": 0.002144,
+            "max": 0.002144
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.12934800000000013,
+            "wall_seconds": 0.129164375,
+            "cpu_seconds_per_million_ops": 0.25869600000000026,
+            "ops_per_second": 3871036.421613932,
+            "average_cores": 1.0014216381258387,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.13432300000000008,
+            "wall_seconds": 0.133952375,
+            "cpu_seconds_per_million_ops": 0.26864600000000016,
+            "ops_per_second": 3732669.9134673793,
+            "average_cores": 1.0027668415733582,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.13441500000000017,
+            "wall_seconds": 0.134150917,
+            "cpu_seconds_per_million_ops": 0.26883000000000035,
+            "ops_per_second": 3727145.599757622,
+            "average_cores": 1.0019685515828427,
+            "go_allocated_bytes_per_op": 0.0
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.13432300000000008,
+            "min": 0.12934800000000013,
+            "max": 0.13441500000000017
+          },
+          "wall_seconds": {
+            "median": 0.133952375,
+            "min": 0.129164375,
+            "max": 0.134150917
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.26864600000000016,
+            "min": 0.25869600000000026,
+            "max": 0.26883000000000035
+          },
+          "ops_per_second": {
+            "median": 3732669.9134673793,
+            "min": 3727145.599757622,
+            "max": 3871036.421613932
+          },
+          "average_cores": {
+            "median": 1.0019685515828427,
+            "min": 1.0014216381258387,
+            "max": 1.0027668415733582
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1250000,
+            "cpu_seconds": 0.09503800000000007,
+            "wall_seconds": 0.094564125,
+            "cpu_seconds_per_million_ops": 0.07603040000000005,
+            "ops_per_second": 13218543.501565736,
+            "average_cores": 1.0050111498414442,
+            "go_allocated_bytes_per_op": 0.2376
+          },
+          {
+            "repetition": 2,
+            "ops": 1250000,
+            "cpu_seconds": 0.09338900000000017,
+            "wall_seconds": 0.092901666,
+            "cpu_seconds_per_million_ops": 0.07471120000000013,
+            "ops_per_second": 13455087.01641583,
+            "average_cores": 1.0052456971008483,
+            "go_allocated_bytes_per_op": 0.2376
+          },
+          {
+            "repetition": 3,
+            "ops": 1250000,
+            "cpu_seconds": 0.09418600000000033,
+            "wall_seconds": 0.093693209,
+            "cpu_seconds_per_million_ops": 0.07534880000000026,
+            "ops_per_second": 13341415.171295926,
+            "average_cores": 1.005259623458946,
+            "go_allocated_bytes_per_op": 0.2376
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1250000,
+            "min": 1250000,
+            "max": 1250000
+          },
+          "cpu_seconds": {
+            "median": 0.09418600000000033,
+            "min": 0.09338900000000017,
+            "max": 0.09503800000000007
+          },
+          "wall_seconds": {
+            "median": 0.093693209,
+            "min": 0.092901666,
+            "max": 0.094564125
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.07534880000000026,
+            "min": 0.07471120000000013,
+            "max": 0.07603040000000005
+          },
+          "ops_per_second": {
+            "median": 13341415.171295926,
+            "min": 13218543.501565736,
+            "max": 13455087.01641583
+          },
+          "average_cores": {
+            "median": 1.0052456971008483,
+            "min": 1.0050111498414442,
+            "max": 1.005259623458946
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.2376,
+            "min": 0.2376,
+            "max": 0.2376
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.37563100000000016,
+            "wall_seconds": 0.058374083,
+            "cpu_seconds_per_million_ops": 0.7512620000000003,
+            "ops_per_second": 8565445.045192402,
+            "average_cores": 6.4348933755413364,
+            "go_allocated_bytes_per_op": 0.047456
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.3941779999999998,
+            "wall_seconds": 0.053112,
+            "cpu_seconds_per_million_ops": 0.7883559999999996,
+            "ops_per_second": 9414068.38379274,
+            "average_cores": 7.421637294773306,
+            "go_allocated_bytes_per_op": 0.044576
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.40464900000000004,
+            "wall_seconds": 0.046376333,
+            "cpu_seconds_per_million_ops": 0.8092980000000001,
+            "ops_per_second": 10781361.260279031,
+            "average_cores": 8.7253341052213,
+            "go_allocated_bytes_per_op": 0.048288
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.3941779999999998,
+            "min": 0.37563100000000016,
+            "max": 0.40464900000000004
+          },
+          "wall_seconds": {
+            "median": 0.053112,
+            "min": 0.046376333,
+            "max": 0.058374083
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7883559999999996,
+            "min": 0.7512620000000003,
+            "max": 0.8092980000000001
+          },
+          "ops_per_second": {
+            "median": 9414068.38379274,
+            "min": 8565445.045192402,
+            "max": 10781361.260279031
+          },
+          "average_cores": {
+            "median": 7.421637294773306,
+            "min": 6.4348933755413364,
+            "max": 8.7253341052213
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.047456,
+            "min": 0.044576,
+            "max": 0.048288
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 25000,
+            "cpu_seconds": 0.44928800000000013,
+            "wall_seconds": 0.771521041,
+            "cpu_seconds_per_million_ops": 17.971520000000005,
+            "ops_per_second": 32403.52326308104,
+            "average_cores": 0.5823405663929263,
+            "go_allocated_bytes_per_op": 43.8512
+          },
+          {
+            "repetition": 2,
+            "ops": 25000,
+            "cpu_seconds": 0.45660100000000015,
+            "wall_seconds": 0.8293265000000001,
+            "cpu_seconds_per_million_ops": 18.26404000000001,
+            "ops_per_second": 30144.942914521598,
+            "average_cores": 0.5505684431885393,
+            "go_allocated_bytes_per_op": 43.82752
+          },
+          {
+            "repetition": 3,
+            "ops": 25000,
+            "cpu_seconds": 0.4625809999999998,
+            "wall_seconds": 0.8064847500000001,
+            "cpu_seconds_per_million_ops": 18.503239999999995,
+            "ops_per_second": 30998.726262337877,
+            "average_cores": 0.5735768717263404,
+            "go_allocated_bytes_per_op": 43.79936
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 25000,
+            "min": 25000,
+            "max": 25000
+          },
+          "cpu_seconds": {
+            "median": 0.45660100000000015,
+            "min": 0.44928800000000013,
+            "max": 0.4625809999999998
+          },
+          "wall_seconds": {
+            "median": 0.8064847500000001,
+            "min": 0.771521041,
+            "max": 0.8293265000000001
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 18.26404000000001,
+            "min": 17.971520000000005,
+            "max": 18.503239999999995
+          },
+          "ops_per_second": {
+            "median": 30998.726262337877,
+            "min": 30144.942914521598,
+            "max": 32403.52326308104
+          },
+          "average_cores": {
+            "median": 0.5735768717263404,
+            "min": 0.5505684431885393,
+            "max": 0.5823405663929263
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 43.82752,
+            "min": 43.79936,
+            "max": 43.8512
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 250000,
+            "cpu_seconds": 0.9010069999999997,
+            "wall_seconds": 1.311215458,
+            "cpu_seconds_per_million_ops": 3.6040279999999987,
+            "ops_per_second": 190662.79189640243,
+            "average_cores": 0.6871540405528073,
+            "go_allocated_bytes_per_op": 5.313664
+          },
+          {
+            "repetition": 2,
+            "ops": 250000,
+            "cpu_seconds": 0.9008920000000002,
+            "wall_seconds": 1.383323791,
+            "cpu_seconds_per_million_ops": 3.603568000000001,
+            "ops_per_second": 180724.13821443485,
+            "average_cores": 0.6512517212971147,
+            "go_allocated_bytes_per_op": 5.30576
+          },
+          {
+            "repetition": 3,
+            "ops": 250000,
+            "cpu_seconds": 0.9022169999999996,
+            "wall_seconds": 1.3203639159999998,
+            "cpu_seconds_per_million_ops": 3.6088679999999984,
+            "ops_per_second": 189341.7390240162,
+            "average_cores": 0.683309343028123,
+            "go_allocated_bytes_per_op": 5.266144
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 250000,
+            "min": 250000,
+            "max": 250000
+          },
+          "cpu_seconds": {
+            "median": 0.9010069999999997,
+            "min": 0.9008920000000002,
+            "max": 0.9022169999999996
+          },
+          "wall_seconds": {
+            "median": 1.3203639159999998,
+            "min": 1.311215458,
+            "max": 1.383323791
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 3.6040279999999987,
+            "min": 3.603568000000001,
+            "max": 3.6088679999999984
+          },
+          "ops_per_second": {
+            "median": 189341.7390240162,
+            "min": 180724.13821443485,
+            "max": 190662.79189640243
+          },
+          "average_cores": {
+            "median": 0.683309343028123,
+            "min": 0.6512517212971147,
+            "max": 0.6871540405528073
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 5.30576,
+            "min": 5.266144,
+            "max": 5.313664
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 25000,
+            "cpu_seconds": 0.4005989999999999,
+            "wall_seconds": 0.693995334,
+            "cpu_seconds_per_million_ops": 16.02396,
+            "ops_per_second": 36023.29695202244,
+            "average_cores": 0.5772358694273295,
+            "go_allocated_bytes_per_op": 43.49952
+          },
+          {
+            "repetition": 2,
+            "ops": 25000,
+            "cpu_seconds": 0.40428499999999934,
+            "wall_seconds": 0.7195545,
+            "cpu_seconds_per_million_ops": 16.171399999999974,
+            "ops_per_second": 34743.71989890967,
+            "average_cores": 0.561854591973227,
+            "go_allocated_bytes_per_op": 43.48352
+          },
+          {
+            "repetition": 3,
+            "ops": 25000,
+            "cpu_seconds": 0.41686699999999965,
+            "wall_seconds": 0.711547416,
+            "cpu_seconds_per_million_ops": 16.674679999999984,
+            "ops_per_second": 35134.692977368635,
+            "average_cores": 0.5858597622958688,
+            "go_allocated_bytes_per_op": 43.47712
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 25000,
+            "min": 25000,
+            "max": 25000
+          },
+          "cpu_seconds": {
+            "median": 0.40428499999999934,
+            "min": 0.4005989999999999,
+            "max": 0.41686699999999965
+          },
+          "wall_seconds": {
+            "median": 0.711547416,
+            "min": 0.693995334,
+            "max": 0.7195545
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 16.171399999999974,
+            "min": 16.02396,
+            "max": 16.674679999999984
+          },
+          "ops_per_second": {
+            "median": 35134.692977368635,
+            "min": 34743.71989890967,
+            "max": 36023.29695202244
+          },
+          "average_cores": {
+            "median": 0.5772358694273295,
+            "min": 0.561854591973227,
+            "max": 0.5858597622958688
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 43.48352,
+            "min": 43.47712,
+            "max": 43.49952
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1125000,
+            "cpu_seconds": 0.08580999999999972,
+            "wall_seconds": 0.085323875,
+            "cpu_seconds_per_million_ops": 0.0762755555555553,
+            "ops_per_second": 13185055.179455927,
+            "average_cores": 1.0056974088436528,
+            "go_allocated_bytes_per_op": 0.264
+          },
+          {
+            "repetition": 2,
+            "ops": 1125000,
+            "cpu_seconds": 0.08519199999999993,
+            "wall_seconds": 0.084714042,
+            "cpu_seconds_per_million_ops": 0.07572622222222215,
+            "ops_per_second": 13279970.751484152,
+            "average_cores": 1.0056420162314994,
+            "go_allocated_bytes_per_op": 0.264
+          },
+          {
+            "repetition": 3,
+            "ops": 1125000,
+            "cpu_seconds": 0.08699499999999993,
+            "wall_seconds": 0.08654725,
+            "cpu_seconds_per_million_ops": 0.07732888888888882,
+            "ops_per_second": 12998679.911840063,
+            "average_cores": 1.0051734746049115,
+            "go_allocated_bytes_per_op": 0.264
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1125000,
+            "min": 1125000,
+            "max": 1125000
+          },
+          "cpu_seconds": {
+            "median": 0.08580999999999972,
+            "min": 0.08519199999999993,
+            "max": 0.08699499999999993
+          },
+          "wall_seconds": {
+            "median": 0.085323875,
+            "min": 0.084714042,
+            "max": 0.08654725
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.0762755555555553,
+            "min": 0.07572622222222215,
+            "max": 0.07732888888888882
+          },
+          "ops_per_second": {
+            "median": 13185055.179455927,
+            "min": 12998679.911840063,
+            "max": 13279970.751484152
+          },
+          "average_cores": {
+            "median": 1.0056420162314994,
+            "min": 1.0051734746049115,
+            "max": 1.0056974088436528
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.264,
+            "min": 0.264,
+            "max": 0.264
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 657637376,
+      "min": 654016512,
+      "max": 669171712
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 451282096,
+      "min": 447612104,
+      "max": 462554312
+    },
+    "disk_bytes": {
+      "median": 247574128,
+      "min": 247574128,
+      "max": 247574128
+    },
+    "fixture_rss_bytes": {
+      "median": 288587776,
+      "min": 288473088,
+      "max": 289161216
+    }
+  },
+  {
+    "rows": 250000,
+    "value_bytes": 1024,
+    "workload": "random",
+    "engine": "ours-before",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 250000,
+            "cpu_seconds": 2.124605,
+            "wall_seconds": 2.376379583,
+            "cpu_seconds_per_million_ops": 8.49842,
+            "ops_per_second": 105202.04843890885,
+            "average_cores": 0.8940511924941917,
+            "go_allocated_bytes_per_op": 6872.281408
+          },
+          {
+            "repetition": 2,
+            "ops": 250000,
+            "cpu_seconds": 1.924449,
+            "wall_seconds": 2.193206626,
+            "cpu_seconds_per_million_ops": 7.697796,
+            "ops_per_second": 113988.34794510603,
+            "average_cores": 0.8774590488584454,
+            "go_allocated_bytes_per_op": 5558.97552
+          },
+          {
+            "repetition": 3,
+            "ops": 250000,
+            "cpu_seconds": 1.9409330000000002,
+            "wall_seconds": 2.249007416,
+            "cpu_seconds_per_million_ops": 7.763732000000001,
+            "ops_per_second": 111160.14923803168,
+            "average_cores": 0.8630176077640823,
+            "go_allocated_bytes_per_op": 6081.418656
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 250000,
+            "min": 250000,
+            "max": 250000
+          },
+          "cpu_seconds": {
+            "median": 1.9409330000000002,
+            "min": 1.924449,
+            "max": 2.124605
+          },
+          "wall_seconds": {
+            "median": 2.249007416,
+            "min": 2.193206626,
+            "max": 2.376379583
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 7.763732000000001,
+            "min": 7.697796,
+            "max": 8.49842
+          },
+          "ops_per_second": {
+            "median": 111160.14923803168,
+            "min": 105202.04843890885,
+            "max": 113988.34794510603
+          },
+          "average_cores": {
+            "median": 0.8774590488584454,
+            "min": 0.8630176077640823,
+            "max": 0.8940511924941917
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 6081.418656,
+            "min": 5558.97552,
+            "max": 6872.281408
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.41266800000000026,
+            "wall_seconds": 0.410890209,
+            "cpu_seconds_per_million_ops": 0.8253360000000005,
+            "ops_per_second": 1216870.0763565772,
+            "average_cores": 1.0043266813398326,
+            "go_allocated_bytes_per_op": 49.987168
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.37633899999999987,
+            "wall_seconds": 0.374811458,
+            "cpu_seconds_per_million_ops": 0.7526779999999997,
+            "ops_per_second": 1334004.0421069518,
+            "average_cores": 1.004075494404976,
+            "go_allocated_bytes_per_op": 49.987168
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.3848050000000002,
+            "wall_seconds": 0.374853292,
+            "cpu_seconds_per_million_ops": 0.7696100000000003,
+            "ops_per_second": 1333855.165929822,
+            "average_cores": 1.0265482742512508,
+            "go_allocated_bytes_per_op": 49.987168
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.3848050000000002,
+            "min": 0.37633899999999987,
+            "max": 0.41266800000000026
+          },
+          "wall_seconds": {
+            "median": 0.374853292,
+            "min": 0.374811458,
+            "max": 0.410890209
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7696100000000003,
+            "min": 0.7526779999999997,
+            "max": 0.8253360000000005
+          },
+          "ops_per_second": {
+            "median": 1333855.165929822,
+            "min": 1216870.0763565772,
+            "max": 1334004.0421069518
+          },
+          "average_cores": {
+            "median": 1.0043266813398326,
+            "min": 1.004075494404976,
+            "max": 1.0265482742512508
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 49.987168,
+            "min": 49.987168,
+            "max": 49.987168
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.18605899999999997,
+            "wall_seconds": 0.178052125,
+            "cpu_seconds_per_million_ops": 0.37211799999999995,
+            "ops_per_second": 2808166.4287915686,
+            "average_cores": 1.044969275149061,
+            "go_allocated_bytes_per_op": 48.161344
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.17894900000000014,
+            "wall_seconds": 0.178495875,
+            "cpu_seconds_per_million_ops": 0.35789800000000027,
+            "ops_per_second": 2801185.1814502715,
+            "average_cores": 1.00253857407069,
+            "go_allocated_bytes_per_op": 48.161152
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.17440100000000003,
+            "wall_seconds": 0.174137709,
+            "cpu_seconds_per_million_ops": 0.34880200000000006,
+            "ops_per_second": 2871290.789750771,
+            "average_cores": 1.0015119700466486,
+            "go_allocated_bytes_per_op": 48.161152
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.17894900000000014,
+            "min": 0.17440100000000003,
+            "max": 0.18605899999999997
+          },
+          "wall_seconds": {
+            "median": 0.178052125,
+            "min": 0.174137709,
+            "max": 0.178495875
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.35789800000000027,
+            "min": 0.34880200000000006,
+            "max": 0.37211799999999995
+          },
+          "ops_per_second": {
+            "median": 2808166.4287915686,
+            "min": 2801185.1814502715,
+            "max": 2871290.789750771
+          },
+          "average_cores": {
+            "median": 1.00253857407069,
+            "min": 1.0015119700466486,
+            "max": 1.044969275149061
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 48.161152,
+            "min": 48.161152,
+            "max": 48.161344
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1250000,
+            "cpu_seconds": 0.10422600000000015,
+            "wall_seconds": 0.103744125,
+            "cpu_seconds_per_million_ops": 0.08338080000000012,
+            "ops_per_second": 12048875.056780323,
+            "average_cores": 1.0046448413343902,
+            "go_allocated_bytes_per_op": 4.477536
+          },
+          {
+            "repetition": 2,
+            "ops": 1250000,
+            "cpu_seconds": 0.10690900000000014,
+            "wall_seconds": 0.106330333,
+            "cpu_seconds_per_million_ops": 0.08552720000000012,
+            "ops_per_second": 11755817.599104105,
+            "average_cores": 1.005442162962098,
+            "go_allocated_bytes_per_op": 4.477536
+          },
+          {
+            "repetition": 3,
+            "ops": 1250000,
+            "cpu_seconds": 0.10651100000000002,
+            "wall_seconds": 0.105951917,
+            "cpu_seconds_per_million_ops": 0.08520880000000003,
+            "ops_per_second": 11797804.470116382,
+            "average_cores": 1.005276761533253,
+            "go_allocated_bytes_per_op": 4.477536
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1250000,
+            "min": 1250000,
+            "max": 1250000
+          },
+          "cpu_seconds": {
+            "median": 0.10651100000000002,
+            "min": 0.10422600000000015,
+            "max": 0.10690900000000014
+          },
+          "wall_seconds": {
+            "median": 0.105951917,
+            "min": 0.103744125,
+            "max": 0.106330333
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.08520880000000003,
+            "min": 0.08338080000000012,
+            "max": 0.08552720000000012
+          },
+          "ops_per_second": {
+            "median": 11797804.470116382,
+            "min": 11755817.599104105,
+            "max": 12048875.056780323
+          },
+          "average_cores": {
+            "median": 1.005276761533253,
+            "min": 1.0046448413343902,
+            "max": 1.005442162962098
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 4.477536,
+            "min": 4.477536,
+            "max": 4.477536
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 500000,
+            "cpu_seconds": 0.951149,
+            "wall_seconds": 0.286715083,
+            "cpu_seconds_per_million_ops": 1.902298,
+            "ops_per_second": 1743891.5133739233,
+            "average_cores": 3.3174013381081875,
+            "go_allocated_bytes_per_op": 49.971872
+          },
+          {
+            "repetition": 2,
+            "ops": 500000,
+            "cpu_seconds": 0.8628600000000002,
+            "wall_seconds": 0.271384041,
+            "cpu_seconds_per_million_ops": 1.7257200000000004,
+            "ops_per_second": 1842407.5275671792,
+            "average_cores": 3.179479518473233,
+            "go_allocated_bytes_per_op": 49.96592
+          },
+          {
+            "repetition": 3,
+            "ops": 500000,
+            "cpu_seconds": 0.8849560000000001,
+            "wall_seconds": 0.276186125,
+            "cpu_seconds_per_million_ops": 1.7699120000000002,
+            "ops_per_second": 1810373.3487697833,
+            "average_cores": 3.204201514467825,
+            "go_allocated_bytes_per_op": 49.946912
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 500000,
+            "min": 500000,
+            "max": 500000
+          },
+          "cpu_seconds": {
+            "median": 0.8849560000000001,
+            "min": 0.8628600000000002,
+            "max": 0.951149
+          },
+          "wall_seconds": {
+            "median": 0.276186125,
+            "min": 0.271384041,
+            "max": 0.286715083
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.7699120000000002,
+            "min": 1.7257200000000004,
+            "max": 1.902298
+          },
+          "ops_per_second": {
+            "median": 1810373.3487697833,
+            "min": 1743891.5133739233,
+            "max": 1842407.5275671792
+          },
+          "average_cores": {
+            "median": 3.204201514467825,
+            "min": 3.179479518473233,
+            "max": 3.3174013381081875
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 49.96592,
+            "min": 49.946912,
+            "max": 49.971872
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 25000,
+            "cpu_seconds": 0.8952830000000003,
+            "wall_seconds": 1.128192417,
+            "cpu_seconds_per_million_ops": 35.81132000000001,
+            "ops_per_second": 22159.34057284131,
+            "average_cores": 0.7935552362430037,
+            "go_allocated_bytes_per_op": 21628.98528
+          },
+          {
+            "repetition": 2,
+            "ops": 25000,
+            "cpu_seconds": 0.9159339999999998,
+            "wall_seconds": 1.1614125830000002,
+            "cpu_seconds_per_million_ops": 36.637359999999994,
+            "ops_per_second": 21525.51157610456,
+            "average_cores": 0.78863791679791,
+            "go_allocated_bytes_per_op": 21629.06112
+          },
+          {
+            "repetition": 3,
+            "ops": 25000,
+            "cpu_seconds": 0.879497,
+            "wall_seconds": 1.1327745,
+            "cpu_seconds_per_million_ops": 35.17988,
+            "ops_per_second": 22069.705841718718,
+            "average_cores": 0.7764096031469635,
+            "go_allocated_bytes_per_op": 21628.93088
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 25000,
+            "min": 25000,
+            "max": 25000
+          },
+          "cpu_seconds": {
+            "median": 0.8952830000000003,
+            "min": 0.879497,
+            "max": 0.9159339999999998
+          },
+          "wall_seconds": {
+            "median": 1.1327745,
+            "min": 1.128192417,
+            "max": 1.1614125830000002
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 35.81132000000001,
+            "min": 35.17988,
+            "max": 36.637359999999994
+          },
+          "ops_per_second": {
+            "median": 22069.705841718718,
+            "min": 21525.51157610456,
+            "max": 22159.34057284131
+          },
+          "average_cores": {
+            "median": 0.78863791679791,
+            "min": 0.7764096031469635,
+            "max": 0.7935552362430037
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 21628.98528,
+            "min": 21628.93088,
+            "max": 21629.06112
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 250000,
+            "cpu_seconds": 1.375496,
+            "wall_seconds": 1.628583167,
+            "cpu_seconds_per_million_ops": 5.501984,
+            "ops_per_second": 153507.6654761961,
+            "average_cores": 0.8445967193273833,
+            "go_allocated_bytes_per_op": 3181.42304
+          },
+          {
+            "repetition": 2,
+            "ops": 250000,
+            "cpu_seconds": 1.3437259999999993,
+            "wall_seconds": 1.601464542,
+            "cpu_seconds_per_million_ops": 5.374903999999997,
+            "ops_per_second": 156107.10911387758,
+            "average_cores": 0.8390607252046167,
+            "go_allocated_bytes_per_op": 3181.538048
+          },
+          {
+            "repetition": 3,
+            "ops": 250000,
+            "cpu_seconds": 1.3430870000000006,
+            "wall_seconds": 1.658316041,
+            "cpu_seconds_per_million_ops": 5.372348000000003,
+            "ops_per_second": 150755.34085121957,
+            "average_cores": 0.8099101539113681,
+            "go_allocated_bytes_per_op": 3180.097568
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 250000,
+            "min": 250000,
+            "max": 250000
+          },
+          "cpu_seconds": {
+            "median": 1.3437259999999993,
+            "min": 1.3430870000000006,
+            "max": 1.375496
+          },
+          "wall_seconds": {
+            "median": 1.628583167,
+            "min": 1.601464542,
+            "max": 1.658316041
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 5.374903999999997,
+            "min": 5.372348000000003,
+            "max": 5.501984
+          },
+          "ops_per_second": {
+            "median": 153507.6654761961,
+            "min": 150755.34085121957,
+            "max": 156107.10911387758
+          },
+          "average_cores": {
+            "median": 0.8390607252046167,
+            "min": 0.8099101539113681,
+            "max": 0.8445967193273833
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 3181.42304,
+            "min": 3180.097568,
+            "max": 3181.538048
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 25000,
+            "cpu_seconds": 0.7935740000000004,
+            "wall_seconds": 1.107525417,
+            "cpu_seconds_per_million_ops": 31.742960000000018,
+            "ops_per_second": 22572.845386897337,
+            "average_cores": 0.7165289282024672,
+            "go_allocated_bytes_per_op": 19502.61952
+          },
+          {
+            "repetition": 2,
+            "ops": 25000,
+            "cpu_seconds": 0.7703160000000009,
+            "wall_seconds": 0.9902663749999999,
+            "cpu_seconds_per_million_ops": 30.812640000000037,
+            "ops_per_second": 25245.73249293656,
+            "average_cores": 0.7778876668411577,
+            "go_allocated_bytes_per_op": 19502.56672
+          },
+          {
+            "repetition": 3,
+            "ops": 25000,
+            "cpu_seconds": 0.7908999999999999,
+            "wall_seconds": 1.024916751,
+            "cpu_seconds_per_million_ops": 31.635999999999996,
+            "ops_per_second": 24392.225003257852,
+            "average_cores": 0.7716724302030653,
+            "go_allocated_bytes_per_op": 19502.50048
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 25000,
+            "min": 25000,
+            "max": 25000
+          },
+          "cpu_seconds": {
+            "median": 0.7908999999999999,
+            "min": 0.7703160000000009,
+            "max": 0.7935740000000004
+          },
+          "wall_seconds": {
+            "median": 1.024916751,
+            "min": 0.9902663749999999,
+            "max": 1.107525417
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 31.635999999999996,
+            "min": 30.812640000000037,
+            "max": 31.742960000000018
+          },
+          "ops_per_second": {
+            "median": 24392.225003257852,
+            "min": 22572.845386897337,
+            "max": 25245.73249293656
+          },
+          "average_cores": {
+            "median": 0.7716724302030653,
+            "min": 0.7165289282024672,
+            "max": 0.7778876668411577
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 19502.56672,
+            "min": 19502.50048,
+            "max": 19502.61952
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1125000,
+            "cpu_seconds": 0.09337900000000054,
+            "wall_seconds": 0.092871,
+            "cpu_seconds_per_million_ops": 0.08300355555555604,
+            "ops_per_second": 12113576.896986142,
+            "average_cores": 1.0054699529454894,
+            "go_allocated_bytes_per_op": 4.500586666666667
+          },
+          {
+            "repetition": 2,
+            "ops": 1125000,
+            "cpu_seconds": 0.09355199999999941,
+            "wall_seconds": 0.09304,
+            "cpu_seconds_per_million_ops": 0.08315733333333282,
+            "ops_per_second": 12091573.516766982,
+            "average_cores": 1.0055030094582913,
+            "go_allocated_bytes_per_op": 4.500586666666667
+          },
+          {
+            "repetition": 3,
+            "ops": 1125000,
+            "cpu_seconds": 0.09464299999999959,
+            "wall_seconds": 0.094158916,
+            "cpu_seconds_per_million_ops": 0.08412711111111075,
+            "ops_per_second": 11947886.061050236,
+            "average_cores": 1.0051411382008646,
+            "go_allocated_bytes_per_op": 4.500586666666667
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1125000,
+            "min": 1125000,
+            "max": 1125000
+          },
+          "cpu_seconds": {
+            "median": 0.09355199999999941,
+            "min": 0.09337900000000054,
+            "max": 0.09464299999999959
+          },
+          "wall_seconds": {
+            "median": 0.09304,
+            "min": 0.092871,
+            "max": 0.094158916
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.08315733333333282,
+            "min": 0.08300355555555604,
+            "max": 0.08412711111111075
+          },
+          "ops_per_second": {
+            "median": 12091573.516766982,
+            "min": 11947886.061050236,
+            "max": 12113576.896986142
+          },
+          "average_cores": {
+            "median": 1.0054699529454894,
+            "min": 1.0051411382008646,
+            "max": 1.0055030094582913
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 4.500586666666667,
+            "min": 4.500586666666667,
+            "max": 4.500586666666667
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 1660338176,
+      "min": 1651933184,
+      "max": 1821081600
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 1107429032,
+      "min": 1040123608,
+      "max": 1293977424
+    },
+    "disk_bytes": {
+      "median": 247574128,
+      "min": 247574128,
+      "max": 247574128
+    },
+    "fixture_rss_bytes": {
+      "median": 288112640,
+      "min": 287686656,
+      "max": 288276480
+    }
+  },
+  {
+    "rows": 1000000,
+    "value_bytes": 100,
+    "workload": "random",
+    "engine": "ours",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.7375630000000002,
+            "wall_seconds": 1.958020001,
+            "cpu_seconds_per_million_ops": 1.7375630000000002,
+            "ops_per_second": 510720.0128135974,
+            "average_cores": 0.8874081976244329,
+            "go_allocated_bytes_per_op": 7.938712
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.7438719999999999,
+            "wall_seconds": 2.028779418,
+            "cpu_seconds_per_million_ops": 1.7438719999999999,
+            "ops_per_second": 492907.20870276494,
+            "average_cores": 0.859567079854908,
+            "go_allocated_bytes_per_op": 7.911296
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.710635,
+            "wall_seconds": 1.973221834,
+            "cpu_seconds_per_million_ops": 1.710635,
+            "ops_per_second": 506785.3916722878,
+            "average_cores": 0.8669248284833239,
+            "go_allocated_bytes_per_op": 7.914672
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.7375630000000002,
+            "min": 1.710635,
+            "max": 1.7438719999999999
+          },
+          "wall_seconds": {
+            "median": 1.973221834,
+            "min": 1.958020001,
+            "max": 2.028779418
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.7375630000000002,
+            "min": 1.710635,
+            "max": 1.7438719999999999
+          },
+          "ops_per_second": {
+            "median": 506785.3916722878,
+            "min": 492907.20870276494,
+            "max": 510720.0128135974
+          },
+          "average_cores": {
+            "median": 0.8669248284833239,
+            "min": 0.859567079854908,
+            "max": 0.8874081976244329
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 7.914672,
+            "min": 7.911296,
+            "max": 7.938712
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.230539,
+            "wall_seconds": 1.226439166,
+            "cpu_seconds_per_million_ops": 0.6152695,
+            "ops_per_second": 1630737.2232109553,
+            "average_cores": 1.003342875956393,
+            "go_allocated_bytes_per_op": 8e-05
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.254457,
+            "wall_seconds": 1.2506551670000001,
+            "cpu_seconds_per_million_ops": 0.6272285,
+            "ops_per_second": 1599161.8255553888,
+            "average_cores": 1.0030398731003682,
+            "go_allocated_bytes_per_op": 8e-05
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.2688420000000002,
+            "wall_seconds": 1.265085666,
+            "cpu_seconds_per_million_ops": 0.6344210000000001,
+            "ops_per_second": 1580920.6077906822,
+            "average_cores": 1.0029692329151725,
+            "go_allocated_bytes_per_op": 8e-05
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.254457,
+            "min": 1.230539,
+            "max": 1.2688420000000002
+          },
+          "wall_seconds": {
+            "median": 1.2506551670000001,
+            "min": 1.226439166,
+            "max": 1.265085666
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.6272285,
+            "min": 0.6152695,
+            "max": 0.6344210000000001
+          },
+          "ops_per_second": {
+            "median": 1599161.8255553888,
+            "min": 1580920.6077906822,
+            "max": 1630737.2232109553
+          },
+          "average_cores": {
+            "median": 1.0030398731003682,
+            "min": 1.0029692329151725,
+            "max": 1.003342875956393
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 8e-05,
+            "min": 8e-05,
+            "max": 8e-05
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 0.6702319999999998,
+            "wall_seconds": 0.668826084,
+            "cpu_seconds_per_million_ops": 0.33511599999999997,
+            "ops_per_second": 2990313.9961867877,
+            "average_cores": 1.0021020651461312,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 0.673988,
+            "wall_seconds": 0.672674708,
+            "cpu_seconds_per_million_ops": 0.336994,
+            "ops_per_second": 2973205.289591474,
+            "average_cores": 1.0019523433605892,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 0.6896600000000003,
+            "wall_seconds": 0.688180625,
+            "cpu_seconds_per_million_ops": 0.34483000000000014,
+            "ops_per_second": 2906213.757471013,
+            "average_cores": 1.0021496899887297,
+            "go_allocated_bytes_per_op": 0.0
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 0.673988,
+            "min": 0.6702319999999998,
+            "max": 0.6896600000000003
+          },
+          "wall_seconds": {
+            "median": 0.672674708,
+            "min": 0.668826084,
+            "max": 0.688180625
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.336994,
+            "min": 0.33511599999999997,
+            "max": 0.34483000000000014
+          },
+          "ops_per_second": {
+            "median": 2973205.289591474,
+            "min": 2906213.757471013,
+            "max": 2990313.9961867877
+          },
+          "average_cores": {
+            "median": 1.0021020651461312,
+            "min": 1.0019523433605892,
+            "max": 1.0021496899887297
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 5000000,
+            "cpu_seconds": 0.09079399999999982,
+            "wall_seconds": 0.090331666,
+            "cpu_seconds_per_million_ops": 0.018158799999999965,
+            "ops_per_second": 55351575.160807945,
+            "average_cores": 1.0051181830300773,
+            "go_allocated_bytes_per_op": 0.06964
+          },
+          {
+            "repetition": 2,
+            "ops": 5000000,
+            "cpu_seconds": 0.09506300000000012,
+            "wall_seconds": 0.094829417,
+            "cpu_seconds_per_million_ops": 0.019012600000000022,
+            "ops_per_second": 52726254.76543845,
+            "average_cores": 1.0024631913533764,
+            "go_allocated_bytes_per_op": 0.06964
+          },
+          {
+            "repetition": 3,
+            "ops": 5000000,
+            "cpu_seconds": 0.09247200000000022,
+            "wall_seconds": 0.091995875,
+            "cpu_seconds_per_million_ops": 0.018494400000000043,
+            "ops_per_second": 54350262.987335026,
+            "average_cores": 1.0051755037929713,
+            "go_allocated_bytes_per_op": 0.06964
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 5000000,
+            "min": 5000000,
+            "max": 5000000
+          },
+          "cpu_seconds": {
+            "median": 0.09247200000000022,
+            "min": 0.09079399999999982,
+            "max": 0.09506300000000012
+          },
+          "wall_seconds": {
+            "median": 0.091995875,
+            "min": 0.090331666,
+            "max": 0.094829417
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.018494400000000043,
+            "min": 0.018158799999999965,
+            "max": 0.019012600000000022
+          },
+          "ops_per_second": {
+            "median": 54350262.987335026,
+            "min": 52726254.76543845,
+            "max": 55351575.160807945
+          },
+          "average_cores": {
+            "median": 1.0051181830300773,
+            "min": 1.0024631913533764,
+            "max": 1.0051755037929713
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.06964,
+            "min": 0.06964,
+            "max": 0.06964
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.489268,
+            "wall_seconds": 0.165319417,
+            "cpu_seconds_per_million_ops": 0.744634,
+            "ops_per_second": 12097792.481327225,
+            "average_cores": 9.008427606540616,
+            "go_allocated_bytes_per_op": 0.00476
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.4229459999999998,
+            "wall_seconds": 0.157228041,
+            "cpu_seconds_per_million_ops": 0.7114729999999999,
+            "ops_per_second": 12720377.27672254,
+            "average_cores": 9.050204982201615,
+            "go_allocated_bytes_per_op": 0.003864
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.4887599999999996,
+            "wall_seconds": 0.163068958,
+            "cpu_seconds_per_million_ops": 0.7443799999999998,
+            "ops_per_second": 12264749.983868787,
+            "average_cores": 9.129634592992245,
+            "go_allocated_bytes_per_op": 0.00796
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.4887599999999996,
+            "min": 1.4229459999999998,
+            "max": 1.489268
+          },
+          "wall_seconds": {
+            "median": 0.163068958,
+            "min": 0.157228041,
+            "max": 0.165319417
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7443799999999998,
+            "min": 0.7114729999999999,
+            "max": 0.744634
+          },
+          "ops_per_second": {
+            "median": 12264749.983868787,
+            "min": 12097792.481327225,
+            "max": 12720377.27672254
+          },
+          "average_cores": {
+            "median": 9.050204982201615,
+            "min": 9.008427606540616,
+            "max": 9.129634592992245
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.00476,
+            "min": 0.003864,
+            "max": 0.00796
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.32322300000000026,
+            "wall_seconds": 0.520236251,
+            "cpu_seconds_per_million_ops": 3.232230000000002,
+            "ops_per_second": 192220.36105284787,
+            "average_cores": 0.621300417605847,
+            "go_allocated_bytes_per_op": 8.3212
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.34002699999999964,
+            "wall_seconds": 0.575559291,
+            "cpu_seconds_per_million_ops": 3.4002699999999964,
+            "ops_per_second": 173744.04611948135,
+            "average_cores": 0.5907766676986883,
+            "go_allocated_bytes_per_op": 8.32312
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.32019000000000086,
+            "wall_seconds": 0.51939625,
+            "cpu_seconds_per_million_ops": 3.2019000000000086,
+            "ops_per_second": 192531.23217581952,
+            "average_cores": 0.6164657523037582,
+            "go_allocated_bytes_per_op": 8.31848
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.32322300000000026,
+            "min": 0.32019000000000086,
+            "max": 0.34002699999999964
+          },
+          "wall_seconds": {
+            "median": 0.520236251,
+            "min": 0.51939625,
+            "max": 0.575559291
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 3.232230000000002,
+            "min": 3.2019000000000086,
+            "max": 3.4002699999999964
+          },
+          "ops_per_second": {
+            "median": 192220.36105284787,
+            "min": 173744.04611948135,
+            "max": 192531.23217581952
+          },
+          "average_cores": {
+            "median": 0.6164657523037582,
+            "min": 0.5907766676986883,
+            "max": 0.621300417605847
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 8.3212,
+            "min": 8.31848,
+            "max": 8.32312
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.3215719999999997,
+            "wall_seconds": 1.502450708,
+            "cpu_seconds_per_million_ops": 1.3215719999999997,
+            "ops_per_second": 665579.2397549989,
+            "average_cores": 0.8796108870414934,
+            "go_allocated_bytes_per_op": 1.240264
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.2153619999999994,
+            "wall_seconds": 1.3698332500000001,
+            "cpu_seconds_per_million_ops": 1.2153619999999994,
+            "ops_per_second": 730015.861419629,
+            "average_cores": 0.8872335373666826,
+            "go_allocated_bytes_per_op": 1.148208
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.1676440000000008,
+            "wall_seconds": 1.2995458340000001,
+            "cpu_seconds_per_million_ops": 1.1676440000000008,
+            "ops_per_second": 769499.600427329,
+            "average_cores": 0.8985015914413687,
+            "go_allocated_bytes_per_op": 1.148352
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.2153619999999994,
+            "min": 1.1676440000000008,
+            "max": 1.3215719999999997
+          },
+          "wall_seconds": {
+            "median": 1.3698332500000001,
+            "min": 1.2995458340000001,
+            "max": 1.502450708
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.2153619999999994,
+            "min": 1.1676440000000008,
+            "max": 1.3215719999999997
+          },
+          "ops_per_second": {
+            "median": 730015.861419629,
+            "min": 665579.2397549989,
+            "max": 769499.600427329
+          },
+          "average_cores": {
+            "median": 0.8872335373666826,
+            "min": 0.8796108870414934,
+            "max": 0.8985015914413687
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 1.148352,
+            "min": 1.148208,
+            "max": 1.240264
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.29586000000000046,
+            "wall_seconds": 0.4594615,
+            "cpu_seconds_per_million_ops": 2.9586000000000046,
+            "ops_per_second": 217646.0922188257,
+            "average_cores": 0.6439277284386188,
+            "go_allocated_bytes_per_op": 7.22264
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.30230700000000055,
+            "wall_seconds": 0.46720741600000004,
+            "cpu_seconds_per_million_ops": 3.023070000000005,
+            "ops_per_second": 214037.6984084516,
+            "average_cores": 0.647050944927639,
+            "go_allocated_bytes_per_op": 7.21896
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.29055999999999926,
+            "wall_seconds": 0.44789725,
+            "cpu_seconds_per_million_ops": 2.9055999999999926,
+            "ops_per_second": 223265.49225296648,
+            "average_cores": 0.6487202142902178,
+            "go_allocated_bytes_per_op": 7.22184
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.29586000000000046,
+            "min": 0.29055999999999926,
+            "max": 0.30230700000000055
+          },
+          "wall_seconds": {
+            "median": 0.4594615,
+            "min": 0.44789725,
+            "max": 0.46720741600000004
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 2.9586000000000046,
+            "min": 2.9055999999999926,
+            "max": 3.023070000000005
+          },
+          "ops_per_second": {
+            "median": 217646.0922188257,
+            "min": 214037.6984084516,
+            "max": 223265.49225296648
+          },
+          "average_cores": {
+            "median": 0.647050944927639,
+            "min": 0.6439277284386188,
+            "max": 0.6487202142902178
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 7.22184,
+            "min": 7.21896,
+            "max": 7.22264
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 4500000,
+            "cpu_seconds": 0.0821730000000005,
+            "wall_seconds": 0.081788958,
+            "cpu_seconds_per_million_ops": 0.018260666666666776,
+            "ops_per_second": 55019651.91927253,
+            "average_cores": 1.0046955238138686,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          },
+          {
+            "repetition": 2,
+            "ops": 4500000,
+            "cpu_seconds": 0.08475399999999977,
+            "wall_seconds": 0.084282209,
+            "cpu_seconds_per_million_ops": 0.01883422222222217,
+            "ops_per_second": 53392050.98433051,
+            "average_cores": 1.005597753139097,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          },
+          {
+            "repetition": 3,
+            "ops": 4500000,
+            "cpu_seconds": 0.08483800000000019,
+            "wall_seconds": 0.084523666,
+            "cpu_seconds_per_million_ops": 0.01885288888888893,
+            "ops_per_second": 53239527.0219349,
+            "average_cores": 1.0037188874415386,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 4500000,
+            "min": 4500000,
+            "max": 4500000
+          },
+          "cpu_seconds": {
+            "median": 0.08475399999999977,
+            "min": 0.0821730000000005,
+            "max": 0.08483800000000019
+          },
+          "wall_seconds": {
+            "median": 0.084282209,
+            "min": 0.081788958,
+            "max": 0.084523666
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.01883422222222217,
+            "min": 0.018260666666666776,
+            "max": 0.01885288888888893
+          },
+          "ops_per_second": {
+            "median": 53392050.98433051,
+            "min": 53239527.0219349,
+            "max": 55019651.91927253
+          },
+          "average_cores": {
+            "median": 1.0046955238138686,
+            "min": 1.0037188874415386,
+            "max": 1.005597753139097
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.07737777777777778,
+            "min": 0.07737777777777778,
+            "max": 0.07737777777777778
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 363053056,
+      "min": 360497152,
+      "max": 367034368
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 316146672,
+      "min": 312968200,
+      "max": 316310512
+    },
+    "disk_bytes": {
+      "median": 123287952,
+      "min": 123287952,
+      "max": 123287952
+    },
+    "fixture_rss_bytes": {
+      "median": 162037760,
+      "min": 161972224,
+      "max": 162054144
+    }
+  },
+  {
+    "rows": 1000000,
+    "value_bytes": 100,
+    "workload": "random",
+    "engine": "ours-before",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 2.19315,
+            "wall_seconds": 2.017976042,
+            "cpu_seconds_per_million_ops": 2.19315,
+            "ops_per_second": 495546.0219482626,
+            "average_cores": 1.086806758035832,
+            "go_allocated_bytes_per_op": 1104.148248
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 2.1308320000000003,
+            "wall_seconds": 1.810076459,
+            "cpu_seconds_per_million_ops": 2.1308320000000003,
+            "ops_per_second": 552462.8504104533,
+            "average_cores": 1.1772055204658072,
+            "go_allocated_bytes_per_op": 942.923576
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 2.144165,
+            "wall_seconds": 1.9276464990000002,
+            "cpu_seconds_per_million_ops": 2.144165,
+            "ops_per_second": 518767.3157494215,
+            "average_cores": 1.1123227215738585,
+            "go_allocated_bytes_per_op": 975.803776
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 2.144165,
+            "min": 2.1308320000000003,
+            "max": 2.19315
+          },
+          "wall_seconds": {
+            "median": 1.9276464990000002,
+            "min": 1.810076459,
+            "max": 2.017976042
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 2.144165,
+            "min": 2.1308320000000003,
+            "max": 2.19315
+          },
+          "ops_per_second": {
+            "median": 518767.3157494215,
+            "min": 495546.0219482626,
+            "max": 552462.8504104533
+          },
+          "average_cores": {
+            "median": 1.1123227215738585,
+            "min": 1.086806758035832,
+            "max": 1.1772055204658072
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 975.803776,
+            "min": 942.923576,
+            "max": 1104.148248
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.2950019999999998,
+            "wall_seconds": 1.291139208,
+            "cpu_seconds_per_million_ops": 0.6475009999999999,
+            "ops_per_second": 1549019.646841985,
+            "average_cores": 1.002991770349832,
+            "go_allocated_bytes_per_op": 33.232848
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.3240309999999997,
+            "wall_seconds": 1.319590834,
+            "cpu_seconds_per_million_ops": 0.6620154999999999,
+            "ops_per_second": 1515621.318721588,
+            "average_cores": 1.0033648051241313,
+            "go_allocated_bytes_per_op": 33.232848
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.3670619999999998,
+            "wall_seconds": 1.362980708,
+            "cpu_seconds_per_million_ops": 0.6835309999999999,
+            "ops_per_second": 1467372.1999592674,
+            "average_cores": 1.002994387210358,
+            "go_allocated_bytes_per_op": 33.232848
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.3240309999999997,
+            "min": 1.2950019999999998,
+            "max": 1.3670619999999998
+          },
+          "wall_seconds": {
+            "median": 1.319590834,
+            "min": 1.291139208,
+            "max": 1.362980708
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.6620154999999999,
+            "min": 0.6475009999999999,
+            "max": 0.6835309999999999
+          },
+          "ops_per_second": {
+            "median": 1515621.318721588,
+            "min": 1467372.1999592674,
+            "max": 1549019.646841985
+          },
+          "average_cores": {
+            "median": 1.002994387210358,
+            "min": 1.002991770349832,
+            "max": 1.0033648051241313
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 33.232848,
+            "min": 33.232848,
+            "max": 33.232848
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 0.8006279999999999,
+            "wall_seconds": 0.798821125,
+            "cpu_seconds_per_million_ops": 0.40031399999999995,
+            "ops_per_second": 2503689.4210828487,
+            "average_cores": 1.0022619269113593,
+            "go_allocated_bytes_per_op": 32.814688
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 0.8007450000000002,
+            "wall_seconds": 0.799373,
+            "cpu_seconds_per_million_ops": 0.4003725000000001,
+            "ops_per_second": 2501960.9118646737,
+            "average_cores": 1.0017163451855393,
+            "go_allocated_bytes_per_op": 32.814688
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 0.808377,
+            "wall_seconds": 0.79954525,
+            "cpu_seconds_per_million_ops": 0.4041885,
+            "ops_per_second": 2501421.902012425,
+            "average_cores": 1.0110459664415492,
+            "go_allocated_bytes_per_op": 32.814688
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 0.8007450000000002,
+            "min": 0.8006279999999999,
+            "max": 0.808377
+          },
+          "wall_seconds": {
+            "median": 0.799373,
+            "min": 0.798821125,
+            "max": 0.79954525
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.4003725000000001,
+            "min": 0.40031399999999995,
+            "max": 0.4041885
+          },
+          "ops_per_second": {
+            "median": 2501960.9118646737,
+            "min": 2501421.902012425,
+            "max": 2503689.4210828487
+          },
+          "average_cores": {
+            "median": 1.0022619269113593,
+            "min": 1.0017163451855393,
+            "max": 1.0110459664415492
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 32.814688,
+            "min": 32.814688,
+            "max": 32.814688
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 5000000,
+            "cpu_seconds": 0.09967600000000021,
+            "wall_seconds": 0.099282083,
+            "cpu_seconds_per_million_ops": 0.019935200000000042,
+            "ops_per_second": 50361554.15877002,
+            "average_cores": 1.0039676544659142,
+            "go_allocated_bytes_per_op": 0.5766256
+          },
+          {
+            "repetition": 2,
+            "ops": 5000000,
+            "cpu_seconds": 0.09575599999999995,
+            "wall_seconds": 0.095298084,
+            "cpu_seconds_per_million_ops": 0.01915119999999999,
+            "ops_per_second": 52466952.0113332,
+            "average_cores": 1.0048050913594437,
+            "go_allocated_bytes_per_op": 0.5766256
+          },
+          {
+            "repetition": 3,
+            "ops": 5000000,
+            "cpu_seconds": 0.09628299999999934,
+            "wall_seconds": 0.095755291,
+            "cpu_seconds_per_million_ops": 0.01925659999999987,
+            "ops_per_second": 52216435.747660145,
+            "average_cores": 1.0055110166183854,
+            "go_allocated_bytes_per_op": 0.5766256
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 5000000,
+            "min": 5000000,
+            "max": 5000000
+          },
+          "cpu_seconds": {
+            "median": 0.09628299999999934,
+            "min": 0.09575599999999995,
+            "max": 0.09967600000000021
+          },
+          "wall_seconds": {
+            "median": 0.095755291,
+            "min": 0.095298084,
+            "max": 0.099282083
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.01925659999999987,
+            "min": 0.01915119999999999,
+            "max": 0.019935200000000042
+          },
+          "ops_per_second": {
+            "median": 52216435.747660145,
+            "min": 50361554.15877002,
+            "max": 52466952.0113332
+          },
+          "average_cores": {
+            "median": 1.0048050913594437,
+            "min": 1.0039676544659142,
+            "max": 1.0055110166183854
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.5766256,
+            "min": 0.5766256,
+            "max": 0.5766256
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 2.9562219999999995,
+            "wall_seconds": 0.854388208,
+            "cpu_seconds_per_million_ops": 1.4781109999999997,
+            "ops_per_second": 2340856.2773609813,
+            "average_cores": 3.460045412986317,
+            "go_allocated_bytes_per_op": 33.142584
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 2.9215850000000003,
+            "wall_seconds": 0.838437833,
+            "cpu_seconds_per_million_ops": 1.4607925000000002,
+            "ops_per_second": 2385388.541979117,
+            "average_cores": 3.4845576917090293,
+            "go_allocated_bytes_per_op": 33.1348
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 2.8878830000000004,
+            "wall_seconds": 0.839396042,
+            "cpu_seconds_per_million_ops": 1.4439415000000002,
+            "ops_per_second": 2382665.5117823393,
+            "average_cores": 3.4404296130812595,
+            "go_allocated_bytes_per_op": 33.099472
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 2.9215850000000003,
+            "min": 2.8878830000000004,
+            "max": 2.9562219999999995
+          },
+          "wall_seconds": {
+            "median": 0.839396042,
+            "min": 0.838437833,
+            "max": 0.854388208
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.4607925000000002,
+            "min": 1.4439415000000002,
+            "max": 1.4781109999999997
+          },
+          "ops_per_second": {
+            "median": 2382665.5117823393,
+            "min": 2340856.2773609813,
+            "max": 2385388.541979117
+          },
+          "average_cores": {
+            "median": 3.460045412986317,
+            "min": 3.4404296130812595,
+            "max": 3.4845576917090293
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 33.1348,
+            "min": 33.099472,
+            "max": 33.142584
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.4927329999999992,
+            "wall_seconds": 0.598745208,
+            "cpu_seconds_per_million_ops": 4.9273299999999915,
+            "ops_per_second": 167015.95046419144,
+            "average_cores": 0.8229427032007232,
+            "go_allocated_bytes_per_op": 3162.30648
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.5006520000000012,
+            "wall_seconds": 0.6325121250000001,
+            "cpu_seconds_per_million_ops": 5.0065200000000125,
+            "ops_per_second": 158099.7360327282,
+            "average_cores": 0.7915294904425764,
+            "go_allocated_bytes_per_op": 3162.25944
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.5312579999999991,
+            "wall_seconds": 0.6794105,
+            "cpu_seconds_per_million_ops": 5.312579999999991,
+            "ops_per_second": 147186.4211695286,
+            "average_cores": 0.7819396373768128,
+            "go_allocated_bytes_per_op": 3162.312
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.5006520000000012,
+            "min": 0.4927329999999992,
+            "max": 0.5312579999999991
+          },
+          "wall_seconds": {
+            "median": 0.6325121250000001,
+            "min": 0.598745208,
+            "max": 0.6794105
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 5.0065200000000125,
+            "min": 4.9273299999999915,
+            "max": 5.312579999999991
+          },
+          "ops_per_second": {
+            "median": 158099.7360327282,
+            "min": 147186.4211695286,
+            "max": 167015.95046419144
+          },
+          "average_cores": {
+            "median": 0.7915294904425764,
+            "min": 0.7819396373768128,
+            "max": 0.8229427032007232
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 3162.30648,
+            "min": 3162.25944,
+            "max": 3162.312
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.3104359999999993,
+            "wall_seconds": 1.407469042,
+            "cpu_seconds_per_million_ops": 1.3104359999999993,
+            "ops_per_second": 710495.201073133,
+            "average_cores": 0.9310584893134717,
+            "go_allocated_bytes_per_op": 380.842056
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.3467590000000005,
+            "wall_seconds": 1.4226600839999999,
+            "cpu_seconds_per_million_ops": 1.3467590000000005,
+            "ops_per_second": 702908.5944327373,
+            "average_cores": 0.9466484757296393,
+            "go_allocated_bytes_per_op": 380.842712
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.340392,
+            "wall_seconds": 1.466494875,
+            "cpu_seconds_per_million_ops": 1.340392,
+            "ops_per_second": 681898.0530020605,
+            "average_cores": 0.9140106950595378,
+            "go_allocated_bytes_per_op": 380.842896
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.340392,
+            "min": 1.3104359999999993,
+            "max": 1.3467590000000005
+          },
+          "wall_seconds": {
+            "median": 1.4226600839999999,
+            "min": 1.407469042,
+            "max": 1.466494875
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.340392,
+            "min": 1.3104359999999993,
+            "max": 1.3467590000000005
+          },
+          "ops_per_second": {
+            "median": 702908.5944327373,
+            "min": 681898.0530020605,
+            "max": 710495.201073133
+          },
+          "average_cores": {
+            "median": 0.9310584893134717,
+            "min": 0.9140106950595378,
+            "max": 0.9466484757296393
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 380.842712,
+            "min": 380.842056,
+            "max": 380.842896
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.4570280000000002,
+            "wall_seconds": 0.538479083,
+            "cpu_seconds_per_million_ops": 4.570280000000002,
+            "ops_per_second": 185708.23483592953,
+            "average_cores": 0.8487386315059524,
+            "go_allocated_bytes_per_op": 2915.22096
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.46716499999999983,
+            "wall_seconds": 0.5460219159999999,
+            "cpu_seconds_per_million_ops": 4.671649999999998,
+            "ops_per_second": 183142.83194449655,
+            "average_cores": 0.855579210853507,
+            "go_allocated_bytes_per_op": 2915.21664
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.4670670000000008,
+            "wall_seconds": 0.568475584,
+            "cpu_seconds_per_million_ops": 4.670670000000008,
+            "ops_per_second": 175909.05012377806,
+            "average_cores": 0.8216131231416278,
+            "go_allocated_bytes_per_op": 2915.22272
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.4670670000000008,
+            "min": 0.4570280000000002,
+            "max": 0.46716499999999983
+          },
+          "wall_seconds": {
+            "median": 0.5460219159999999,
+            "min": 0.538479083,
+            "max": 0.568475584
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 4.670670000000008,
+            "min": 4.570280000000002,
+            "max": 4.671649999999998
+          },
+          "ops_per_second": {
+            "median": 183142.83194449655,
+            "min": 175909.05012377806,
+            "max": 185708.23483592953
+          },
+          "average_cores": {
+            "median": 0.8487386315059524,
+            "min": 0.8216131231416278,
+            "max": 0.855579210853507
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 2915.22096,
+            "min": 2915.21664,
+            "max": 2915.22272
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 4500000,
+            "cpu_seconds": 0.0887819999999997,
+            "wall_seconds": 0.088321459,
+            "cpu_seconds_per_million_ops": 0.019729333333333265,
+            "ops_per_second": 50950245.28523696,
+            "average_cores": 1.0052143726475318,
+            "go_allocated_bytes_per_op": 0.5805493333333334
+          },
+          {
+            "repetition": 2,
+            "ops": 4500000,
+            "cpu_seconds": 0.0865269999999998,
+            "wall_seconds": 0.086132708,
+            "cpu_seconds_per_million_ops": 0.019228222222222178,
+            "ops_per_second": 52244961.344998,
+            "average_cores": 1.0045777267330291,
+            "go_allocated_bytes_per_op": 0.5805493333333334
+          },
+          {
+            "repetition": 3,
+            "ops": 4500000,
+            "cpu_seconds": 0.08729699999999996,
+            "wall_seconds": 0.086763958,
+            "cpu_seconds_per_million_ops": 0.019399333333333324,
+            "ops_per_second": 51864853.83711979,
+            "average_cores": 1.0061435878708986,
+            "go_allocated_bytes_per_op": 0.5805493333333334
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 4500000,
+            "min": 4500000,
+            "max": 4500000
+          },
+          "cpu_seconds": {
+            "median": 0.08729699999999996,
+            "min": 0.0865269999999998,
+            "max": 0.0887819999999997
+          },
+          "wall_seconds": {
+            "median": 0.086763958,
+            "min": 0.086132708,
+            "max": 0.088321459
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.019399333333333324,
+            "min": 0.019228222222222178,
+            "max": 0.019729333333333265
+          },
+          "ops_per_second": {
+            "median": 51864853.83711979,
+            "min": 50950245.28523696,
+            "max": 52244961.344998
+          },
+          "average_cores": {
+            "median": 1.0052143726475318,
+            "min": 1.0045777267330291,
+            "max": 1.0061435878708986
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.5805493333333334,
+            "min": 0.5805493333333334,
+            "max": 0.5805493333333334
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 982056960,
+      "min": 954236928,
+      "max": 1015414784
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 649561336,
+      "min": 611632352,
+      "max": 699696400
+    },
+    "disk_bytes": {
+      "median": 123287952,
+      "min": 123287952,
+      "max": 123287952
+    },
+    "fixture_rss_bytes": {
+      "median": 161873920,
+      "min": 161202176,
+      "max": 162103296
+    }
+  },
+  {
+    "rows": 1000000,
+    "value_bytes": 100,
+    "workload": "seq",
+    "engine": "ours",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 0.744377,
+            "wall_seconds": 0.903038708,
+            "cpu_seconds_per_million_ops": 0.744377,
+            "ops_per_second": 1107372.2434498346,
+            "average_cores": 0.8243024284624574,
+            "go_allocated_bytes_per_op": 7.774336
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 0.688487,
+            "wall_seconds": 0.854035709,
+            "cpu_seconds_per_million_ops": 0.688487,
+            "ops_per_second": 1170911.2270854707,
+            "average_cores": 0.8061571580023944,
+            "go_allocated_bytes_per_op": 7.782272
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 0.688939,
+            "wall_seconds": 0.799475958,
+            "cpu_seconds_per_million_ops": 0.688939,
+            "ops_per_second": 1250819.3523438012,
+            "average_cores": 0.861738233784386,
+            "go_allocated_bytes_per_op": 7.776744
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 0.688939,
+            "min": 0.688487,
+            "max": 0.744377
+          },
+          "wall_seconds": {
+            "median": 0.854035709,
+            "min": 0.799475958,
+            "max": 0.903038708
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.688939,
+            "min": 0.688487,
+            "max": 0.744377
+          },
+          "ops_per_second": {
+            "median": 1170911.2270854707,
+            "min": 1107372.2434498346,
+            "max": 1250819.3523438012
+          },
+          "average_cores": {
+            "median": 0.8243024284624574,
+            "min": 0.8061571580023944,
+            "max": 0.861738233784386
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 7.776744,
+            "min": 7.774336,
+            "max": 7.782272
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.7110060000000002,
+            "wall_seconds": 1.7041844579999998,
+            "cpu_seconds_per_million_ops": 0.8555030000000001,
+            "ops_per_second": 1173581.879949289,
+            "average_cores": 1.0040028190422567,
+            "go_allocated_bytes_per_op": 8e-05
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.7524170000000001,
+            "wall_seconds": 1.746027834,
+            "cpu_seconds_per_million_ops": 0.8762085,
+            "ops_per_second": 1145457.1118824445,
+            "average_cores": 1.0036592578168488,
+            "go_allocated_bytes_per_op": 8e-05
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.765114,
+            "wall_seconds": 1.7582426249999998,
+            "cpu_seconds_per_million_ops": 0.882557,
+            "ops_per_second": 1137499.4392483234,
+            "average_cores": 1.0039080926046826,
+            "go_allocated_bytes_per_op": 8e-05
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.7524170000000001,
+            "min": 1.7110060000000002,
+            "max": 1.765114
+          },
+          "wall_seconds": {
+            "median": 1.746027834,
+            "min": 1.7041844579999998,
+            "max": 1.7582426249999998
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.8762085,
+            "min": 0.8555030000000001,
+            "max": 0.882557
+          },
+          "ops_per_second": {
+            "median": 1145457.1118824445,
+            "min": 1137499.4392483234,
+            "max": 1173581.879949289
+          },
+          "average_cores": {
+            "median": 1.0039080926046826,
+            "min": 1.0036592578168488,
+            "max": 1.0040028190422567
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 8e-05,
+            "min": 8e-05,
+            "max": 8e-05
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.4383500000000002,
+            "wall_seconds": 1.432336417,
+            "cpu_seconds_per_million_ops": 0.7191750000000001,
+            "ops_per_second": 1396320.0099240374,
+            "average_cores": 1.0041984431371198,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.4293959999999997,
+            "wall_seconds": 1.423811583,
+            "cpu_seconds_per_million_ops": 0.7146979999999998,
+            "ops_per_second": 1404680.2427228182,
+            "average_cores": 1.0039221601135124,
+            "go_allocated_bytes_per_op": 0.0
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.4646929999999998,
+            "wall_seconds": 1.4591882090000001,
+            "cpu_seconds_per_million_ops": 0.7323464999999999,
+            "ops_per_second": 1370625.1103623055,
+            "average_cores": 1.003772502385948,
+            "go_allocated_bytes_per_op": 0.0
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.4383500000000002,
+            "min": 1.4293959999999997,
+            "max": 1.4646929999999998
+          },
+          "wall_seconds": {
+            "median": 1.432336417,
+            "min": 1.423811583,
+            "max": 1.4591882090000001
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7191750000000001,
+            "min": 0.7146979999999998,
+            "max": 0.7323464999999999
+          },
+          "ops_per_second": {
+            "median": 1396320.0099240374,
+            "min": 1370625.1103623055,
+            "max": 1404680.2427228182
+          },
+          "average_cores": {
+            "median": 1.0039221601135124,
+            "min": 1.003772502385948,
+            "max": 1.0041984431371198
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 5000000,
+            "cpu_seconds": 0.091619,
+            "wall_seconds": 0.091135333,
+            "cpu_seconds_per_million_ops": 0.0183238,
+            "ops_per_second": 54863463.32876185,
+            "average_cores": 1.0053071293435665,
+            "go_allocated_bytes_per_op": 0.06964
+          },
+          {
+            "repetition": 2,
+            "ops": 5000000,
+            "cpu_seconds": 0.09294800000000003,
+            "wall_seconds": 0.092532292,
+            "cpu_seconds_per_million_ops": 0.018589600000000005,
+            "ops_per_second": 54035190.22310611,
+            "average_cores": 1.0044925721714537,
+            "go_allocated_bytes_per_op": 0.06964
+          },
+          {
+            "repetition": 3,
+            "ops": 5000000,
+            "cpu_seconds": 0.09213600000000016,
+            "wall_seconds": 0.091708334,
+            "cpu_seconds_per_million_ops": 0.018427200000000032,
+            "ops_per_second": 54520672.0252927,
+            "average_cores": 1.0046633275444754,
+            "go_allocated_bytes_per_op": 0.06964
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 5000000,
+            "min": 5000000,
+            "max": 5000000
+          },
+          "cpu_seconds": {
+            "median": 0.09213600000000016,
+            "min": 0.091619,
+            "max": 0.09294800000000003
+          },
+          "wall_seconds": {
+            "median": 0.091708334,
+            "min": 0.091135333,
+            "max": 0.092532292
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.018427200000000032,
+            "min": 0.0183238,
+            "max": 0.018589600000000005
+          },
+          "ops_per_second": {
+            "median": 54520672.0252927,
+            "min": 54035190.22310611,
+            "max": 54863463.32876185
+          },
+          "average_cores": {
+            "median": 1.0046633275444754,
+            "min": 1.0044925721714537,
+            "max": 1.0053071293435665
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.06964,
+            "min": 0.06964,
+            "max": 0.06964
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 2.0600940000000003,
+            "wall_seconds": 0.219153416,
+            "cpu_seconds_per_million_ops": 1.0300470000000002,
+            "ops_per_second": 9126027.038519902,
+            "average_cores": 9.400236772946311,
+            "go_allocated_bytes_per_op": 0.007736
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 2.0810049999999998,
+            "wall_seconds": 0.227448208,
+            "cpu_seconds_per_million_ops": 1.0405024999999999,
+            "ops_per_second": 8793210.628416996,
+            "average_cores": 9.149357641894456,
+            "go_allocated_bytes_per_op": 0.00796
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 2.089836,
+            "wall_seconds": 0.224624708,
+            "cpu_seconds_per_million_ops": 1.044918,
+            "ops_per_second": 8903740.010649228,
+            "average_cores": 9.303678204447571,
+            "go_allocated_bytes_per_op": 0.00796
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 2.0810049999999998,
+            "min": 2.0600940000000003,
+            "max": 2.089836
+          },
+          "wall_seconds": {
+            "median": 0.224624708,
+            "min": 0.219153416,
+            "max": 0.227448208
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.0405024999999999,
+            "min": 1.0300470000000002,
+            "max": 1.044918
+          },
+          "ops_per_second": {
+            "median": 8903740.010649228,
+            "min": 8793210.628416996,
+            "max": 9126027.038519902
+          },
+          "average_cores": {
+            "median": 9.303678204447571,
+            "min": 9.149357641894456,
+            "max": 9.400236772946311
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.00796,
+            "min": 0.007736,
+            "max": 0.00796
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.34122699999999967,
+            "wall_seconds": 0.550196208,
+            "cpu_seconds_per_million_ops": 3.4122699999999964,
+            "ops_per_second": 181753.34280021064,
+            "average_cores": 0.6201914790368742,
+            "go_allocated_bytes_per_op": 8.46504
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.3508859999999995,
+            "wall_seconds": 0.6013432919999999,
+            "cpu_seconds_per_million_ops": 3.508859999999995,
+            "ops_per_second": 166294.36351973144,
+            "average_cores": 0.583503640379844,
+            "go_allocated_bytes_per_op": 8.47088
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.3445009999999992,
+            "wall_seconds": 0.5629289989999999,
+            "cpu_seconds_per_million_ops": 3.4450099999999924,
+            "ops_per_second": 177642.29623565727,
+            "average_cores": 0.6119794869548003,
+            "go_allocated_bytes_per_op": 8.4708
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.3445009999999992,
+            "min": 0.34122699999999967,
+            "max": 0.3508859999999995
+          },
+          "wall_seconds": {
+            "median": 0.5629289989999999,
+            "min": 0.550196208,
+            "max": 0.6013432919999999
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 3.4450099999999924,
+            "min": 3.4122699999999964,
+            "max": 3.508859999999995
+          },
+          "ops_per_second": {
+            "median": 177642.29623565727,
+            "min": 166294.36351973144,
+            "max": 181753.34280021064
+          },
+          "average_cores": {
+            "median": 0.6119794869548003,
+            "min": 0.583503640379844,
+            "max": 0.6201914790368742
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 8.4708,
+            "min": 8.46504,
+            "max": 8.47088
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.3828060000000009,
+            "wall_seconds": 1.520057041,
+            "cpu_seconds_per_million_ops": 1.3828060000000009,
+            "ops_per_second": 657870.0489700899,
+            "average_cores": 0.9097066509361347,
+            "go_allocated_bytes_per_op": 1.147368
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.3797299999999997,
+            "wall_seconds": 1.521491375,
+            "cpu_seconds_per_million_ops": 1.3797299999999997,
+            "ops_per_second": 657249.8644627545,
+            "average_cores": 0.906827355495196,
+            "go_allocated_bytes_per_op": 1.147656
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.5148009999999992,
+            "wall_seconds": 1.571846208,
+            "cpu_seconds_per_million_ops": 1.5148009999999992,
+            "ops_per_second": 636194.5557462579,
+            "average_cores": 0.9637081492389866,
+            "go_allocated_bytes_per_op": 1.265368
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.3828060000000009,
+            "min": 1.3797299999999997,
+            "max": 1.5148009999999992
+          },
+          "wall_seconds": {
+            "median": 1.521491375,
+            "min": 1.520057041,
+            "max": 1.571846208
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.3828060000000009,
+            "min": 1.3797299999999997,
+            "max": 1.5148009999999992
+          },
+          "ops_per_second": {
+            "median": 657249.8644627545,
+            "min": 636194.5557462579,
+            "max": 657870.0489700899
+          },
+          "average_cores": {
+            "median": 0.9097066509361347,
+            "min": 0.906827355495196,
+            "max": 0.9637081492389866
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 1.147656,
+            "min": 1.147368,
+            "max": 1.265368
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.3128150000000002,
+            "wall_seconds": 0.49194825,
+            "cpu_seconds_per_million_ops": 3.1281500000000015,
+            "ops_per_second": 203273.41341289456,
+            "average_cores": 0.6358697281675465,
+            "go_allocated_bytes_per_op": 7.23736
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.3077639999999999,
+            "wall_seconds": 0.468851625,
+            "cpu_seconds_per_million_ops": 3.0776399999999993,
+            "ops_per_second": 213287.09269163778,
+            "average_cores": 0.656420887951492,
+            "go_allocated_bytes_per_op": 7.23704
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.36549200000000004,
+            "wall_seconds": 0.631653833,
+            "cpu_seconds_per_million_ops": 3.6549200000000006,
+            "ops_per_second": 158314.56214720698,
+            "average_cores": 0.5786270594830698,
+            "go_allocated_bytes_per_op": 7.2372
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.3128150000000002,
+            "min": 0.3077639999999999,
+            "max": 0.36549200000000004
+          },
+          "wall_seconds": {
+            "median": 0.49194825,
+            "min": 0.468851625,
+            "max": 0.631653833
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 3.1281500000000015,
+            "min": 3.0776399999999993,
+            "max": 3.6549200000000006
+          },
+          "ops_per_second": {
+            "median": 203273.41341289456,
+            "min": 158314.56214720698,
+            "max": 213287.09269163778
+          },
+          "average_cores": {
+            "median": 0.6358697281675465,
+            "min": 0.5786270594830698,
+            "max": 0.656420887951492
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 7.2372,
+            "min": 7.23704,
+            "max": 7.23736
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 4500000,
+            "cpu_seconds": 0.08417599999999958,
+            "wall_seconds": 0.0837995,
+            "cpu_seconds_per_million_ops": 0.018705777777777682,
+            "ops_per_second": 53699604.41291416,
+            "average_cores": 1.0044928669025421,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          },
+          {
+            "repetition": 2,
+            "ops": 4500000,
+            "cpu_seconds": 0.08319899999999991,
+            "wall_seconds": 0.082759125,
+            "cpu_seconds_per_million_ops": 0.018488666666666646,
+            "ops_per_second": 54374668.65436289,
+            "average_cores": 1.0053151238609628,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          },
+          {
+            "repetition": 3,
+            "ops": 4500000,
+            "cpu_seconds": 0.08942300000000081,
+            "wall_seconds": 0.088922875,
+            "cpu_seconds_per_million_ops": 0.019871777777777957,
+            "ops_per_second": 50605651.24553159,
+            "average_cores": 1.005624255850936,
+            "go_allocated_bytes_per_op": 0.07737777777777778
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 4500000,
+            "min": 4500000,
+            "max": 4500000
+          },
+          "cpu_seconds": {
+            "median": 0.08417599999999958,
+            "min": 0.08319899999999991,
+            "max": 0.08942300000000081
+          },
+          "wall_seconds": {
+            "median": 0.0837995,
+            "min": 0.082759125,
+            "max": 0.088922875
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.018705777777777682,
+            "min": 0.018488666666666646,
+            "max": 0.019871777777777957
+          },
+          "ops_per_second": {
+            "median": 53699604.41291416,
+            "min": 50605651.24553159,
+            "max": 54374668.65436289
+          },
+          "average_cores": {
+            "median": 1.0053151238609628,
+            "min": 1.0044928669025421,
+            "max": 1.005624255850936
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.07737777777777778,
+            "min": 0.07737777777777778,
+            "max": 0.07737777777777778
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 375980032,
+      "min": 367656960,
+      "max": 380715008
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 269370328,
+      "min": 267699160,
+      "max": 290866136
+    },
+    "disk_bytes": {
+      "median": 123287952,
+      "min": 123287952,
+      "max": 123287952
+    },
+    "fixture_rss_bytes": {
+      "median": 162217984,
+      "min": 161955840,
+      "max": 162676736
+    }
+  },
+  {
+    "rows": 1000000,
+    "value_bytes": 100,
+    "workload": "seq",
+    "engine": "ours-before",
+    "trials": 3,
+    "operations": {
+      "Load + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.041808,
+            "wall_seconds": 1.001248334,
+            "cpu_seconds_per_million_ops": 1.041808,
+            "ops_per_second": 998753.2223948749,
+            "average_cores": 1.0405090971167599,
+            "go_allocated_bytes_per_op": 729.964368
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.004197,
+            "wall_seconds": 0.977715042,
+            "cpu_seconds_per_million_ops": 1.004197,
+            "ops_per_second": 1022792.8967466985,
+            "average_cores": 1.0270855585343444,
+            "go_allocated_bytes_per_op": 726.279272
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.0236750000000001,
+            "wall_seconds": 0.9999795410000001,
+            "cpu_seconds_per_million_ops": 1.0236750000000001,
+            "ops_per_second": 1000020.4594185791,
+            "average_cores": 1.0236959437953141,
+            "go_allocated_bytes_per_op": 720.00312
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.0236750000000001,
+            "min": 1.004197,
+            "max": 1.041808
+          },
+          "wall_seconds": {
+            "median": 0.9999795410000001,
+            "min": 0.977715042,
+            "max": 1.001248334
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.0236750000000001,
+            "min": 1.004197,
+            "max": 1.041808
+          },
+          "ops_per_second": {
+            "median": 1000020.4594185791,
+            "min": 998753.2223948749,
+            "max": 1022792.8967466985
+          },
+          "average_cores": {
+            "median": 1.0270855585343444,
+            "min": 1.0236959437953141,
+            "max": 1.0405090971167599
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 726.279272,
+            "min": 720.00312,
+            "max": 729.964368
+          }
+        }
+      },
+      "Point read hit": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.833851,
+            "wall_seconds": 1.8271879580000001,
+            "cpu_seconds_per_million_ops": 0.9169255,
+            "ops_per_second": 1094578.1419165854,
+            "average_cores": 1.003646610065936,
+            "go_allocated_bytes_per_op": 33.232656
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.8319630000000002,
+            "wall_seconds": 1.8249695,
+            "cpu_seconds_per_million_ops": 0.9159815000000001,
+            "ops_per_second": 1095908.7261458342,
+            "average_cores": 1.0038321188381507,
+            "go_allocated_bytes_per_op": 33.232656
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.843947,
+            "wall_seconds": 1.836683958,
+            "cpu_seconds_per_million_ops": 0.9219735,
+            "ops_per_second": 1088918.9679523513,
+            "average_cores": 1.0039544320994171,
+            "go_allocated_bytes_per_op": 33.232656
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.833851,
+            "min": 1.8319630000000002,
+            "max": 1.843947
+          },
+          "wall_seconds": {
+            "median": 1.8271879580000001,
+            "min": 1.8249695,
+            "max": 1.836683958
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.9169255,
+            "min": 0.9159815000000001,
+            "max": 0.9219735
+          },
+          "ops_per_second": {
+            "median": 1094578.1419165854,
+            "min": 1088918.9679523513,
+            "max": 1095908.7261458342
+          },
+          "average_cores": {
+            "median": 1.0038321188381507,
+            "min": 1.003646610065936,
+            "max": 1.0039544320994171
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 33.232656,
+            "min": 33.232656,
+            "max": 33.232656
+          }
+        }
+      },
+      "Point read miss": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 1.5502809999999998,
+            "wall_seconds": 1.538214625,
+            "cpu_seconds_per_million_ops": 0.7751404999999999,
+            "ops_per_second": 1300208.675366092,
+            "average_cores": 1.0078444027276101,
+            "go_allocated_bytes_per_op": 32.98768
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 1.5560269999999998,
+            "wall_seconds": 1.544248084,
+            "cpu_seconds_per_million_ops": 0.7780134999999999,
+            "ops_per_second": 1295128.6912524349,
+            "average_cores": 1.0076276060317262,
+            "go_allocated_bytes_per_op": 32.99048
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 1.5810019999999996,
+            "wall_seconds": 1.574788083,
+            "cpu_seconds_per_million_ops": 0.7905009999999998,
+            "ops_per_second": 1270012.1505808982,
+            "average_cores": 1.0039458750463504,
+            "go_allocated_bytes_per_op": 32.98768
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 1.5560269999999998,
+            "min": 1.5502809999999998,
+            "max": 1.5810019999999996
+          },
+          "wall_seconds": {
+            "median": 1.544248084,
+            "min": 1.538214625,
+            "max": 1.574788083
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.7780134999999999,
+            "min": 0.7751404999999999,
+            "max": 0.7905009999999998
+          },
+          "ops_per_second": {
+            "median": 1295128.6912524349,
+            "min": 1270012.1505808982,
+            "max": 1300208.675366092
+          },
+          "average_cores": {
+            "median": 1.0076276060317262,
+            "min": 1.0039458750463504,
+            "max": 1.0078444027276101
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 32.98768,
+            "min": 32.98768,
+            "max": 32.99048
+          }
+        }
+      },
+      "Full value scan": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 5000000,
+            "cpu_seconds": 0.09695500000000079,
+            "wall_seconds": 0.096481875,
+            "cpu_seconds_per_million_ops": 0.019391000000000158,
+            "ops_per_second": 51823205.13567963,
+            "average_cores": 1.004903770785972,
+            "go_allocated_bytes_per_op": 0.5773936
+          },
+          {
+            "repetition": 2,
+            "ops": 5000000,
+            "cpu_seconds": 0.09718800000000011,
+            "wall_seconds": 0.09671725,
+            "cpu_seconds_per_million_ops": 0.01943760000000002,
+            "ops_per_second": 51697086.093742326,
+            "average_cores": 1.0048672806557268,
+            "go_allocated_bytes_per_op": 0.5773936
+          },
+          {
+            "repetition": 3,
+            "ops": 5000000,
+            "cpu_seconds": 0.09735100000000008,
+            "wall_seconds": 0.096806583,
+            "cpu_seconds_per_million_ops": 0.019470200000000014,
+            "ops_per_second": 51649380.083996974,
+            "average_cores": 1.0056237601114386,
+            "go_allocated_bytes_per_op": 0.5773936
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 5000000,
+            "min": 5000000,
+            "max": 5000000
+          },
+          "cpu_seconds": {
+            "median": 0.09718800000000011,
+            "min": 0.09695500000000079,
+            "max": 0.09735100000000008
+          },
+          "wall_seconds": {
+            "median": 0.09671725,
+            "min": 0.096481875,
+            "max": 0.096806583
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.01943760000000002,
+            "min": 0.019391000000000158,
+            "max": 0.019470200000000014
+          },
+          "ops_per_second": {
+            "median": 51697086.093742326,
+            "min": 51649380.083996974,
+            "max": 51823205.13567963
+          },
+          "average_cores": {
+            "median": 1.004903770785972,
+            "min": 1.0048672806557268,
+            "max": 1.0056237601114386
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.5773936,
+            "min": 0.5773936,
+            "max": 0.5773936
+          }
+        }
+      },
+      "10-reader point hits": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 2000000,
+            "cpu_seconds": 3.511152,
+            "wall_seconds": 0.957320833,
+            "cpu_seconds_per_million_ops": 1.755576,
+            "ops_per_second": 2089163.769404776,
+            "average_cores": 3.667685773636559,
+            "go_allocated_bytes_per_op": 33.153088
+          },
+          {
+            "repetition": 2,
+            "ops": 2000000,
+            "cpu_seconds": 3.602970000000001,
+            "wall_seconds": 0.963048833,
+            "cpu_seconds_per_million_ops": 1.8014850000000004,
+            "ops_per_second": 2076737.8885344644,
+            "average_cores": 3.7412121551265107,
+            "go_allocated_bytes_per_op": 33.157888
+          },
+          {
+            "repetition": 3,
+            "ops": 2000000,
+            "cpu_seconds": 3.6167340000000006,
+            "wall_seconds": 0.970795875,
+            "cpu_seconds_per_million_ops": 1.8083670000000003,
+            "ops_per_second": 2060165.32569218,
+            "average_cores": 3.7255349895259915,
+            "go_allocated_bytes_per_op": 33.14396
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 2000000,
+            "min": 2000000,
+            "max": 2000000
+          },
+          "cpu_seconds": {
+            "median": 3.602970000000001,
+            "min": 3.511152,
+            "max": 3.6167340000000006
+          },
+          "wall_seconds": {
+            "median": 0.963048833,
+            "min": 0.957320833,
+            "max": 0.970795875
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.8014850000000004,
+            "min": 1.755576,
+            "max": 1.8083670000000003
+          },
+          "ops_per_second": {
+            "median": 2076737.8885344644,
+            "min": 2060165.32569218,
+            "max": 2089163.769404776
+          },
+          "average_cores": {
+            "median": 3.7255349895259915,
+            "min": 3.667685773636559,
+            "max": 3.7412121551265107
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 33.153088,
+            "min": 33.14396,
+            "max": 33.157888
+          }
+        }
+      },
+      "Update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.5246920000000006,
+            "wall_seconds": 0.674433501,
+            "cpu_seconds_per_million_ops": 5.246920000000006,
+            "ops_per_second": 148272.58707007795,
+            "average_cores": 0.7779744025497343,
+            "go_allocated_bytes_per_op": 3163.15392
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.5404279999999999,
+            "wall_seconds": 0.707717959,
+            "cpu_seconds_per_million_ops": 5.404279999999999,
+            "ops_per_second": 141299.22623597007,
+            "average_cores": 0.7636205823625283,
+            "go_allocated_bytes_per_op": 3163.11648
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.5505949999999997,
+            "wall_seconds": 0.681517876,
+            "cpu_seconds_per_million_ops": 5.505949999999998,
+            "ops_per_second": 146731.2942500132,
+            "average_cores": 0.8078951695758597,
+            "go_allocated_bytes_per_op": 3163.09712
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.5404279999999999,
+            "min": 0.5246920000000006,
+            "max": 0.5505949999999997
+          },
+          "wall_seconds": {
+            "median": 0.681517876,
+            "min": 0.674433501,
+            "max": 0.707717959
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 5.404279999999999,
+            "min": 5.246920000000006,
+            "max": 5.505949999999998
+          },
+          "ops_per_second": {
+            "median": 146731.2942500132,
+            "min": 141299.22623597007,
+            "max": 148272.58707007795
+          },
+          "average_cores": {
+            "median": 0.7779744025497343,
+            "min": 0.7636205823625283,
+            "max": 0.8078951695758597
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 3163.11648,
+            "min": 3163.09712,
+            "max": 3163.15392
+          }
+        }
+      },
+      "80% read / 20% update + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 1000000,
+            "cpu_seconds": 1.5662800000000003,
+            "wall_seconds": 1.664799958,
+            "cpu_seconds_per_million_ops": 1.5662800000000003,
+            "ops_per_second": 600672.7686378282,
+            "average_cores": 0.9408217440620577,
+            "go_allocated_bytes_per_op": 380.860192
+          },
+          {
+            "repetition": 2,
+            "ops": 1000000,
+            "cpu_seconds": 1.5739020000000001,
+            "wall_seconds": 1.656628625,
+            "cpu_seconds_per_million_ops": 1.5739020000000001,
+            "ops_per_second": 603635.5915315661,
+            "average_cores": 0.9500632647827151,
+            "go_allocated_bytes_per_op": 380.8578
+          },
+          {
+            "repetition": 3,
+            "ops": 1000000,
+            "cpu_seconds": 1.580012000000001,
+            "wall_seconds": 1.710760041,
+            "cpu_seconds_per_million_ops": 1.580012000000001,
+            "ops_per_second": 584535.5140604433,
+            "average_cores": 0.9235731266416698,
+            "go_allocated_bytes_per_op": 380.856664
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 1000000,
+            "min": 1000000,
+            "max": 1000000
+          },
+          "cpu_seconds": {
+            "median": 1.5739020000000001,
+            "min": 1.5662800000000003,
+            "max": 1.580012000000001
+          },
+          "wall_seconds": {
+            "median": 1.664799958,
+            "min": 1.656628625,
+            "max": 1.710760041
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 1.5739020000000001,
+            "min": 1.5662800000000003,
+            "max": 1.580012000000001
+          },
+          "ops_per_second": {
+            "median": 600672.7686378282,
+            "min": 584535.5140604433,
+            "max": 603635.5915315661
+          },
+          "average_cores": {
+            "median": 0.9408217440620577,
+            "min": 0.9235731266416698,
+            "max": 0.9500632647827151
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 380.8578,
+            "min": 380.856664,
+            "max": 380.860192
+          }
+        }
+      },
+      "Delete + maintenance": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 100000,
+            "cpu_seconds": 0.48709800000000136,
+            "wall_seconds": 0.606037666,
+            "cpu_seconds_per_million_ops": 4.870980000000014,
+            "ops_per_second": 165006.2456679054,
+            "average_cores": 0.8037421225234561,
+            "go_allocated_bytes_per_op": 2916.03736
+          },
+          {
+            "repetition": 2,
+            "ops": 100000,
+            "cpu_seconds": 0.49229700000000176,
+            "wall_seconds": 0.57114725,
+            "cpu_seconds_per_million_ops": 4.922970000000017,
+            "ops_per_second": 175086.19712342133,
+            "average_cores": 0.8619440958526926,
+            "go_allocated_bytes_per_op": 2916.0316
+          },
+          {
+            "repetition": 3,
+            "ops": 100000,
+            "cpu_seconds": 0.5052559999999993,
+            "wall_seconds": 0.602697125,
+            "cpu_seconds_per_million_ops": 5.052559999999993,
+            "ops_per_second": 165920.81802281702,
+            "average_cores": 0.8383248883093632,
+            "go_allocated_bytes_per_op": 2916.10304
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 100000,
+            "min": 100000,
+            "max": 100000
+          },
+          "cpu_seconds": {
+            "median": 0.49229700000000176,
+            "min": 0.48709800000000136,
+            "max": 0.5052559999999993
+          },
+          "wall_seconds": {
+            "median": 0.602697125,
+            "min": 0.57114725,
+            "max": 0.606037666
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 4.922970000000017,
+            "min": 4.870980000000014,
+            "max": 5.052559999999993
+          },
+          "ops_per_second": {
+            "median": 165920.81802281702,
+            "min": 165006.2456679054,
+            "max": 175086.19712342133
+          },
+          "average_cores": {
+            "median": 0.8383248883093632,
+            "min": 0.8037421225234561,
+            "max": 0.8619440958526926
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 2916.03736,
+            "min": 2916.0316,
+            "max": 2916.10304
+          }
+        }
+      },
+      "Scan after delete": {
+        "samples": [
+          {
+            "repetition": 1,
+            "ops": 4500000,
+            "cpu_seconds": 0.08968599999999927,
+            "wall_seconds": 0.089235334,
+            "cpu_seconds_per_million_ops": 0.01993022222222206,
+            "ops_per_second": 50428454.71951727,
+            "average_cores": 1.005050308883242,
+            "go_allocated_bytes_per_op": 0.5815448888888889
+          },
+          {
+            "repetition": 2,
+            "ops": 4500000,
+            "cpu_seconds": 0.08837600000000112,
+            "wall_seconds": 0.087898125,
+            "cpu_seconds_per_million_ops": 0.01963911111111136,
+            "ops_per_second": 51195631.30612855,
+            "average_cores": 1.0054366916245498,
+            "go_allocated_bytes_per_op": 0.5815448888888889
+          },
+          {
+            "repetition": 3,
+            "ops": 4500000,
+            "cpu_seconds": 0.09081800000000007,
+            "wall_seconds": 0.09026825,
+            "cpu_seconds_per_million_ops": 0.02018177777777779,
+            "ops_per_second": 49851415.08780773,
+            "average_cores": 1.0060901812098946,
+            "go_allocated_bytes_per_op": 0.5815448888888889
+          }
+        ],
+        "measures": {
+          "ops": {
+            "median": 4500000,
+            "min": 4500000,
+            "max": 4500000
+          },
+          "cpu_seconds": {
+            "median": 0.08968599999999927,
+            "min": 0.08837600000000112,
+            "max": 0.09081800000000007
+          },
+          "wall_seconds": {
+            "median": 0.089235334,
+            "min": 0.087898125,
+            "max": 0.09026825
+          },
+          "cpu_seconds_per_million_ops": {
+            "median": 0.01993022222222206,
+            "min": 0.01963911111111136,
+            "max": 0.02018177777777779
+          },
+          "ops_per_second": {
+            "median": 50428454.71951727,
+            "min": 49851415.08780773,
+            "max": 51195631.30612855
+          },
+          "average_cores": {
+            "median": 1.0054366916245498,
+            "min": 1.005050308883242,
+            "max": 1.0060901812098946
+          },
+          "go_allocated_bytes_per_op": {
+            "median": 0.5815448888888889,
+            "min": 0.5815448888888889,
+            "max": 0.5815448888888889
+          }
+        }
+      }
+    },
+    "process_peak_rss_bytes": {
+      "median": 858996736,
+      "min": 837844992,
+      "max": 859373568
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 562562368,
+      "min": 540476568,
+      "max": 576095480
+    },
+    "disk_bytes": {
+      "median": 123287952,
+      "min": 123287952,
+      "max": 123287952
+    },
+    "fixture_rss_bytes": {
+      "median": 161644544,
+      "min": 161546240,
+      "max": 161923072
+    }
+  }
+]

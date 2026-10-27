@@ -10,6 +10,7 @@ import (
 func TestMemtableOrderAndRanges(t *testing.T) {
 	rng := rand.New(rand.NewSource(77))
 	mt := newMemtable()
+	defer mt.releaseBuffers()
 	ref := map[string]mtValue{}
 	for i := 0; i < 200_000; i++ {
 		k := make([]byte, 1+rng.Intn(12))

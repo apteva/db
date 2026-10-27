@@ -1,0 +1,8 @@
+{
+  "event": "Initial 100k SQLite trial was interrupted by the free-space guard before completing insert; partial fixture removed, no timing sample accepted.",
+  "completed_before_pause": 24,
+  "resume_at": "2026-10-27T10:32:28.331220+00:00",
+  "cleanup": "Removed only task-created /private/tmp/apteva-db-go-cache. Preserved all benchmark results/source snapshots/binaries.",
+  "guard_update": "Increase preflight reserve from 256 MiB to 1 GiB and stop threshold from 128 to 512 MiB. Successful child measurement phases are unchanged.",
+  "free_bytes_after_cleanup": 11440877568
+}

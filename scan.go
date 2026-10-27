@@ -15,9 +15,22 @@ func (db *DB) Scan(start, end []byte, fn func(key, val []byte) bool) error {
 }
 
 func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) error {
+	return db.scanWithRetirement(v, start, end, fn, false)
+}
+
+// Only a private file copy retires consumed file translations. Public scans
+// keep their warm read layout. Remapping preserves all bytes and addresses.
+func (db *DB) scanWithRetirement(v view, start, end []byte, fn func(key, val []byte) bool, retire bool) error {
 	// Merge buffered entries (newer) with the tree (older). The snapshot is
 	// taken once; values in it are never mutated by the writer.
 	db.mu.RLock()
+	if db.closed || (v.snap != nil && v.snap.closed) {
+		db.mu.RUnlock()
+		return ErrClosed
+	}
+	stores := v.retainMemtables()
+	pg := db.pager
+	defer releaseMemtableStores(stores)
 	snap := v.memRange(start, end) // db.mt is swapped by the checkpointer under the lock
 	db.mu.RUnlock()
 	si := 0
@@ -54,66 +67,22 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 	cur := start
 	var curBuf, flat []byte
 	var cells []cellRef
-	type frame struct {
-		n   page
-		idx int
-	}
-	var stack [maxTreeDepth]frame
+	var walk leafWalk
+	var retired []uint32
 	for {
 		db.mu.RLock()
 		if db.closed {
 			db.mu.RUnlock()
 			return ErrClosed
 		}
-		n, err := v.page(v.root())
+		leaf, i, err := walk.next(v, cur)
 		if err != nil {
 			db.mu.RUnlock()
 			return err
 		}
-		depth := 0
-		for n.typ() == pageInternal {
-			idx := 0
-			if cur != nil {
-				idx = n.searchInternal(cur)
-			}
-			stack[depth] = frame{n, idx}
-			depth++
-			if n, err = v.page(n.child(idx)); err != nil {
-				db.mu.RUnlock()
-				return err
-			}
-		}
-		leaf := n
-		i := 0
-		if cur != nil {
-			i, _ = leaf.searchLeaf(cur)
-		}
-		if i >= leaf.numCells() {
-			// every key here is below cur: hop to the next leaf, if any
-			d := depth - 1
-			for d >= 0 && stack[d].idx >= stack[d].n.numCells() {
-				d--
-			}
-			if d < 0 {
-				db.mu.RUnlock()
-				return drain()
-			}
-			stack[d].idx++
-			if n, err = v.page(stack[d].n.child(stack[d].idx)); err != nil {
-				db.mu.RUnlock()
-				return err
-			}
-			for n.typ() == pageInternal {
-				if n, err = v.page(n.child(0)); err != nil {
-					db.mu.RUnlock()
-					return err
-				}
-			}
-			leaf, i = n, 0
-			if leaf.numCells() == 0 {
-				db.mu.RUnlock()
-				return drain()
-			}
+		if leaf == nil {
+			db.mu.RUnlock()
+			return drain()
 		}
 		nc := leaf.numCells()
 		if nc == 0 { // empty root
@@ -155,12 +124,23 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
 		// resume just past the last key of this leaf
 		curBuf = append(curBuf[:0], leaf.leafKey(nc-1)...)
 		curBuf = append(curBuf, 0)
+		if retire {
+			retired = append(retired, walk.id)
+		}
 		db.mu.RUnlock()
 		for _, c := range cells {
 			vo := c.ko + c.kl
 			if !emit(flat[c.ko:vo], flat[vo:vo+c.vl]) {
 				return nil
 			}
+		}
+		if len(retired) >= 256 {
+			db.mu.Lock()
+			if !db.closed && db.pager == pg {
+				pg.discardScannedPages(retired)
+			}
+			db.mu.Unlock()
+			retired = retired[:0]
 		}
 		if jEnd < nc {
 			return drain() // the range ends inside this leaf
@@ -280,61 +260,21 @@ func (db *DB) scanLeaves(v view, start, end []byte, fn func(lv leafView) bool) e
 	}
 	cur := start
 	var curBuf []byte
-	type frame struct {
-		n   page
-		idx int
-	}
-	var stack [maxTreeDepth]frame
+	var walk leafWalk
 	for {
 		db.mu.RLock()
 		if db.closed {
 			db.mu.RUnlock()
 			return ErrClosed
 		}
-		n, err := v.page(v.root())
+		leaf, i, err := walk.next(v, cur)
 		if err != nil {
 			db.mu.RUnlock()
 			return err
 		}
-		depth := 0
-		for n.typ() == pageInternal {
-			idx := 0
-			if cur != nil {
-				idx = n.searchInternal(cur)
-			}
-			stack[depth] = frame{n, idx}
-			depth++
-			if n, err = v.page(n.child(idx)); err != nil {
-				db.mu.RUnlock()
-				return err
-			}
-		}
-		leaf := n
-		i := 0
-		if cur != nil {
-			i, _ = leaf.searchLeaf(cur)
-		}
-		if i >= leaf.numCells() {
-			d := depth - 1
-			for d >= 0 && stack[d].idx >= stack[d].n.numCells() {
-				d--
-			}
-			if d < 0 {
-				db.mu.RUnlock()
-				return nil
-			}
-			stack[d].idx++
-			if n, err = v.page(stack[d].n.child(stack[d].idx)); err != nil {
-				db.mu.RUnlock()
-				return err
-			}
-			for n.typ() == pageInternal {
-				if n, err = v.page(n.child(0)); err != nil {
-					db.mu.RUnlock()
-					return err
-				}
-			}
-			leaf, i = n, 0
+		if leaf == nil {
+			db.mu.RUnlock()
+			return nil
 		}
 		nc := leaf.numCells()
 		if nc == 0 {

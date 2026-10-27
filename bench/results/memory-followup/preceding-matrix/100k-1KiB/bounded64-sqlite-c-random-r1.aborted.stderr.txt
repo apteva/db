@@ -1,0 +1,1 @@
+sqlite-c random open               wall=0.003s cpu=0.002s rss=123.7MiB

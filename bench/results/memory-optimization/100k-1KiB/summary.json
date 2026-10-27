@@ -1,0 +1,5738 @@
+[
+  {
+    "profile": "alpha6-before-memory",
+    "workload": "random",
+    "engine": "ours",
+    "trials": 3,
+    "process_peak_rss_bytes": {
+      "median": 686555136,
+      "min": 674004992,
+      "max": 723795968
+    },
+    "fixture_rss_bytes": {
+      "median": 128090112,
+      "min": 128040960,
+      "max": 128172032
+    },
+    "baseline_rss_bytes": {
+      "median": 20496384,
+      "min": 20447232,
+      "max": 21397504
+    },
+    "disk_bytes": {
+      "median": 99075536,
+      "min": 99075536,
+      "max": 99075536
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 429065416,
+      "min": 421708904,
+      "max": 468845792
+    },
+    "fixture_memory_footprint_bytes": {
+      "median": 116687616,
+      "min": 116622080,
+      "max": 116720384
+    },
+    "baseline_memory_footprint_bytes": {
+      "median": 9208480,
+      "min": 9126560,
+      "max": 9896608
+    },
+    "phases": {
+      "open": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.039648833,
+          "min": 0.021717625,
+          "max": 0.041171292
+        },
+        "user_seconds": {
+          "median": 0.00012199999999999711,
+          "min": 0.00011800000000000699,
+          "max": 0.00012200000000001099
+        },
+        "system_seconds": {
+          "median": 0.0010989999999999993,
+          "min": 0.0007639999999999991,
+          "max": 0.0011989999999999987
+        },
+        "cpu_ns_per_op": {
+          "median": 1217000.0000000063,
+          "min": 886000.00000001,
+          "max": 1320999.9999999958
+        },
+        "wall_ns_per_op": {
+          "median": 39648833,
+          "min": 21717625,
+          "max": 41171292
+        },
+        "average_cores": {
+          "median": 0.033317500164506623,
+          "min": 0.02955943184877478,
+          "max": 0.040796357796951094
+        },
+        "rss_bytes": {
+          "median": 128581632,
+          "min": 128499712,
+          "max": 128581632
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 128466944,
+          "min": 128401408,
+          "max": 128516096
+        },
+        "memory_footprint_bytes": {
+          "median": 116720384,
+          "min": 116654848,
+          "max": 116720384
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 116720384,
+          "min": 116654848,
+          "max": 116736768
+        },
+        "go_heap_bytes": {
+          "median": 113153136,
+          "min": 113152816,
+          "max": 113154576
+        },
+        "go_allocated_bytes": {
+          "median": 4311432,
+          "min": 4310936,
+          "max": 4311432
+        },
+        "go_allocations": {
+          "median": 116,
+          "min": 115,
+          "max": 116
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "insert": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.125226333,
+          "min": 0.123505708,
+          "max": 0.128163916
+        },
+        "user_seconds": {
+          "median": 0.122503,
+          "min": 0.119918,
+          "max": 0.146668
+        },
+        "system_seconds": {
+          "median": 0.065314,
+          "min": 0.063154,
+          "max": 0.06567899999999999
+        },
+        "cpu_ns_per_op": {
+          "median": 1856.5700000000004,
+          "min": 1852.32,
+          "max": 2123.47
+        },
+        "wall_ns_per_op": {
+          "median": 1252.26333,
+          "min": 1235.05708,
+          "max": 1281.63916
+        },
+        "average_cores": {
+          "median": 1.499784933017023,
+          "min": 1.4825715610469885,
+          "max": 1.6568391995762677
+        },
+        "rss_bytes": {
+          "median": 385679360,
+          "min": 360677376,
+          "max": 392577024
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 385597440,
+          "min": 360513536,
+          "max": 392511488
+        },
+        "memory_footprint_bytes": {
+          "median": 338396144,
+          "min": 313328624,
+          "max": 345228296
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 338396144,
+          "min": 313328624,
+          "max": 345228296
+        },
+        "go_heap_bytes": {
+          "median": 302968568,
+          "min": 268143888,
+          "max": 327914368
+        },
+        "go_allocated_bytes": {
+          "median": 259783984,
+          "min": 234839640,
+          "max": 323493464
+        },
+        "go_allocations": {
+          "median": 318331,
+          "min": 318284,
+          "max": 318426
+        },
+        "gc_cycles": {
+          "median": 1,
+          "min": 1,
+          "max": 2
+        }
+      },
+      "settle": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.751496125,
+          "min": 0.748865,
+          "max": 0.774564125
+        },
+        "user_seconds": {
+          "median": 0.207597,
+          "min": 0.186936,
+          "max": 0.212027
+        },
+        "system_seconds": {
+          "median": 0.22462600000000002,
+          "min": 0.21757300000000002,
+          "max": 0.24133700000000002
+        },
+        "cpu_ns_per_op": {
+          "median": 4282.73,
+          "min": 4251.700000000001,
+          "max": 4366.53
+        },
+        "wall_ns_per_op": {
+          "median": 7514.96125,
+          "min": 7488.65,
+          "max": 7745.64125
+        },
+        "average_cores": {
+          "median": 0.5657647269970953,
+          "min": 0.5529212962193414,
+          "max": 0.5830864040915252
+        },
+        "rss_bytes": {
+          "median": 550092800,
+          "min": 542982144,
+          "max": 586137600
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428573776,
+          "min": 421463120,
+          "max": 464602216
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428655840,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 237621376,
+          "min": 232729056,
+          "max": 330553032
+        },
+        "go_allocated_bytes": {
+          "median": 292683288,
+          "min": 271571504,
+          "max": 295590072
+        },
+        "go_allocations": {
+          "median": 44730,
+          "min": 40805,
+          "max": 45287
+        },
+        "gc_cycles": {
+          "median": 2,
+          "min": 1,
+          "max": 2
+        }
+      },
+      "find-hit": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.128969084,
+          "min": 0.127559708,
+          "max": 0.134378042
+        },
+        "user_seconds": {
+          "median": 0.128363,
+          "min": 0.12686999999999998,
+          "max": 0.13362400000000002
+        },
+        "system_seconds": {
+          "median": 0.0012090000000000156,
+          "min": 0.0011430000000000051,
+          "max": 0.0013500000000000179
+        },
+        "cpu_ns_per_op": {
+          "median": 647.5300000000001,
+          "min": 640.395,
+          "max": 674.8700000000001
+        },
+        "wall_ns_per_op": {
+          "median": 644.8454200000001,
+          "min": 637.79854,
+          "max": 671.89021
+        },
+        "average_cores": {
+          "median": 1.0041631372678432,
+          "min": 1.0040709720031658,
+          "max": 1.0044349358803728
+        },
+        "rss_bytes": {
+          "median": 550158336,
+          "min": 543014912,
+          "max": 586170368
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428622928,
+          "min": 421479504,
+          "max": 464618600
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428655840,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 243238768,
+          "min": 238345760,
+          "max": 336169736
+        },
+        "go_allocated_bytes": {
+          "median": 5566704,
+          "min": 5566704,
+          "max": 5566704
+        },
+        "go_allocations": {
+          "median": 86965,
+          "min": 86965,
+          "max": 86965
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-miss": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.056269042,
+          "min": 0.055367209,
+          "max": 0.058855458
+        },
+        "user_seconds": {
+          "median": 0.05574000000000001,
+          "min": 0.054898,
+          "max": 0.058243000000000045
+        },
+        "system_seconds": {
+          "median": 0.0006450000000000067,
+          "min": 0.0005830000000000002,
+          "max": 0.0008399999999999519
+        },
+        "cpu_ns_per_op": {
+          "median": 281.92500000000007,
+          "min": 277.405,
+          "max": 295.415
+        },
+        "wall_ns_per_op": {
+          "median": 281.34521,
+          "min": 276.836045,
+          "max": 294.27729
+        },
+        "average_cores": {
+          "median": 1.0020607779318513,
+          "min": 1.002055205636246,
+          "max": 1.0038661155266178
+        },
+        "rss_bytes": {
+          "median": 550174720,
+          "min": 543031296,
+          "max": 586186752
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428639312,
+          "min": 421495888,
+          "max": 464634984
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428655840,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 248224544,
+          "min": 243332432,
+          "max": 341156408
+        },
+        "go_allocated_bytes": {
+          "median": 4936640,
+          "min": 4936640,
+          "max": 4936640
+        },
+        "go_allocations": {
+          "median": 77135,
+          "min": 77135,
+          "max": 77135
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-values": {
+        "ops": {
+          "median": 500000,
+          "min": 500000,
+          "max": 500000
+        },
+        "wall_seconds": {
+          "median": 0.042083292,
+          "min": 0.041242666,
+          "max": 0.042388041
+        },
+        "user_seconds": {
+          "median": 0.041656000000000026,
+          "min": 0.04081999999999997,
+          "max": 0.04208999999999996
+        },
+        "system_seconds": {
+          "median": 0.0005870000000000042,
+          "min": 0.0005549999999999722,
+          "max": 0.0006450000000000067
+        },
+        "cpu_ns_per_op": {
+          "median": 84.48600000000006,
+          "min": 82.92999999999995,
+          "max": 85.28999999999986
+        },
+        "wall_ns_per_op": {
+          "median": 84.166584,
+          "min": 82.485332,
+          "max": 84.776082
+        },
+        "average_cores": {
+          "median": 1.0053908736161716,
+          "min": 1.00379504531157,
+          "max": 1.0060620635900568
+        },
+        "rss_bytes": {
+          "median": 550207488,
+          "min": 543064064,
+          "max": 586219520
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428672080,
+          "min": 421528656,
+          "max": 464667752
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428672080,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 250725192,
+          "min": 245834056,
+          "max": 343656624
+        },
+        "go_allocated_bytes": {
+          "median": 2342968,
+          "min": 2342968,
+          "max": 2342968
+        },
+        "go_allocations": {
+          "median": 32077,
+          "min": 32077,
+          "max": 32077
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit-par10": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.0767705,
+          "min": 0.075513833,
+          "max": 0.077169833
+        },
+        "user_seconds": {
+          "median": 0.20182999999999995,
+          "min": 0.2002839999999999,
+          "max": 0.20274599999999998
+        },
+        "system_seconds": {
+          "median": 0.068996,
+          "min": 0.066102,
+          "max": 0.070166
+        },
+        "cpu_ns_per_op": {
+          "median": 1358.71,
+          "min": 1331.9299999999996,
+          "max": 1359.9799999999998
+        },
+        "wall_ns_per_op": {
+          "median": 383.8525,
+          "min": 377.569165,
+          "max": 385.849165
+        },
+        "average_cores": {
+          "median": 3.527645060740062,
+          "min": 3.524641552612923,
+          "max": 3.539666929354374
+        },
+        "rss_bytes": {
+          "median": 550273024,
+          "min": 543129600,
+          "max": 586285056
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428704848,
+          "min": 421545040,
+          "max": 464684136
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428704848,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 256317304,
+          "min": 251430168,
+          "max": 349256128
+        },
+        "go_allocated_bytes": {
+          "median": 5546800,
+          "min": 5542352,
+          "max": 5550176
+        },
+        "go_allocations": {
+          "median": 86453,
+          "min": 86349,
+          "max": 86475
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "readers-close": {
+        "ops": {
+          "median": 10,
+          "min": 10,
+          "max": 10
+        },
+        "wall_seconds": {
+          "median": 6.333e-06,
+          "min": 5.25e-06,
+          "max": 7.25e-06
+        },
+        "user_seconds": {
+          "median": 2.9999999999752447e-06,
+          "min": 2.0000000000575113e-06,
+          "max": 5.000000000032756e-06
+        },
+        "system_seconds": {
+          "median": 4.000000000004e-06,
+          "min": 2.9999999999752447e-06,
+          "max": 4.999999999977245e-06
+        },
+        "cpu_ns_per_op": {
+          "median": 700.0000000034756,
+          "min": 699.9999999979245,
+          "max": 800.0000000008001
+        },
+        "wall_ns_per_op": {
+          "median": 633.3,
+          "min": 525,
+          "max": 725
+        },
+        "average_cores": {
+          "median": 1.105321332698444,
+          "min": 1.1034482758631725,
+          "max": 1.3333333333399537
+        },
+        "rss_bytes": {
+          "median": 550273024,
+          "min": 543129600,
+          "max": 586285056
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428704848,
+          "min": 421545040,
+          "max": 464684136
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428704848,
+          "min": 421545160,
+          "max": 464700664
+        },
+        "go_heap_bytes": {
+          "median": 256366920,
+          "min": 251479784,
+          "max": 349305296
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.010059791,
+          "min": 0.009621708,
+          "max": 0.010747416
+        },
+        "user_seconds": {
+          "median": 0.008763999999999994,
+          "min": 0.008355000000000001,
+          "max": 0.013843999999999967
+        },
+        "system_seconds": {
+          "median": 0.0037960000000000216,
+          "min": 0.0036559999999999926,
+          "max": 0.00529099999999999
+        },
+        "cpu_ns_per_op": {
+          "median": 1256.0000000000016,
+          "min": 1201.0999999999995,
+          "max": 1913.499999999996
+        },
+        "wall_ns_per_op": {
+          "median": 1005.9791,
+          "min": 962.1708,
+          "max": 1074.7416
+        },
+        "average_cores": {
+          "median": 1.2485348850686873,
+          "min": 1.2483230628075592,
+          "max": 1.7804279651964676
+        },
+        "rss_bytes": {
+          "median": 550387712,
+          "min": 543162368,
+          "max": 586317824
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428803152,
+          "min": 421577808,
+          "max": 464716904
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428803152,
+          "min": 421577808,
+          "max": 464716904
+        },
+        "go_heap_bytes": {
+          "median": 264177224,
+          "min": 220536592,
+          "max": 269065832
+        },
+        "go_allocated_bytes": {
+          "median": 12648880,
+          "min": 12648304,
+          "max": 12653808
+        },
+        "go_allocations": {
+          "median": 30903,
+          "min": 30897,
+          "max": 30903
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 1
+        }
+      },
+      "settle-update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.41958275,
+          "min": 0.392604916,
+          "max": 0.436255084
+        },
+        "user_seconds": {
+          "median": 0.12268699999999999,
+          "min": 0.12033099999999997,
+          "max": 0.1273660000000001
+        },
+        "system_seconds": {
+          "median": 0.14434399999999997,
+          "min": 0.13229499999999994,
+          "max": 0.14932300000000004
+        },
+        "cpu_ns_per_op": {
+          "median": 2717.100000000001,
+          "min": 2526.2599999999993,
+          "max": 2720.1
+        },
+        "wall_ns_per_op": {
+          "median": 4195.8275,
+          "min": 3926.04916,
+          "max": 4362.55084
+        },
+        "average_cores": {
+          "median": 0.643461122631485,
+          "min": 0.6235113583226459,
+          "max": 0.6475719032777207
+        },
+        "rss_bytes": {
+          "median": 550469632,
+          "min": 543277056,
+          "max": 586465280
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 420545616,
+          "min": 388432976,
+          "max": 439583848
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428803152,
+          "min": 421708904,
+          "max": 464897152
+        },
+        "go_heap_bytes": {
+          "median": 250711264,
+          "min": 232923552,
+          "max": 286722144
+        },
+        "go_allocated_bytes": {
+          "median": 206374440,
+          "min": 206368344,
+          "max": 206384232
+        },
+        "go_allocations": {
+          "median": 28322,
+          "min": 28223,
+          "max": 28469
+        },
+        "gc_cycles": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        }
+      },
+      "verify-update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.007320209,
+          "min": 0.00729525,
+          "max": 0.007501875
+        },
+        "user_seconds": {
+          "median": 0.00719700000000012,
+          "min": 0.0071590000000000265,
+          "max": 0.007356999999999836
+        },
+        "system_seconds": {
+          "median": 0.00019700000000000273,
+          "min": 0.00019199999999996997,
+          "max": 0.00024100000000004673
+        },
+        "cpu_ns_per_op": {
+          "median": 743.8000000000167,
+          "min": 735.6000000000029,
+          "max": 754.8999999999807
+        },
+        "wall_ns_per_op": {
+          "median": 732.0209,
+          "min": 729.525,
+          "max": 750.1875
+        },
+        "average_cores": {
+          "median": 1.0083273362804606,
+          "min": 1.0062817628925844,
+          "max": 1.0160912072319475
+        },
+        "rss_bytes": {
+          "median": 550486016,
+          "min": 543293440,
+          "max": 586481664
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 420545616,
+          "min": 388432976,
+          "max": 439583848
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428803152,
+          "min": 421708904,
+          "max": 464897152
+        },
+        "go_heap_bytes": {
+          "median": 251034384,
+          "min": 233246208,
+          "max": 287045040
+        },
+        "go_allocated_bytes": {
+          "median": 273520,
+          "min": 273520,
+          "max": 273520
+        },
+        "go_allocations": {
+          "median": 4274,
+          "min": 4274,
+          "max": 4274
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "mixed-80read-20update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.090316417,
+          "min": 0.085458708,
+          "max": 0.092635584
+        },
+        "user_seconds": {
+          "median": 0.08228999999999997,
+          "min": 0.0755539999999999,
+          "max": 0.08892500000000014
+        },
+        "system_seconds": {
+          "median": 0.01585100000000006,
+          "min": 0.015475000000000017,
+          "max": 0.016614000000000018
+        },
+        "cpu_ns_per_op": {
+          "median": 981.4100000000003,
+          "min": 910.289999999999,
+          "max": 1055.3900000000017
+        },
+        "wall_ns_per_op": {
+          "median": 903.16417,
+          "min": 854.58708,
+          "max": 926.35584
+        },
+        "average_cores": {
+          "median": 1.065181093072457,
+          "min": 1.0594308986058751,
+          "max": 1.1685472420811398
+        },
+        "rss_bytes": {
+          "median": 550486016,
+          "min": 543424512,
+          "max": 586481664
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 420545616,
+          "min": 385631312,
+          "max": 439583848
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428803152,
+          "min": 421708904,
+          "max": 464897152
+        },
+        "go_heap_bytes": {
+          "median": 260808768,
+          "min": 145342304,
+          "max": 278597376
+        },
+        "go_allocated_bytes": {
+          "median": 27512528,
+          "min": 27512496,
+          "max": 27513312
+        },
+        "go_allocations": {
+          "median": 96653,
+          "min": 96652,
+          "max": 96662
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 1
+        }
+      },
+      "settle-mixed": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.416483167,
+          "min": 0.402345833,
+          "max": 0.419771042
+        },
+        "user_seconds": {
+          "median": 0.13635300000000017,
+          "min": 0.127718,
+          "max": 0.14211899999999988
+        },
+        "system_seconds": {
+          "median": 0.13861999999999997,
+          "min": 0.134405,
+          "max": 0.14846099999999995
+        },
+        "cpu_ns_per_op": {
+          "median": 2807.389999999998,
+          "min": 2621.23,
+          "max": 2848.1400000000012
+        },
+        "wall_ns_per_op": {
+          "median": 4164.83167,
+          "min": 4023.45833,
+          "max": 4197.71042
+        },
+        "average_cores": {
+          "median": 0.6740704600913675,
+          "min": 0.6514868019025811,
+          "max": 0.6784984467794711
+        },
+        "rss_bytes": {
+          "median": 550535168,
+          "min": 543457280,
+          "max": 586596352
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428917840,
+          "min": 380109904,
+          "max": 460194920
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428983496,
+          "min": 421708904,
+          "max": 464897152
+        },
+        "go_heap_bytes": {
+          "median": 237751392,
+          "min": 232699184,
+          "max": 332257864
+        },
+        "go_allocated_bytes": {
+          "median": 226175536,
+          "min": 226174128,
+          "max": 226176120
+        },
+        "go_allocations": {
+          "median": 31863,
+          "min": 31854,
+          "max": 31864
+        },
+        "gc_cycles": {
+          "median": 1,
+          "min": 1,
+          "max": 2
+        }
+      },
+      "delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.004712583,
+          "min": 0.004438167,
+          "max": 0.004731625
+        },
+        "user_seconds": {
+          "median": 0.004183000000000048,
+          "min": 0.0040719999999998535,
+          "max": 0.0042039999999998745
+        },
+        "system_seconds": {
+          "median": 0.00039800000000000946,
+          "min": 0.00037600000000004297,
+          "max": 0.0005190000000000472
+        },
+        "cpu_ns_per_op": {
+          "median": 458.1000000000057,
+          "min": 444.79999999998967,
+          "max": 472.29999999999217
+        },
+        "wall_ns_per_op": {
+          "median": 471.2583,
+          "min": 443.8167,
+          "max": 473.1625
+        },
+        "average_cores": {
+          "median": 1.0022104650464345,
+          "min": 0.9681663276358666,
+          "max": 1.002215554304265
+        },
+        "rss_bytes": {
+          "median": 550535168,
+          "min": 543473664,
+          "max": 586612736
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428917840,
+          "min": 380109904,
+          "max": 460211304
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 428983496,
+          "min": 421708904,
+          "max": 464897152
+        },
+        "go_heap_bytes": {
+          "median": 240209056,
+          "min": 235156864,
+          "max": 334715528
+        },
+        "go_allocated_bytes": {
+          "median": 2408304,
+          "min": 2408304,
+          "max": 2408304
+        },
+        "go_allocations": {
+          "median": 20897,
+          "min": 20897,
+          "max": 20897
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-delete": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.351919209,
+          "min": 0.351086875,
+          "max": 0.354268959
+        },
+        "user_seconds": {
+          "median": 0.10694900000000018,
+          "min": 0.10590500000000014,
+          "max": 0.10729199999999994
+        },
+        "system_seconds": {
+          "median": 0.12550799999999995,
+          "min": 0.121552,
+          "max": 0.12653400000000004
+        },
+        "cpu_ns_per_op": {
+          "median": 2327.999999999999,
+          "min": 2274.570000000001,
+          "max": 2334.830000000002
+        },
+        "wall_ns_per_op": {
+          "median": 3519.19209,
+          "min": 3510.86875,
+          "max": 3542.68959
+        },
+        "average_cores": {
+          "median": 0.6571278518364345,
+          "min": 0.6478652897520026,
+          "max": 0.663456253676679
+        },
+        "rss_bytes": {
+          "median": 539639808,
+          "min": 532496384,
+          "max": 580009984
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428999760,
+          "min": 388564048,
+          "max": 468763752
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 429065416,
+          "min": 421708904,
+          "max": 468845792
+        },
+        "go_heap_bytes": {
+          "median": 318036544,
+          "min": 221500720,
+          "max": 331072864
+        },
+        "go_allocated_bytes": {
+          "median": 195312960,
+          "min": 195312960,
+          "max": 195313088
+        },
+        "go_allocations": {
+          "median": 28113,
+          "min": 28112,
+          "max": 28115
+        },
+        "gc_cycles": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        }
+      },
+      "verify-delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.00379775,
+          "min": 0.003743625,
+          "max": 0.003811625
+        },
+        "user_seconds": {
+          "median": 0.0036959999999999216,
+          "min": 0.003593999999999875,
+          "max": 0.003721999999999781
+        },
+        "system_seconds": {
+          "median": 0.00015799999999999148,
+          "min": 0.00015700000000007375,
+          "max": 0.00019899999999994922
+        },
+        "cpu_ns_per_op": {
+          "median": 385.3999999999913,
+          "min": 375.09999999999485,
+          "max": 392.099999999973
+        },
+        "wall_ns_per_op": {
+          "median": 379.775,
+          "min": 374.3625,
+          "max": 381.1625
+        },
+        "average_cores": {
+          "median": 1.0111173056111011,
+          "min": 1.0019700156933318,
+          "max": 1.0324534263708065
+        },
+        "rss_bytes": {
+          "median": 539656192,
+          "min": 532512768,
+          "max": 580026368
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428999760,
+          "min": 388564048,
+          "max": 468763752
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 429065416,
+          "min": 421708904,
+          "max": 468845792
+        },
+        "go_heap_bytes": {
+          "median": 318298384,
+          "min": 221762560,
+          "max": 331334704
+        },
+        "go_allocated_bytes": {
+          "median": 212480,
+          "min": 212480,
+          "max": 212480
+        },
+        "go_allocations": {
+          "median": 3320,
+          "min": 3320,
+          "max": 3320
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-after-delete": {
+        "ops": {
+          "median": 450000,
+          "min": 450000,
+          "max": 450000
+        },
+        "wall_seconds": {
+          "median": 0.037943209,
+          "min": 0.037499458,
+          "max": 0.038369625
+        },
+        "user_seconds": {
+          "median": 0.03733199999999992,
+          "min": 0.036989999999999856,
+          "max": 0.037924999999999986
+        },
+        "system_seconds": {
+          "median": 0.0007179999999999964,
+          "min": 0.0006939999999999724,
+          "max": 0.0007690000000000197
+        },
+        "cpu_ns_per_op": {
+          "median": 84.66888888888876,
+          "min": 83.74222222222184,
+          "max": 85.8733333333333
+        },
+        "wall_ns_per_op": {
+          "median": 84.31824222222222,
+          "min": 83.33212888888889,
+          "max": 85.26583333333333
+        },
+        "average_cores": {
+          "median": 1.0049211911276112,
+          "min": 1.0041586097791555,
+          "max": 1.007124776434484
+        },
+        "rss_bytes": {
+          "median": 539656192,
+          "min": 532512768,
+          "max": 580026368
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428999760,
+          "min": 388564048,
+          "max": 468763752
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 429065416,
+          "min": 421708904,
+          "max": 468845792
+        },
+        "go_heap_bytes": {
+          "median": 320480440,
+          "min": 223944616,
+          "max": 333516760
+        },
+        "go_allocated_bytes": {
+          "median": 2132920,
+          "min": 2132920,
+          "max": 2132920
+        },
+        "go_allocations": {
+          "median": 28795,
+          "min": 28795,
+          "max": 28795
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "close": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.008997375,
+          "min": 0.00892325,
+          "max": 0.009260542
+        },
+        "user_seconds": {
+          "median": 0.00014399999999992197,
+          "min": 0.000140000000000029,
+          "max": 0.00015399999999998748
+        },
+        "system_seconds": {
+          "median": 0.0009980000000000544,
+          "min": 0.0009790000000000632,
+          "max": 0.0010530000000000816
+        },
+        "cpu_ns_per_op": {
+          "median": 1138000.0000000834,
+          "min": 1122999.999999985,
+          "max": 1207000.0000000692
+        },
+        "wall_ns_per_op": {
+          "median": 8997375,
+          "min": 8923250,
+          "max": 9260542
+        },
+        "average_cores": {
+          "median": 0.12753200907741946,
+          "min": 0.12481418191416775,
+          "max": 0.1303379435026664
+        },
+        "rss_bytes": {
+          "median": 440909824,
+          "min": 433766400,
+          "max": 481280000
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 686555136,
+          "min": 674004992,
+          "max": 723795968
+        },
+        "memory_footprint_bytes": {
+          "median": 428934128,
+          "min": 388498416,
+          "max": 468698120
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 429065416,
+          "min": 421708904,
+          "max": 468845792
+        },
+        "go_heap_bytes": {
+          "median": 320585680,
+          "min": 224050320,
+          "max": 333622912
+        },
+        "go_allocated_bytes": {
+          "median": 51240,
+          "min": 51240,
+          "max": 51240
+        },
+        "go_allocations": {
+          "median": 26,
+          "min": 26,
+          "max": 26
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    },
+    "load_cpu_seconds": {
+      "median": 0.621885,
+      "min": 0.610827,
+      "max": 0.64062
+    }
+  },
+  {
+    "profile": "bounded64",
+    "workload": "random",
+    "engine": "ours",
+    "trials": 3,
+    "process_peak_rss_bytes": {
+      "median": 291995648,
+      "min": 288047104,
+      "max": 293044224
+    },
+    "fixture_rss_bytes": {
+      "median": 128761856,
+      "min": 128729088,
+      "max": 128958464
+    },
+    "baseline_rss_bytes": {
+      "median": 21118976,
+      "min": 21004288,
+      "max": 21299200
+    },
+    "disk_bytes": {
+      "median": 99075536,
+      "min": 99075536,
+      "max": 99075536
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 238797712,
+      "min": 235029392,
+      "max": 243073936
+    },
+    "fixture_memory_footprint_bytes": {
+      "median": 117129984,
+      "min": 117080832,
+      "max": 117375744
+    },
+    "baseline_memory_footprint_bytes": {
+      "median": 9503392,
+      "min": 9487008,
+      "max": 9798304
+    },
+    "phases": {
+      "open": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.029281709,
+          "min": 0.022292333,
+          "max": 0.032842583
+        },
+        "user_seconds": {
+          "median": 0.0001280000000000031,
+          "min": 0.00010399999999999299,
+          "max": 0.00014500000000000624
+        },
+        "system_seconds": {
+          "median": 0.0007860000000000002,
+          "min": 0.0007290000000000005,
+          "max": 0.0008059999999999994
+        },
+        "cpu_ns_per_op": {
+          "median": 914000.0000000034,
+          "min": 832999.9999999935,
+          "max": 951000.0000000057
+        },
+        "wall_ns_per_op": {
+          "median": 29281709,
+          "min": 22292333,
+          "max": 32842583
+        },
+        "average_cores": {
+          "median": 0.03247761256011408,
+          "min": 0.02782972338077073,
+          "max": 0.037367107336858524
+        },
+        "rss_bytes": {
+          "median": 129302528,
+          "min": 129286144,
+          "max": 129581056
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 129171456,
+          "min": 129155072,
+          "max": 129466368
+        },
+        "memory_footprint_bytes": {
+          "median": 117195520,
+          "min": 117129984,
+          "max": 117506816
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 117228312,
+          "min": 117162776,
+          "max": 117539608
+        },
+        "go_heap_bytes": {
+          "median": 108943080,
+          "min": 108941952,
+          "max": 108944200
+        },
+        "go_allocated_bytes": {
+          "median": 101152,
+          "min": 100232,
+          "max": 101680
+        },
+        "go_allocations": {
+          "median": 121,
+          "min": 118,
+          "max": 129
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "insert": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.150312292,
+          "min": 0.147900542,
+          "max": 0.158754541
+        },
+        "user_seconds": {
+          "median": 0.105436,
+          "min": 0.103021,
+          "max": 0.105928
+        },
+        "system_seconds": {
+          "median": 0.074984,
+          "min": 0.072566,
+          "max": 0.07757599999999999
+        },
+        "cpu_ns_per_op": {
+          "median": 1804.2,
+          "min": 1755.87,
+          "max": 1835.04
+        },
+        "wall_ns_per_op": {
+          "median": 1503.12292,
+          "min": 1479.00542,
+          "max": 1587.54541
+        },
+        "average_cores": {
+          "median": 1.1871964607134435,
+          "min": 1.1558976445278502,
+          "max": 1.2003010372564875
+        },
+        "rss_bytes": {
+          "median": 250609664,
+          "min": 240107520,
+          "max": 251363328
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 250478592,
+          "min": 246923264,
+          "max": 255344640
+        },
+        "memory_footprint_bytes": {
+          "median": 238289808,
+          "min": 234668944,
+          "max": 238994320
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238289808,
+          "min": 234668944,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 113760344,
+          "min": 113759304,
+          "max": 113760808
+        },
+        "go_allocated_bytes": {
+          "median": 4765680,
+          "min": 4765520,
+          "max": 4767600
+        },
+        "go_allocations": {
+          "median": 1917,
+          "min": 1915,
+          "max": 1924
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.702728958,
+          "min": 0.673919459,
+          "max": 1.182379291
+        },
+        "user_seconds": {
+          "median": 0.133286,
+          "min": 0.1332,
+          "max": 0.135986
+        },
+        "system_seconds": {
+          "median": 0.19160399999999997,
+          "min": 0.177303,
+          "max": 0.21664999999999998
+        },
+        "cpu_ns_per_op": {
+          "median": 3248.899999999999,
+          "min": 3105.03,
+          "max": 3526.359999999999
+        },
+        "wall_ns_per_op": {
+          "median": 7027.28958,
+          "min": 6739.19459,
+          "max": 11823.79291
+        },
+        "average_cores": {
+          "median": 0.4607420009221012,
+          "min": 0.2982427066206118,
+          "max": 0.4623261875028636
+        },
+        "rss_bytes": {
+          "median": 147095552,
+          "min": 143310848,
+          "max": 147800064
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 134382480,
+          "min": 130597800,
+          "max": 134955992
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 114501512,
+          "min": 114501504,
+          "max": 114502800
+        },
+        "go_allocated_bytes": {
+          "median": 691136,
+          "min": 690368,
+          "max": 691688
+        },
+        "go_allocations": {
+          "median": 2785,
+          "min": 2784,
+          "max": 2795
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.13562825,
+          "min": 0.131277,
+          "max": 0.153208958
+        },
+        "user_seconds": {
+          "median": 0.13115500000000002,
+          "min": 0.127189,
+          "max": 0.14493499999999998
+        },
+        "system_seconds": {
+          "median": 0.004993000000000025,
+          "min": 0.004674999999999985,
+          "max": 0.008859000000000006
+        },
+        "cpu_ns_per_op": {
+          "median": 680.7400000000004,
+          "min": 659.3199999999999,
+          "max": 768.97
+        },
+        "wall_ns_per_op": {
+          "median": 678.14125,
+          "min": 656.385,
+          "max": 766.04479
+        },
+        "average_cores": {
+          "median": 1.0038321662338048,
+          "min": 1.0038185887276903,
+          "max": 1.0044714611089527
+        },
+        "rss_bytes": {
+          "median": 256327680,
+          "min": 252592128,
+          "max": 257048576
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 134398864,
+          "min": 130597800,
+          "max": 135021528
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 114553664,
+          "min": 114552376,
+          "max": 114553824
+        },
+        "go_allocated_bytes": {
+          "median": 1072,
+          "min": 1072,
+          "max": 1072
+        },
+        "go_allocations": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-miss": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.048302958,
+          "min": 0.04737225,
+          "max": 0.052182083
+        },
+        "user_seconds": {
+          "median": 0.048302999999999985,
+          "min": 0.047372000000000025,
+          "max": 0.05222500000000002
+        },
+        "system_seconds": {
+          "median": 9.199999999998099e-05,
+          "min": 8.20000000000265e-05,
+          "max": 0.00019600000000002948
+        },
+        "cpu_ns_per_op": {
+          "median": 241.97499999999982,
+          "min": 237.27000000000027,
+          "max": 262.10500000000025
+        },
+        "wall_ns_per_op": {
+          "median": 241.51479,
+          "min": 236.86125,
+          "max": 260.910415
+        },
+        "average_cores": {
+          "median": 1.001905514771993,
+          "min": 1.0017256938397492,
+          "max": 1.0045785255448705
+        },
+        "rss_bytes": {
+          "median": 256344064,
+          "min": 252641280,
+          "max": 257048576
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 134415248,
+          "min": 130646952,
+          "max": 135037912
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 114602976,
+          "min": 114601528,
+          "max": 114603040
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-values": {
+        "ops": {
+          "median": 500000,
+          "min": 500000,
+          "max": 500000
+        },
+        "wall_seconds": {
+          "median": 0.040417458,
+          "min": 0.037616625,
+          "max": 0.041235208
+        },
+        "user_seconds": {
+          "median": 0.040343999999999935,
+          "min": 0.03754500000000005,
+          "max": 0.041139999999999954
+        },
+        "system_seconds": {
+          "median": 0.00028600000000000847,
+          "min": 0.00026399999999998647,
+          "max": 0.00030599999999997296
+        },
+        "cpu_ns_per_op": {
+          "median": 81.25999999999988,
+          "min": 75.61800000000008,
+          "max": 82.89199999999985
+        },
+        "wall_ns_per_op": {
+          "median": 80.834916,
+          "min": 75.23325,
+          "max": 82.470416
+        },
+        "average_cores": {
+          "median": 1.0051140951640407,
+          "min": 1.0051119422023995,
+          "max": 1.005258668172549
+        },
+        "rss_bytes": {
+          "median": 256671744,
+          "min": 253149184,
+          "max": 257507328
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 134726544,
+          "min": 131187624,
+          "max": 135463896
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115056776,
+          "min": 115055328,
+          "max": 115057304
+        },
+        "go_allocated_bytes": {
+          "median": 297000,
+          "min": 297000,
+          "max": 297000
+        },
+        "go_allocations": {
+          "median": 115,
+          "min": 115,
+          "max": 115
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit-par10": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.0228225,
+          "min": 0.020749417,
+          "max": 0.023333458
+        },
+        "user_seconds": {
+          "median": 0.14154500000000003,
+          "min": 0.1394930000000001,
+          "max": 0.14307499999999995
+        },
+        "system_seconds": {
+          "median": 0.0007349999999999857,
+          "min": 0.0006729999999999792,
+          "max": 0.0011309999999999931
+        },
+        "cpu_ns_per_op": {
+          "median": 713.3800000000001,
+          "min": 700.8300000000003,
+          "max": 719.0499999999997
+        },
+        "wall_ns_per_op": {
+          "median": 114.1125,
+          "min": 103.747085,
+          "max": 116.66729
+        },
+        "average_cores": {
+          "median": 6.141570818271446,
+          "min": 6.11465304456802,
+          "max": 6.930797139987111
+        },
+        "rss_bytes": {
+          "median": 256966656,
+          "min": 253591552,
+          "max": 257884160
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 135021480,
+          "min": 131613632,
+          "max": 135807960
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115130920,
+          "min": 115129248,
+          "max": 115131224
+        },
+        "go_allocated_bytes": {
+          "median": 24592,
+          "min": 24144,
+          "max": 24592
+        },
+        "go_allocations": {
+          "median": 60,
+          "min": 59,
+          "max": 60
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "readers-close": {
+        "ops": {
+          "median": 10,
+          "min": 10,
+          "max": 10
+        },
+        "wall_seconds": {
+          "median": 7.916e-06,
+          "min": 3.709e-06,
+          "max": 8.666e-06
+        },
+        "user_seconds": {
+          "median": 5.000000000032756e-06,
+          "min": 1.999999999946489e-06,
+          "max": 6.999999999979245e-06
+        },
+        "system_seconds": {
+          "median": 4.000000000004e-06,
+          "min": 2.9999999999752447e-06,
+          "max": 1.2999999999985246e-05
+        },
+        "cpu_ns_per_op": {
+          "median": 900.0000000036756,
+          "min": 499.99999999217334,
+          "max": 1999.9999999964489
+        },
+        "wall_ns_per_op": {
+          "median": 791.6,
+          "min": 370.9,
+          "max": 866.6
+        },
+        "average_cores": {
+          "median": 1.348072256651856,
+          "min": 1.1369378474023188,
+          "max": 2.307869836137144
+        },
+        "rss_bytes": {
+          "median": 256966656,
+          "min": 253624320,
+          "max": 257933312
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 135021480,
+          "min": 131613632,
+          "max": 135840728
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115180376,
+          "min": 115179312,
+          "max": 115180536
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.00850325,
+          "min": 0.008474292,
+          "max": 0.008916166
+        },
+        "user_seconds": {
+          "median": 0.007452999999999932,
+          "min": 0.007353000000000054,
+          "max": 0.007781999999999956
+        },
+        "system_seconds": {
+          "median": 0.0033139999999999836,
+          "min": 0.003155999999999992,
+          "max": 0.003361000000000003
+        },
+        "cpu_ns_per_op": {
+          "median": 1066.7000000000037,
+          "min": 1060.8999999999924,
+          "max": 1114.2999999999959
+        },
+        "wall_ns_per_op": {
+          "median": 850.325,
+          "min": 847.4292,
+          "max": 891.6166
+        },
+        "average_cores": {
+          "median": 1.249752416004812,
+          "min": 1.2476406080028135,
+          "max": 1.258748223450412
+        },
+        "rss_bytes": {
+          "median": 270221312,
+          "min": 266862592,
+          "max": 271220736
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 148292544,
+          "min": 144901080,
+          "max": 149128152
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115246312,
+          "min": 115246160,
+          "max": 115246488
+        },
+        "go_allocated_bytes": {
+          "median": 16784,
+          "min": 16784,
+          "max": 16784
+        },
+        "go_allocations": {
+          "median": 137,
+          "min": 137,
+          "max": 137
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.369612916,
+          "min": 0.364666167,
+          "max": 0.382000583
+        },
+        "user_seconds": {
+          "median": 0.06705300000000003,
+          "min": 0.0654800000000001,
+          "max": 0.067434
+        },
+        "system_seconds": {
+          "median": 0.11354599999999998,
+          "min": 0.11245900000000003,
+          "max": 0.11846099999999998
+        },
+        "cpu_ns_per_op": {
+          "median": 1805.99,
+          "min": 1779.3900000000012,
+          "max": 1858.9499999999996
+        },
+        "wall_ns_per_op": {
+          "median": 3696.12916,
+          "min": 3646.66167,
+          "max": 3820.00583
+        },
+        "average_cores": {
+          "median": 0.4886165828685489,
+          "min": 0.46580818961734444,
+          "max": 0.5097676089046121
+        },
+        "rss_bytes": {
+          "median": 148307968,
+          "min": 144736256,
+          "max": 149323776
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 135529384,
+          "min": 131957696,
+          "max": 136397736
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115865072,
+          "min": 115864856,
+          "max": 115866240
+        },
+        "go_allocated_bytes": {
+          "median": 567128,
+          "min": 567016,
+          "max": 567576
+        },
+        "go_allocations": {
+          "median": 1750,
+          "min": 1749,
+          "max": 1752
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.011016875,
+          "min": 0.010985125,
+          "max": 0.011058542
+        },
+        "user_seconds": {
+          "median": 0.007640999999999898,
+          "min": 0.007637999999999923,
+          "max": 0.007695999999999925
+        },
+        "system_seconds": {
+          "median": 0.0034379999999999966,
+          "min": 0.00333599999999995,
+          "max": 0.0034680000000000266
+        },
+        "cpu_ns_per_op": {
+          "median": 1107.599999999992,
+          "min": 1103.1999999999875,
+          "max": 1110.8999999999924
+        },
+        "wall_ns_per_op": {
+          "median": 1101.6875,
+          "min": 1098.5125,
+          "max": 1105.8542
+        },
+        "average_cores": {
+          "median": 1.0045628076467878,
+          "min": 1.0042671339652371,
+          "max": 1.0053667668916928
+        },
+        "rss_bytes": {
+          "median": 235143168,
+          "min": 231571456,
+          "max": 236191744
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 135594920,
+          "min": 131990464,
+          "max": 136463272
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115914272,
+          "min": 115914056,
+          "max": 115916336
+        },
+        "go_allocated_bytes": {
+          "median": 48,
+          "min": 48,
+          "max": 48
+        },
+        "go_allocations": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "mixed-80read-20update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.08643675,
+          "min": 0.082799583,
+          "max": 0.086859042
+        },
+        "user_seconds": {
+          "median": 0.07617299999999994,
+          "min": 0.072519,
+          "max": 0.07622700000000004
+        },
+        "system_seconds": {
+          "median": 0.015641000000000016,
+          "min": 0.01541999999999999,
+          "max": 0.016259999999999997
+        },
+        "cpu_ns_per_op": {
+          "median": 915.9299999999993,
+          "min": 881.6000000000001,
+          "max": 924.8700000000005
+        },
+        "wall_ns_per_op": {
+          "median": 864.3675,
+          "min": 827.99583,
+          "max": 868.59042
+        },
+        "average_cores": {
+          "median": 1.0647396617927414,
+          "min": 1.0596534460168843,
+          "max": 1.0647941523462814
+        },
+        "rss_bytes": {
+          "median": 281935872,
+          "min": 278331392,
+          "max": 283000832
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 159957952,
+          "min": 156320704,
+          "max": 160859048
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 115999992,
+          "min": 115999024,
+          "max": 116002272
+        },
+        "go_allocated_bytes": {
+          "median": 35888,
+          "min": 35600,
+          "max": 35888
+        },
+        "go_allocations": {
+          "median": 265,
+          "min": 262,
+          "max": 265
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-mixed": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.377672875,
+          "min": 0.365449167,
+          "max": 0.408892
+        },
+        "user_seconds": {
+          "median": 0.07313000000000003,
+          "min": 0.07264300000000001,
+          "max": 0.07333999999999996
+        },
+        "system_seconds": {
+          "median": 0.11084000000000005,
+          "min": 0.10503599999999996,
+          "max": 0.111348
+        },
+        "cpu_ns_per_op": {
+          "median": 1839.700000000001,
+          "min": 1776.7899999999997,
+          "max": 1846.8799999999997
+        },
+        "wall_ns_per_op": {
+          "median": 3776.72875,
+          "min": 3654.49167,
+          "max": 4088.92
+        },
+        "average_cores": {
+          "median": 0.4861934737971368,
+          "min": 0.4499232071060331,
+          "max": 0.4890157917748262
+        },
+        "rss_bytes": {
+          "median": 148963328,
+          "min": 145473536,
+          "max": 149995520
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 136168336,
+          "min": 132678592,
+          "max": 137151424
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 116632984,
+          "min": 116632912,
+          "max": 116637344
+        },
+        "go_allocated_bytes": {
+          "median": 583840,
+          "min": 583840,
+          "max": 585024
+        },
+        "go_allocations": {
+          "median": 2051,
+          "min": 2051,
+          "max": 2056
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.004001959,
+          "min": 0.003911375,
+          "max": 0.004020458
+        },
+        "user_seconds": {
+          "median": 0.0032519999999999216,
+          "min": 0.0031729999999999814,
+          "max": 0.003255000000000008
+        },
+        "system_seconds": {
+          "median": 0.0007730000000000237,
+          "min": 0.0007449999999999957,
+          "max": 0.0008090000000000597
+        },
+        "cpu_ns_per_op": {
+          "median": 402.8000000000032,
+          "min": 391.79999999999774,
+          "max": 406.09999999999815
+        },
+        "wall_ns_per_op": {
+          "median": 400.19590000000005,
+          "min": 391.1375,
+          "max": 402.0458
+        },
+        "average_cores": {
+          "median": 1.0018759056804054,
+          "min": 1.0016937777635684,
+          "max": 1.0147530247061454
+        },
+        "rss_bytes": {
+          "median": 158253056,
+          "min": 154779648,
+          "max": 159285248
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 145523624,
+          "min": 142033856,
+          "max": 146457560
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 116698344,
+          "min": 116698272,
+          "max": 116702704
+        },
+        "go_allocated_bytes": {
+          "median": 16208,
+          "min": 16208,
+          "max": 16208
+        },
+        "go_allocations": {
+          "median": 135,
+          "min": 135,
+          "max": 135
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-delete": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.327708417,
+          "min": 0.309765458,
+          "max": 0.339903542
+        },
+        "user_seconds": {
+          "median": 0.06366300000000003,
+          "min": 0.06351000000000007,
+          "max": 0.06483000000000005
+        },
+        "system_seconds": {
+          "median": 0.10527500000000001,
+          "min": 0.101657,
+          "max": 0.11157299999999992
+        },
+        "cpu_ns_per_op": {
+          "median": 1701.0500000000006,
+          "min": 1651.6700000000005,
+          "max": 1752.3599999999994
+        },
+        "wall_ns_per_op": {
+          "median": 3277.08417,
+          "min": 3097.65458,
+          "max": 3399.03542
+        },
+        "average_cores": {
+          "median": 0.5190742476413112,
+          "min": 0.5155462604740964,
+          "max": 0.5332001865747086
+        },
+        "rss_bytes": {
+          "median": 149569536,
+          "min": 145981440,
+          "max": 150536192
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 136889256,
+          "min": 133268392,
+          "max": 137692024
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 117305072,
+          "min": 117304696,
+          "max": 117311168
+        },
+        "go_allocated_bytes": {
+          "median": 557200,
+          "min": 556736,
+          "max": 558416
+        },
+        "go_allocations": {
+          "median": 1665,
+          "min": 1664,
+          "max": 1674
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.006697125,
+          "min": 0.006472625,
+          "max": 0.006814375
+        },
+        "user_seconds": {
+          "median": 0.0039359999999999395,
+          "min": 0.003831000000000029,
+          "max": 0.004022999999999888
+        },
+        "system_seconds": {
+          "median": 0.002798999999999996,
+          "min": 0.0026530000000000165,
+          "max": 0.0029090000000000504
+        },
+        "cpu_ns_per_op": {
+          "median": 673.4999999999935,
+          "min": 648.4000000000045,
+          "max": 693.1999999999939
+        },
+        "wall_ns_per_op": {
+          "median": 669.7125,
+          "min": 647.2625,
+          "max": 681.4375
+        },
+        "average_cores": {
+          "median": 1.0056554118371592,
+          "min": 1.0017574013634414,
+          "max": 1.017261304228185
+        },
+        "rss_bytes": {
+          "median": 227999744,
+          "min": 224444416,
+          "max": 228966400
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 136889256,
+          "min": 133284800,
+          "max": 137708432
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 117354672,
+          "min": 117354312,
+          "max": 117360320
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-after-delete": {
+        "ops": {
+          "median": 450000,
+          "min": 450000,
+          "max": 450000
+        },
+        "wall_seconds": {
+          "median": 0.037271917,
+          "min": 0.036731916,
+          "max": 0.037861041
+        },
+        "user_seconds": {
+          "median": 0.03637800000000002,
+          "min": 0.035857999999999945,
+          "max": 0.03698599999999996
+        },
+        "system_seconds": {
+          "median": 0.0011209999999999276,
+          "min": 0.0011130000000000306,
+          "max": 0.0011360000000000259
+        },
+        "cpu_ns_per_op": {
+          "median": 83.31333333333345,
+          "min": 82.20888888888882,
+          "max": 84.68222222222198
+        },
+        "wall_ns_per_op": {
+          "median": 82.82648222222223,
+          "min": 81.62648,
+          "max": 84.13564666666667
+        },
+        "average_cores": {
+          "median": 1.0064963612595832,
+          "min": 1.0058779643665778,
+          "max": 1.0071350484412511
+        },
+        "rss_bytes": {
+          "median": 248250368,
+          "min": 244695040,
+          "max": 249200640
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 137216936,
+          "min": 133612480,
+          "max": 138003344
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 117701720,
+          "min": 117700912,
+          "max": 117706712
+        },
+        "go_allocated_bytes": {
+          "median": 297000,
+          "min": 297000,
+          "max": 297000
+        },
+        "go_allocations": {
+          "median": 115,
+          "min": 115,
+          "max": 115
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "close": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.012965375,
+          "min": 0.009783708,
+          "max": 0.017465375
+        },
+        "user_seconds": {
+          "median": 8.999999999992347e-05,
+          "min": 8.60000000000305e-05,
+          "max": 9.700000000001374e-05
+        },
+        "system_seconds": {
+          "median": 0.0011719999999999509,
+          "min": 0.0011069999999999691,
+          "max": 0.0013020000000000254
+        },
+        "cpu_ns_per_op": {
+          "median": 1261999.9999998743,
+          "min": 1192999.9999999995,
+          "max": 1399000.000000039
+        },
+        "wall_ns_per_op": {
+          "median": 12965375,
+          "min": 9783708,
+          "max": 17465375
+        },
+        "average_cores": {
+          "median": 0.10790277951852832,
+          "min": 0.07225725184829265,
+          "max": 0.12193740859804887
+        },
+        "rss_bytes": {
+          "median": 137969664,
+          "min": 137756672,
+          "max": 137986048
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 291995648,
+          "min": 288047104,
+          "max": 293044224
+        },
+        "memory_footprint_bytes": {
+          "median": 125485848,
+          "min": 125371184,
+          "max": 125633328
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 238797712,
+          "min": 235029392,
+          "max": 243073936
+        },
+        "go_heap_bytes": {
+          "median": 117758648,
+          "min": 117757840,
+          "max": 117762760
+        },
+        "go_allocated_bytes": {
+          "median": 2016,
+          "min": 2016,
+          "max": 2016
+        },
+        "go_allocations": {
+          "median": 20,
+          "min": 20,
+          "max": 20
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    },
+    "load_cpu_seconds": {
+      "median": 0.5053099999999999,
+      "min": 0.48608999999999997,
+      "max": 0.53614
+    }
+  },
+  {
+    "profile": "bounded64",
+    "workload": "random",
+    "engine": "pebble",
+    "trials": 3,
+    "process_peak_rss_bytes": {
+      "median": 281919488,
+      "min": 280412160,
+      "max": 281968640
+    },
+    "fixture_rss_bytes": {
+      "median": 128745472,
+      "min": 128466944,
+      "max": 129007616
+    },
+    "baseline_rss_bytes": {
+      "median": 21118976,
+      "min": 20627456,
+      "max": 21348352
+    },
+    "disk_bytes": {
+      "median": 128927952,
+      "min": 128927952,
+      "max": 128929019
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 267993976,
+      "min": 266503032,
+      "max": 268026768
+    },
+    "fixture_memory_footprint_bytes": {
+      "median": 117129984,
+      "min": 116802304,
+      "max": 117359360
+    },
+    "baseline_memory_footprint_bytes": {
+      "median": 9568928,
+      "min": 9077408,
+      "max": 9814712
+    },
+    "phases": {
+      "open": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.038964666,
+          "min": 0.037658166,
+          "max": 0.04585175
+        },
+        "user_seconds": {
+          "median": 0.0003999999999999976,
+          "min": 0.00038499999999999646,
+          "max": 0.0004149999999999987
+        },
+        "system_seconds": {
+          "median": 0.0018799999999999997,
+          "min": 0.0016660000000000008,
+          "max": 0.002016999999999998
+        },
+        "cpu_ns_per_op": {
+          "median": 2294999.9999999986,
+          "min": 2065999.9999999984,
+          "max": 2401999.9999999944
+        },
+        "wall_ns_per_op": {
+          "median": 38964666,
+          "min": 37658166,
+          "max": 45851750
+        },
+        "average_cores": {
+          "median": 0.054861938842162374,
+          "min": 0.05005261522188354,
+          "max": 0.061645594498358956
+        },
+        "rss_bytes": {
+          "median": 130252800,
+          "min": 129925120,
+          "max": 130400256
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 130187264,
+          "min": 129892352,
+          "max": 130367488
+        },
+        "memory_footprint_bytes": {
+          "median": 117326592,
+          "min": 116982528,
+          "max": 117474048
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 117326592,
+          "min": 116982528,
+          "max": 117474048
+        },
+        "go_heap_bytes": {
+          "median": 109148488,
+          "min": 109148360,
+          "max": 109148872
+        },
+        "go_allocated_bytes": {
+          "median": 306424,
+          "min": 306392,
+          "max": 306744
+        },
+        "go_allocations": {
+          "median": 588,
+          "min": 584,
+          "max": 588
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "insert": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.185850834,
+          "min": 0.183664875,
+          "max": 0.215957834
+        },
+        "user_seconds": {
+          "median": 0.115238,
+          "min": 0.112855,
+          "max": 0.121991
+        },
+        "system_seconds": {
+          "median": 0.119895,
+          "min": 0.11762599999999998,
+          "max": 0.12417700000000001
+        },
+        "cpu_ns_per_op": {
+          "median": 2351.33,
+          "min": 2304.81,
+          "max": 2461.68
+        },
+        "wall_ns_per_op": {
+          "median": 1858.50834,
+          "min": 1836.64875,
+          "max": 2159.57834
+        },
+        "average_cores": {
+          "median": 1.2548997188493445,
+          "min": 1.139889187812469,
+          "max": 1.2651705399395732
+        },
+        "rss_bytes": {
+          "median": 246464512,
+          "min": 244940800,
+          "max": 246824960
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 246431744,
+          "min": 244842496,
+          "max": 246726656
+        },
+        "memory_footprint_bytes": {
+          "median": 232932168,
+          "min": 231342920,
+          "max": 233177928
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 232932168,
+          "min": 231342920,
+          "max": 233177928
+        },
+        "go_heap_bytes": {
+          "median": 117174136,
+          "min": 115801480,
+          "max": 117502840
+        },
+        "go_allocated_bytes": {
+          "median": 7975424,
+          "min": 6602256,
+          "max": 8304000
+        },
+        "go_allocations": {
+          "median": 2275,
+          "min": 2222,
+          "max": 2407
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 1.454918084,
+          "min": 1.447882875,
+          "max": 1.487733709
+        },
+        "user_seconds": {
+          "median": 0.20022299999999998,
+          "min": 0.196638,
+          "max": 0.20134800000000003
+        },
+        "system_seconds": {
+          "median": 0.452697,
+          "min": 0.448564,
+          "max": 0.46021999999999996
+        },
+        "cpu_ns_per_op": {
+          "median": 6540.45,
+          "min": 6487.87,
+          "max": 6568.58
+        },
+        "wall_ns_per_op": {
+          "median": 14549.18084,
+          "min": 14478.82875,
+          "max": 14877.33709
+        },
+        "average_cores": {
+          "median": 0.4480935655793291,
+          "min": 0.441515841192787,
+          "max": 0.44954077290855915
+        },
+        "rss_bytes": {
+          "median": 254803968,
+          "min": 253722624,
+          "max": 255066112
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 254722048,
+          "min": 253607936,
+          "max": 254951424
+        },
+        "memory_footprint_bytes": {
+          "median": 241058656,
+          "min": 239944544,
+          "max": 241320800
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 241058656,
+          "min": 239944544,
+          "max": 241320800
+        },
+        "go_heap_bytes": {
+          "median": 126994272,
+          "min": 125671776,
+          "max": 127265376
+        },
+        "go_allocated_bytes": {
+          "median": 9688728,
+          "min": 9654520,
+          "max": 9767480
+        },
+        "go_allocations": {
+          "median": 61239,
+          "min": 60808,
+          "max": 61245
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 1.774264084,
+          "min": 1.771280958,
+          "max": 1.780460416
+        },
+        "user_seconds": {
+          "median": 1.3428879999999999,
+          "min": 1.342769,
+          "max": 1.3457869999999998
+        },
+        "system_seconds": {
+          "median": 0.43375700000000006,
+          "min": 0.431485,
+          "max": 0.44027800000000006
+        },
+        "cpu_ns_per_op": {
+          "median": 8886.36,
+          "min": 8883.224999999999,
+          "max": 8915.235
+        },
+        "wall_ns_per_op": {
+          "median": 8871.32042,
+          "min": 8856.40479,
+          "max": 8902.30208
+        },
+        "average_cores": {
+          "median": 1.001452761306433,
+          "min": 1.0013419174865064,
+          "max": 1.0033823216881215
+        },
+        "rss_bytes": {
+          "median": 255033344,
+          "min": 253952000,
+          "max": 255344640
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 255033344,
+          "min": 253952000,
+          "max": 255328256
+        },
+        "memory_footprint_bytes": {
+          "median": 241222496,
+          "min": 240157536,
+          "max": 241533792
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 241222496,
+          "min": 240157536,
+          "max": 241533792
+        },
+        "go_heap_bytes": {
+          "median": 127186736,
+          "min": 125864232,
+          "max": 127445040
+        },
+        "go_allocated_bytes": {
+          "median": 131928,
+          "min": 124512,
+          "max": 133232
+        },
+        "go_allocations": {
+          "median": 1070,
+          "min": 1034,
+          "max": 1180
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-miss": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 1.084779917,
+          "min": 1.052745708,
+          "max": 1.101725709
+        },
+        "user_seconds": {
+          "median": 0.8296219999999999,
+          "min": 0.817212,
+          "max": 0.8299850000000002
+        },
+        "system_seconds": {
+          "median": 0.256227,
+          "min": 0.23653600000000008,
+          "max": 0.27264900000000014
+        },
+        "cpu_ns_per_op": {
+          "median": 5431.060000000001,
+          "min": 5268.740000000001,
+          "max": 5511.355
+        },
+        "wall_ns_per_op": {
+          "median": 5423.899585,
+          "min": 5263.72854,
+          "max": 5508.628545
+        },
+        "average_cores": {
+          "median": 1.0009520741736428,
+          "min": 1.000494942611891,
+          "max": 1.0013201599490895
+        },
+        "rss_bytes": {
+          "median": 255049728,
+          "min": 253968384,
+          "max": 255344640
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 255049728,
+          "min": 253968384,
+          "max": 255344640
+        },
+        "memory_footprint_bytes": {
+          "median": 241222496,
+          "min": 240157536,
+          "max": 241550176
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 241222496,
+          "min": 240157536,
+          "max": 241550176
+        },
+        "go_heap_bytes": {
+          "median": 127236496,
+          "min": 125913832,
+          "max": 127498064
+        },
+        "go_allocated_bytes": {
+          "median": 384,
+          "min": 0,
+          "max": 3856
+        },
+        "go_allocations": {
+          "median": 4,
+          "min": 0,
+          "max": 8
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-values": {
+        "ops": {
+          "median": 500000,
+          "min": 500000,
+          "max": 500000
+        },
+        "wall_seconds": {
+          "median": 0.270030083,
+          "min": 0.265838834,
+          "max": 0.277591458
+        },
+        "user_seconds": {
+          "median": 0.18138499999999969,
+          "min": 0.18064400000000003,
+          "max": 0.18689299999999998
+        },
+        "system_seconds": {
+          "median": 0.08921500000000004,
+          "min": 0.08588000000000018,
+          "max": 0.09152500000000008
+        },
+        "cpu_ns_per_op": {
+          "median": 541.1999999999994,
+          "min": 533.0480000000005,
+          "max": 556.8360000000001
+        },
+        "wall_ns_per_op": {
+          "median": 540.060166,
+          "min": 531.677668,
+          "max": 555.182916
+        },
+        "average_cores": {
+          "median": 1.0025773736278132,
+          "min": 1.002110568547282,
+          "max": 1.0029775483941585
+        },
+        "rss_bytes": {
+          "median": 255246336,
+          "min": 254181376,
+          "max": 255557632
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 255213568,
+          "min": 254164992,
+          "max": 255541248
+        },
+        "memory_footprint_bytes": {
+          "median": 241402720,
+          "min": 240354144,
+          "max": 241746784
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 241402720,
+          "min": 240354144,
+          "max": 241746784
+        },
+        "go_heap_bytes": {
+          "median": 127445272,
+          "min": 126120712,
+          "max": 127704896
+        },
+        "go_allocated_bytes": {
+          "median": 50032,
+          "min": 49856,
+          "max": 51960
+        },
+        "go_allocations": {
+          "median": 574,
+          "min": 572,
+          "max": 576
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit-par10": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 0.953565,
+          "min": 0.937971125,
+          "max": 0.968575834
+        },
+        "user_seconds": {
+          "median": 3.329968,
+          "min": 3.3205220000000004,
+          "max": 3.379521
+        },
+        "system_seconds": {
+          "median": 1.7030759999999998,
+          "min": 1.652358,
+          "max": 1.723809
+        },
+        "cpu_ns_per_op": {
+          "median": 25165.22,
+          "min": 24864.4,
+          "max": 25516.65
+        },
+        "wall_ns_per_op": {
+          "median": 4767.825,
+          "min": 4689.855625,
+          "max": 4842.87917
+        },
+        "average_cores": {
+          "median": 5.301741031740183,
+          "min": 5.1963344772031554,
+          "max": 5.351842821412279
+        },
+        "rss_bytes": {
+          "median": 259244032,
+          "min": 258064384,
+          "max": 259604480
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 259227648,
+          "min": 258048000,
+          "max": 259571712
+        },
+        "memory_footprint_bytes": {
+          "median": 245367696,
+          "min": 244188024,
+          "max": 245728120
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 245367696,
+          "min": 244188024,
+          "max": 245728120
+        },
+        "go_heap_bytes": {
+          "median": 130396952,
+          "min": 129013000,
+          "max": 130596568
+        },
+        "go_allocated_bytes": {
+          "median": 2842960,
+          "min": 2841672,
+          "max": 2902352
+        },
+        "go_allocations": {
+          "median": 24815,
+          "min": 24759,
+          "max": 25317
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "readers-close": {
+        "ops": {
+          "median": 10,
+          "min": 10,
+          "max": 10
+        },
+        "wall_seconds": {
+          "median": 6.66e-07,
+          "min": 6.25e-07,
+          "max": 7.08e-07
+        },
+        "user_seconds": {
+          "median": 1.000000000139778e-06,
+          "min": 9.999999992515995e-07,
+          "max": 2.000000000279556e-06
+        },
+        "system_seconds": {
+          "median": 1.000000000139778e-06,
+          "min": 9.999999996956888e-07,
+          "max": 1.000000000139778e-06
+        },
+        "cpu_ns_per_op": {
+          "median": 200.0000000279556,
+          "min": 199.99999989472883,
+          "max": 300.0000000419334
+        },
+        "wall_ns_per_op": {
+          "median": 66.6,
+          "min": 62.5,
+          "max": 70.8
+        },
+        "average_cores": {
+          "median": 3.199999998315661,
+          "min": 2.8248587574569997,
+          "max": 4.504504505134135
+        },
+        "rss_bytes": {
+          "median": 259293184,
+          "min": 258080768,
+          "max": 259637248
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 259244032,
+          "min": 258064384,
+          "max": 259604480
+        },
+        "memory_footprint_bytes": {
+          "median": 245384080,
+          "min": 244188024,
+          "max": 245760888
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 245384080,
+          "min": 244188024,
+          "max": 245760888
+        },
+        "go_heap_bytes": {
+          "median": 130446328,
+          "min": 129062152,
+          "max": 130645736
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.011521875,
+          "min": 0.011459292,
+          "max": 0.012275833
+        },
+        "user_seconds": {
+          "median": 0.011854999999999727,
+          "min": 0.011667000000000094,
+          "max": 0.012132000000000254
+        },
+        "system_seconds": {
+          "median": 0.009958999999999829,
+          "min": 0.009519000000000055,
+          "max": 0.010791999999999913
+        },
+        "cpu_ns_per_op": {
+          "median": 2165.100000000031,
+          "min": 2162.599999999992,
+          "max": 2264.699999999964
+        },
+        "wall_ns_per_op": {
+          "median": 1152.1875,
+          "min": 1145.9292,
+          "max": 1227.5833
+        },
+        "average_cores": {
+          "median": 1.887202106377944,
+          "min": 1.7637092326036294,
+          "max": 1.9655655004068033
+        },
+        "rss_bytes": {
+          "median": 270123008,
+          "min": 268877824,
+          "max": 270450688
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 270090240,
+          "min": 268877824,
+          "max": 270434304
+        },
+        "memory_footprint_bytes": {
+          "median": 256230288,
+          "min": 255001464,
+          "max": 256590712
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 256230288,
+          "min": 255001464,
+          "max": 256590712
+        },
+        "go_heap_bytes": {
+          "median": 130498056,
+          "min": 129114632,
+          "max": 130697336
+        },
+        "go_allocated_bytes": {
+          "median": 2432,
+          "min": 1664,
+          "max": 2432
+        },
+        "go_allocations": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 1.238325833,
+          "min": 1.2311504580000001,
+          "max": 1.2827515
+        },
+        "user_seconds": {
+          "median": 0.1847500000000002,
+          "min": 0.18391799999999936,
+          "max": 0.18704300000000007
+        },
+        "system_seconds": {
+          "median": 0.4256570000000002,
+          "min": 0.40922800000000015,
+          "max": 0.45149000000000017
+        },
+        "cpu_ns_per_op": {
+          "median": 6095.749999999995,
+          "min": 5962.710000000003,
+          "max": 6362.400000000003
+        },
+        "wall_ns_per_op": {
+          "median": 12383.25833,
+          "min": 12311.50458,
+          "max": 12827.515
+        },
+        "average_cores": {
+          "median": 0.49512632354476976,
+          "min": 0.4815138181810023,
+          "max": 0.49599630169990083
+        },
+        "rss_bytes": {
+          "median": 275005440,
+          "min": 273678336,
+          "max": 275218432
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 274923520,
+          "min": 273645568,
+          "max": 275202048
+        },
+        "memory_footprint_bytes": {
+          "median": 261079928,
+          "min": 259752824,
+          "max": 261358480
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 261079928,
+          "min": 259752824,
+          "max": 261358480
+        },
+        "go_heap_bytes": {
+          "median": 136062944,
+          "min": 134714896,
+          "max": 136454792
+        },
+        "go_allocated_bytes": {
+          "median": 5547912,
+          "min": 5513432,
+          "max": 5705984
+        },
+        "go_allocations": {
+          "median": 50633,
+          "min": 50613,
+          "max": 50671
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.078228375,
+          "min": 0.07617875,
+          "max": 0.081086416
+        },
+        "user_seconds": {
+          "median": 0.05909800000000054,
+          "min": 0.05832399999999982,
+          "max": 0.06063799999999997
+        },
+        "system_seconds": {
+          "median": 0.0241220000000002,
+          "min": 0.021160999999999763,
+          "max": 0.02508800000000022
+        },
+        "cpu_ns_per_op": {
+          "median": 8418.600000000077,
+          "min": 7948.499999999958,
+          "max": 8476.000000000016
+        },
+        "wall_ns_per_op": {
+          "median": 7822.8375,
+          "min": 7617.875,
+          "max": 8108.6416
+        },
+        "average_cores": {
+          "median": 1.04530455508109,
+          "min": 1.04340121096762,
+          "max": 1.0761568292835018
+        },
+        "rss_bytes": {
+          "median": 275054592,
+          "min": 273727488,
+          "max": 275316736
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 275038208,
+          "min": 273727488,
+          "max": 275283968
+        },
+        "memory_footprint_bytes": {
+          "median": 261161848,
+          "min": 259834744,
+          "max": 261407632
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 261161848,
+          "min": 259834744,
+          "max": 261407632
+        },
+        "go_heap_bytes": {
+          "median": 136190624,
+          "min": 134842800,
+          "max": 136582488
+        },
+        "go_allocated_bytes": {
+          "median": 73272,
+          "min": 72104,
+          "max": 73856
+        },
+        "go_allocations": {
+          "median": 730,
+          "min": 710,
+          "max": 740
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "mixed-80read-20update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.698148959,
+          "min": 0.693322084,
+          "max": 0.71649075
+        },
+        "user_seconds": {
+          "median": 0.5404309999999999,
+          "min": 0.5368029999999999,
+          "max": 0.5490810000000002
+        },
+        "system_seconds": {
+          "median": 0.1782130000000004,
+          "min": 0.17643999999999993,
+          "max": 0.18895799999999996
+        },
+        "cpu_ns_per_op": {
+          "median": 7186.440000000002,
+          "min": 7132.4299999999985,
+          "max": 7380.390000000001
+        },
+        "wall_ns_per_op": {
+          "median": 6981.48959,
+          "min": 6933.22084,
+          "max": 7164.9075
+        },
+        "average_cores": {
+          "median": 1.0293562580532334,
+          "min": 1.0287325565703456,
+          "max": 1.0300747078730608
+        },
+        "rss_bytes": {
+          "median": 275054592,
+          "min": 273760256,
+          "max": 275316736
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 275054592,
+          "min": 273727488,
+          "max": 275316736
+        },
+        "memory_footprint_bytes": {
+          "median": 261178232,
+          "min": 259834744,
+          "max": 261440400
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 261178232,
+          "min": 259834744,
+          "max": 261440400
+        },
+        "go_heap_bytes": {
+          "median": 136243376,
+          "min": 134899296,
+          "max": 136636552
+        },
+        "go_allocated_bytes": {
+          "median": 4912,
+          "min": 2480,
+          "max": 7344
+        },
+        "go_allocations": {
+          "median": 5,
+          "min": 3,
+          "max": 7
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-mixed": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 1.040664792,
+          "min": 1.01344925,
+          "max": 1.05207375
+        },
+        "user_seconds": {
+          "median": 0.15081200000000017,
+          "min": 0.14928399999999975,
+          "max": 0.1513239999999998
+        },
+        "system_seconds": {
+          "median": 0.3262879999999999,
+          "min": 0.32270699999999986,
+          "max": 0.34847300000000025
+        },
+        "cpu_ns_per_op": {
+          "median": 4776.119999999997,
+          "min": 4735.19,
+          "max": 4977.57
+        },
+        "wall_ns_per_op": {
+          "median": 10406.647920000001,
+          "min": 10134.4925,
+          "max": 10520.7375
+        },
+        "average_cores": {
+          "median": 0.46723503914971565,
+          "min": 0.45894893694068556,
+          "max": 0.4731198739632084
+        },
+        "rss_bytes": {
+          "median": 279347200,
+          "min": 277708800,
+          "max": 279396352
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 279298048,
+          "min": 277659648,
+          "max": 279363584
+        },
+        "memory_footprint_bytes": {
+          "median": 265405328,
+          "min": 263766904,
+          "max": 265470840
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 265405328,
+          "min": 263766904,
+          "max": 265470840
+        },
+        "go_heap_bytes": {
+          "median": 140955560,
+          "min": 139606632,
+          "max": 141349136
+        },
+        "go_allocated_bytes": {
+          "median": 4663032,
+          "min": 4658184,
+          "max": 4663432
+        },
+        "go_allocations": {
+          "median": 40227,
+          "min": 40206,
+          "max": 40228
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.006722375,
+          "min": 0.006533042,
+          "max": 0.006755958
+        },
+        "user_seconds": {
+          "median": 0.007294999999999163,
+          "min": 0.007067999999999408,
+          "max": 0.0073270000000000834
+        },
+        "system_seconds": {
+          "median": 0.012411000000000172,
+          "min": 0.011690000000000644,
+          "max": 0.012427999999999884
+        },
+        "cpu_ns_per_op": {
+          "median": 1970.5999999999337,
+          "min": 1875.8000000000052,
+          "max": 1975.4999999999966
+        },
+        "wall_ns_per_op": {
+          "median": 672.2375,
+          "min": 653.3042,
+          "max": 675.5958
+        },
+        "average_cores": {
+          "median": 2.9168328163081143,
+          "min": 2.871250483312376,
+          "max": 2.9386935420889144
+        },
+        "rss_bytes": {
+          "median": 279379968,
+          "min": 277774336,
+          "max": 279445504
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 279347200,
+          "min": 277708800,
+          "max": 279396352
+        },
+        "memory_footprint_bytes": {
+          "median": 265454480,
+          "min": 263816056,
+          "max": 265503608
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 265454480,
+          "min": 263816056,
+          "max": 265503608
+        },
+        "go_heap_bytes": {
+          "median": 141017224,
+          "min": 139665712,
+          "max": 141409392
+        },
+        "go_allocated_bytes": {
+          "median": 7600,
+          "min": 6424,
+          "max": 9592
+        },
+        "go_allocations": {
+          "median": 131,
+          "min": 110,
+          "max": 143
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-delete": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.643085333,
+          "min": 0.637845792,
+          "max": 0.67905325
+        },
+        "user_seconds": {
+          "median": 0.10259499999999999,
+          "min": 0.10022199999999959,
+          "max": 0.1032889999999993
+        },
+        "system_seconds": {
+          "median": 0.20977800000000002,
+          "min": 0.20399000000000012,
+          "max": 0.217136
+        },
+        "cpu_ns_per_op": {
+          "median": 3099.999999999996,
+          "min": 3072.789999999994,
+          "max": 3197.31
+        },
+        "wall_ns_per_op": {
+          "median": 6430.85333,
+          "min": 6378.45792,
+          "max": 6790.5325
+        },
+        "average_cores": {
+          "median": 0.47781994741901446,
+          "min": 0.47084819931279315,
+          "max": 0.48601088834963985
+        },
+        "rss_bytes": {
+          "median": 281804800,
+          "min": 280330240,
+          "max": 281886720
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 281739264,
+          "min": 280281088,
+          "max": 281870336
+        },
+        "memory_footprint_bytes": {
+          "median": 267846520,
+          "min": 266388344,
+          "max": 267961232
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 267846520,
+          "min": 266388344,
+          "max": 267961232
+        },
+        "go_heap_bytes": {
+          "median": 143528072,
+          "min": 142178056,
+          "max": 143919344
+        },
+        "go_allocated_bytes": {
+          "median": 2461552,
+          "min": 2460800,
+          "max": 2461600
+        },
+        "go_allocations": {
+          "median": 25972,
+          "min": 25971,
+          "max": 25977
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.079086333,
+          "min": 0.075166458,
+          "max": 0.085632959
+        },
+        "user_seconds": {
+          "median": 0.05860500000000002,
+          "min": 0.057179000000000535,
+          "max": 0.060414000000000634
+        },
+        "system_seconds": {
+          "median": 0.024863999999999997,
+          "min": 0.021728000000000414,
+          "max": 0.029653000000000596
+        },
+        "cpu_ns_per_op": {
+          "median": 8346.900000000001,
+          "min": 7890.700000000095,
+          "max": 9006.700000000124
+        },
+        "wall_ns_per_op": {
+          "median": 7908.6333,
+          "min": 7516.6458,
+          "max": 8563.2959
+        },
+        "average_cores": {
+          "median": 1.0517796074289718,
+          "min": 1.049763446349979,
+          "max": 1.0554162373415394
+        },
+        "rss_bytes": {
+          "median": 281870336,
+          "min": 280363008,
+          "max": 281935872
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 281837568,
+          "min": 280330240,
+          "max": 281935872
+        },
+        "memory_footprint_bytes": {
+          "median": 267928440,
+          "min": 266421112,
+          "max": 268010384
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 267928440,
+          "min": 266421112,
+          "max": 268010384
+        },
+        "go_heap_bytes": {
+          "median": 143646568,
+          "min": 142296920,
+          "max": 144038000
+        },
+        "go_allocated_bytes": {
+          "median": 65840,
+          "min": 65256,
+          "max": 66424
+        },
+        "go_allocations": {
+          "median": 643,
+          "min": 633,
+          "max": 653
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-after-delete": {
+        "ops": {
+          "median": 450000,
+          "min": 450000,
+          "max": 450000
+        },
+        "wall_seconds": {
+          "median": 0.236381875,
+          "min": 0.230952541,
+          "max": 0.240965833
+        },
+        "user_seconds": {
+          "median": 0.15911799999999943,
+          "min": 0.15743200000000002,
+          "max": 0.16343499999999977
+        },
+        "system_seconds": {
+          "median": 0.0774550000000005,
+          "min": 0.07416399999999967,
+          "max": 0.07793799999999962
+        },
+        "cpu_ns_per_op": {
+          "median": 525.7177777777775,
+          "min": 514.6577777777771,
+          "max": 536.3844444444431
+        },
+        "wall_ns_per_op": {
+          "median": 525.2930555555556,
+          "min": 513.2278688888889,
+          "max": 535.4796288888889
+        },
+        "average_cores": {
+          "median": 1.0016897291824747,
+          "min": 1.0008085433792244,
+          "max": 1.0027861092032744
+        },
+        "rss_bytes": {
+          "median": 281886720,
+          "min": 280379392,
+          "max": 281952256
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 281886720,
+          "min": 280379392,
+          "max": 281952256
+        },
+        "memory_footprint_bytes": {
+          "median": 267977592,
+          "min": 266470264,
+          "max": 268026768
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 267977592,
+          "min": 266470264,
+          "max": 268026768
+        },
+        "go_heap_bytes": {
+          "median": 143713880,
+          "min": 142365128,
+          "max": 144119904
+        },
+        "go_allocated_bytes": {
+          "median": 18160,
+          "min": 18160,
+          "max": 32528
+        },
+        "go_allocations": {
+          "median": 315,
+          "min": 315,
+          "max": 318
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "close": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.01195225,
+          "min": 0.004237833,
+          "max": 0.013367958
+        },
+        "user_seconds": {
+          "median": 0.0001120000000005561,
+          "min": 9.900000000051534e-05,
+          "max": 0.00011600000000022703
+        },
+        "system_seconds": {
+          "median": 0.000248000000000026,
+          "min": 0.0002310000000003143,
+          "max": 0.00030800000000041905
+        },
+        "cpu_ns_per_op": {
+          "median": 347000.00000054133,
+          "min": 343000.0000008704,
+          "max": 424000.0000006461
+        },
+        "wall_ns_per_op": {
+          "median": 11952250,
+          "min": 4237833,
+          "max": 13367958
+        },
+        "average_cores": {
+          "median": 0.0286975255705721,
+          "min": 0.025957592027184805,
+          "max": 0.10005113462485334
+        },
+        "rss_bytes": {
+          "median": 281903104,
+          "min": 280412160,
+          "max": 281952256
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 281886720,
+          "min": 280379392,
+          "max": 281952256
+        },
+        "memory_footprint_bytes": {
+          "median": 267977592,
+          "min": 266470264,
+          "max": 268026768
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 267977592,
+          "min": 266470264,
+          "max": 268026768
+        },
+        "go_heap_bytes": {
+          "median": 143769392,
+          "min": 142420640,
+          "max": 144175416
+        },
+        "go_allocated_bytes": {
+          "median": 1496,
+          "min": 1496,
+          "max": 1496
+        },
+        "go_allocations": {
+          "median": 21,
+          "min": 21,
+          "max": 21
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    },
+    "load_cpu_seconds": {
+      "median": 0.8845259999999999,
+      "min": 0.88392,
+      "max": 0.9030259999999999
+    }
+  },
+  {
+    "profile": "bounded64",
+    "workload": "random",
+    "engine": "sqlite-c",
+    "trials": 3,
+    "process_peak_rss_bytes": {
+      "median": 1057505280,
+      "min": 1030684672,
+      "max": 1061781504
+    },
+    "fixture_rss_bytes": {
+      "median": 128745472,
+      "min": 128647168,
+      "max": 129155072
+    },
+    "baseline_rss_bytes": {
+      "median": 20971520,
+      "min": 20905984,
+      "max": 21610496
+    },
+    "disk_bytes": {
+      "median": 469110784,
+      "min": 469110784,
+      "max": 469110784
+    },
+    "process_peak_memory_footprint_bytes": {
+      "median": 1072104936,
+      "min": 1071924712,
+      "max": 1072121296
+    },
+    "fixture_memory_footprint_bytes": {
+      "median": 117097216,
+      "min": 117031680,
+      "max": 117523200
+    },
+    "baseline_memory_footprint_bytes": {
+      "median": 9503392,
+      "min": 9437856,
+      "max": 10044064
+    },
+    "phases": {
+      "open": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.001204209,
+          "min": 0.001158625,
+          "max": 0.001239875
+        },
+        "user_seconds": {
+          "median": 0.0002299999999999941,
+          "min": 0.00022500000000000298,
+          "max": 0.00023200000000000998
+        },
+        "system_seconds": {
+          "median": 0.0008009999999999996,
+          "min": 0.0007889999999999998,
+          "max": 0.0008009999999999996
+        },
+        "cpu_ns_per_op": {
+          "median": 1026000.0000000026,
+          "min": 1021000.0000000098,
+          "max": 1030999.9999999937
+        },
+        "wall_ns_per_op": {
+          "median": 1204209,
+          "min": 1158625,
+          "max": 1239875
+        },
+        "average_cores": {
+          "median": 0.8520115694202607,
+          "min": 0.8234701078737854,
+          "max": 0.8898478800302029
+        },
+        "rss_bytes": {
+          "median": 130072576,
+          "min": 129941504,
+          "max": 130547712
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 130072576,
+          "min": 129941504,
+          "max": 130465792
+        },
+        "memory_footprint_bytes": {
+          "median": 117392128,
+          "min": 117359360,
+          "max": 117850880
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 117392128,
+          "min": 117359360,
+          "max": 117850880
+        },
+        "go_heap_bytes": {
+          "median": 108848520,
+          "min": 108848504,
+          "max": 108848776
+        },
+        "go_allocated_bytes": {
+          "median": 6152,
+          "min": 6152,
+          "max": 6152
+        },
+        "go_allocations": {
+          "median": 78,
+          "min": 78,
+          "max": 78
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "insert": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 4.340335334,
+          "min": 4.308127167,
+          "max": 4.3687650829999995
+        },
+        "user_seconds": {
+          "median": 1.3456070000000002,
+          "min": 1.3454009999999998,
+          "max": 1.354199
+        },
+        "system_seconds": {
+          "median": 3.0470119999999996,
+          "min": 3.016489,
+          "max": 3.070815
+        },
+        "cpu_ns_per_op": {
+          "median": 43926.19,
+          "min": 43618.9,
+          "max": 44250.14
+        },
+        "wall_ns_per_op": {
+          "median": 43403.35334,
+          "min": 43081.27167,
+          "max": 43687.65083
+        },
+        "average_cores": {
+          "median": 1.0124793978719615,
+          "min": 1.012045996904994,
+          "max": 1.012875244132233
+        },
+        "rss_bytes": {
+          "median": 217907200,
+          "min": 217628672,
+          "max": 218005504
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 217874432,
+          "min": 217563136,
+          "max": 217972736
+        },
+        "memory_footprint_bytes": {
+          "median": 205226824,
+          "min": 205030216,
+          "max": 205259592
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 205226824,
+          "min": 205030216,
+          "max": 205259592
+        },
+        "go_heap_bytes": {
+          "median": 113699152,
+          "min": 113699136,
+          "max": 113699408
+        },
+        "go_allocated_bytes": {
+          "median": 4800000,
+          "min": 4800000,
+          "max": 4800000
+        },
+        "go_allocations": {
+          "median": 300000,
+          "min": 300000,
+          "max": 300000
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.001597666,
+          "min": 0.001529625,
+          "max": 0.001618291
+        },
+        "user_seconds": {
+          "median": 0.00015699999999996272,
+          "min": 0.00015499999999990521,
+          "max": 0.00017299999999997873
+        },
+        "system_seconds": {
+          "median": 0.001466999999999885,
+          "min": 0.0013830000000001341,
+          "max": 0.0014980000000002214
+        },
+        "cpu_ns_per_op": {
+          "median": 16.239999999998478,
+          "min": 15.380000000000393,
+          "max": 16.710000000002
+        },
+        "wall_ns_per_op": {
+          "median": 15.97666,
+          "min": 15.29625,
+          "max": 16.18291
+        },
+        "average_cores": {
+          "median": 1.0054751981695118,
+          "min": 1.003527795680658,
+          "max": 1.0459007076574203
+        },
+        "rss_bytes": {
+          "median": 217923584,
+          "min": 217677824,
+          "max": 218087424
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 217907200,
+          "min": 217628672,
+          "max": 218021888
+        },
+        "memory_footprint_bytes": {
+          "median": 205259592,
+          "min": 205079368,
+          "max": 205308744
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 205259592,
+          "min": 205079368,
+          "max": 205308744
+        },
+        "go_heap_bytes": {
+          "median": 113749928,
+          "min": 113749912,
+          "max": 113750536
+        },
+        "go_allocated_bytes": {
+          "median": 440,
+          "min": 440,
+          "max": 440
+        },
+        "go_allocations": {
+          "median": 9,
+          "min": 9,
+          "max": 9
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 3.094569625,
+          "min": 3.094440917,
+          "max": 3.140484792
+        },
+        "user_seconds": {
+          "median": 1.5520869999999998,
+          "min": 1.5496379999999998,
+          "max": 1.5819779999999999
+        },
+        "system_seconds": {
+          "median": 1.5670480000000002,
+          "min": 1.563012,
+          "max": 1.5811709999999999
+        },
+        "cpu_ns_per_op": {
+          "median": 15583.43,
+          "min": 15575.495,
+          "max": 15815.745
+        },
+        "wall_ns_per_op": {
+          "median": 15472.848125,
+          "min": 15472.204585,
+          "max": 15702.42396
+        },
+        "average_cores": {
+          "median": 1.0071887244244322,
+          "min": 1.006634000034819,
+          "max": 1.0072167864202795
+        },
+        "rss_bytes": {
+          "median": 224641024,
+          "min": 224477184,
+          "max": 224821248
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 224641024,
+          "min": 224444416,
+          "max": 224788480
+        },
+        "memory_footprint_bytes": {
+          "median": 211993416,
+          "min": 211878728,
+          "max": 212075336
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 211993416,
+          "min": 211878728,
+          "max": 212075336
+        },
+        "go_heap_bytes": {
+          "median": 120201592,
+          "min": 120201128,
+          "max": 120202744
+        },
+        "go_allocated_bytes": {
+          "median": 6401072,
+          "min": 6401072,
+          "max": 6401072
+        },
+        "go_allocations": {
+          "median": 400002,
+          "min": 400002,
+          "max": 400002
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-miss": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 2.951516833,
+          "min": 2.8952687089999998,
+          "max": 2.98021425
+        },
+        "user_seconds": {
+          "median": 1.459593,
+          "min": 1.434243,
+          "max": 1.4614030000000002
+        },
+        "system_seconds": {
+          "median": 1.518884,
+          "min": 1.4895139999999998,
+          "max": 1.549728
+        },
+        "cpu_ns_per_op": {
+          "median": 14892.385,
+          "min": 14618.784999999998,
+          "max": 15055.655
+        },
+        "wall_ns_per_op": {
+          "median": 14757.584165,
+          "min": 14476.343545,
+          "max": 14901.07125
+        },
+        "average_cores": {
+          "median": 1.0098396017307283,
+          "min": 1.009134342958362,
+          "max": 1.0103740024731445
+        },
+        "rss_bytes": {
+          "median": 231407616,
+          "min": 231227392,
+          "max": 231555072
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 231358464,
+          "min": 231178240,
+          "max": 231522304
+        },
+        "memory_footprint_bytes": {
+          "median": 218694472,
+          "min": 218596168,
+          "max": 218809160
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 218694472,
+          "min": 218596168,
+          "max": 218809160
+        },
+        "go_heap_bytes": {
+          "median": 126651096,
+          "min": 126650280,
+          "max": 126652792
+        },
+        "go_allocated_bytes": {
+          "median": 6400000,
+          "min": 6400000,
+          "max": 6400000
+        },
+        "go_allocations": {
+          "median": 400000,
+          "min": 400000,
+          "max": 400000
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-values": {
+        "ops": {
+          "median": 500000,
+          "min": 500000,
+          "max": 500000
+        },
+        "wall_seconds": {
+          "median": 1.086095,
+          "min": 1.0448075000000001,
+          "max": 1.4488982080000001
+        },
+        "user_seconds": {
+          "median": 0.3732680000000004,
+          "min": 0.36633799999999983,
+          "max": 0.40336399999999983
+        },
+        "system_seconds": {
+          "median": 0.7039880000000007,
+          "min": 0.6842740000000003,
+          "max": 0.850301
+        },
+        "cpu_ns_per_op": {
+          "median": 2154.5120000000024,
+          "min": 2101.224,
+          "max": 2507.3299999999995
+        },
+        "wall_ns_per_op": {
+          "median": 2172.19,
+          "min": 2089.6150000000002,
+          "max": 2897.7964160000006
+        },
+        "average_cores": {
+          "median": 0.9918616695592937,
+          "min": 0.8652540206606424,
+          "max": 1.0055555688488071
+        },
+        "rss_bytes": {
+          "median": 239665152,
+          "min": 219627520,
+          "max": 239992832
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 239632384,
+          "min": 237420544,
+          "max": 239992832
+        },
+        "memory_footprint_bytes": {
+          "median": 227083104,
+          "min": 227066720,
+          "max": 227296096
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 227083104,
+          "min": 227066720,
+          "max": 227296096
+        },
+        "go_heap_bytes": {
+          "median": 134814432,
+          "min": 134813280,
+          "max": 134816672
+        },
+        "go_allocated_bytes": {
+          "median": 8006184,
+          "min": 8006184,
+          "max": 8006184
+        },
+        "go_allocations": {
+          "median": 500041,
+          "min": 500041,
+          "max": 500041
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "find-hit-par10": {
+        "ops": {
+          "median": 200000,
+          "min": 200000,
+          "max": 200000
+        },
+        "wall_seconds": {
+          "median": 5.348849333,
+          "min": 5.111012875,
+          "max": 5.789292584
+        },
+        "user_seconds": {
+          "median": 5.165906,
+          "min": 5.037532000000001,
+          "max": 5.36603
+        },
+        "system_seconds": {
+          "median": 35.956814,
+          "min": 34.333425,
+          "max": 36.508519
+        },
+        "cpu_ns_per_op": {
+          "median": 204971.73,
+          "min": 198497.275,
+          "max": 208372.125
+        },
+        "wall_ns_per_op": {
+          "median": 26744.246665,
+          "min": 25555.064375,
+          "max": 28946.46292
+        },
+        "average_cores": {
+          "median": 7.664142967550662,
+          "min": 6.857393096648508,
+          "max": 8.153848565681807
+        },
+        "rss_bytes": {
+          "median": 978993152,
+          "min": 976011264,
+          "max": 1052213248
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1049575424,
+          "min": 1029242880,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 1072072144,
+          "min": 1071842792,
+          "max": 1072072168
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072072144,
+          "min": 1071842792,
+          "max": 1072072168
+        },
+        "go_heap_bytes": {
+          "median": 141318832,
+          "min": 141317136,
+          "max": 141319632
+        },
+        "go_allocated_bytes": {
+          "median": 6454080,
+          "min": 6453632,
+          "max": 6454176
+        },
+        "go_allocations": {
+          "median": 400351,
+          "min": 400350,
+          "max": 400352
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "readers-close": {
+        "ops": {
+          "median": 10,
+          "min": 10,
+          "max": 10
+        },
+        "wall_seconds": {
+          "median": 0.103257292,
+          "min": 0.095448875,
+          "max": 0.111944333
+        },
+        "user_seconds": {
+          "median": 0.03404600000000002,
+          "min": 0.03155600000000014,
+          "max": 0.03423500000000068
+        },
+        "system_seconds": {
+          "median": 0.06938399999999945,
+          "min": 0.06406599999999685,
+          "max": 0.07747400000000226
+        },
+        "cpu_ns_per_op": {
+          "median": 10342999.999999946,
+          "min": 9562199.999999698,
+          "max": 11170900.000000294
+        },
+        "wall_ns_per_op": {
+          "median": 10325729.2,
+          "min": 9544887.5,
+          "max": 11194433.3
+        },
+        "average_cores": {
+          "median": 1.0016725985802482,
+          "min": 0.9978977676342308,
+          "max": 1.0018137982244106
+        },
+        "rss_bytes": {
+          "median": 979517440,
+          "min": 959152128,
+          "max": 1052508160
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1052426240,
+          "min": 1029242880,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 669763048,
+          "min": 669713896,
+          "max": 669943272
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 141368928,
+          "min": 141366304,
+          "max": 141369728
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.458600125,
+          "min": 0.447928917,
+          "max": 0.481961625
+        },
+        "user_seconds": {
+          "median": 0.15454300000000032,
+          "min": 0.1517780000000002,
+          "max": 0.15569799999999923
+        },
+        "system_seconds": {
+          "median": 0.29599599999999526,
+          "min": 0.29300499999999374,
+          "max": 0.3259169999999969
+        },
+        "cpu_ns_per_op": {
+          "median": 45053.89999999956,
+          "min": 44478.29999999939,
+          "max": 48161.499999999614
+        },
+        "wall_ns_per_op": {
+          "median": 45860.0125,
+          "min": 44792.8917,
+          "max": 48196.1625
+        },
+        "average_cores": {
+          "median": 0.9929767494782972,
+          "min": 0.9824223227152317,
+          "max": 0.9992808037361816
+        },
+        "rss_bytes": {
+          "median": 1021149184,
+          "min": 1005289472,
+          "max": 1053032448
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1052934144,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 670205416,
+          "min": 670123496,
+          "max": 670516712
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 141898992,
+          "min": 141895456,
+          "max": 141899328
+        },
+        "go_allocated_bytes": {
+          "median": 480000,
+          "min": 480000,
+          "max": 480000
+        },
+        "go_allocations": {
+          "median": 30000,
+          "min": 30000,
+          "max": 30000
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.001982,
+          "min": 0.001722042,
+          "max": 0.002363375
+        },
+        "user_seconds": {
+          "median": 0.00017800000000001148,
+          "min": 0.00017099999999992122,
+          "max": 0.00019500000000149953
+        },
+        "system_seconds": {
+          "median": 0.0017970000000033792,
+          "min": 0.0015629999999973165,
+          "max": 0.00219200000000086
+        },
+        "cpu_ns_per_op": {
+          "median": 19.920000000048788,
+          "min": 17.339999999972378,
+          "max": 23.700000000008714
+        },
+        "wall_ns_per_op": {
+          "median": 19.819999999999997,
+          "min": 17.22042,
+          "max": 23.63375
+        },
+        "average_cores": {
+          "median": 1.0050454086805645,
+          "min": 1.0028031945843852,
+          "max": 1.0069440815016346
+        },
+        "rss_bytes": {
+          "median": 1021280256,
+          "min": 1005371392,
+          "max": 1053163520
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1053097984,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 670254568,
+          "min": 670172648,
+          "max": 670565864
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 141950488,
+          "min": 141947848,
+          "max": 141950824
+        },
+        "go_allocated_bytes": {
+          "median": 40,
+          "min": 40,
+          "max": 40
+        },
+        "go_allocations": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-update": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.163879166,
+          "min": 0.158464292,
+          "max": 0.170959458
+        },
+        "user_seconds": {
+          "median": 0.07815999999999867,
+          "min": 0.07740699999999912,
+          "max": 0.07916800000000102
+        },
+        "system_seconds": {
+          "median": 0.08365200000000073,
+          "min": 0.08219599999999616,
+          "max": 0.09316100000000205
+        },
+        "cpu_ns_per_op": {
+          "median": 16181.19999999994,
+          "min": 15960.29999999953,
+          "max": 17232.900000000307
+        },
+        "wall_ns_per_op": {
+          "median": 16387.9166,
+          "min": 15846.4292,
+          "max": 17095.9458
+        },
+        "average_cores": {
+          "median": 1.0071858964920328,
+          "min": 0.9873860353914629,
+          "max": 1.0080109168338791
+        },
+        "rss_bytes": {
+          "median": 1021657088,
+          "min": 1005617152,
+          "max": 1053573120
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1053491200,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 670598632,
+          "min": 670533096,
+          "max": 670795240
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 142319688,
+          "min": 142317944,
+          "max": 142320024
+        },
+        "go_allocated_bytes": {
+          "median": 320048,
+          "min": 320048,
+          "max": 320048
+        },
+        "go_allocations": {
+          "median": 20001,
+          "min": 20001,
+          "max": 20001
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "mixed-80read-20update": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 2.297189,
+          "min": 2.151609584,
+          "max": 3.080165334
+        },
+        "user_seconds": {
+          "median": 0.9816719999999997,
+          "min": 0.9441630000000014,
+          "max": 1.0000619999999998
+        },
+        "system_seconds": {
+          "median": 1.3034269999999992,
+          "min": 1.213901,
+          "max": 1.508353999999997
+        },
+        "cpu_ns_per_op": {
+          "median": 22850.98999999999,
+          "min": 21580.640000000014,
+          "max": 25084.159999999967
+        },
+        "wall_ns_per_op": {
+          "median": 22971.89,
+          "min": 21516.09584,
+          "max": 30801.65334
+        },
+        "average_cores": {
+          "median": 0.994737046015804,
+          "min": 0.8143770635657692,
+          "max": 1.0029998081659415
+        },
+        "rss_bytes": {
+          "median": 990298112,
+          "min": 956825600,
+          "max": 1054605312
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1055342592,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 674350568,
+          "min": 674334184,
+          "max": 674547176
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 145888904,
+          "min": 145888040,
+          "max": 145889224
+        },
+        "go_allocated_bytes": {
+          "median": 3520048,
+          "min": 3520048,
+          "max": 3520048
+        },
+        "go_allocations": {
+          "median": 220001,
+          "min": 220001,
+          "max": 220001
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-mixed": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.001955042,
+          "min": 0.001548292,
+          "max": 0.002500916
+        },
+        "user_seconds": {
+          "median": 0.00015699999999974068,
+          "min": 0.00015500000000123748,
+          "max": 0.00015799999999899228
+        },
+        "system_seconds": {
+          "median": 0.0018089999999943984,
+          "min": 0.0013959999999997308,
+          "max": 0.002293000000001655
+        },
+        "cpu_ns_per_op": {
+          "median": 19.63999999995636,
+          "min": 15.53999999998723,
+          "max": 24.500000000013955
+        },
+        "wall_ns_per_op": {
+          "median": 19.550420000000003,
+          "min": 15.48292,
+          "max": 25.00916
+        },
+        "average_cores": {
+          "median": 1.0036866430871716,
+          "min": 0.9796410595163514,
+          "max": 1.0045819987476667
+        },
+        "rss_bytes": {
+          "median": 990347264,
+          "min": 956891136,
+          "max": 1054392320
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1055342592,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 674432488,
+          "min": 674399720,
+          "max": 674612712
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 145938544,
+          "min": 145937616,
+          "max": 145938800
+        },
+        "go_allocated_bytes": {
+          "median": 40,
+          "min": 40,
+          "max": 40
+        },
+        "go_allocations": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.34602225,
+          "min": 0.335199625,
+          "max": 0.372829125
+        },
+        "user_seconds": {
+          "median": 0.11785500000000049,
+          "min": 0.11736700000000155,
+          "max": 0.12287399999999948
+        },
+        "system_seconds": {
+          "median": 0.23114900000000205,
+          "min": 0.21947499999999565,
+          "max": 0.2465869999999981
+        },
+        "cpu_ns_per_op": {
+          "median": 34851.600000000355,
+          "min": 33732.999999999614,
+          "max": 36946.09999999976
+        },
+        "wall_ns_per_op": {
+          "median": 34602.225,
+          "min": 33519.9625,
+          "max": 37282.9125
+        },
+        "average_cores": {
+          "median": 1.0063555411197018,
+          "min": 0.9909660357140757,
+          "max": 1.0072069064922953
+        },
+        "rss_bytes": {
+          "median": 979238912,
+          "min": 957399040,
+          "max": 1053573120
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1055342592,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 674842088,
+          "min": 674776552,
+          "max": 674973160
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 146307968,
+          "min": 146306768,
+          "max": 146308592
+        },
+        "go_allocated_bytes": {
+          "median": 320000,
+          "min": 320000,
+          "max": 320000
+        },
+        "go_allocations": {
+          "median": 20000,
+          "min": 20000,
+          "max": 20000
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "settle-delete": {
+        "ops": {
+          "median": 100000,
+          "min": 100000,
+          "max": 100000
+        },
+        "wall_seconds": {
+          "median": 0.001505375,
+          "min": 0.00113525,
+          "max": 0.001729958
+        },
+        "user_seconds": {
+          "median": 0.00011800000000050659,
+          "min": 0.00011699999999947863,
+          "max": 0.00013799999999974943
+        },
+        "system_seconds": {
+          "median": 0.0013939999999976749,
+          "min": 0.001024000000001024,
+          "max": 0.0015749999999954412
+        },
+        "cpu_ns_per_op": {
+          "median": 15.109999999971533,
+          "min": 11.420000000015307,
+          "max": 17.129999999951906
+        },
+        "wall_ns_per_op": {
+          "median": 15.05375,
+          "min": 11.3525,
+          "max": 17.29958
+        },
+        "average_cores": {
+          "median": 1.0037366104772256,
+          "min": 0.990197449877506,
+          "max": 1.0059458269117205
+        },
+        "rss_bytes": {
+          "median": 979271680,
+          "min": 957497344,
+          "max": 1053655040
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1055342592,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 674874856,
+          "min": 674825704,
+          "max": 675038696
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 146357160,
+          "min": 146356408,
+          "max": 146357800
+        },
+        "go_allocated_bytes": {
+          "median": 40,
+          "min": 40,
+          "max": 40
+        },
+        "go_allocations": {
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "verify-delete": {
+        "ops": {
+          "median": 10000,
+          "min": 10000,
+          "max": 10000
+        },
+        "wall_seconds": {
+          "median": 0.148046709,
+          "min": 0.145946833,
+          "max": 0.163794834
+        },
+        "user_seconds": {
+          "median": 0.07164900000000074,
+          "min": 0.07028299999999987,
+          "max": 0.07633599999999952
+        },
+        "system_seconds": {
+          "median": 0.07777099999999848,
+          "min": 0.07603699999999947,
+          "max": 0.08599800000000357
+        },
+        "cpu_ns_per_op": {
+          "median": 14941.999999999922,
+          "min": 14631.999999999935,
+          "max": 16233.40000000031
+        },
+        "wall_ns_per_op": {
+          "median": 14804.6709,
+          "min": 14594.6833,
+          "max": 16379.4834
+        },
+        "average_cores": {
+          "median": 1.0025568694594376,
+          "min": 0.9910813182301164,
+          "max": 1.0092760657043665
+        },
+        "rss_bytes": {
+          "median": 979648512,
+          "min": 957890560,
+          "max": 1054064640
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1055342592,
+          "min": 1030684672,
+          "max": 1057505280
+        },
+        "memory_footprint_bytes": {
+          "median": 675202536,
+          "min": 675202536,
+          "max": 675431912
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 146726456,
+          "min": 146726312,
+          "max": 146726952
+        },
+        "go_allocated_bytes": {
+          "median": 320000,
+          "min": 320000,
+          "max": 320000
+        },
+        "go_allocations": {
+          "median": 20000,
+          "min": 20000,
+          "max": 20000
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "scan-after-delete": {
+        "ops": {
+          "median": 450000,
+          "min": 450000,
+          "max": 450000
+        },
+        "wall_seconds": {
+          "median": 1.003321459,
+          "min": 0.967444167,
+          "max": 1.00533825
+        },
+        "user_seconds": {
+          "median": 0.3368289999999998,
+          "min": 0.3313360000000003,
+          "max": 0.3452370000000009
+        },
+        "system_seconds": {
+          "median": 0.6562690000000018,
+          "min": 0.6389309999999995,
+          "max": 0.6662849999999949
+        },
+        "cpu_ns_per_op": {
+          "median": 2225.568888888895,
+          "min": 2156.1488888888885,
+          "max": 2229.1422222222104
+        },
+        "wall_ns_per_op": {
+          "median": 2229.603242222222,
+          "min": 2149.8759266666666,
+          "max": 2234.0850000000005
+        },
+        "average_cores": {
+          "median": 0.9981905510106335,
+          "min": 0.9977875605548626,
+          "max": 1.0029178252309414
+        },
+        "rss_bytes": {
+          "median": 982089728,
+          "min": 965394432,
+          "max": 1061650432
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1057505280,
+          "min": 1030684672,
+          "max": 1061584896
+        },
+        "memory_footprint_bytes": {
+          "median": 682771944,
+          "min": 682722792,
+          "max": 682952168
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 153981408,
+          "min": 153981360,
+          "max": 153981920
+        },
+        "go_allocated_bytes": {
+          "median": 7205800,
+          "min": 7205800,
+          "max": 7205800
+        },
+        "go_allocations": {
+          "median": 450035,
+          "min": 450035,
+          "max": 450035
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "close": {
+        "ops": {
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "wall_seconds": {
+          "median": 0.061680542,
+          "min": 0.059997917,
+          "max": 0.609036541
+        },
+        "user_seconds": {
+          "median": 0.0030610000000006465,
+          "min": 0.0030250000000009436,
+          "max": 0.0031079999999992225
+        },
+        "system_seconds": {
+          "median": 0.058568000000001064,
+          "min": 0.04632800000000259,
+          "max": 0.11987400000000292
+        },
+        "cpu_ns_per_op": {
+          "median": 61629000.00000171,
+          "min": 49353000.00000353,
+          "max": 122982000.00000215
+        },
+        "wall_ns_per_op": {
+          "median": 61680542,
+          "min": 59997917,
+          "max": 609036541
+        },
+        "average_cores": {
+          "median": 0.8225785571856359,
+          "min": 0.20192877064169806,
+          "max": 0.9991643718046724
+        },
+        "rss_bytes": {
+          "median": 974372864,
+          "min": 965410816,
+          "max": 1061748736
+        },
+        "process_peak_rss_bytes_so_far": {
+          "median": 1057505280,
+          "min": 1030684672,
+          "max": 1061683200
+        },
+        "memory_footprint_bytes": {
+          "median": 682837480,
+          "min": 682755560,
+          "max": 682968552
+        },
+        "process_peak_memory_footprint_bytes_so_far": {
+          "median": 1072104936,
+          "min": 1071924712,
+          "max": 1072121296
+        },
+        "go_heap_bytes": {
+          "median": 154036320,
+          "min": 154035392,
+          "max": 154036832
+        },
+        "go_allocated_bytes": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "go_allocations": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "gc_cycles": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    },
+    "load_cpu_seconds": {
+      "median": 4.39429,
+      "min": 4.363428,
+      "max": 4.426638
+    }
+  }
+]

@@ -31,12 +31,13 @@ func (db *DB) spill(val []byte) ([]byte, error) {
 					return nil, err
 				}
 				if off%(pageBufferArenaBytes/PageSize*overflowData) == 0 {
-					db.pager.releaseUnusedBuffers(true)
+					db.pager.releaseUnusedBuffers()
 				}
 			}
 		} else {
 			first = n
 		}
+		retainNode(n)
 		db.dirtyOverflow = append(db.dirtyOverflow, n)
 		prev = n
 		off += chunk
@@ -114,6 +115,10 @@ func (db *DB) writeDirtyOverflow() error {
 			return err
 		}
 	}
+	for _, n := range db.dirtyOverflow {
+		releaseNode(n)
+	}
+	clear(db.dirtyOverflow)
 	db.dirtyOverflow = db.dirtyOverflow[:0]
 	return nil
 }

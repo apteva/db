@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+"""Write a reviewable report using all completed CPU matrix samples."""
+import argparse,json,pathlib
+p=argparse.ArgumentParser();p.add_argument('root');args=p.parse_args();root=pathlib.Path(args.root)
+data=json.loads((root/'cpu-summary.json').read_text());engines=['ours','pebble','sqlite-c','sqlite-go'];names={'ours':'AptevaDB alpha.6','pebble':'Pebble 2.1.7','sqlite-c':'SQLite C 3.32.2','sqlite-go':'SQLite Go 3.46.0'}
+lines=['# Large-operation CPU benchmark','',
+ 'Measured on Apple M1 Pro (10 logical CPUs, 16 GiB RAM), Go 1.25.1, macOS. Three fresh serial processes per engine/dataset/order. CPU is process user + system time from getrusage, including all engine/GC/background threads. Lower CPU seconds per million operations is better. These are controlled embedded key/value operations, not a comparison of SQL/document query languages. All 48 successful processes passed 864 measured phases; every engine/dataset/order group has three trials.','',
+ 'The C binding is crawshaw.io/sqlite v0.3.2 and bundles SQLite 3.32.2; the pure-Go binding uses SQLite 3.46.0 (zombiezen v1.4.0 / modernc v1.33.1). The C result is version-specific and is not a latest-SQLite claim. SQLite stores BLOB keys/values in a WITHOUT ROWID table. This layout, page size, compression and caches differ from the other engines and affect storage/CPU. All engines use asynchronous/non-fsync writes and per-row atomic mutations. 64 MiB cache settings are used; SQLite has a separate cache per connection, Pebble also has a 64 MiB memtable, and AptevaDB derives a 32 MiB memtable from its configured cache. These are not equal total-process memory limits. Native file mappings, WAL/page buffers, fixtures and C allocations are included in process memory measurements.','',
+ 'Reads repeat two complete shuffled passes. Scans repeat five passes and access full keys/values through public Go APIs, checking lengths and first/last-byte sums. SQLite copies columns into Go buffers; AptevaDB/Pebble expose borrowed callback slices. The ten-reader phase includes reader/connection setup and newly opened SQLite caches. Fixtures remain alive throughout each process. No cold OS-cache claim is made.','',
+ 'Updates change 10% of existing values. Mixed operations perform 80% point reads and 20% updates. Deletes remove 10% of the rows. Write tables include the following maintenance phase: full checkpoint/compaction for AptevaDB, flush/compaction for Pebble, WAL checkpoint for SQLite. Result validation, value checks, GC and background engine work within measured intervals count toward CPU; initial fixture generation and compilation do not.','',
+ 'Background applications, memory pressure and disk-space fluctuations were present. All successful trials are retained, including slower samples, with median/min/max, CPU/wall, allocations, GC, sampled RSS, lifetime peaks and background snapshots. A disk-space preflight interrupted the initial run before the third fixture; it resumed without rerunning or discarding the two completed SQLite trials. A live disk-space monitor stops fixtures below 128 MiB free and removes only their disposable databases. The initial 250K-row SQLite C load was aborted by that guard, with no completed trial counted. We measured the additional 100K x 1KiB case while space was constrained, then resumed and completed the original 250K case after disk space recovered. The aborted reason remains beside the completed retry; all three successful trials are used.','',
+ '## CPU seconds per million logical operations','']
+scenarios=sorted({(d['rows'],d['value_bytes'],d['workload']) for d in data})
+for n,size,work in scenarios:
+ subset={d['engine']:d for d in data if (d['rows'],d['value_bytes'],d['workload'])==(n,size,work)}
+ lines += [f'### {n:,} rows, {size} bytes/value, {work} insertion','', '| Operation | AptevaDB | Pebble | SQLite C | SQLite Go |','|---|---:|---:|---:|---:|']
+ ops=list(next(iter(subset.values()))['operations'])
+ for op in ops:
+  cells=[f"{subset[e]['operations'][op]['measures']['cpu_seconds_per_million_ops']['median']:.3f}" if e in subset else 'pending' for e in engines]
+  lines.append('| '+op+' | '+' | '.join(cells)+' |')
+ lines+=['','| Engine | Trials | Peak RSS MiB | Peak physical footprint MiB |','|---|---:|---:|---:|']
+ for e in engines:
+  if e in subset:
+   d=subset[e];lines.append(f"| {names[e]} | {d['trials']} | {d['process_peak_rss_bytes']['median']/2**20:.1f} | {d['process_peak_memory_footprint_bytes']['median']/2**20:.1f} |")
+ lines+=['','Peaks are process-lifetime high-water marks across load, reads, mutations, maintenance and close. They include shared workload fixture arrays, not just database memory. Physical footprint accounts for compressed memory and differs from RSS in how file-backed pages are charged. Neither peak is a phase-only peak.','']
+lines+=['## Files and reproduction','',
+ '`cpu-summary.csv` includes median throughput and average cores alongside CPU. `cpu-summary.json` retains every per-operation sample and ranges. Dataset directories contain full raw phase measurements, stdout/stderr, metadata, source copies/patches, binary SHA256 and module dependency versions. The standard harness uses Bloom filters (10 bits/key) at each Pebble level and default compression settings. The root database implementation was unchanged from released alpha.6.','',
+ '```sh','cd bench','go vet ./...','go build -o /tmp/apteva-large-cpu-bench .','python3 run_large_cpu.py --binary /tmp/apteva-large-cpu-bench --out /tmp/apteva-cpu-results','python3 run_resources.py --binary /tmp/apteva-large-cpu-bench --out /tmp/apteva-cpu-results/100k-1KiB --n 100000 --vsize 1024 --reps 3 --readers 10 --cachemb 64 --ourscachemb 64 --no-default --crud --readpasses 2 --scanpasses 5 --workloads random','python3 summarize_large_cpu.py /tmp/apteva-cpu-results','python3 report_large_cpu.py /tmp/apteva-cpu-results','```','',
+ 'The runner refuses fixtures that cannot fit its estimated temporary database/WAL/compaction allowance and reserve. It supports resuming completed trials unchanged. This run was constrained by local free disk space; its measured settings, commands and successful/aborted records are preserved.','']
+(root/'REPORT.md').write_text('\n'.join(lines))
+print(root/'REPORT.md')

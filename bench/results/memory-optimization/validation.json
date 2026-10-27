@@ -1,0 +1,58 @@
+{
+  "base_revision": "65cedd31a494bb561485cfc07c3dd0aeed06be06",
+  "macos_full_tests": {
+    "command": "go test ./...",
+    "passed": true,
+    "seconds": 213.758
+  },
+  "macos_full_race_memory_changes": {
+    "command": "go test -race ./...",
+    "passed": true,
+    "seconds": 450.579,
+    "note": "Before subsequent WAL pin/finalization fixes; final changes also passed targeted race."
+  },
+  "macos_final_targeted_race": {
+    "passed": true,
+    "seconds": 63.778,
+    "scope": "final policy and reclamation: cache bounds, memtable ownership/hash/overflow-safe budgets, cursor storage, descriptor capture, mapping segments/reclamation, concurrent compaction"
+  },
+  "linux_full_tests": {
+    "command": "docker run golang:1.25-bookworm go test ./...",
+    "passed": true,
+    "seconds": 361.859,
+    "architecture": "linux/arm64",
+    "CI": true
+  },
+  "vet": {
+    "root": true,
+    "benchmark_module": true
+  },
+  "source_archive_sha256": "a4e65fa19dd47574264681f06cf3fe23a3e50f4fc1a24705d33914f510ee7ab6",
+  "candidate_sha256": "5cd32937b9ded92efefc18d71ca5812c27b1b155948bd8c02ac762208349ccc4",
+  "no_release_published": true,
+  "linux_final_targeted_tests": {
+    "passed": true,
+    "seconds": 26.412,
+    "architecture": "linux/arm64",
+    "CI": true,
+    "scope": "final policy and reclamation: cache bounds, memtable ownership/hash/budget extremes, cursor storage, descriptor capture, mapping growth/reclamation and compactions"
+  },
+  "macos_prior_policy_targeted_race": {
+    "passed": true,
+    "seconds": 295.321,
+    "scope": "two-budget writer waits and compaction/replay; before final cache sweep"
+  },
+  "repeated_cache_bound_tests": {
+    "passed": true,
+    "count": 5,
+    "seconds": 10.671
+  },
+  "diagnostic_candidates": "Earlier 16 MiB/single-burst matrix and subsequent one-trial tuning probes are separate, retained, and not pooled with these final trials.",
+  "cross_builds": {
+    "linux/amd64": true,
+    "darwin/amd64": true
+  },
+  "completed_benchmark_trials": 48,
+  "measured_go_source_matches_current": false,
+  "source_stage": "Original 48-trial memory candidate, before final warm-up/in-flight correction. Its source archive matches that original measured state; final validation is in the final-native cohort."
+}

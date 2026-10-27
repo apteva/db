@@ -5,6 +5,41 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.7] - 2026-10-27
+
+- Reduce retained native memory with stable file segments, explicit ownership of
+  writable pages/descriptors and memtable record/metadata storage, and reclamation
+  of old mapped file versions. Preserve snapshot/cursor and checkpoint I/O views.
+- Stream compaction in both cache modes, reuse checkpoint vectors and scratch
+  buffers, and allocate reclaimable WAL buffers lazily. Verified clean reads
+  avoid descriptor allocation and read-side CLOCK reference writes. Warm the new
+  compacted mapping after closing the old file in both cache modes.
+- With a cache target, the default memtable budget remains `CacheBytes/2`,
+  but now accounts for native metadata and replaced records. Writers wait at
+  two active-table budgets while another table applies (previously four budgets).
+  Dirty-page checkpoint pressure begins at `CacheBytes/4` (previously `3/4`).
+  These targets do not cap total process memory or versions retained by snapshots.
+- Pin the WAL replay range through compaction and serialize concurrent copies
+  and log rotations, preventing background checkpoints from deleting required
+  generations.
+- Expose checkpoint-pinned `InFlightPages` in statistics without double-counting
+  dirty pages; cache bounds include pages that I/O cannot evict.
+- Batch contiguous checkpoint pages with immutable staging copies while retaining
+  the data-sync/meta-sync durability order. Reuse tree descent between scan leaves.
+- Bound ordinary WAL backlog at 4 MiB, release oversized burst buffers at replay
+  barriers, and report allocated `WALBufferBytes`. Large atomic batches remain supported.
+- Retire consumed file translations during private compaction copies, preserving
+  concurrent views and warming the replacement only after closing the old file.
+- Drain startup cleanup synchronously before checkpoint workers start, avoiding
+  a recovery deadlock after interrupted index builds with small memtable budgets.
+  Writers also recheck closure/failure after waiting for buffer space.
+- Flush a complete WAL prefix before a new record crosses the ordinary buffer
+  limit, avoiding a double-sized allocation immediately before flushing.
+- Keep snapshot-retired page IDs pending until metadata that excludes them is
+  durable, including when retirement happens during checkpoint I/O. This prevents
+  recovered tree corruption after an interrupted checkpoint.
+- The on-disk format remains 10 and existing databases need no migration.
+
 ## [0.2.0-alpha.6] - 2026-10-14
 
 - Add `CountDocuments(ctx, filter, CountOptions)` for embedded/default and

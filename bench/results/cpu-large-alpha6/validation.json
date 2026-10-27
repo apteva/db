@@ -1,0 +1,50 @@
+{
+  "successful_processes": 48,
+  "groups": 16,
+  "trials_per_group": 3,
+  "engine_root_version": "v0.2.0-alpha.6",
+  "engine_changes": "none; benchmark tools only",
+  "phases_per_process": 18,
+  "hardware": "Apple M1 Pro, 10 logical CPUs, 16 GiB RAM",
+  "go": "1.25.1",
+  "payloads": [
+    {
+      "rows": 1000000,
+      "value_bytes": 100,
+      "orders": [
+        "random",
+        "seq"
+      ]
+    },
+    {
+      "rows": 100000,
+      "value_bytes": 1024,
+      "orders": [
+        "random"
+      ]
+    },
+    {
+      "rows": 250000,
+      "value_bytes": 1024,
+      "orders": [
+        "random"
+      ]
+    }
+  ],
+  "validation": "all point hit values, expected misses, update values, deletions, scan counts and value checksum checks passed",
+  "failed_attempts": [
+    {
+      "reason": "free-space preflight before third million-row process",
+      "completed_trials_preserved": 2
+    },
+    {
+      "reason": "live free-space guard aborted initial 250K SQLite C fixture",
+      "successful_trial_count": 0,
+      "cleanup": "only disposable fixture removed; retried once disk space recovered"
+    }
+  ],
+  "durability": "per-row atomic async/non-fsync",
+  "cache": "64 MiB configured caches; SQLite per connection, Pebble 64 MiB memtable, AptevaDB 32 MiB derived memtable",
+  "cpu": "getrusage process user + system CPU, including all threads",
+  "statistics": "median/min/max across all three trials; no best-of selection"
+}

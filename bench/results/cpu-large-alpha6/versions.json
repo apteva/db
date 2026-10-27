@@ -1,0 +1,8 @@
+{
+  "apteva": "v0.2.0-alpha.6",
+  "pebble": "v2.1.7",
+  "sqlite_c": "3.32.2",
+  "sqlite_c_binding": "crawshaw.io/sqlite v0.3.2",
+  "sqlite_go": "3.46.0",
+  "sqlite_go_binding": "zombiezen v1.4.0 / modernc v1.33.1"
+}

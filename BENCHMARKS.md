@@ -31,6 +31,29 @@ memtables, readers and sync policy. Record background load; do not benchmark bes
 builds, tests or soak runs. Historical results under bench/results refer to their
 original builds. They do not establish release performance or a universal lead.
 
+## Memory optimization validation (alpha.7)
+
+The [latest validation](bench/results/memory-followup/native/REPORT.md) keeps
+36 final native trials (original alpha.6, the prior memory candidate and final
+code) separate from the preceding 48-trial competitor matrix. It preserves the
+prior buffering policy after rejecting smaller-table tuning that hurt ingestion.
+The report lists all CPU/elapsed differences and RSS/footprint gaps, with every
+sample retained. Background activity was present; small differences do not
+establish significance or a universal lead. WAL boundary and snapshot-retirement
+recovery regressions fail on earlier code and pass on the final source.
+A separate complete-key read shortcut was rejected after its small hit-read gain
+raised peak RSS by 95 MiB; its raw trials are retained with the report.
+
+The [memory/CPU comparison](bench/results/memory-optimization/REPORT.md) compares
+unchanged alpha.6 with the candidate, Pebble and SQLite C using three fresh
+processes per fixture/order. A subsequent native-only cohort verifies the final
+post-compaction warm-up fix; the report keeps both candidate versions separate. It covers one million 100-byte values (random and
+sequential insertion) and 100,000/250,000 1-KiB values, including updates,
+deletes, scans and ten concurrent readers. Completed write work includes
+checkpoint/compaction costs. RSS and macOS physical footprint include fixtures.
+The report retains CPU and elapsed time separately and identifies remaining gaps.
+These measurements validate the alpha.7 implementation; results do not establish a universal lead.
+
 ## Public-alpha measurements
 
 See [the completed alpha report](bench/results/public-alpha/VALIDATION.md) and

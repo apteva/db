@@ -1,0 +1,2658 @@
+diff --git a/BENCHMARKS.md b/BENCHMARKS.md
+index 61dde75..3a6fc21 100644
+--- a/BENCHMARKS.md
++++ b/BENCHMARKS.md
+@@ -31,6 +31,18 @@ memtables, readers and sync policy. Record background load; do not benchmark bes
+ builds, tests or soak runs. Historical results under bench/results refer to their
+ original builds. They do not establish release performance or a universal lead.
+ 
++## Memory optimization validation (working tree)
++
++The [memory/CPU comparison](bench/results/memory-optimization/REPORT.md) compares
++unchanged alpha.6 with the candidate, Pebble and SQLite C using three fresh
++processes per fixture/order. A subsequent native-only cohort verifies the final
++post-compaction warm-up fix; the report keeps both candidate versions separate. It covers one million 100-byte values (random and
++sequential insertion) and 100,000/250,000 1-KiB values, including updates,
++deletes, scans and ten concurrent readers. Completed write work includes
++checkpoint/compaction costs. RSS and macOS physical footprint include fixtures.
++The report retains CPU and elapsed time separately and identifies remaining gaps.
++These changes have not been released; results do not establish a universal lead.
++
+ ## Public-alpha measurements
+ 
+ See [the completed alpha report](bench/results/public-alpha/VALIDATION.md) and
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index d9e394e..a3a22b1 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -5,6 +5,41 @@ versions follow semantic versioning. Before 1.0, a minor version may change
+ the API or the on-disk format; both are listed here when it happens, with
+ the migration.
+ 
++## [Unreleased]
++
++- Reduce retained native memory with stable file segments, explicit ownership of
++  writable pages/descriptors and memtable record/metadata storage, and reclamation
++  of old mapped file versions. Preserve snapshot/cursor and checkpoint I/O views.
++- Stream compaction in both cache modes, reuse checkpoint vectors and scratch
++  buffers, and allocate reclaimable WAL buffers lazily. Verified clean reads
++  avoid descriptor allocation and read-side CLOCK reference writes. Warm the new
++  compacted mapping after closing the old file in both cache modes.
++- With a cache target, the default memtable budget remains `CacheBytes/2`,
++  but now accounts for native metadata and replaced records. Writers wait at
++  two active-table budgets while another table applies (previously four budgets).
++  Dirty-page checkpoint pressure begins at `CacheBytes/4` (previously `3/4`).
++  These targets do not cap total process memory or versions retained by snapshots.
++- Pin the WAL replay range through compaction and serialize concurrent copies
++  and log rotations, preventing background checkpoints from deleting required
++  generations.
++- Expose checkpoint-pinned `InFlightPages` in statistics without double-counting
++  dirty pages; cache bounds include pages that I/O cannot evict.
++- Batch contiguous checkpoint pages with immutable staging copies while retaining
++  the data-sync/meta-sync durability order. Reuse tree descent between scan leaves.
++- Bound ordinary WAL backlog at 4 MiB, release oversized burst buffers at replay
++  barriers, and report allocated `WALBufferBytes`. Large atomic batches remain supported.
++- Retire consumed file translations during private compaction copies, preserving
++  concurrent views and warming the replacement only after closing the old file.
++- Drain startup cleanup synchronously before checkpoint workers start, avoiding
++  a recovery deadlock after interrupted index builds with small memtable budgets.
++  Writers also recheck closure/failure after waiting for buffer space.
++- Flush a complete WAL prefix before a new record crosses the ordinary buffer
++  limit, avoiding a double-sized allocation immediately before flushing.
++- Keep snapshot-retired page IDs pending until metadata that excludes them is
++  durable, including when retirement happens during checkpoint I/O. This prevents
++  recovered tree corruption after an interrupted checkpoint.
++- The on-disk format remains 10 and existing databases need no migration.
++
+ ## [0.2.0-alpha.6] - 2026-10-14
+ 
+ - Add `CountDocuments(ctx, filter, CountOptions)` for embedded/default and
+diff --git a/README.md b/README.md
+index 74c4edf..e41a45e 100644
+--- a/README.md
++++ b/README.md
+@@ -227,29 +227,23 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
+ * **B+tree over fixed-size 16KB slotted pages** (`page.go`). Each slot carries the
+   cell offset, the key length and an 8-byte big-endian key prefix, so binary search
+   runs over the compact slot array and touches the cell only on a prefix tie.
+-* **Mapped reads, private writes** (`pager.go`). The data file is mapped
+-  read-only (the mapping doubles as the file grows). A clean page is a view into
+-  the OS page cache: loading it costs a small struct and a page fault, no copy and
+-  no syscall, and the cache is shared across threads and processes. The writer
+-  copies a page into a private buffer before modifying it; a checkpoint writes the
+-  buffer and hands the page back to the mapping. With `Options.CacheBytes` set,
+-  clean leaf pages are evicted by a CLOCK sweep (internal pages stay resident so
+-  checkpoints can always reach dirty leaves) and a checkpoint runs once dirty pages
+-  reach three quarters of the limit.
+-* **Writable-buffer lifetime** (`page_buffers.go`, `wal_buffer.go`). In the
+-  default unlimited-cache mode, private leaf and overflow pages use anonymous mapped arenas; small internal pages use
+-  Go storage. WAL buffers up to 16 MiB remain on the Go heap to avoid increasing GC
+-  work on small databases; larger buffers use owned anonymous mappings.
+-  Checkpoint captures and snapshot overlays retain explicit references; unused
+-  arenas and superseded WAL buffers are returned to the OS when those references
+-  are released. Compaction and backup write completed pages in bounded batches
+-  instead of retaining an entire replacement tree. Bounded-cache mode retains
+-  Go writable buffers and its original compaction builder to preserve parallel
+-  read CPU efficiency. Backup always uses the streaming builder. Sibling balancing reuses its
+-  cell-length scratch slice. These
+-  mappings are outside Go's heap, so measure total process RSS and memory footprint
+-  as well as `runtime.MemStats`. `CacheBytes` controls the logical page cache,
+-  not a hard limit on all process memory, memtables or snapshot versions.
++* **Mapped reads, private writes** (`pager.go`). The data file uses stable
++  read-only 64 MiB segments. Growing it adds segments without duplicating old
++  mappings. Verified clean reads use mapped bytes directly, even after a page
++  descriptor is evicted. Dirty pages stay resident; with `Options.CacheBytes`
++  set, partial checkpoints begin at one quarter of the page target.
++* **Buffer ownership** (`page_buffers.go`, `node_buffers.go`, `memtable_buffers.go`,
++  `wal_buffer.go`). Writable pages, page descriptors and memtable records/metadata
++  use owned native buffers. Snapshots, cursors and checkpoint I/O retain explicit
++  references. Retired buffers return to the OS without waiting for Go GC. Small
++  internal pages have separate buffers so they cannot pin mostly empty leaf
++  arenas. Normal WAL flush buffers stay on the Go heap; bursts above 2 MiB use
++  reclaimable mappings. Both cache modes stream compaction/backup output and
++  reuse checkpoint vectors/scratch storage. Unneeded old file-page mappings are
++  reclaimed after copies or checkpoint/snapshot retirement, preserving file
++  contents and all live views. These allocations sit outside Go's heap; measure
++  process RSS and physical footprint as well as `runtime.MemStats`.
++  `CacheBytes` is a logical page target, not a hard total-memory limit.
+ * **Sibling balancing** (`tree.go`, `balanceLeaf`). A leaf that overflows
+   first sheds cells to a neighbour with room and rewrites the separator; it splits
+   only when both neighbours are full. Leaves end up ~87% full after random inserts
+@@ -258,12 +252,12 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
+   in memory (they are already in the log) and applied to the tree in key
+   order once `Options.MemtableBytes` is reached, so each leaf write carries
+   many records. The memtable is a small in-memory B+tree (wide nodes,
+-  contiguous arrays) with a map for point reads: a scan copies out only the
++  contiguous arrays) with a keyed hash table for point reads: a scan copies out only the
+   entries of its range, so probes stay cheap while writers run. Applying a
+   sorted batch reuses the leaf reached for the previous key and splits an
+   overflowing leaf at the insertion point, keeping the left part full. If dirty pages fill
+   the cache mid-apply, a partial checkpoint writes them out but leaves the log
+-  alone, so replay after a crash rebuilds the memtable. Default budget: half
++  alone, so replay after a crash rebuilds the memtable. Default budget: one half
+   of `CacheBytes` with a cache limit; without one, inserts go straight to
+   the tree, which is faster on this design (a random insert costs about
+   1µs, a skip-list insert with its allocations about as much).
+@@ -355,11 +349,14 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
+   a captured page copies it first. Log rotation, file truncation, old-log
+   deletion and the directory sync all happen off the lock; the log's bulk writes
+   run on the flusher goroutine with a second buffer. Flow control: a writer waits
+-  only when the active memtable reaches four times its budget.
++  when the active memtable reaches twice its budget while the previous table is applying.
++  The budget includes native record/metadata storage and replaced values.
+ * **Non-blocking compaction and backup** copy a snapshot while writers continue,
+   replay the log delta into the copy in rounds, and hold the lock only for the
+   last few records and two renames; the copy's meta points back into the shared
+-  log so nothing is flushed under the lock. With 64MB cache and 16MB memtable,
++  log so nothing is flushed under the lock. The new mappings are warmed only after
++  the old file has closed, preserving read performance without retaining two trees.
++  With 64MB cache and 16MB memtable,
+   the longest single write wait during checkpoints and compactions measured 4 to
+   6 ms in historical runs; see BENCHMARKS.md for current validation.
+ * **Snapshots** (`snapshot.go`). `Snapshot()` pins the root and memtable;
+diff --git a/bench/resources.go b/bench/resources.go
+index 8fa21b5..ccc884f 100644
+--- a/bench/resources.go
++++ b/bench/resources.go
+@@ -8,6 +8,7 @@ import (
+ 	"os/exec"
+ 	"path/filepath"
+ 	"runtime"
++	"runtime/pprof"
+ 	"strconv"
+ 	"strings"
+ 	"sync"
+@@ -16,9 +17,14 @@ import (
+ 	"golang.org/x/sys/unix"
+ )
+ 
++var flagResourceCRUD = flag.Bool("resourcecrud", false, "resource runner: consume scan values and include updates, mixed operations and deletes")
++var flagResourceReads = flag.Int("resourcereadpasses", 1, "complete hit/miss/parallel passes per measured resource phase")
++var flagResourceScans = flag.Int("resourcescanpasses", 1, "complete value scans per measured resource phase")
+ var flagResources = flag.Bool("resources", false, "JSON CPU/RSS/allocation comparison; exactly one engine and workload per process")
+ 
+ type resourcePhase struct {
++	MinorFaults   int64   `json:"minor_page_faults"`
++	MajorFaults   int64   `json:"major_page_faults"`
+ 	Phase         string  `json:"phase"`
+ 	Ops           int     `json:"ops"`
+ 	WallSeconds   float64 `json:"wall_seconds"`
+@@ -89,6 +95,7 @@ func measureResource(phase string, ops int, fn func() error) resourcePhase {
+ 	footprint, peakFootprint := resourceFootprint()
+ 	return resourcePhase{
+ 		Phase: phase, Ops: ops, WallSeconds: d, UserSeconds: user, SystemSeconds: system,
++		MinorFaults: u1.Minflt - u0.Minflt, MajorFaults: u1.Majflt - u0.Majflt,
+ 		CPUNsPerOp: (user + system) * 1e9 / float64(ops), WallNsPerOp: d * 1e9 / float64(ops),
+ 		AverageCores: (user + system) / d, RSSBytes: resourceRSS(), PeakRSSBytes: resourcePeak(u1),
+ 		Footprint: footprint, PeakFootprint: peakFootprint,
+@@ -102,7 +109,7 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 	if strings.Contains(name, ",") || strings.Contains(workload, ",") || *flagReps != 1 || *flagDurable {
+ 		panic("resources requires one engine, one workload, reps=1 and durable=false; repeat in separate processes")
+ 	}
+-	if (workload != "random" && workload != "seq") || *flagN < 1 || *flagVal < 1 || *flagPar < 1 {
++	if (workload != "random" && workload != "seq") || *flagN < 1 || *flagVal < 1 || *flagPar < 1 || *flagResourceReads < 1 || *flagResourceScans < 1 {
+ 		panic("invalid resource workload, count, value size or readers")
+ 	}
+ 	op, ok := openers[name]
+@@ -124,10 +131,37 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 	record := func(phase string, ops int, fn func() error) {
+ 		r := measureResource(phase, ops, fn)
+ 		phases = append(phases, r)
++		if os.Getenv("APTEVA_RESOURCE_DIAGNOSTICS") != "" {
++			if d, ok := db.(*ours); ok {
++				fmt.Fprintf(os.Stderr, "stats %s %+v\n", phase, d.db.Stats())
++			}
++			if dir := os.Getenv("APTEVA_RESOURCE_HEAP_DIR"); dir != "" {
++				if err := os.MkdirAll(dir, 0755); err != nil {
++					panic(err)
++				}
++				f, err := os.Create(filepath.Join(dir, phase+".pprof"))
++				if err != nil {
++					panic(err)
++				}
++				runtime.GC() // diagnostic runs only: include allocations since the previous GC
++				if err := pprof.WriteHeapProfile(f); err != nil {
++					panic(err)
++				}
++				f.Close()
++			}
++		}
+ 		fmt.Fprintf(os.Stderr, "%s %s %-18s wall=%.3fs cpu=%.3fs rss=%.1fMiB\n", name, workload, phase,
+ 			r.WallSeconds, r.UserSeconds+r.SystemSeconds, float64(r.RSSBytes)/(1<<20))
+ 	}
+ 	record("open", 1, func() error { db, err = op(edir); return err })
++	var scan func(func([]byte, []byte) bool) error
++	var remove func([]byte) error
++	if *flagResourceCRUD {
++		scan, remove, err = resourceCRUD(db)
++		if err != nil {
++			panic(err)
++		}
++	}
+ 	n, vs := *flagN, *flagVal
+ 	record("insert", n, func() error {
+ 		for i := 0; i < n; i++ {
+@@ -144,48 +178,93 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 		if err != nil {
+ 			return nil, err
+ 		}
+-		if !found || len(v) != vs || v[0] != byte(i) {
++		if !found || len(v) != vs || v[0] != vals[i*vs] || v[vs-1] != vals[(i+1)*vs-1] {
+ 			return nil, fmt.Errorf("bad value at %d, found=%v len=%d", i, found, len(v))
+ 		}
+ 		return v, nil
+ 	}
+-	record("find-hit", n, func() error {
+-		for _, i := range order {
+-			buf, err = check(db, i, buf)
+-			if err != nil {
+-				return err
++	record("find-hit", n*(*flagResourceReads), func() error {
++		for pass := 0; pass < *flagResourceReads; pass++ {
++			for _, i := range order {
++				buf, err = check(db, i, buf)
++				if err != nil {
++					return err
++				}
+ 			}
+ 		}
+ 		return nil
+ 	})
+-	record("find-miss", n, func() error {
+-		for i := 0; i < n; i++ {
+-			_, found, err := db.Find(misses[i*16:(i+1)*16], buf)
+-			if err != nil {
+-				return err
+-			}
+-			if found {
+-				return fmt.Errorf("unexpected hit at %d", i)
++	record("find-miss", n*(*flagResourceReads), func() error {
++		for pass := 0; pass < *flagResourceReads; pass++ {
++			for i := 0; i < n; i++ {
++				_, found, err := db.Find(misses[i*16:(i+1)*16], buf)
++				if err != nil {
++					return err
++				}
++				if found {
++					return fmt.Errorf("unexpected hit at %d", i)
++				}
+ 			}
+ 		}
+ 		return nil
+ 	})
+-	record("scan", n, func() error {
+-		seen, err := db.Iterate()
+-		if err != nil {
+-			return err
++	var deleted []bool
++	if *flagResourceCRUD {
++		deleted = make([]bool, n)
++	}
++	scanValues := func(expected int) error {
++		var want uint64
++		for i := 0; i < n; i++ {
++			if !deleted[i] {
++				want += uint64(vals[i*vs]) + uint64(vals[(i+1)*vs-1])
++			}
+ 		}
+-		if seen != n {
+-			return fmt.Errorf("scan returned %d of %d", seen, n)
++		for pass := 0; pass < *flagResourceScans; pass++ {
++			seen := 0
++			var sum uint64
++			var bad error
++			err := scan(func(k, v []byte) bool {
++				if len(k) != 16 || len(v) != vs {
++					bad = fmt.Errorf("bad scan record key=%d value=%d", len(k), len(v))
++					return false
++				}
++				seen++
++				sum += uint64(v[0]) + uint64(v[len(v)-1])
++				return true
++			})
++			if err != nil {
++				return err
++			}
++			if bad != nil {
++				return bad
++			}
++			if seen != expected || sum != want {
++				return fmt.Errorf("scan mismatch: rows=%d/%d checksum=%d/%d", seen, expected, sum, want)
++			}
+ 		}
+ 		return nil
+-	})
++	}
++	if *flagResourceCRUD {
++		record("scan-values", n*(*flagResourceScans), func() error { return scanValues(n) })
++	} else {
++		record("scan", n, func() error {
++			seen, err := db.Iterate()
++			if err != nil {
++				return err
++			}
++			if seen != n {
++				return fmt.Errorf("scan returned %d of %d", seen, n)
++			}
++			return nil
++		})
++	}
++
+ 	if !*flagNoPar {
+ 		par := *flagPar
+ 		readers := make([]reader, par)
+ 		// Include connection creation in parallel CPU/wall cost; capture RSS
+ 		// before closing them, including SQLite's per-connection page caches.
+-		record(fmt.Sprintf("find-hit-par%d", par), n, func() error {
++		record(fmt.Sprintf("find-hit-par%d", par), n*(*flagResourceReads), func() error {
+ 			for g := range readers {
+ 				r, err := db.NewReader()
+ 				if err != nil {
+@@ -200,10 +279,12 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 				go func(g int, rd reader) {
+ 					defer wg.Done()
+ 					var b []byte
+-					for j := g; j < n; j += par {
+-						b, errs[g] = check(rd, order[j], b)
+-						if errs[g] != nil {
+-							return
++					for pass := 0; pass < *flagResourceReads; pass++ {
++						for j := g; j < n; j += par {
++							b, errs[g] = check(rd, order[j], b)
++							if errs[g] != nil {
++								return
++							}
+ 						}
+ 					}
+ 				}(g, rd)
+@@ -225,6 +306,71 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 			return nil
+ 		})
+ 	}
++	if *flagResourceCRUD {
++		changed := max(n/10, 1)
++		for _, i := range order[:changed] {
++			vals[(i+1)*vs-1] ^= 0xff
++		}
++		record("update", changed, func() error {
++			for _, i := range order[:changed] {
++				if err := db.Upsert(keys[i*16:(i+1)*16], vals[i*vs:(i+1)*vs]); err != nil {
++					return err
++				}
++			}
++			return nil
++		})
++		record("settle-update", n, db.Settle)
++		record("verify-update", changed, func() error {
++			for _, i := range order[:changed] {
++				buf, err = check(db, i, buf)
++				if err != nil {
++					return err
++				}
++			}
++			return nil
++		})
++		record("mixed-80read-20update", n, func() error {
++			for j, i := range order {
++				if j%10 < 8 {
++					buf, err = check(db, i, buf)
++					if err != nil {
++						return err
++					}
++				} else {
++					vals[(i+1)*vs-1] ^= 0xff
++					if err := db.Upsert(keys[i*16:(i+1)*16], vals[i*vs:(i+1)*vs]); err != nil {
++						return err
++					}
++				}
++			}
++			return nil
++		})
++		record("settle-mixed", n, db.Settle)
++		record("delete", changed, func() error {
++			for _, i := range order[:changed] {
++				if err := remove(keys[i*16 : (i+1)*16]); err != nil {
++					return err
++				}
++				deleted[i] = true
++			}
++			return nil
++		})
++		record("settle-delete", n, db.Settle)
++		record("verify-delete", changed, func() error {
++			for _, i := range order[:changed] {
++				_, found, err := db.Find(keys[i*16:(i+1)*16], buf)
++				if err != nil {
++					return err
++				}
++				if found {
++					return fmt.Errorf("deleted row still present: %d", i)
++				}
++			}
++			return nil
++		})
++		record("scan-after-delete", (n-changed)*(*flagResourceScans), func() error { return scanValues(n - changed) })
++	}
++
+ 	record("close", 1, db.Close)
+ 	runtime.KeepAlive(keys)
+ 	runtime.KeepAlive(vals)
+@@ -233,6 +379,7 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 	footprint, peakFootprint := resourceFootprint()
+ 	output := map[string]any{
+ 		"engine": name, "workload": workload, "n": n, "key_bytes": 16, "value_bytes": vs,
++		"resource_crud": *flagResourceCRUD, "read_passes": *flagResourceReads, "scan_passes": *flagResourceScans,
+ 		"readers": *flagPar, "gomaxprocs": runtime.GOMAXPROCS(0), "go_version": runtime.Version(),
+ 		"cache_mb": *flagCache, "ours_cache_mb": *flagOursMB,
+ 		"baseline_rss_bytes": baseline, "fixture_rss_bytes": fixtureRSS,
+@@ -240,7 +387,7 @@ func runResourceBench(dir string, openers map[string]opener) {
+ 		"memory_footprint_bytes": footprint, "process_peak_memory_footprint_bytes": peakFootprint,
+ 		"fixture_payload_bytes": n * (16 + vs + 8 + 16),
+ 		"phases":                phases, "disk_bytes": dirSize(edir), "process_peak_rss_bytes": resourcePeak(resourceUsage()),
+-		"notes": "RSS/peak include fixtures, native allocations and resident mappings; macOS memory footprint additionally accounts for compressed memory, but differs in treatment of file-backed pages. Go allocation counters exclude C allocations and anonymous mapped storage (including AptevaDB page/WAL buffers). Peaks are cumulative. Async/non-fsync writes. Parallel read includes reader setup. Settle is explicit engine maintenance.",
++		"notes": "RSS/peak include fixtures, native allocations and resident mappings; macOS memory footprint additionally accounts for compressed memory, but differs in treatment of file-backed pages. Go allocation counters exclude C allocations and anonymous mapped storage (including AptevaDB page/WAL buffers). Peaks are cumulative. Async/non-fsync writes. Parallel read includes reader setup and newly opened SQLite connection caches; its cache setting is per connection. Settle is explicit engine maintenance. CRUD scans consume full values; SQLite copies columns into Go buffers, AptevaDB/Pebble expose borrowed callbacks. Read phases repeat the same shuffled order. Update changes 10% of values, mixed is 80% point reads/20% updates, delete removes the updated 10%. Checks validate hit values, deletion, scan row counts and first/last-byte sums.",
+ 	}
+ 	if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+ 		panic(err)
+diff --git a/bench/run_resources.py b/bench/run_resources.py
+index baef8e3..7888de7 100644
+--- a/bench/run_resources.py
++++ b/bench/run_resources.py
+@@ -64,9 +64,18 @@ def summarize(out, runs):
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--resume", action="store_true")
+     parser.add_argument("--binary", required=True)
++    parser.add_argument("--baseline-binary", help="interleave an unchanged AptevaDB binary with identical cache/fixture settings")
++    parser.add_argument("--prior-binary", help="also interleave the previous optimization candidate as a separate profile")
+     parser.add_argument("--out", required=True)
+     parser.add_argument("--n", type=int, default=1_000_000)
++    parser.add_argument("--vsize", type=int, default=100)
++    parser.add_argument("--engines", default="ours,pebble,sqlite-c,sqlite-go")
++    parser.add_argument("--crud", action="store_true")
++    parser.add_argument("--readpasses", type=int, default=1)
++    parser.add_argument("--scanpasses", type=int, default=1)
++    parser.add_argument("--timeout", type=int, default=1800)
+     parser.add_argument("--reps", type=int, default=3)
+     parser.add_argument("--readers", type=int, default=10)
+     parser.add_argument("--cachemb", type=int, default=64)
+@@ -74,19 +83,19 @@ def main():
+     parser.add_argument("--workloads", default="random,seq")
+     parser.add_argument("--no-default", action="store_true", help="skip the additional AptevaDB default-cache trials")
+     args = parser.parse_args()
+-    if min(args.n, args.reps, args.readers) < 1:
++    if min(args.n, args.reps, args.readers, args.vsize, args.readpasses, args.scanpasses) < 1:
+         parser.error("n, reps and readers must be positive")
+     workloads = args.workloads.split(",")
+     if args.cachemb < 1 or args.ourscachemb < 0 or any(w not in ("random", "seq") for w in workloads):
+         parser.error("invalid cache or workload selection")
+     profile = "bounded64" if (args.cachemb, args.ourscachemb) == (64, 64) else f"cache{args.cachemb}-ours{args.ourscachemb}"
+     out = Path(args.out).resolve()
+-    out.mkdir(parents=True, exist_ok=False)
++    out.mkdir(parents=True, exist_ok=args.resume)
+     bench = Path(__file__).resolve().parent
+     binary = str(Path(args.binary).resolve())
+     metadata = {
+         "started_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+-        "n": args.n, "reps": args.reps, "readers": args.readers, "value_bytes": 100,
++        "n": args.n, "reps": args.reps, "readers": args.readers, "value_bytes": args.vsize, "resource_crud":args.crud, "read_passes":args.readpasses,"scan_passes":args.scanpasses,
+         "cache_mb": args.cachemb, "ours_cache_mb": args.ourscachemb, "workloads": workloads,
+         "cpu": capture(["sysctl", "-n", "machdep.cpu.brand_string"]),
+         "logical_cpus": capture(["sysctl", "-n", "hw.logicalcpu"]),
+@@ -95,19 +104,39 @@ def main():
+         "git_head": capture(["git", "rev-parse", "HEAD"], bench),
+         "git_status": capture(["git", "status", "--short"], bench),
+         "binary_sha256": hashlib.sha256(Path(binary).read_bytes()).hexdigest(),
++        "baseline_binary_sha256": hashlib.sha256(Path(args.baseline_binary).read_bytes()).hexdigest() if args.baseline_binary else None,
++        "prior_binary_sha256": hashlib.sha256(Path(args.prior_binary).read_bytes()).hexdigest() if args.prior_binary else None,
+         "background_initial": background(),
+         "profiles": {profile: f"{args.cachemb} MiB Pebble/SQLite cache setting (SQLite per connection); {args.ourscachemb} MiB AptevaDB cache (0=default/unlimited); Pebble additionally has 64 MiB memtable",
+                      "ours-default": "AptevaDB default unlimited page cache; comparison to its bounded64 setting"},
+         "method": "Serial fresh subprocesses/directories; deterministic rotated trial order; retain all observations, report median/min/max. Async writes. Workload fixtures included in process RSS. No cold OS-cache claim.",
+     }
++    if args.resume:
++        prior=json.loads((out/"metadata.json").read_text())
++        for key in ("n","value_bytes","readers","cache_mb","ours_cache_mb","binary_sha256","resource_crud","read_passes","scan_passes"):
++            if prior[key]!=metadata[key]:raise RuntimeError(f"resume configuration changed: {key}")
++        if prior.get("baseline_binary_sha256") != metadata["baseline_binary_sha256"]: raise RuntimeError("resume baseline binary changed")
++        if prior.get("prior_binary_sha256") != metadata["prior_binary_sha256"]: raise RuntimeError("resume prior candidate binary changed")
++        prior.setdefault("resumed_at",[]).append(metadata["started_at"])
++        metadata=prior
+     (out / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+     (out / "build-info.txt").write_text(capture(["go", "version", "-m", binary]) + "\n")
++    if args.baseline_binary: (out / "baseline-build-info.txt").write_text(capture(["go", "version", "-m", args.baseline_binary]) + "\n")
++    if args.prior_binary: (out / "prior-build-info.txt").write_text(capture(["go", "version", "-m", args.prior_binary]) + "\n")
+     (out / "bench-go.mod").write_text((bench / "go.mod").read_text())
+     (out / "source.patch").write_text(capture(["git", "diff"], bench))
+-    for name in ["resources.go", "resources_memory_darwin.go", "resources_memory_other.go", "run_resources.py"]:
+-        (out / name).write_text((bench / name).read_text())
+-    runs = []
+-    entries = [(profile, "ours"), (profile, "pebble"), (profile, "sqlite-c"), (profile, "sqlite-go")]
++    for name in ["resources.go", "resource_crud.go", "resources_memory_darwin.go", "resources_memory_other.go", "run_resources.py"]:
++        (out / (name + ".txt" if name.endswith(".go") else name)).write_text((bench / name).read_text())
++    runs = json.loads((out/"runs.json").read_text()) if args.resume and (out/"runs.json").exists() else []
++    engines=args.engines.split(",")
++    if not engines or any(e not in ("ours","pebble","sqlite-c","sqlite-go") for e in engines): parser.error("unsupported resource engine")
++    entries = [(profile, e) for e in engines]
++    if args.baseline_binary:
++        entries.append(("alpha6-before-memory", "ours"))
++        metadata["profiles"]["alpha6-before-memory"] = "Pre-change AptevaDB; same fixture and cache option, original write-buffer defaults"
++    if args.prior_binary:
++        entries.append(("prior-memory-candidate", "ours"))
++        metadata["profiles"]["prior-memory-candidate"] = "Previous memory-optimization candidate, kept separate from original alpha.6 and final code"
+     if not args.no_default:
+         entries.append(("ours-default", "ours"))
+     total = args.reps * len(workloads) * len(entries)
+@@ -116,23 +145,52 @@ def main():
+         random.Random(42 + rep).shuffle(jobs)
+         for profile, engine, workload in jobs:
+             stem = f"{profile}-{engine}-{workload}-r{rep}"
++            if any(r["profile"]==profile and r["engine"]==engine and r["workload"]==workload and r["repetition"]==rep for r in runs):continue
+             scratch = out / (stem + "-data")
++            if scratch.exists():scratch.rmdir() # Only an empty preflight directory may be resumed.
+             scratch.mkdir()
+-            command = [binary, "-resources", "-engines", engine, "-workloads", workload,
+-                       "-n", str(args.n), "-vsize", "100", "-par", str(args.readers),
++            run_binary = str(Path(args.baseline_binary).resolve()) if profile == "alpha6-before-memory" else binary
++            if profile == "prior-memory-candidate": run_binary = str(Path(args.prior_binary).resolve())
++            command = [run_binary, "-resources", "-engines", engine, "-workloads", workload,
++                       "-n", str(args.n), "-vsize", str(args.vsize),
++                       "-resourcereadpasses",str(args.readpasses),"-resourcescanpasses",str(args.scanpasses), "-par", str(args.readers),
+                        "-cachemb", str(args.cachemb), "-ourscachemb", "0" if profile == "ours-default" else str(args.ourscachemb),
+                        "-dir", str(scratch)]
++            if args.crud:command.append("-resourcecrud")
++            # Refuse before a new process if it could exhaust the local volume.
++            # Live DB/WAL/compaction allowance plus a 1 GiB reserve. Other
++            # local jobs can consume space while a process is running.
++            import shutil
++            needed=args.n*(16+args.vsize)*3+(1<<30)
++            if shutil.disk_usage(out).free<needed:
++                raise RuntimeError(f"insufficient free disk for {stem}: need {needed/2**30:.2f} GiB")
+             bg = background()
+             print(f"RUN {len(runs)+1}/{total} {stem}", flush=True)
+             start = time.monotonic()
+             with (out / (stem + ".stderr.txt")).open("w") as stderr:
+-                proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=stderr, text=True,
+-                                      env={**os.environ, "GOMAXPROCS": str(args.readers)}, timeout=600)
++                proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=stderr, text=True,
++                                        env={**os.environ, "GOMAXPROCS": str(args.readers)})
++                aborted=None
++                while True:
++                    try:
++                        stdout,_=proc.communicate(timeout=1)
++                        break
++                    except subprocess.TimeoutExpired:
++                        if time.monotonic()-start>args.timeout:aborted="run timeout"
++                        elif shutil.disk_usage(out).free<(512<<20):aborted="free disk below 512 MiB"
++                        if aborted:
++                            proc.terminate()
++                            try:stdout,_=proc.communicate(timeout=10)
++                            except subprocess.TimeoutExpired:proc.kill();stdout,_=proc.communicate()
++                            # This directory belongs solely to this fresh failed fixture.
++                            shutil.rmtree(scratch)
++                            (out/(stem+".aborted.txt")).write_text(aborted+"\n")
++                            raise RuntimeError(f"{stem}: {aborted}; disposable fixture removed")
+             elapsed = time.monotonic() - start
+-            (out / (stem + ".stdout.json")).write_text(proc.stdout)
++            (out / (stem + ".stdout.json")).write_text(stdout)
+             if proc.returncode:
+                 raise RuntimeError(f"{stem} failed ({proc.returncode}); see stderr log")
+-            run = json.loads(proc.stdout)
++            run = json.loads(stdout)
+             run.update(profile=profile, repetition=rep, command=command, elapsed_seconds=elapsed, background_before=bg)
+             (out / (stem + ".json")).write_text(json.dumps(run, indent=2) + "\n")
+             runs.append(run)
+diff --git a/checkpoint.go b/checkpoint.go
+index 0f414af..d247670 100644
+--- a/checkpoint.go
++++ b/checkpoint.go
+@@ -94,6 +94,8 @@ func (db *DB) stopCheckpointer() {
+ func (db *DB) runCheckpoint(full bool) error {
+ 	db.ckptMu.Lock()
+ 	defer db.ckptMu.Unlock()
++	workStart := time.Now()
++	defer func() { db.mu.Lock(); db.noteHold("checkpoint-work", workStart); db.mu.Unlock() }()
+ 	if full && db.wal.size() >= walRotateBytes {
+ 		if err := db.wal.rotate(); err != nil {
+ 			return err
+@@ -109,7 +111,7 @@ func (db *DB) runCheckpoint(full bool) error {
+ 		return db.failed
+ 	}
+ 	if full && db.mt != nil && db.imm == nil && db.mt.len() > 0 {
+-		db.imm, db.mt = db.mt, newMemtable()
++		db.imm, db.mt = db.mt, newMemtable(db.opts.MemtableBytes)
+ 	}
+ 	db.mu.Unlock()
+ 
+@@ -148,21 +150,32 @@ func (db *DB) applyImmutable() error {
+ 	if imm == nil {
+ 		return nil
+ 	}
+-	entries := imm.snapshot()
+ 	const chunk = 256
+-	for start := 0; start < len(entries); start += chunk {
+-		end := min(len(entries), start+chunk)
++	var entries [chunk]mtEntry
++	leaf, index := imm.first, 0
++	for leaf != nil {
++		count := 0
++		for count < chunk && leaf != nil {
++			if index == len(leaf.keys) {
++				leaf, index = leaf.next, 0
++				continue
++			}
++			value := leaf.vals[index]
++			entries[count] = mtEntry{k: leaf.keys[index], v: value.v, del: value.del}
++			count++
++			index++
++		}
+ 		db.mu.Lock()
+ 		t := time.Now()
+ 		db.sortedApply = true // the chunk is in key order: split leaves at the insertion point
+ 		si := sortedInserter{db: db}
+-		for _, e := range entries[start:end] {
++		for _, e := range entries[:count] {
+ 			var err error
+ 			if e.del {
+-				err = db.deleteTree([]byte(e.k))
++				err = db.deleteTree(immutableMemtableKey(e.k))
+ 				si.valid = false
+ 			} else {
+-				err = si.insert([]byte(e.k), e.v)
++				err = si.insert(immutableMemtableKey(e.k), e.v)
+ 			}
+ 			if err != nil {
+ 				db.sortedApply = false
+@@ -181,6 +194,7 @@ func (db *DB) applyImmutable() error {
+ 		}
+ 	}
+ 	db.mu.Lock()
++	db.imm.releaseBuffers()
+ 	db.imm = nil
+ 	db.cond.Broadcast()
+ 	db.mu.Unlock()
+@@ -245,7 +259,10 @@ func (db *DB) flushPass(full bool) error {
+ 
+ // captureLocked prepares everything a checkpoint will write, in memory.
+ func (db *DB) captureLocked(full bool) (*captureSet, error) {
+-	cs := &captureSet{full: full}
++	db.pager.releaseUnusedNodes()
++	db.pager.reclaimCopiedPages()
++	cs := &captureSet{full: full, pages: db.checkpointPages[:0], nodes: db.checkpointNodes[:0], toRelease: db.checkpointReleased[:0]}
++	db.activeCapture = cs
+ 	walGen, walOff := db.wal.position()
+ 	switch {
+ 	case db.metaLogPos != nil:
+@@ -267,6 +284,10 @@ func (db *DB) captureLocked(full bool) (*captureSet, error) {
+ 		}
+ 		db.captureNode(cs, n)
+ 	}
++	for _, n := range db.dirtyOverflow {
++		releaseNode(n)
++	}
++	clear(db.dirtyOverflow)
+ 	db.dirtyOverflow = db.dirtyOverflow[:0]
+ 	root, err := db.pager.get(db.root)
+ 	if err != nil {
+@@ -285,7 +306,10 @@ func (db *DB) captureLocked(full bool) (*captureSet, error) {
+ 	cs.toRelease = append(cs.toRelease, db.pager.pending...)
+ 	db.pager.pending = db.pager.pending[:0]
+ 	cs.meta = meta{db.ckpt + 1, db.root, db.pager.hwm, walGen, walOff, freeHead}
+-	cs.metaBuf = make(page, PageSize)
++	if db.checkpointMeta == nil {
++		db.checkpointMeta = make(page, PageSize)
++	}
++	cs.metaBuf = db.checkpointMeta
+ 	db.encodeMeta(cs.metaBuf, cs.meta)
+ 	return cs, nil
+ }
+@@ -316,6 +340,7 @@ func (db *DB) captureNode(cs *captureSet, n *node) uint32 {
+ 		n.buffer.live++
+ 	}
+ 	cs.pages = append(cs.pages, ioPage{id: n.id, data: n.data, buffer: n.buffer})
++	retainNode(n)
+ 	cs.nodes = append(cs.nodes, n)
+ 	return n.id
+ }
+@@ -400,18 +425,8 @@ func (db *DB) captureFreelist(cs *captureSet) (uint32, error) {
+ // writeCapture does the I/O of a checkpoint without any lock held.
+ func (db *DB) writeCapture(cs *captureSet) error {
+ 	f := db.pager.f
+-	scratch := make(page, PageSize)
+-	for _, p := range cs.pages {
+-		buf := p.data
+-		if buf.typ() == pageLeaf {
+-			// never write into a frozen buffer: a writer may be copying it
+-			copy(scratch, buf)
+-			scratch.setCrc(pageCrc(scratch))
+-			buf = scratch
+-		}
+-		if err := writeAt(f, buf, int64(p.id)*PageSize); err != nil {
+-			return err
+-		}
++	if err := db.writeCheckpointPages(cs.pages); err != nil {
++		return err
+ 	}
+ 	if err := db.wal.syncFn(f); err != nil {
+ 		return err
+@@ -443,7 +458,7 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
+ 	// only ids freed by this capture: anything freed while the I/O ran is
+ 	// still referenced by the meta just written and waits for the next one
+ 	if len(db.snaps) > 0 {
+-		db.quarantineIDs(cs.toRelease)
++		db.quarantineUntil(cs.toRelease, db.ckpt)
+ 	} else if trailing := pg.releaseIDs(cs.toRelease); trailing > 0 {
+ 		truncateTo = int64(pg.hwm) * PageSize
+ 	}
+@@ -452,9 +467,16 @@ func (db *DB) commitCaptureLocked(cs *captureSet) (truncateTo int64, dropGen uin
+ 	}
+ 	// The capture's I/O has finished. Readers are excluded by the writer
+ 	// lock; snapshots are the only remaining possible aliases of old
+-	// private buffers or superseded file mappings.
++	// private buffers. File mappings retain stable addresses.
+ 	db.releaseCaptureBuffers(cs)
+-	pg.releaseUnusedBuffers(len(db.snaps) == 0)
++	// Dirty and in-flight pages could not be evicted during apply/I/O.
++	// Recheck now: verified reads no longer create descriptors that would
++	// otherwise trigger a later sweep.
++	pg.loadMu.Lock()
++	pg.evictLocked(nil)
++	pg.loadMu.Unlock()
++	pg.releaseUnusedNodes()
++	pg.releaseUnusedBuffers()
+ 	db.cond.Broadcast()
+ 	return truncateTo, dropGen, nil
+ }
+@@ -466,13 +488,23 @@ func (db *DB) releaseCaptureBuffers(cs *captureSet) {
+ 	if cs == nil {
+ 		return
+ 	}
++	if db.activeCapture == cs {
++		db.activeCapture = nil
++	}
+ 	for _, p := range cs.pages {
+ 		if p.buffer != nil {
+ 			p.buffer.live--
+ 		}
+ 	}
+-	cs.pages, cs.nodes = nil, nil
+-	db.pager.releaseUnusedBuffers(false)
++	for _, n := range cs.nodes {
++		releaseNode(n)
++	}
++	clear(cs.pages)
++	clear(cs.nodes)
++	db.checkpointPages, db.checkpointNodes = cs.pages[:0], cs.nodes[:0]
++	db.checkpointReleased = cs.toRelease[:0]
++	cs.pages, cs.nodes, cs.toRelease = nil, nil, nil
++	db.pager.releaseUnusedBuffers()
+ }
+ 
+ // ---- lifecycle
+@@ -504,6 +536,7 @@ func (db *DB) Close() error {
+ 	if e := db.wal.close(); err == nil {
+ 		err = e
+ 	}
++	db.releaseMemtables()
+ 	if e := db.pager.close(); err == nil {
+ 		err = e
+ 	}
+@@ -547,6 +580,7 @@ func (db *DB) crash() {
+ 	}
+ 	db.cond.Broadcast()
+ 	db.wal.close()
++	db.releaseMemtables()
+ 	db.pager.close()
+ 	if db.dirLock != nil {
+ 		db.dirLock.Close()
+@@ -578,6 +612,8 @@ func (db *DB) Compact(ctx context.Context) error {
+ }
+ 
+ func (db *DB) compact(ctx context.Context) error {
++	db.compactMu.Lock()
++	defer db.compactMu.Unlock()
+ 	db.mu.Lock()
+ 	if db.closed {
+ 		db.mu.Unlock()
+@@ -596,10 +632,18 @@ func (db *DB) compact(ctx context.Context) error {
+ 		return ErrSnapshotsOpen
+ 	}
+ 	db.mu.Unlock()
++	// Registration excludes checkpoint log deletion until the replay pin is
++	// visible. It remains after closing the page snapshot, through final swap.
++	db.ckptMu.Lock()
+ 	s, err := db.Snapshot()
++	if err == nil {
++		db.wal.compactionPin.Store(s.pos.gen + 1)
++	}
++	db.ckptMu.Unlock()
+ 	if err != nil {
+ 		return err
+ 	}
++	defer db.wal.compactionPin.Store(0)
+ 	tmp := filepath.Join(db.dir, "compact.tmp")
+ 	os.RemoveAll(tmp)
+ 	ndb, err := db.copySnapshot(ctx, s, tmp, db.opts, true)
+@@ -617,7 +661,7 @@ func (db *DB) compact(ctx context.Context) error {
+ 	// rounds until it is small, checkpoint the copy once, then shrink the
+ 	// delta that accumulated during that checkpoint
+ 	pos := s.pos
+-	catchUp := func() (int, error) {
++	catchUp := func(flushPages bool) (int, error) {
+ 		g, off, err := db.wal.flushAndPosition()
+ 		if err != nil {
+ 			return 0, err
+@@ -625,8 +669,14 @@ func (db *DB) compact(ctx context.Context) error {
+ 		n := 0
+ 		if _, _, err := db.wal.replayFrom(pos.gen, pos.off, func(k, v []byte, del bool) error {
+ 			n++
+-			return ndb.putDirect(k, v, del)
+-		}); err != nil {
++			if err := ndb.putDirect(k, v, del); err != nil {
++				return err
++			}
++			if flushPages && ndb.dirtyPressure() {
++				return ndb.flushPass(false)
++			}
++			return nil
++		}, lsn{g, off}); err != nil {
+ 			return 0, err
+ 		}
+ 		pos = lsn{g, off}
+@@ -636,7 +686,7 @@ func (db *DB) compact(ctx context.Context) error {
+ 		if err := ctx.Err(); err != nil {
+ 			return fail(err)
+ 		}
+-		n, err := catchUp()
++		n, err := catchUp(true)
+ 		if err != nil {
+ 			return fail(err)
+ 		}
+@@ -648,14 +698,13 @@ func (db *DB) compact(ctx context.Context) error {
+ 	if err := ndb.runCheckpoint(true); err != nil {
+ 		return fail(err)
+ 	}
+-	// from here no checkpoint may be in flight against the old file
+-	db.ckptMu.Lock()
+-	defer db.ckptMu.Unlock()
++	// Catch up while the old checkpointer can still drain writer buffers.
++	// The replay pin protects the log independently of page checkpoints.
+ 	for round := 0; round < 20; round++ {
+ 		if err := ctx.Err(); err != nil {
+ 			return fail(err)
+ 		}
+-		n, err := catchUp()
++		n, err := catchUp(true)
+ 		if err != nil {
+ 			return fail(err)
+ 		}
+@@ -663,31 +712,49 @@ func (db *DB) compact(ctx context.Context) error {
+ 			break
+ 		}
+ 	}
++	// Exclude an old-file checkpoint only for one memory-only catch-up and
++	// the swap. Repeated disk-backed rounds here would starve its writers.
++	db.ckptMu.Lock()
++	defer db.ckptMu.Unlock()
++	finalizeStart := time.Now()
++	defer func() { db.mu.Lock(); db.noteHold("compaction-finalize", finalizeStart); db.mu.Unlock() }()
++	if _, err := catchUp(false); err != nil {
++		return fail(err)
++	}
+ 	// final tail under the lock, in memory only, then swap
+ 	db.mu.Lock()
+ 	defer db.mu.Unlock()
+ 	t := time.Now()
++	if db.closed {
++		return fail(ErrClosed)
++	}
++	if db.failed != nil {
++		return fail(db.failed)
++	}
+ 	defer db.noteHold("compact-swap", t)
+ 	db.treeGen++
+ 	if len(db.snaps) > 0 {
+ 		return fail(ErrSnapshotsOpen)
+ 	}
+ 	t1 := time.Now()
+-	if _, _, err := db.wal.flushAndPosition(); err != nil {
++	tailGen, tailOff, err := db.wal.flushAndPosition()
++	if err != nil {
+ 		return fail(err)
+ 	}
+ 	db.noteHold("swap-flush", t1)
+ 	t1 = time.Now()
+-	if _, _, err := db.wal.replayFrom(pos.gen, pos.off, ndb.putDirect); err != nil {
++	if _, _, err := db.wal.replayFrom(pos.gen, pos.off, ndb.putDirect, lsn{tailGen, tailOff}); err != nil {
+ 		return fail(err)
+ 	}
+ 	db.noteHold("swap-replay", t1)
+ 	t1 = time.Now()
+ 	ndb.wal.close()
++	ndb.releaseMemtables()
+ 	if ndb.dirLock != nil {
+ 		ndb.dirLock.Close()
+ 		ndb.dirLock = nil
+ 	}
++	db.releaseMemtables()
+ 	db.pager.close()
+ 	db.noteHold("swap-close", t1)
+ 	t1 = time.Now()
+@@ -707,11 +774,14 @@ func (db *DB) compact(ctx context.Context) error {
+ 	}
+ 	db.noteHold("swap-rename", t1)
+ 	// the new tree lives on; the existing log stays the log
++	ndb.pager.limit = db.pager.limit
+ 	db.pager, db.root, db.ckpt = ndb.pager, ndb.root, ndb.ckpt
+ 	db.freelistPages, db.dirtyOverflow = ndb.freelistPages, ndb.dirtyOverflow
+ 	if db.mt != nil {
+-		db.mt = newMemtable() // every record is in the new tree now
++		db.mt.releaseBuffers()
++		db.mt = newMemtable(db.opts.MemtableBytes) // every record is in the new tree now
+ 	}
++	db.imm.releaseBuffers()
+ 	db.imm = nil
+ 	g, off := db.wal.position()
+ 	db.activeStart = lsn{g, off}
+@@ -728,7 +798,7 @@ func (db *DB) compact(ctx context.Context) error {
+ 		publishErr = syncCompactionDirectory(db.dir)
+ 	}
+ 	var warmErr error
+-	if publishErr == nil && pg.limit == 0 {
++	if publishErr == nil {
+ 		warmErr = db.warmCompactedPages(pg, warmLimit)
+ 	}
+ 	db.mu.Lock() // matched by deferred unlock
+@@ -756,6 +826,16 @@ func (db *DB) warmCompactedPages(pg *pager, limit uint32) error {
+ 				db.mu.RUnlock()
+ 				return fmt.Errorf("%w: compacted page %d type", ErrCorrupt, n.id)
+ 			}
++			if i >= 2 && n == nil && pg.isVerified(uint32(i)) {
++				// Bounded caches may have evicted the descriptor, but the
++				// copy already verified/wrote these bytes. Fault the header
++				// without allocating a descriptor or warming the old tree.
++				typ := pg.mappedPage(uint32(i)).typ()
++				if typ < pageLeaf || typ > pageFreelist {
++					db.mu.RUnlock()
++					return fmt.Errorf("%w: compacted page %d type", ErrCorrupt, i)
++				}
++			}
+ 		}
+ 		done := end >= min(int(limit), int(pg.hwm))
+ 		db.mu.RUnlock()
+@@ -780,13 +860,17 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
+ 	// The initial empty root is durable. Start the private builder on a
+ 	// fresh id so completed leaves can be written once without relocating
+ 	// their ids or patching already-built parents.
+-	stream := opts.CacheBytes <= 0
+-	ndb.sortedLoad, ndb.streamCopy = stream, stream
++	// Completed leaves are file-backed; keep their small node descriptors
++	// while building so publishing the copy preserves the warm read layout.
++	limit := ndb.pager.limit
++	ndb.pager.limit = 0
++	ndb.sortedLoad, ndb.streamCopy = true, true
+ 	si := sortedInserter{db: ndb}
+ 	writer := copyPageWriter{pg: ndb.pager}
++	defer writer.close()
+ 	n := 0
+ 	var cerr error
+-	err = db.scan(view{db, s}, nil, nil, func(k, v []byte) bool {
++	err = db.scanWithRetirement(view{db, s}, nil, nil, func(k, v []byte) bool {
+ 		if n++; n&4095 == 0 {
+ 			if cerr = ctx.Err(); cerr != nil {
+ 				return false
+@@ -800,10 +884,6 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
+ 				return false
+ 			}
+ 		}
+-		if !stream {
+-			cerr = ndb.insertTree(k, v)
+-			return cerr == nil
+-		}
+ 		if n == 1 {
+ 			oldRoot, rerr := ndb.pager.get(ndb.root)
+ 			if rerr != nil {
+@@ -825,10 +905,13 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
+ 		// Overflow chains are immutable and already written by streamCopy.
+ 		// Drop the tracking entries after each row, keeping the builder's
+ 		// working set bounded even for very large values.
++		for _, n := range ndb.dirtyOverflow {
++			releaseNode(n)
++		}
+ 		clear(ndb.dirtyOverflow)
+ 		ndb.dirtyOverflow = ndb.dirtyOverflow[:0]
+ 		return true
+-	})
++	}, preserveFeed && db.opts.CacheBytes > 0)
+ 	ndb.sortedLoad, ndb.streamCopy = false, false
+ 	if err == nil {
+ 		err = cerr
+@@ -843,6 +926,7 @@ func (db *DB) copySnapshot(ctx context.Context, s *Snapshot, dir string, opts Op
+ 		ndb.closeQuiet()
+ 		return nil, err
+ 	}
++	ndb.pager.limit = limit
+ 	return ndb, nil
+ }
+ 
+@@ -858,6 +942,7 @@ func (db *DB) closeQuiet() {
+ 	db.mu.Lock()
+ 	db.closed = true
+ 	db.wal.close()
++	db.releaseMemtables()
+ 	db.pager.close()
+ 	if db.dirLock != nil {
+ 		db.dirLock.Close()
+diff --git a/collection.go b/collection.go
+index a7ca824..35f3f48 100644
+--- a/collection.go
++++ b/collection.go
+@@ -363,7 +363,10 @@ func (c *Collection) write(key, val []byte, del bool) error {
+ 		}
+ 		return err
+ 	}
+-	db.stallLocked()
++	if err := db.stallLocked(); err != nil {
++		db.mu.Unlock()
++		return err
++	}
+ 	if err := c.check(); err != nil {
+ 		db.mu.Unlock()
+ 		return err
+@@ -502,7 +505,14 @@ func (c *Collection) NewCursor() *Cursor {
+ 		cur.owned = s
+ 		cur.c, cur.v = cc, view{c.db, s}
+ 	}
+-	cur.snap = cur.c.snap.mem
++	c.db.mu.RLock()
++	if c.db.closed || cur.c.snap.closed {
++		cur.err = ErrClosed
++	} else {
++		cur.snap = cur.c.snap.mem
++		cur.memStores = cur.v.retainMemtables()
++	}
++	c.db.mu.RUnlock()
+ 	return cur
+ }
+ 
+diff --git a/copy_builder.go b/copy_builder.go
+index d0549e1..1b1eac2 100644
+--- a/copy_builder.go
++++ b/copy_builder.go
+@@ -1,6 +1,9 @@
+ package db
+ 
+-import "fmt"
++import (
++	"fmt"
++	"syscall"
++)
+ 
+ // copyPageWriter belongs exclusively to a private sorted backup/compaction
+ // builder. Completed leaves never change again; contiguous ids share one
+@@ -9,6 +12,7 @@ import "fmt"
+ type copyPageWriter struct {
+ 	pg    *pager
+ 	data  []byte
++	store []byte
+ 	nodes []*node
+ }
+ 
+@@ -22,7 +26,12 @@ func (w *copyPageWriter) add(n *node) error {
+ 		}
+ 	}
+ 	if w.data == nil {
+-		w.data = make([]byte, 0, pageBufferArenaBytes)
++		var err error
++		w.store, err = syscall.Mmap(-1, 0, pageBufferArenaBytes, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
++		if err != nil {
++			return err
++		}
++		w.data = w.store[:0]
+ 		w.nodes = make([]*node, 0, pageBufferArenaBytes/PageSize)
+ 	}
+ 	n.data.setCrc(pageCrc(n.data))
+@@ -52,6 +61,13 @@ func (w *copyPageWriter) flush() error {
+ 	}
+ 	clear(w.nodes)
+ 	w.nodes, w.data = w.nodes[:0], w.data[:0]
+-	w.pg.releaseUnusedBuffers(true)
++	w.pg.releaseUnusedBuffers()
+ 	return nil
+ }
++
++func (w *copyPageWriter) close() {
++	if w.store != nil {
++		syscall.Munmap(w.store)
++		w.store, w.data = nil, nil
++	}
++}
+diff --git a/cursor.go b/cursor.go
+index abf7836..40bcbbd 100644
+--- a/cursor.go
++++ b/cursor.go
+@@ -11,16 +11,17 @@ import (
+ // leaf while its generation is unchanged; other movements descend the tree.
+ // No lock is held between calls.
+ type Cursor struct {
+-	owned  *Snapshot
+-	closed bool
+-	c      *Collection
+-	v      view
+-	snap   []mtEntry
+-	ikey   []byte // internal key of the current position
+-	key    []byte // user key
+-	val    []byte
+-	valid  bool
+-	err    error
++	owned     *Snapshot
++	closed    bool
++	c         *Collection
++	v         view
++	memStores []*memtableStorage
++	snap      []mtEntry
++	ikey      []byte // internal key of the current position
++	key       []byte // user key
++	val       []byte
++	valid     bool
++	err       error
+ 
+ 	// the leaf and slot of the tree key found last, valid while the tree
+ 	// generation is unchanged: a step then moves within the leaf instead
+@@ -365,6 +366,8 @@ func (c *Cursor) Close() error {
+ 			c.owned.Close()
+ 			c.owned = nil
+ 		}
++		releaseMemtableStores(c.memStores)
++		c.memStores = nil
+ 		c.snap = nil
+ 		c.key, c.val = nil, nil
+ 	}
+diff --git a/db.go b/db.go
+index 5a6aa2a..d5a2493 100644
+--- a/db.go
++++ b/db.go
+@@ -39,7 +39,7 @@ type Options struct {
+ 	// when Sync is off. Default 10ms.
+ 	LogFlushInterval time.Duration
+ 	// CacheBytes targets the logical page cache, not total process memory; clean pages are evicted past it and a
+-	// checkpoint runs when dirty pages reach three quarters of it. 0 keeps
++	// checkpoint runs when dirty pages reach one quarter of it. 0 keeps
+ 	// everything resident, which is fastest when the data fits in RAM.
+ 	CacheBytes int64
+ 	// VerifyChecksums checks every page checksum when a page is first read
+@@ -52,7 +52,9 @@ type Options struct {
+ 	// MemtableBytes buffers inserts in memory and applies them to the tree
+ 	// in key order once the budget is reached, cutting write amplification
+ 	// when the file is larger than the cache. Default: CacheBytes/2 with a
+-	// cache limit; 0 (inserts go straight to the tree) without one. Set to
++	// cache limit, including record/metadata storage and overwritten records.
++	// Writers can buffer up to two active budgets while a previous table applies.
++	// 0 (inserts go straight to the tree) without one. Set to
+ 	// -1 to disable with a cache limit.
+ 	MemtableBytes int64
+ 	// ChangeFeed enables persistent opt-in change capture; see CHANGE_FEEDS.md.
+@@ -77,18 +79,24 @@ const FormatVersion = 10
+ 
+ // DB is a single-writer, multi-reader key-value store.
+ type DB struct {
+-	mu          treeMutex // tree structure; writers exclude every read lane
+-	dirLock     *os.File  // remains locked across data-file swaps
+-	dir         string
+-	pager       *pager
+-	wal         *wal
+-	mt          *memtable // active memtable; nil unless MemtableBytes > 0
+-	imm         *memtable // memtable being applied by the checkpointer, or nil
+-	activeStart lsn       // log position of the active memtable's first record
+-	metaLogPos  *lsn      // compaction copies: where in the parent's log their meta points
+-	root        uint32
+-	ckpt        uint64
+-	opts        Options
++	checkpointPages    []ioPage
++	checkpointNodes    []*node
++	checkpointReleased []uint32
++	checkpointScratch  page        // owned by the serialized checkpointer
++	checkpointMeta     page        // same owner; never exposed to readers
++	activeCapture      *captureSet // writer lock; captured pages pinned until I/O completes
++	mu                 treeMutex   // tree structure; writers exclude every read lane
++	dirLock            *os.File    // remains locked across data-file swaps
++	dir                string
++	pager              *pager
++	wal                *wal
++	mt                 *memtable // active memtable; nil unless MemtableBytes > 0
++	imm                *memtable // memtable being applied by the checkpointer, or nil
++	activeStart        lsn       // log position of the active memtable's first record
++	metaLogPos         *lsn      // compaction copies: where in the parent's log their meta points
++	root               uint32
++	ckpt               uint64
++	opts               Options
+ 
+ 	scratch       page
+ 	scratch2      []byte // two pages, for sibling balancing
+@@ -120,6 +128,8 @@ type DB struct {
+ 	done          chan struct{}
+ 	stopOnce      sync.Once
+ 	closed        bool
++	opening       bool                     // startup maintenance must drain buffers without a worker
++	compactMu     sync.Mutex               // serialize copies that share compact.tmp
+ 	ckptMu        sync.Mutex               // one checkpoint or compaction at a time
+ 	holds         map[string]time.Duration // longest writer-lock hold per section (diagnostics)
+ 	stalls        uint64                   // writer waits for the memtable to drain
+@@ -240,7 +250,6 @@ func Open(dir string, opts Options) (*DB, error) {
+ 		return nil, err
+ 	}
+ 	w := newWAL(dir)
+-	w.heapOnly = opts.CacheBytes > 0
+ 	w.strictSync = opts.Sync
+ 	if opts.ChangeFeed != nil && !opts.ChangeFeed.Disabled {
+ 		normalized, _ := normalizeChangeOptions(*opts.ChangeFeed)
+@@ -267,11 +276,11 @@ func Open(dir string, opts Options) (*DB, error) {
+ 		f.Close()
+ 		return nil, err
+ 	}
+-	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
++	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
+ 		stop: make(chan struct{}), done: make(chan struct{}), ckptReq: make(chan ckptRequest, 16), ckptDone: make(chan struct{})}
+ 	db.cond = sync.NewCond(&db.mu)
+ 	if opts.MemtableBytes > 0 {
+-		db.mt = newMemtable()
++		db.mt = newMemtable(opts.MemtableBytes)
+ 	}
+ 	st, err := f.Stat()
+ 	if err == nil {
+@@ -314,6 +323,7 @@ func Open(dir string, opts Options) (*DB, error) {
+ 	}
+ 	if err != nil {
+ 		// release the lock and descriptors: a failed open must not wedge the next one
++		db.releaseMemtables()
+ 		w.close()
+ 		pg.close()
+ 		return nil, err
+@@ -323,6 +333,7 @@ func Open(dir string, opts Options) (*DB, error) {
+ 	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
+ 	os.Remove(oldPath)
+ 	lockOwned = false
++	db.opening = false
+ 	go db.flusher()
+ 	go db.checkpointer()
+ 	return db, nil
+@@ -404,7 +415,7 @@ func (db *DB) putLocked(key, val []byte, del bool) error {
+ }
+ 
+ func (db *DB) memtableFull() bool {
+-	return db.mt != nil && int64(db.mt.bytes) >= db.opts.MemtableBytes
++	return db.mt != nil && int64(db.mt.bufferedBytes()) >= db.opts.MemtableBytes
+ }
+ 
+ func (db *DB) flusher() {
+@@ -464,16 +475,31 @@ func (db *DB) noteActiveStartLocked() {
+ 
+ // stallLocked is the engine's only flow control: a writer waits when the
+ // memtable being applied has not drained and the active one has grown to
+-// four times its budget, i.e. when writes outrun the disk for a sustained
++// twice its budget, i.e. when writes outrun the disk for a sustained
+ // stretch. Writer lock held on entry and exit.
+-func (db *DB) stallLocked() {
+-	for db.mt != nil && int64(db.mt.bytes) >= 4*db.opts.MemtableBytes && !db.closed && db.failed == nil {
++func (db *DB) stallLocked() error {
++	for db.mt != nil && int64(db.mt.bufferedBytes())/2 >= db.opts.MemtableBytes && !db.closed && db.failed == nil {
+ 		db.stalls++
++		if db.opening {
++			// Open has not published the handle or started its workers. Recovery
++			// cleanup can generate enough tombstones to need another checkpoint.
++			db.mu.Unlock()
++			err := db.runCheckpoint(true)
++			db.mu.Lock()
++			if err != nil && db.failed == nil {
++				db.failed = err
++			}
++			continue
++		}
+ 		if db.imm == nil {
+ 			db.requestCheckpoint()
+ 		}
+ 		db.cond.Wait()
+ 	}
++	if db.closed {
++		return ErrClosed
++	}
++	return db.failed
+ }
+ 
+ // Batch aggregates writes into one log write and one flush, applied
+@@ -610,7 +636,10 @@ func (b *Batch) CommitContext(ctx context.Context) error {
+ 		}
+ 		return err
+ 	}
+-	db.stallLocked()
++	if err := db.stallLocked(); err != nil {
++		db.mu.Unlock()
++		return err
++	}
+ 	if err := ctx.Err(); err != nil {
+ 		db.mu.Unlock()
+ 		return err
+@@ -1009,10 +1038,10 @@ func formatVersionAt(path string) (uint32, error) {
+ 	return best, nil
+ }
+ 
+-// dirtyPressure reports whether dirty pages fill three quarters of the cache
++// dirtyPressure reports whether dirty pages fill one quarter of the cache
+ // limit; the checkpoint that follows makes them evictable again.
+ func (db *DB) dirtyPressure() bool {
+-	return db.pager.limit > 0 && db.pager.dirtyN > db.pager.limit*3/4
++	return db.pager.limit > 0 && db.pager.dirtyN > max(db.pager.limit/4, 2)
+ }
+ 
+ // needCheckpoint decides, after a write, whether a full checkpoint is due:
+@@ -1066,6 +1095,10 @@ func (db *DB) walkLeaves(n *node, fn func(key, val []byte) error) error {
+ 
+ // Stats reports resident and file-level counters.
+ type Stats struct {
++	// WALBufferBytes is allocated active, spare and in-flight log-buffer storage.
++	WALBufferBytes int
++	// InFlightPages counts resident checkpoint pages not already counted dirty.
++	InFlightPages                                           int
+ 	ResidentPages, HighWaterPages, FreePages, DirtyPages    int
+ 	Loads, Writes, Evictions, Balances, Merges, Relocations uint64
+ 	Height                                                  int
+@@ -1082,9 +1115,21 @@ func (db *DB) Stats() Stats {
+ 	if db.closed || db.failed != nil {
+ 		return Stats{}
+ 	}
++	db.pager.loadMu.Lock()
++	defer db.pager.loadMu.Unlock()
+ 	s := Stats{HighWaterPages: int(db.pager.hwm), FreePages: len(db.pager.free), DirtyPages: db.pager.dirtyN,
+ 		Loads: db.pager.loads, Writes: db.pager.writes, Evictions: db.pager.evictions, Balances: db.balances, Merges: db.merges, Relocations: db.relocations,
+ 		ResidentPages: int(db.pager.resident.Load())}
++	db.wal.mu.Lock()
++	s.WALBufferBytes = len(db.wal.bufStore) + len(db.wal.spareStore) + len(db.wal.inflightStore)
++	db.wal.mu.Unlock()
++	if cs := db.activeCapture; cs != nil {
++		for _, n := range cs.nodes {
++			if n.writing && !n.dirty && db.pager.pages[n.id].Load() == n {
++				s.InFlightPages++
++			}
++		}
++	}
+ 	if n := db.pager.loaded(db.root); n != nil {
+ 		s.Height = int(n.data.level()) + 1
+ 	}
+diff --git a/engine_test.go b/engine_test.go
+index 9ee9bef..e6a79e9 100644
+--- a/engine_test.go
++++ b/engine_test.go
+@@ -451,8 +451,8 @@ func TestEvictionKeepsResidentBounded(t *testing.T) {
+ 	if st.Evictions == 0 || st.HighWaterPages < 4*limit {
+ 		t.Fatalf("eviction did not engage: %+v", st)
+ 	}
+-	// allowance: eviction slack, pinned dirty pages, and internal pages (never evicted)
+-	if allowed := limit + limit/16 + st.DirtyPages + st.HighWaterPages/50 + 8; st.ResidentPages > allowed {
++	// allowance: eviction slack, pinned dirty/in-flight pages, and internal pages (never evicted)
++	if allowed := limit + limit/16 + st.DirtyPages + st.InFlightPages + st.HighWaterPages/50 + 8; st.ResidentPages > allowed {
+ 		t.Fatalf("resident pages %d exceed limit %d (allowed %d)", st.ResidentPages, limit, allowed)
+ 	}
+ 	// updates with size changes and a scan while evicting
+diff --git a/latency_test.go b/latency_test.go
+index de701f8..aeb8e9a 100644
+--- a/latency_test.go
++++ b/latency_test.go
+@@ -86,11 +86,15 @@ func TestCheckpointsDoNotStallWriters(t *testing.T) {
+ 	// longer than the buffer covers; that is flow control, not a lock hold,
+ 	// and shows up as a long log write. Everything the engine controls is
+ 	// the lock-hold table below.
+-	if maxWait > limit && maxWait > 2*st.LockHolds["wal-flush-write"]+limit {
++	// Bounded memtable flow control can also wait for the applying table's
++	// checkpoint work or for the final compaction fence. Both are measured
++	// independently of the writer's wait; writer-lock sections remain bounded.
++	flowLimit := limit + st.LockHolds["checkpoint-work"] + st.LockHolds["compaction-finalize"]
++	if maxWait > flowLimit && maxWait > 2*st.LockHolds["wal-flush-write"]+flowLimit {
+ 		t.Fatalf("a write stalled for %v without a matching disk stall", maxWait)
+ 	}
+ 	for section, d := range st.LockHolds {
+-		if section == "wal-flush-write" || section == "compact-swap" {
++		if section == "wal-flush-write" || section == "compact-swap" || section == "checkpoint-work" || section == "compaction-finalize" {
+ 			continue // diagnostics of work done outside the lock
+ 		}
+ 		if d > limit {
+diff --git a/memtable.go b/memtable.go
+index 3c8a5d7..43bad23 100644
+--- a/memtable.go
++++ b/memtable.go
+@@ -1,8 +1,10 @@
+ package db
+ 
+ import (
++	"hash/maphash"
+ 	"sort"
+ 	"sync"
++	"unsafe"
+ )
+ 
+ type mtEntry struct {
+@@ -21,13 +23,14 @@ type mtValue struct {
+ // of one. Every entry is already in the log, so nothing here is at risk.
+ //
+ // Keys are kept in order by a small in-memory B+tree (wide nodes, contiguous
+-// arrays: an insert is a few binary searches and a short move), and a map
++// arrays: an insert is a few binary searches and a short move), and a keyed hash table
+ // serves point reads and updates. A scan copies out just the entries of its
+ // range. Values are replaced, never mutated, so a copy taken by a reader
+ // stays valid while the writer keeps going. Every method runs under the
+ // database's writer lock (put) or reader lock (the rest).
+ type memtable struct {
+-	m     map[string]*mtValue
++	slots []mtSlot
++	seed  maphash.Seed
+ 	root  *mtNode
+ 	first *mtNode // leftmost leaf; leaves are linked for range reads
+ 	n     int
+@@ -37,6 +40,10 @@ type memtable struct {
+ 	snapMu sync.Mutex
+ 	sorted []mtEntry // every entry in order; cached until the next put
+ 	valid  bool
++
++	budget  int64
++	storage *memtableStorage
++	values  []mtValue // current slab; map/tree pointers keep earlier slabs alive
+ }
+ 
+ // mtFanout is the most keys a node holds before it splits.
+@@ -49,31 +56,69 @@ type mtNode struct {
+ 	next     *mtNode    // leaves
+ }
+ 
+-func newMemtable() *memtable {
+-	leaf := &mtNode{}
+-	return &memtable{m: map[string]*mtValue{}, root: leaf, first: leaf}
++func newMemtable(budget ...int64) *memtable {
++	t := &memtable{storage: newMemtableStorage(), seed: maphash.MakeSeed()}
++	if len(budget) > 0 {
++		t.budget = budget[0]
++	}
++	t.root = t.newLeaf()
++	t.first = t.root
++	return t
+ }
+ 
+ // put stores a copy of val, or a tombstone. Writer lock held.
+ func (t *memtable) put(key, val []byte, del bool) {
+-	k := string(key)
+-	var nv mtValue
+-	if !del {
+-		nv.v = append([]byte(nil), val...)
+-	} else {
+-		nv.del = true
++	if len(t.slots) == 0 {
++		capacity := 16
++		if t.budget > 0 {
++			expected := int(t.budget / int64(len(key)+len(val)+192))
++			for capacity < min(expected*4/3+1, 1<<20) {
++				capacity *= 2
++			}
++		}
++		t.growSlots(capacity)
+ 	}
+-	if p, ok := t.m[k]; ok {
+-		t.bytes += len(nv.v) - len(p.v)
+-		*p = nv
++	slot, hash := t.slot(key)
++	if p := slot.val; p != nil {
++		var v []byte
++		if !del {
++			v = t.storage.alloc(len(val))
++			copy(v, val)
++		}
++		t.bytes += len(v) - len(p.v)
++		*p = mtValue{v: v, del: del}
+ 	} else {
+-		t.bytes += len(k) + len(nv.v)
++		// One immutable allocation holds both key and initial value. Neither
++		// is modified: replacing a value leaves snapshot aliases intact.
++		n := len(key)
++		if !del {
++			n += len(val)
++		}
++		if (t.n+1)*4 >= len(t.slots)*3 {
++			t.growSlots(2 * len(t.slots))
++			slot, hash = t.slot(key)
++		}
++		record := t.storage.alloc(n)
++		copy(record, key)
++		k := unsafe.String(unsafe.SliceData(record), len(key))
++		var v []byte
++		if !del {
++			copy(record[len(key):], val)
++			v = record[len(key):n:n]
++		}
++		t.bytes += len(k) + len(v)
+ 		t.n++
+ 		if len(k) > 0 {
+ 			t.byTag[k[0]]++
+ 		}
+-		p := &mtValue{v: nv.v, del: nv.del}
+-		t.m[k] = p
++		// Stable pointers without one separately allocated object per key.
++		if len(t.values) == 0 {
++			t.values = memtableArray[mtValue](t.storage, mtFanout)
++		}
++		p := &t.values[0]
++		t.values = t.values[1:]
++		*p = mtValue{v: v, del: del}
++		*slot = mtSlot{hash: hash, key: k, val: p}
+ 		t.insert(k, p)
+ 	}
+ 	t.snapMu.Lock()
+@@ -102,8 +147,13 @@ func (t *memtable) insertInto(n *mtNode, k string, p *mtValue) (string, *mtNode)
+ 			return "", nil
+ 		}
+ 		mid := len(n.keys) / 2
+-		r := &mtNode{keys: append([]string(nil), n.keys[mid:]...), vals: append([]*mtValue(nil), n.vals[mid:]...), next: n.next}
+-		n.keys, n.vals, n.next = n.keys[:mid:mid], n.vals[:mid:mid], r
++		r := t.newLeaf()
++		r.keys = append(r.keys, n.keys[mid:]...)
++		r.vals = append(r.vals, n.vals[mid:]...)
++		r.next = n.next
++		clear(n.keys[mid:])
++		clear(n.vals[mid:])
++		n.keys, n.vals, n.next = n.keys[:mid], n.vals[:mid], r
+ 		return r.keys[0], r
+ 	}
+ 	sk, right := t.insertInto(n.children[i], k, p)
+@@ -127,8 +177,12 @@ func (t *memtable) insertInto(n *mtNode, k string, p *mtValue) (string, *mtNode)
+ 
+ // get reports the buffered value; del is true for a tombstone.
+ func (t *memtable) get(key []byte) (v []byte, del, ok bool) {
+-	p, ok := t.m[string(key)]
+-	if !ok {
++	if len(t.slots) == 0 {
++		return nil, false, false
++	}
++	slot, _ := t.slot(key)
++	p := slot.val
++	if p == nil {
+ 		return nil, false, false
+ 	}
+ 	return p.v, p.del, true
+@@ -179,15 +233,18 @@ func (t *memtable) snapshot() []mtEntry {
+ 	if t.valid {
+ 		return t.sorted
+ 	}
+-	t.sorted, t.valid = t.rangeInto(make([]mtEntry, 0, t.n), nil, nil), true
++	t.sorted, t.valid = t.rangeInto(memtableArray[mtEntry](t.storage, t.n)[:0], nil, nil), true
+ 	return t.sorted
+ }
+ 
+ func (t *memtable) reset() {
+-	leaf := &mtNode{}
+-	t.m = map[string]*mtValue{}
++	t.releaseBuffers()
++	t.storage = newMemtableStorage()
++	leaf := t.newLeaf()
++	t.slots = nil
+ 	t.root, t.first = leaf, leaf
+ 	t.n, t.bytes = 0, 0
++	t.values = nil
+ 	t.byTag = [256]int{}
+ 	t.snapMu.Lock()
+ 	t.sorted, t.valid = nil, false
+diff --git a/memtable_test.go b/memtable_test.go
+index f332b24..0186fdb 100644
+--- a/memtable_test.go
++++ b/memtable_test.go
+@@ -10,6 +10,7 @@ import (
+ func TestMemtableOrderAndRanges(t *testing.T) {
+ 	rng := rand.New(rand.NewSource(77))
+ 	mt := newMemtable()
++	defer mt.releaseBuffers()
+ 	ref := map[string]mtValue{}
+ 	for i := 0; i < 200_000; i++ {
+ 		k := make([]byte, 1+rng.Intn(12))
+diff --git a/overflow.go b/overflow.go
+index d0a1824..8047569 100644
+--- a/overflow.go
++++ b/overflow.go
+@@ -31,12 +31,13 @@ func (db *DB) spill(val []byte) ([]byte, error) {
+ 					return nil, err
+ 				}
+ 				if off%(pageBufferArenaBytes/PageSize*overflowData) == 0 {
+-					db.pager.releaseUnusedBuffers(true)
++					db.pager.releaseUnusedBuffers()
+ 				}
+ 			}
+ 		} else {
+ 			first = n
+ 		}
++		retainNode(n)
+ 		db.dirtyOverflow = append(db.dirtyOverflow, n)
+ 		prev = n
+ 		off += chunk
+@@ -114,6 +115,10 @@ func (db *DB) writeDirtyOverflow() error {
+ 			return err
+ 		}
+ 	}
++	for _, n := range db.dirtyOverflow {
++		releaseNode(n)
++	}
++	clear(db.dirtyOverflow)
+ 	db.dirtyOverflow = db.dirtyOverflow[:0]
+ 	return nil
+ }
+diff --git a/page_buffers.go b/page_buffers.go
+index bf339df..7d5ad23 100644
+--- a/page_buffers.go
++++ b/page_buffers.go
+@@ -21,7 +21,11 @@ type pageBufferArena struct {
+ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
+ 	a := pg.bufferTail
+ 	if a == nil || a.next+PageSize > len(a.data) {
+-		data, err := syscall.Mmap(-1, 0, pageBufferArenaBytes,
++		size := pageBufferArenaBytes
++		if pg.limit > 0 {
++			size = 256 << 10
++		}
++		data, err := syscall.Mmap(-1, 0, size,
+ 			syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+ 		if err != nil {
+ 			panic("aptevadb: cannot allocate writable page arena: " + err.Error())
+@@ -36,6 +40,18 @@ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
+ 	return page(a.data[start:a.next:a.next]), a
+ }
+ 
++// Sparse parents use one-page mappings so a retained parent cannot pin a
++// mostly empty leaf arena. They still share the same explicit view/I/O leases.
++func (pg *pager) allocInternalPageBuffer() (page, *pageBufferArena) {
++	data, err := syscall.Mmap(-1, 0, PageSize, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
++	if err != nil {
++		panic("aptevadb: cannot allocate internal page buffer: " + err.Error())
++	}
++	a := &pageBufferArena{data: data, next: PageSize, live: 1}
++	pg.bufferArenas = append(pg.bufferArenas, a)
++	return page(data), a
++}
++
+ func (pg *pager) releasePageBuffer(n *node) {
+ 	if n.buffer != nil {
+ 		n.buffer.live--
+@@ -46,8 +62,8 @@ func (pg *pager) releasePageBuffer(n *node) {
+ func (pg *pager) copyPageBuffer(n *node) {
+ 	var buf page
+ 	var a *pageBufferArena
+-	if pg.limit > 0 || n.kind == pageInternal {
+-		buf = make(page, PageSize)
++	if n.pageType() == pageInternal {
++		buf, a = pg.allocInternalPageBuffer()
+ 	} else {
+ 		buf, a = pg.allocPageBuffer()
+ 	}
+@@ -57,10 +73,8 @@ func (pg *pager) copyPageBuffer(n *node) {
+ }
+ 
+ // releaseUnusedBuffers runs under the writer lock. Explicit references keep
+-// current nodes, snapshot overlays and captured I/O alive. File mappings may
+-// be released only after a committed checkpoint with no snapshots, once
+-// ensureMapped has repointed resident mapped nodes.
+-func (pg *pager) releaseUnusedBuffers(releaseMappings bool) {
++// current nodes, snapshot overlays and captured I/O alive.
++func (pg *pager) releaseUnusedBuffers() {
+ 	kept := pg.bufferArenas[:0]
+ 	for _, a := range pg.bufferArenas {
+ 		if a.live == 0 && syscall.Munmap(a.data) == nil {
+@@ -73,15 +87,4 @@ func (pg *pager) releaseUnusedBuffers(releaseMappings bool) {
+ 	}
+ 	clear(pg.bufferArenas[len(kept):])
+ 	pg.bufferArenas = kept
+-	if !releaseMappings {
+-		return
+-	}
+-	old := pg.oldMaps[:0]
+-	for _, m := range pg.oldMaps {
+-		if syscall.Munmap(m) != nil {
+-			old = append(old, m)
+-		}
+-	}
+-	clear(pg.oldMaps[len(old):])
+-	pg.oldMaps = old
+ }
+diff --git a/page_buffers_test.go b/page_buffers_test.go
+index e243cf1..acfa17c 100644
+--- a/page_buffers_test.go
++++ b/page_buffers_test.go
+@@ -73,8 +73,8 @@ func testWritableBufferLifetime(t *testing.T, opts Options) {
+ 	if err := db.Checkpoint(); err != nil {
+ 		t.Fatal(err)
+ 	}
+-	if len(db.pager.bufferArenas) != 0 || len(db.pager.oldMaps) != 0 {
+-		t.Fatalf("checkpoint retained unused buffers: arenas=%d maps=%d", len(db.pager.bufferArenas), len(db.pager.oldMaps))
++	if len(db.pager.bufferArenas) != 0 {
++		t.Fatalf("checkpoint retained unused buffers: arenas=%d", len(db.pager.bufferArenas))
+ 	}
+ 	checkView(db.Find, 2)
+ 	if err := db.Close(); err != nil {
+diff --git a/pager.go b/pager.go
+index 76c7aad..f538739 100644
+--- a/pager.go
++++ b/pager.go
+@@ -21,11 +21,12 @@ type node struct {
+ 	kind     byte   // immutable page type; maintenance need not fault clean contents
+ 	modEpoch uint64 // snapshot epoch current at the last modification
+ 	ref      atomic.Bool
++	arena    *nodeArena       // descriptor storage, owned by pager/capture/staging
+ 	buffer   *pageBufferArena // private writable storage; nil for file-backed pages
+ }
+ 
+-// pageType is used only by maintenance. Bounded-cache reloads leave kind
+-// unknown to preserve the original read path without an extra mapped access.
++// pageType lets maintenance inspect clean descriptors without faulting
++// their mapped contents. kind is recorded when a node is allocated/loaded.
+ func (n *node) pageType() byte {
+ 	if n.kind != 0 {
+ 		return n.kind
+@@ -48,14 +49,15 @@ func (n *node) pageType() byte {
+ // With a page limit, clean pages are evicted by a CLOCK sweep. Dirty pages
+ // are never evicted, and a checkpoint runs when they crowd the limit.
+ type pager struct {
+-	f        fileLike
+-	mm       []byte                 // read-only mapping, far larger than the file
+-	oldMaps  [][]byte               // superseded mappings, kept while views may alias them
+-	pages    []atomic.Pointer[node] // indexed by physical id; grown only under the writer lock
+-	verified []atomic.Uint64        // bit per page id: checksum checked since open, or written by us
+-	hwm      uint32                 // first never-used page id
+-	free     []uint32               // ids safe to reuse now
+-	pending  []uint32               // ids freed by the in-progress checkpoint
++	f           fileLike
++	maps        [][]byte               // stable read-only file segments
++	pages       []atomic.Pointer[node] // indexed by physical id; grown only under the writer lock
++	copiedPages []uint32               // old file versions replaced by private writable copies
++	discarded   []uint64               // recycled ranges already reclaimed; writer lock held
++	verified    []atomic.Uint64        // bit per page id: checksum checked since open, or written by us
++	hwm         uint32                 // first never-used page id
++	free        []uint32               // ids safe to reuse now
++	pending     []uint32               // ids freed by the in-progress checkpoint
+ 
+ 	loadMu sync.Mutex // serialises table inserts and eviction on the read path
+ 
+@@ -65,9 +67,11 @@ type pager struct {
+ 	dirtyN   int // dirty pages, maintained under the writer lock
+ 	hand     int
+ 
+-	loads, writes, evictions uint64
+-	bufferArenas             []*pageBufferArena
+-	bufferTail               *pageBufferArena
++	loads, writes, evictions   uint64
++	bufferArenas               []*pageBufferArena
++	bufferTail                 *pageBufferArena
++	nodeArenas                 []*nodeArena
++	nodeTail, internalNodeTail *nodeArena
+ }
+ 
+ const minMapBytes = 64 << 20
+@@ -85,58 +89,44 @@ func newPager(f fileLike, limit int, verify bool) (*pager, error) {
+ 	return &pager{f: f, limit: limit, verify: verify}, nil
+ }
+ 
+-// ensureMapped grows the read-only mapping to cover the first n pages,
+-// doubling its size, and re-points resident mapped nodes at the new mapping.
+-// Writer lock held, so no reader holds a page view while it moves.
++// ensureMapped adds fixed-size segments. Existing addresses stay valid for
++// snapshots and in-flight checkpoint I/O, and file growth never creates a
++// second resident mapping of pages already in the cache. Writer lock held.
+ func (pg *pager) ensureMapped(n uint32) error {
+-	need := int(n) * PageSize
+-	if need <= len(pg.mm) {
+-		return nil
+-	}
+-	size := len(pg.mm)
+-	if size == 0 {
+-		size = minMapBytes
+-	}
+-	for size < need {
+-		size *= 2
+-	}
+-	mm, err := syscall.Mmap(int(pg.f.Fd()), 0, size, syscall.PROT_READ, syscall.MAP_SHARED)
+-	if err != nil {
+-		return err
+-	}
+-	old := pg.mm
+-	pg.mm = mm
+-	for i := 0; i < len(pg.pages) && i < int(pg.hwm); i++ {
+-		if nd := pg.pages[i].Load(); nd != nil && nd.mapped {
+-			nd.data = pg.mappedPage(nd.id)
++	count := (uint64(n)*PageSize + minMapBytes - 1) / minMapBytes
++	for uint64(len(pg.maps)) < count {
++		mm, err := syscall.Mmap(int(pg.f.Fd()), int64(len(pg.maps))*minMapBytes,
++			minMapBytes, syscall.PROT_READ, syscall.MAP_SHARED)
++		if err != nil {
++			return err
+ 		}
+-	}
+-	if old != nil {
+-		pg.oldMaps = append(pg.oldMaps, old) // snapshot overlays may still alias it
++		pg.maps = append(pg.maps, mm)
+ 	}
+ 	return nil
+ }
+ 
+ func (pg *pager) close() error {
++	for _, a := range pg.nodeArenas {
++		syscall.Munmap(a.data)
++	}
++	pg.nodeArenas = nil
++	pg.nodeTail, pg.internalNodeTail = nil, nil
+ 	for _, a := range pg.bufferArenas {
+ 		syscall.Munmap(a.data)
+ 	}
+ 	pg.bufferArenas, pg.bufferTail = nil, nil
+-	if pg.mm != nil {
+-		syscall.Munmap(pg.mm)
+-		pg.mm = nil
+-	}
+-	for _, m := range pg.oldMaps {
++	for _, m := range pg.maps {
+ 		syscall.Munmap(m)
+ 	}
+-	pg.oldMaps = nil
++	pg.maps = nil
+ 	syscall.Flock(int(pg.f.Fd()), syscall.LOCK_UN)
+ 	return pg.f.Close()
+ }
+ 
+ func (pg *pager) mappedPage(id uint32) page {
+-	off := int(id) * PageSize
+-	return pg.mm[off : off+PageSize : off+PageSize]
++	const pagesPerMap = minMapBytes / PageSize
++	off := int(id%pagesPerMap) * PageSize
++	return pg.maps[id/pagesPerMap][off : off+PageSize : off+PageSize]
+ }
+ 
+ func (pg *pager) growTo(n uint32) {
+@@ -152,6 +142,9 @@ func (pg *pager) growTo(n uint32) {
+ 			nv[i].Store(pg.verified[i].Load())
+ 		}
+ 		pg.verified = nv
++		nd := make([]uint64, size/64+1)
++		copy(nd, pg.discarded)
++		pg.discarded = nd
+ 	}
+ }
+ 
+@@ -187,6 +180,24 @@ func (pg *pager) get(id uint32) (*node, error) {
+ 	return pg.load(id)
+ }
+ 
++// read returns page bytes without allocating a node for an already verified
++// clean cache miss. The file mapping owns these bytes; evicting a descriptor
++// does not evict mapped file pages, so read-only cache churn needs no objects.
++// Writers still use get to obtain and pin mutable node state.
++func (pg *pager) read(id uint32) (page, error) {
++	if n := pg.pages[id].Load(); n != nil {
++		return n.data, nil
++	}
++	if !pg.verify || pg.isVerified(id) {
++		return pg.mappedPage(id), nil
++	}
++	n, err := pg.load(id)
++	if err != nil {
++		return nil, err
++	}
++	return n.data, nil
++}
++
+ // load makes a node for a page in the durable file, viewed through the mapping.
+ func (pg *pager) load(id uint32) (*node, error) {
+ 	pg.loadMu.Lock()
+@@ -195,12 +206,11 @@ func (pg *pager) load(id uint32) (*node, error) {
+ 		return n, nil
+ 	}
+ 	p := pg.mappedPage(id)
+-	n := &node{data: p, id: id, onDisk: true, mapped: true}
+-	if pg.limit == 0 {
+-		n.kind = p.typ()
+-	}
++	n := pg.newNode(p.typ())
++	n.data, n.id, n.onDisk, n.mapped, n.kind = p, id, true, true, p.typ()
+ 	if pg.verify && !pg.isVerified(id) {
+ 		if pageCrc(n.data) != n.data.crc() {
++			releaseNode(n)
+ 			return nil, fmt.Errorf("%w: page %d", ErrCorrupt, id)
+ 		}
+ 		pg.markVerified(id)
+@@ -234,7 +244,7 @@ func (pg *pager) evictLocked(keep *node) {
+ 		n := pg.pages[pg.hand].Load()
+ 		// Internal pages stay resident: the checkpoint walk reaches dirty
+ 		// leaves only through resident parents, and they are <1% of the tree.
+-		if n == nil || n == keep || n.dirty || n.writing || n.data.typ() == pageInternal {
++		if n == nil || n == keep || n.dirty || n.writing || n.pageType() == pageInternal {
+ 			continue
+ 		}
+ 		if n.ref.Load() {
+@@ -242,6 +252,7 @@ func (pg *pager) evictLocked(keep *node) {
+ 			continue
+ 		}
+ 		pg.pages[pg.hand].Store(nil)
++		releaseNode(n)
+ 		pg.resident.Add(-1)
+ 		pg.evictions++
+ 		evicted++
+@@ -254,11 +265,13 @@ func (pg *pager) allocID() uint32 {
+ 	if k := len(pg.free); k > 0 {
+ 		id := pg.free[k-1]
+ 		pg.free = pg.free[:k-1]
++		pg.discarded[id/64] &^= uint64(1) << (id % 64)
+ 		return id
+ 	}
+ 	id := pg.hwm
+ 	pg.hwm++
+ 	pg.growTo(pg.hwm)
++	pg.discarded[id/64] &^= uint64(1) << (id % 64)
+ 	if err := pg.ensureMapped(pg.hwm); err != nil {
+ 		panic("aptevadb: cannot grow file mapping: " + err.Error())
+ 	}
+@@ -267,11 +280,13 @@ func (pg *pager) allocID() uint32 {
+ 
+ // alloc creates a fresh dirty page. Writer lock held.
+ func (pg *pager) alloc(typ byte, level byte) *node {
+-	n := &node{id: pg.allocID(), dirty: true, kind: typ}
+-	if typ == pageInternal || pg.limit > 0 {
++	id := pg.allocID()
++	n := pg.newNode(typ)
++	n.id, n.dirty, n.kind = id, true, typ
++	if typ == pageInternal {
+ 		// Sparse parents can outlive hundreds of completed leaves. Keeping
+ 		// these small buffers separate avoids pinning whole leaf arenas.
+-		n.data = make(page, PageSize)
++		n.data, n.buffer = pg.allocInternalPageBuffer()
+ 	} else {
+ 		n.data, n.buffer = pg.allocPageBuffer()
+ 	}
+@@ -307,6 +322,7 @@ func (pg *pager) markDirty(n *node) {
+ 		pg.dirtyN++
+ 		if pg.pages[n.id].Load() != n {
+ 			pg.pages[n.id].Store(n)
++			retainNode(n)
+ 			pg.resident.Add(1)
+ 		}
+ 	}
+@@ -344,6 +360,7 @@ func (pg *pager) freePage(n *node) {
+ 	pg.releasePageBuffer(n)
+ 	if pg.pages[n.id].Load() == n {
+ 		pg.pages[n.id].Store(nil)
++		releaseNode(n)
+ 		pg.resident.Add(-1)
+ 	}
+ 	if n.dirty {
+@@ -362,6 +379,9 @@ func (pg *pager) freePage(n *node) {
+ func (pg *pager) releaseIDs(ids []uint32) (trailingFree uint32) {
+ 	pg.free = append(pg.free, ids...)
+ 	sort.Slice(pg.free, func(i, j int) bool { return pg.free[i] > pg.free[j] })
++	if len(ids) >= 64 {
++		pg.discardFreePages()
++	}
+ 	for len(pg.free) > 0 && pg.free[0] == pg.hwm-1 {
+ 		pg.free = pg.free[1:]
+ 		pg.hwm--
+diff --git a/scan.go b/scan.go
+index 33cdf07..a896c6b 100644
+--- a/scan.go
++++ b/scan.go
+@@ -15,9 +15,22 @@ func (db *DB) Scan(start, end []byte, fn func(key, val []byte) bool) error {
+ }
+ 
+ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) error {
++	return db.scanWithRetirement(v, start, end, fn, false)
++}
++
++// Only a private file copy retires consumed file translations. Public scans
++// keep their warm read layout. Remapping preserves all bytes and addresses.
++func (db *DB) scanWithRetirement(v view, start, end []byte, fn func(key, val []byte) bool, retire bool) error {
+ 	// Merge buffered entries (newer) with the tree (older). The snapshot is
+ 	// taken once; values in it are never mutated by the writer.
+ 	db.mu.RLock()
++	if db.closed || (v.snap != nil && v.snap.closed) {
++		db.mu.RUnlock()
++		return ErrClosed
++	}
++	stores := v.retainMemtables()
++	pg := db.pager
++	defer releaseMemtableStores(stores)
+ 	snap := v.memRange(start, end) // db.mt is swapped by the checkpointer under the lock
+ 	db.mu.RUnlock()
+ 	si := 0
+@@ -54,66 +67,22 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
+ 	cur := start
+ 	var curBuf, flat []byte
+ 	var cells []cellRef
+-	type frame struct {
+-		n   page
+-		idx int
+-	}
+-	var stack [maxTreeDepth]frame
++	var walk leafWalk
++	var retired []uint32
+ 	for {
+ 		db.mu.RLock()
+ 		if db.closed {
+ 			db.mu.RUnlock()
+ 			return ErrClosed
+ 		}
+-		n, err := v.page(v.root())
++		leaf, i, err := walk.next(v, cur)
+ 		if err != nil {
+ 			db.mu.RUnlock()
+ 			return err
+ 		}
+-		depth := 0
+-		for n.typ() == pageInternal {
+-			idx := 0
+-			if cur != nil {
+-				idx = n.searchInternal(cur)
+-			}
+-			stack[depth] = frame{n, idx}
+-			depth++
+-			if n, err = v.page(n.child(idx)); err != nil {
+-				db.mu.RUnlock()
+-				return err
+-			}
+-		}
+-		leaf := n
+-		i := 0
+-		if cur != nil {
+-			i, _ = leaf.searchLeaf(cur)
+-		}
+-		if i >= leaf.numCells() {
+-			// every key here is below cur: hop to the next leaf, if any
+-			d := depth - 1
+-			for d >= 0 && stack[d].idx >= stack[d].n.numCells() {
+-				d--
+-			}
+-			if d < 0 {
+-				db.mu.RUnlock()
+-				return drain()
+-			}
+-			stack[d].idx++
+-			if n, err = v.page(stack[d].n.child(stack[d].idx)); err != nil {
+-				db.mu.RUnlock()
+-				return err
+-			}
+-			for n.typ() == pageInternal {
+-				if n, err = v.page(n.child(0)); err != nil {
+-					db.mu.RUnlock()
+-					return err
+-				}
+-			}
+-			leaf, i = n, 0
+-			if leaf.numCells() == 0 {
+-				db.mu.RUnlock()
+-				return drain()
+-			}
++		if leaf == nil {
++			db.mu.RUnlock()
++			return drain()
+ 		}
+ 		nc := leaf.numCells()
+ 		if nc == 0 { // empty root
+@@ -155,6 +124,9 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
+ 		// resume just past the last key of this leaf
+ 		curBuf = append(curBuf[:0], leaf.leafKey(nc-1)...)
+ 		curBuf = append(curBuf, 0)
++		if retire {
++			retired = append(retired, walk.id)
++		}
+ 		db.mu.RUnlock()
+ 		for _, c := range cells {
+ 			vo := c.ko + c.kl
+@@ -162,6 +134,14 @@ func (db *DB) scan(v view, start, end []byte, fn func(key, val []byte) bool) err
+ 				return nil
+ 			}
+ 		}
++		if len(retired) >= 256 {
++			db.mu.Lock()
++			if !db.closed && db.pager == pg {
++				pg.discardScannedPages(retired)
++			}
++			db.mu.Unlock()
++			retired = retired[:0]
++		}
+ 		if jEnd < nc {
+ 			return drain() // the range ends inside this leaf
+ 		}
+@@ -280,61 +260,21 @@ func (db *DB) scanLeaves(v view, start, end []byte, fn func(lv leafView) bool) e
+ 	}
+ 	cur := start
+ 	var curBuf []byte
+-	type frame struct {
+-		n   page
+-		idx int
+-	}
+-	var stack [maxTreeDepth]frame
++	var walk leafWalk
+ 	for {
+ 		db.mu.RLock()
+ 		if db.closed {
+ 			db.mu.RUnlock()
+ 			return ErrClosed
+ 		}
+-		n, err := v.page(v.root())
++		leaf, i, err := walk.next(v, cur)
+ 		if err != nil {
+ 			db.mu.RUnlock()
+ 			return err
+ 		}
+-		depth := 0
+-		for n.typ() == pageInternal {
+-			idx := 0
+-			if cur != nil {
+-				idx = n.searchInternal(cur)
+-			}
+-			stack[depth] = frame{n, idx}
+-			depth++
+-			if n, err = v.page(n.child(idx)); err != nil {
+-				db.mu.RUnlock()
+-				return err
+-			}
+-		}
+-		leaf := n
+-		i := 0
+-		if cur != nil {
+-			i, _ = leaf.searchLeaf(cur)
+-		}
+-		if i >= leaf.numCells() {
+-			d := depth - 1
+-			for d >= 0 && stack[d].idx >= stack[d].n.numCells() {
+-				d--
+-			}
+-			if d < 0 {
+-				db.mu.RUnlock()
+-				return nil
+-			}
+-			stack[d].idx++
+-			if n, err = v.page(stack[d].n.child(stack[d].idx)); err != nil {
+-				db.mu.RUnlock()
+-				return err
+-			}
+-			for n.typ() == pageInternal {
+-				if n, err = v.page(n.child(0)); err != nil {
+-					db.mu.RUnlock()
+-					return err
+-				}
+-			}
+-			leaf, i = n, 0
++		if leaf == nil {
++			db.mu.RUnlock()
++			return nil
+ 		}
+ 		nc := leaf.numCells()
+ 		if nc == 0 {
+diff --git a/snapshot.go b/snapshot.go
+index 05efe31..7fb1215 100644
+--- a/snapshot.go
++++ b/snapshot.go
+@@ -16,6 +16,7 @@ type Snapshot struct {
+ 	revision    uint64
+ 	epoch       uint64
+ 	root        uint32
++	memStores   []*memtableStorage
+ 	mem         []mtEntry          // memtables as of the snapshot, merged and sorted
+ 	overlay     map[uint32]page    // page id -> its contents at the snapshot
+ 	buffers     []*pageBufferArena // retained private-page storage for overlay entries
+@@ -27,11 +28,12 @@ type Snapshot struct {
+ 
+ var ErrSnapshotsOpen = errors.New("aptevadb: operation not allowed while snapshots are open")
+ 
+-// quarantined ids were freed at a given epoch; they may be reused once no
+-// snapshot from that epoch or earlier is open.
++// Page reuse requires both the last snapshot reader to finish and a durable
++// checkpoint that no longer references the retired id.
+ type quarantine struct {
+-	epoch uint64
+-	ids   []uint32
++	epoch           uint64
++	afterCheckpoint uint64
++	ids             []uint32
+ }
+ 
+ // Snapshot takes a consistent view. Close it when done.
+@@ -56,12 +58,14 @@ func (db *DB) snapshotLocked(logPosition bool) (*Snapshot, error) {
+ 	s := &Snapshot{db: db, epoch: db.epoch, root: db.root, overlay: map[uint32]page{}}
+ 	s.revision = db.revision
+ 	s.mem = db.memSnapshotLocked()
++	s.memStores = (view{db, nil}).retainMemtables()
+ 	var g, off uint64
+ 	var err error
+ 	if logPosition {
+ 		g, off, err = db.wal.flushAndPosition()
+ 	}
+ 	if err != nil {
++		releaseMemtableStores(s.memStores)
+ 		return nil, err
+ 	}
+ 	s.pos = lsn{g, off}
+@@ -99,10 +103,12 @@ func (s *Snapshot) Close() {
+ 		a.live--
+ 	}
+ 	s.buffers, s.overlay = nil, nil
++	releaseMemtableStores(s.memStores)
++	s.memStores, s.mem = nil, nil
+ 	// Captures retain their own references, so unused private arenas can
+-	// be released even if checkpoint I/O is in progress. File mappings
+-	// wait until that I/O has committed.
+-	db.pager.releaseUnusedBuffers(false)
++	// be released even if checkpoint I/O is in progress. File segments
++	// have stable addresses until the database closes.
++	db.pager.releaseUnusedBuffers()
+ 	db.releaseQuarantineLocked()
+ }
+ 
+@@ -137,6 +143,7 @@ func (db *DB) preserveForSnapshots(n *node) {
+ // after n's last modification may still read the current buffer, that
+ // buffer is left to the snapshot and a copy is modified instead.
+ func (db *DB) writable(n *node) page {
++	reclaim := n.mapped && len(db.snaps) == 0 && !n.writing
+ 	preserve := len(db.snaps) > 0 && db.epoch > n.modEpoch
+ 	if preserve {
+ 		db.preserveForSnapshots(n)
+@@ -147,6 +154,15 @@ func (db *DB) writable(n *node) page {
+ 	}
+ 	db.pager.markDirty(n)
+ 	n.modEpoch = db.epoch
++	if reclaim {
++		// A previously discarded mapping may have faulted back in since its
++		// last checkpoint. This copy supersedes those translations again.
++		db.pager.discarded[n.id/64] &^= uint64(1) << (n.id % 64)
++		db.pager.copiedPages = append(db.pager.copiedPages, n.id)
++		if len(db.pager.copiedPages) >= 16 {
++			db.pager.reclaimCopiedPages()
++		}
++	}
+ 	return n.data
+ }
+ 
+@@ -157,33 +173,55 @@ func (db *DB) freePage(n *node) {
+ 		db.pager.releasePageBuffer(n)
+ 		if db.pager.pages[n.id].Load() == n {
+ 			db.pager.pages[n.id].Store(nil)
++			releaseNode(n)
+ 			db.pager.resident.Add(-1)
+ 		}
+ 		if n.dirty {
+ 			db.pager.dirtyN--
+ 			n.dirty = false
+ 		}
+-		db.quarantineIDs([]uint32{n.id})
++		if n.onDisk {
++			db.quarantineIDs([]uint32{n.id})
++		} else {
++			db.quarantineUntil([]uint32{n.id}, db.ckpt)
++		}
+ 		return
+ 	}
+ 	db.pager.freePage(n)
+ }
+ 
+ func (db *DB) quarantineIDs(ids []uint32) {
++	after := db.ckpt + 1
++	if db.activeCapture != nil {
++		// A capture already in flight may still reference the retired page.
++		// Its successor is the first checkpoint that can exclude that page.
++		after++
++	}
++	db.quarantineUntil(ids, after)
++}
++
++func (db *DB) quarantineUntil(ids []uint32, after uint64) {
+ 	if len(ids) == 0 {
+ 		return
+ 	}
+-	db.quar = append(db.quar, quarantine{epoch: db.epoch, ids: append([]uint32(nil), ids...)})
++	db.quar = append(db.quar, quarantine{epoch: db.epoch, afterCheckpoint: after, ids: append([]uint32(nil), ids...)})
+ }
+ 
+-// releaseQuarantineLocked returns ids no open snapshot can reference.
++// releaseQuarantineLocked moves snapshot-retired ids to free or pending,
++// depending on whether their durable checkpoint barrier has completed.
+ func (db *DB) releaseQuarantineLocked() {
+ 	min := db.minSnapEpoch()
+ 	kept := db.quar[:0]
+ 	var freed []uint32
+ 	for _, q := range db.quar {
+ 		if min == 0 || min > q.epoch {
+-			freed = append(freed, q.ids...)
++			if q.afterCheckpoint <= db.ckpt {
++				freed = append(freed, q.ids...)
++			} else {
++				// No snapshot needs these bytes, but the durable root may.
++				// The next capture releases them only after its meta is synced.
++				db.pager.pending = append(db.pager.pending, q.ids...)
++			}
+ 		} else {
+ 			kept = append(kept, q)
+ 		}
+@@ -193,6 +231,9 @@ func (db *DB) releaseQuarantineLocked() {
+ 		pg := db.pager
+ 		pg.free = append(pg.free, freed...)
+ 		sort.Slice(pg.free, func(i, j int) bool { return pg.free[i] > pg.free[j] })
++		if !db.closed && len(freed) >= 64 {
++			pg.discardFreePages()
++		}
+ 	}
+ }
+ 
+@@ -224,11 +265,7 @@ func (v view) page(id uint32) (page, error) {
+ 			return p, nil
+ 		}
+ 	}
+-	n, err := v.db.pager.get(id)
+-	if err != nil {
+-		return nil, err
+-	}
+-	return n.data, nil
++	return v.db.pager.read(id)
+ }
+ 
+ // memGet looks a key up in the memtable view: active first, then the one
+diff --git a/wal.go b/wal.go
+index b8c0fce..9d1fe59 100644
+--- a/wal.go
++++ b/wal.go
+@@ -11,6 +11,7 @@ import (
+ 	"strconv"
+ 	"strings"
+ 	"sync"
++	"sync/atomic"
+ 	"time"
+ )
+ 
+@@ -32,9 +33,11 @@ const (
+ // applies a batch only once its final record is intact, so a batch is
+ // all-or-nothing after a crash. flags bit 1 marks a tombstone.
+ type wal struct {
+-	dir    string
+-	f      fileLike
+-	crcTab *crc32.Table
++	rotateMu      sync.Mutex    // serialize generation preparation/switching, not appends
++	compactionPin atomic.Uint64 // replay floor + 1; zero means no private copy needs it
++	dir           string
++	f             fileLike
++	crcTab        *crc32.Table
+ 
+ 	err     error      // sticky I/O failure; protected by mu
+ 	mu      sync.Mutex // guards buf, base, durable, gen, f, inflight
+@@ -62,7 +65,7 @@ type wal struct {
+ 	retain     *ChangeFeedOptions // immutable during a live Open
+ 	strictSync bool               // rotation must fence concurrent synchronous commits
+ 	changeGens []changeGeneration // protected by mu
+-	heapOnly   bool               // bounded-cache mode preserves the original allocation policy
++	heapOnly   bool               // test hook for the heap-backed allocation policy
+ }
+ 
+ func walPath(dir string, gen uint64) string {
+@@ -91,16 +94,14 @@ func walGens(dir string) ([]uint64, error) {
+ 
+ // walMaxBuffered bounds memory when the disk falls behind: past it an
+ // appender writes synchronously (backpressure).
+-const walMaxBuffered = 64 << 20
++const walMaxBuffered = 4 << 20
+ 
+ func newWAL(dir string) *wal {
+ 	w := &wal{dir: dir, crcTab: crc32.MakeTable(crc32.Castagnoli), syncFn: syncFull, kick: make(chan struct{}, 1)}
+ 	w.inflightOn = sync.NewCond(&w.mu)
+ 	w.syncDone = sync.NewCond(&w.mu)
+-	// Both buffers start at the normal flush capacity; large bursts may grow them.
+-	w.bufStore = newWALBuffer(2 * walFlushBytes)
+-	w.spareStore = newWALBuffer(2 * walFlushBytes)
+-	w.buf, w.spare = w.bufStore[:0], w.spareStore[:0]
++	// Allocate rotating buffers on the first append. Private copy builders
++	// and read-only opens never need a log append buffer.
+ 	return w
+ }
+ 
+@@ -171,6 +172,8 @@ func (w *wal) start(gen uint64, size uint64) error {
+ // old generation is not synced here: records that must be durable already
+ // are, and a checkpoint's meta only advances past them once the tree is.
+ func (w *wal) rotate() error {
++	w.rotateMu.Lock()
++	defer w.rotateMu.Unlock()
+ 	w.mu.Lock()
+ 	next := w.gen + 1
+ 	w.mu.Unlock()
+@@ -216,6 +219,7 @@ func (w *wal) flushAndPosition() (gen, off uint64, err error) {
+ 	if err := w.flushLocked(); err != nil {
+ 		return 0, 0, err
+ 	}
++	w.releaseBurstBuffers()
+ 	return w.gen, w.base, nil
+ }
+ 
+@@ -235,6 +239,9 @@ func (w *wal) size() uint64 {
+ 
+ // dropBefore deletes generation files older than gen.
+ func (w *wal) dropBefore(gen uint64) {
++	if pin := w.compactionPin.Load(); pin != 0 {
++		gen = min(gen, pin-1)
++	}
+ 	if w.retain != nil {
+ 		w.dropChangeBefore(gen)
+ 		return
+@@ -286,8 +293,7 @@ func encodeRecord(dst []byte, key, val []byte, more, del bool, tab *crc32.Table)
+ 	return dst
+ }
+ 
+-// Bounded-cache mode keeps Go's original append growth to preserve both
+-// the established CPU behavior and its smaller long-lived WAL capacities.
++// Heap-backed append growth is retained for allocation/recovery tests.
+ func encodeRecordHeap(dst []byte, key, val []byte, more, del bool, tab *crc32.Table) []byte {
+ 	start := len(dst)
+ 	var flags byte
+@@ -317,11 +323,16 @@ func (w *wal) append(key, val []byte, del bool) (lsn, error) {
+ 		w.mu.Unlock()
+ 		return lsn{}, err
+ 	}
++	extra := 11 + len(key) + len(val)
++	if err := w.prepareAppendLocked(extra); err != nil {
++		w.mu.Unlock()
++		return lsn{}, err
++	}
+ 	if w.heapOnly {
+ 		w.buf = encodeRecordHeap(w.buf, key, val, false, del, w.crcTab)
+ 		w.bufStore = w.buf[:cap(w.buf)]
+ 	} else {
+-		w.reserveBuffer(11 + len(key) + len(val))
++		w.reserveBuffer(extra)
+ 		w.buf = encodeRecord(w.buf, key, val, false, del, w.crcTab)
+ 	}
+ 	l := lsn{w.gen, w.base + uint64(len(w.buf))}
+@@ -338,6 +349,10 @@ func (w *wal) appendRaw(rec []byte) (lsn, error) {
+ 		w.mu.Unlock()
+ 		return lsn{}, err
+ 	}
++	if err := w.prepareAppendLocked(len(rec)); err != nil {
++		w.mu.Unlock()
++		return lsn{}, err
++	}
+ 	if !w.heapOnly {
+ 		w.reserveBuffer(len(rec))
+ 	}
+@@ -538,7 +553,7 @@ const groupCommitWait = 150 * time.Microsecond
+ 
+ // replayFrom feeds records from (gen, off) and every later generation to fn.
+ // It returns the generation and intact end offset of the last file read.
+-func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) error) (lastGen, end uint64, err error) {
++func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) error, through ...lsn) (lastGen, end uint64, err error) {
+ 	gens, err := walGens(w.dir)
+ 	if err != nil {
+ 		return 0, 0, err
+@@ -548,6 +563,9 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
+ 		if g < gen {
+ 			continue
+ 		}
++		if len(through) > 0 && g > through[0].gen {
++			break
++		}
+ 		start := uint64(walHeaderSize)
+ 		if g == gen {
+ 			start = max(off, walHeaderSize)
+@@ -556,7 +574,11 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
+ 		if err != nil {
+ 			return 0, 0, err
+ 		}
+-		e, err := w.replayFile(f, start, fn)
++		limit := ^uint64(0)
++		if len(through) > 0 && g == through[0].gen {
++			limit = through[0].off
++		}
++		e, err := w.replayFile(f, start, fn, limit)
+ 		f.Close()
+ 		if err != nil {
+ 			return 0, 0, err
+@@ -571,12 +593,15 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
+ 
+ // replayFile reads one generation from off to its end and returns the
+ // offset after the last intact batch. A torn tail simply ends replay.
+-func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bool) error) (uint64, error) {
++func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bool) error, limits ...uint64) (uint64, error) {
+ 	st, err := f.Stat()
+ 	if err != nil {
+ 		return 0, err
+ 	}
+ 	size := uint64(st.Size())
++	if len(limits) > 0 {
++		size = min(size, limits[0])
++	}
+ 	if off >= size {
+ 		return size, nil
+ 	}
+diff --git a/wal_buffer.go b/wal_buffer.go
+index 389a0c3..009fab2 100644
+--- a/wal_buffer.go
++++ b/wal_buffer.go
+@@ -2,9 +2,19 @@ package db
+ 
+ import "syscall"
+ 
+-const walHeapBufferBytes = 16 << 20
++const walHeapBufferBytes = 2 << 20
+ 
+-// Keep the small and moderate buffers on the Go heap. Removing all of that live
++// Flush a complete prefix before crossing the ordinary backlog bound. Growing
++// first would double a nearly full buffer only to flush it immediately. A
++// single oversized record/batch still stays intact and is allowed to exceed it.
++func (w *wal) prepareAppendLocked(extra int) error {
++	if len(w.buf) > 0 && extra > walMaxBuffered-len(w.buf) {
++		return w.flushLocked()
++	}
++	return nil
++}
++
++// Keep normal flush buffers on the Go heap. Removing all of that live
+ // storage lowers Go's GC target and adds collection overhead to allocation-heavy
+ // queries on small databases. Large log bursts still use reclaimable mappings.
+ func newWALBuffer(size int) []byte {
+@@ -26,7 +36,7 @@ func (w *wal) reserveBuffer(extra int) {
+ 	if extra <= cap(w.buf)-len(w.buf) {
+ 		return
+ 	}
+-	size := max(len(w.buf)+extra, 2*cap(w.buf))
++	size := max(len(w.buf)+extra, 2*cap(w.buf), 2*walFlushBytes)
+ 	var buf []byte
+ 	if w.heapOnly {
+ 		buf = make([]byte, size)
+@@ -51,6 +61,23 @@ func (w *wal) releaseBuffers() {
+ 	w.buf, w.spare, w.bufStore, w.spareStore = nil, nil, nil, nil
+ }
+ 
++// A checkpoint barrier has drained both pending and in-flight I/O. Return
++// oversized burst storage instead of retaining it throughout a read-only phase.
++// Ordinary heap buffers remain reusable; no live record or I/O slice is retired.
++func (w *wal) releaseBurstBuffers() {
++	if w.heapOnly || len(w.buf) != 0 || w.inflight != nil {
++		return
++	}
++	if len(w.bufStore) > walHeapBufferBytes {
++		releaseWALBuffer(w.bufStore)
++		w.buf, w.bufStore = nil, nil
++	}
++	if len(w.spareStore) > walHeapBufferBytes {
++		releaseWALBuffer(w.spareStore)
++		w.spare, w.spareStore = nil, nil
++	}
++}
++
+ // Only buffers larger than the heap-buffer threshold are mapped. Stores
+ // always retain their full allocation length, even when the active slice is empty.
+ func releaseWALBuffer(store []byte) {
+diff --git a/wal_buffer_test.go b/wal_buffer_test.go
+index 942adb3..e9b0c76 100644
+--- a/wal_buffer_test.go
++++ b/wal_buffer_test.go
+@@ -51,7 +51,7 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
+ 			}
+ 		}
+ 	}
+-	appendRange(0, 32)
++	appendRange(0, 4)
+ 	done := make(chan error, 1)
+ 	go func() { done <- w.flushAsync() }()
+ 	select {
+@@ -59,7 +59,12 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
+ 	case <-time.After(10 * time.Second):
+ 		t.Fatal("WAL write did not start")
+ 	}
+-	appendRange(32, 96)
++	appendRange(4, 8)
++	// Force mapped-to-mapped growth independently of append backpressure:
++	// the paused I/O still owns its original mapping throughout this copy.
++	w.mu.Lock()
++	w.reserveBuffer(8 << 20)
++	w.mu.Unlock()
+ 	resume()
+ 	if err := <-done; err != nil {
+ 		t.Fatal(err)
+@@ -84,3 +89,47 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
+ 		t.Fatalf("replay: seen=%d want=%d err=%v", seen, len(want), err)
+ 	}
+ }
++
++func TestWALCheckpointReleasesBurstStorage(t *testing.T) {
++	w := newWAL(t.TempDir())
++	if err := w.start(1, 0); err != nil {
++		t.Fatal(err)
++	}
++	defer w.close()
++	value := bytes.Repeat([]byte{0x73}, 8<<20)
++	l, err := w.append([]byte("large"), value, false)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(w.bufStore) <= walHeapBufferBytes {
++		t.Fatal("test did not allocate a burst buffer")
++	}
++	gen, off, err := w.flushAndPosition()
++	if err != nil || gen != l.gen || off != l.off {
++		t.Fatalf("barrier: %d/%d, want %v: %v", gen, off, l, err)
++	}
++	if len(w.bufStore) > walHeapBufferBytes || len(w.spareStore) > walHeapBufferBytes {
++		t.Fatal("checkpoint retained oversized WAL storage")
++	}
++	if _, err := w.append([]byte("small"), []byte("after barrier"), false); err != nil {
++		t.Fatal(err)
++	}
++	if err := w.flush(); err != nil {
++		t.Fatal(err)
++	}
++	seen := 0
++	_, _, err = w.replayFrom(1, walHeaderSize, func(k, v []byte, del bool) error {
++		want := value
++		if string(k) == "small" {
++			want = []byte("after barrier")
++		}
++		if del || !bytes.Equal(v, want) {
++			return fmt.Errorf("incorrect replay after buffer retirement for %s", k)
++		}
++		seen++
++		return nil
++	})
++	if err != nil || seen != 2 {
++		t.Fatalf("replay: seen=%d err=%v", seen, err)
++	}
++}

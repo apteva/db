@@ -1,0 +1,1910 @@
+{
+  "checks": [
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "previous",
+      "change_percent": -2.797608683034414,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "Pebble",
+      "change_percent": 1.6633278698476195,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "previous",
+      "change_percent": -1.8503135684435623,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "Pebble",
+      "change_percent": -9.491190887520684,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "previous",
+      "change_percent": 0.7457199873962761,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "Pebble",
+      "change_percent": 10.669474170007787,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "previous",
+      "change_percent": 0.1180144896358204,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "Pebble",
+      "change_percent": -23.66350367572352,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "previous",
+      "change_percent": -0.717637317140496,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "metric": "RSS",
+      "baseline": "Pebble",
+      "change_percent": 4.822963718490447,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "previous",
+      "change_percent": -0.17564345293863415,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "metric": "physical footprint",
+      "baseline": "Pebble",
+      "change_percent": -21.024864203537685,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "metric": "RSS",
+      "baseline": "previous",
+      "change_percent": -0.8690776562938041,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "metric": "RSS",
+      "baseline": "Pebble",
+      "change_percent": 3.679812344231048,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "metric": "physical footprint",
+      "baseline": "previous",
+      "change_percent": 0.6873000002360463,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "metric": "physical footprint",
+      "baseline": "Pebble",
+      "change_percent": -18.0787865703805,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -34.82172969762257,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -24.78801885073971,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -41.259396364395215,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -3.127908020590553,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -11.621254196009257,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -13.72404678386443,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -7.538101689888299,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -7.413585908482634,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -6.613260610192862,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -6.356361740007643,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -13.850846711426302,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -13.50489900345867,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.7980343128760214,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -6.356707032173581,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -13.339254805502087,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -13.501443965137305,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 1.6468338991990406,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -4.316179738958271,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -55.6537620800736,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -72.21862619366443,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -17.63989138255163,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -30.10550781418877,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -59.78418747320286,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -51.83409491514903,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -14.023367906015205,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -21.522303058870275,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -52.22969459057059,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -34.11339865347887,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -12.383958670403118,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -9.90364437275204,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -54.32212804126573,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -36.32133365353827,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -7.829824513374161,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -7.9227775059145795,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -16.649336502277645,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        100000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -16.84111886887384,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -23.275133975167073,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -16.747724836801137,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -32.94066534391394,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": 3.304156809343528,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -0.4172395012319918,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -0.35749864379153173,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -9.095528455284551,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -9.04717311554829,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 11.75553458142662,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 17.067230020554234,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -12.03184291081454,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -7.600376602728643,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.360550742883474,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -12.46227549065072,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -14.31337072552904,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -14.333806978011632,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.509747622449979,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -6.050142546971305,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -62.64967565159121,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -78.7776876677487,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -9.954275486641706,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 0.09087131245004709,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -56.94014963911056,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -29.463564969487553,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 1.3865923844977868,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 19.255062466189887,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -42.99076916768748,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -11.87132098199013,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -7.505060077001624,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 27.032538271966988,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -57.31604227557183,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -13.47812726197457,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -2.3996882678298026,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -2.123925517818026,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -7.956923391007187,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        250000,
+        1024,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -7.681338887319611,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -12.564820219233209,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -8.759001570973313,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -35.439172777533614,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -27.946042108418656,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -0.03157813258838349,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 0.08744290221343043,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -5.174559094609698,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -4.931308987410931,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -3.691170658177445,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -3.8873585552266943,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -21.901641211103808,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -22.677072130196397,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -2.7533636022827546,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -2.9001104256423105,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -10.437626478176398,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -10.976861956683504,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -1.7325074243851102,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -0.0048639759211099864,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -61.14154528303865,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -78.90532761355435,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -6.270562356541753,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -21.77886559533002,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -52.98791880631958,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -40.22318234328777,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -10.919454980822586,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 1.24493808049706,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -23.146280277360187,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -4.873153248426021,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -7.555516501862725,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 4.409127546715452,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -52.93591345898425,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -21.00133971523227,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.094220539176241,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -5.763880803925547,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -10.249933386624054,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "random"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -10.395819529010797,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -19.61629719883129,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -16.656379880150396,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -47.191378829130095,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Load + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -36.93915709094179,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -1.8173246675488919,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 5.035697206714418,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read hit",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": 1.094268092081574,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read hit",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": 13.55448528110037,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 1.6452061421184716,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 1.6062923545312247,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read miss",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -3.214471107467265,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Point read miss",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -2.1988008542129234,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.1946075895433435,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -5.109932230302638,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Full value scan",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -10.618275713670988,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Full value scan",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -10.266266407675563,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 3.076127607846213,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 23.451559637451645,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -50.434658064140756,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "10-reader point hits",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -67.00148100754824,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -11.83454370623246,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": -13.606713130081927,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -54.88023721787446,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -45.89203445453032,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -5.698467935346107,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 1.5179259240910792,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -16.982973554264657,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "80% read / 20% update + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -17.31051443227659,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": -10.284975274309682,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 3.6332484452695546,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -51.02717612681579,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Delete + maintenance",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -25.308266435086544,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-prior",
+      "change_percent": 0.2320319534557358,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-prior",
+      "change_percent": 0.9312571879561915,
+      "non_regressing_median": false
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Scan after delete",
+      "metric": "cpu_seconds_per_million_ops",
+      "baseline": "ours-before",
+      "change_percent": -6.49587008259812,
+      "non_regressing_median": true
+    },
+    {
+      "case": [
+        1000000,
+        100,
+        "seq"
+      ],
+      "operation": "Scan after delete",
+      "metric": "wall_seconds",
+      "baseline": "ours-before",
+      "change_percent": -5.757388815630382,
+      "non_regressing_median": true
+    }
+  ],
+  "all_non_regressing_medians": false,
+  "statistical_significance_claimed": false
+}

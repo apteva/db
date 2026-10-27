@@ -86,11 +86,15 @@ func TestCheckpointsDoNotStallWriters(t *testing.T) {
 	// longer than the buffer covers; that is flow control, not a lock hold,
 	// and shows up as a long log write. Everything the engine controls is
 	// the lock-hold table below.
-	if maxWait > limit && maxWait > 2*st.LockHolds["wal-flush-write"]+limit {
+	// Bounded memtable flow control can also wait for the applying table's
+	// checkpoint work or for the final compaction fence. Both are measured
+	// independently of the writer's wait; writer-lock sections remain bounded.
+	flowLimit := limit + st.LockHolds["checkpoint-work"] + st.LockHolds["compaction-finalize"]
+	if maxWait > flowLimit && maxWait > 2*st.LockHolds["wal-flush-write"]+flowLimit {
 		t.Fatalf("a write stalled for %v without a matching disk stall", maxWait)
 	}
 	for section, d := range st.LockHolds {
-		if section == "wal-flush-write" || section == "compact-swap" {
+		if section == "wal-flush-write" || section == "compact-swap" || section == "checkpoint-work" || section == "compaction-finalize" {
 			continue // diagnostics of work done outside the lock
 		}
 		if d > limit {

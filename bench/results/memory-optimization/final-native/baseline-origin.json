@@ -1,0 +1,7 @@
+{
+  "binary_sha256": "b5a28f0c1f9f6f9a9e81aa846de68b6b095b1ea35cb8ef4c07eca0a0f096d933",
+  "matched_previous_metadata": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-14-cpu-large/million-100B/metadata.json",
+  "git_head": "65cedd31a494bb561485cfc07c3dd0aeed06be06",
+  "git_status_at_original_build": "M resources.go\n M run_resources.py\n?? resource_crud.go\n?? run_large_cpu.py",
+  "source_patch": "/Users/marcoschwartz/Documents/aptevadb-benchmarks/2026-10-14-cpu-large/million-100B/source.patch"
+}

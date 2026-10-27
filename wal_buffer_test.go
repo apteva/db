@@ -51,7 +51,7 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
 			}
 		}
 	}
-	appendRange(0, 32)
+	appendRange(0, 4)
 	done := make(chan error, 1)
 	go func() { done <- w.flushAsync() }()
 	select {
@@ -59,7 +59,12 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("WAL write did not start")
 	}
-	appendRange(32, 96)
+	appendRange(4, 8)
+	// Force mapped-to-mapped growth independently of append backpressure:
+	// the paused I/O still owns its original mapping throughout this copy.
+	w.mu.Lock()
+	w.reserveBuffer(8 << 20)
+	w.mu.Unlock()
 	resume()
 	if err := <-done; err != nil {
 		t.Fatal(err)
@@ -82,5 +87,49 @@ func testWALBufferGrowth(t *testing.T, heapOnly bool) {
 	})
 	if err != nil || seen != len(want) {
 		t.Fatalf("replay: seen=%d want=%d err=%v", seen, len(want), err)
+	}
+}
+
+func TestWALCheckpointReleasesBurstStorage(t *testing.T) {
+	w := newWAL(t.TempDir())
+	if err := w.start(1, 0); err != nil {
+		t.Fatal(err)
+	}
+	defer w.close()
+	value := bytes.Repeat([]byte{0x73}, 8<<20)
+	l, err := w.append([]byte("large"), value, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(w.bufStore) <= walHeapBufferBytes {
+		t.Fatal("test did not allocate a burst buffer")
+	}
+	gen, off, err := w.flushAndPosition()
+	if err != nil || gen != l.gen || off != l.off {
+		t.Fatalf("barrier: %d/%d, want %v: %v", gen, off, l, err)
+	}
+	if len(w.bufStore) > walHeapBufferBytes || len(w.spareStore) > walHeapBufferBytes {
+		t.Fatal("checkpoint retained oversized WAL storage")
+	}
+	if _, err := w.append([]byte("small"), []byte("after barrier"), false); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.flush(); err != nil {
+		t.Fatal(err)
+	}
+	seen := 0
+	_, _, err = w.replayFrom(1, walHeaderSize, func(k, v []byte, del bool) error {
+		want := value
+		if string(k) == "small" {
+			want = []byte("after barrier")
+		}
+		if del || !bytes.Equal(v, want) {
+			return fmt.Errorf("incorrect replay after buffer retirement for %s", k)
+		}
+		seen++
+		return nil
+	})
+	if err != nil || seen != 2 {
+		t.Fatalf("replay: seen=%d err=%v", seen, err)
 	}
 }

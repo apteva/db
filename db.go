@@ -39,7 +39,7 @@ type Options struct {
 	// when Sync is off. Default 10ms.
 	LogFlushInterval time.Duration
 	// CacheBytes targets the logical page cache, not total process memory; clean pages are evicted past it and a
-	// checkpoint runs when dirty pages reach three quarters of it. 0 keeps
+	// checkpoint runs when dirty pages reach one quarter of it. 0 keeps
 	// everything resident, which is fastest when the data fits in RAM.
 	CacheBytes int64
 	// VerifyChecksums checks every page checksum when a page is first read
@@ -52,7 +52,9 @@ type Options struct {
 	// MemtableBytes buffers inserts in memory and applies them to the tree
 	// in key order once the budget is reached, cutting write amplification
 	// when the file is larger than the cache. Default: CacheBytes/2 with a
-	// cache limit; 0 (inserts go straight to the tree) without one. Set to
+	// cache limit, including record/metadata storage and overwritten records.
+	// Writers can buffer up to two active budgets while a previous table applies.
+	// 0 (inserts go straight to the tree) without one. Set to
 	// -1 to disable with a cache limit.
 	MemtableBytes int64
 	// ChangeFeed enables persistent opt-in change capture; see CHANGE_FEEDS.md.
@@ -69,7 +71,7 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.6"
+const Version = "0.2.0-alpha.7"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
 // formats 3 through 9 and upgrades them before returning; see FORMAT.md for the policy.
@@ -77,18 +79,24 @@ const FormatVersion = 10
 
 // DB is a single-writer, multi-reader key-value store.
 type DB struct {
-	mu          treeMutex // tree structure; writers exclude every read lane
-	dirLock     *os.File  // remains locked across data-file swaps
-	dir         string
-	pager       *pager
-	wal         *wal
-	mt          *memtable // active memtable; nil unless MemtableBytes > 0
-	imm         *memtable // memtable being applied by the checkpointer, or nil
-	activeStart lsn       // log position of the active memtable's first record
-	metaLogPos  *lsn      // compaction copies: where in the parent's log their meta points
-	root        uint32
-	ckpt        uint64
-	opts        Options
+	checkpointPages    []ioPage
+	checkpointNodes    []*node
+	checkpointReleased []uint32
+	checkpointScratch  page        // owned by the serialized checkpointer
+	checkpointMeta     page        // same owner; never exposed to readers
+	activeCapture      *captureSet // writer lock; captured pages pinned until I/O completes
+	mu                 treeMutex   // tree structure; writers exclude every read lane
+	dirLock            *os.File    // remains locked across data-file swaps
+	dir                string
+	pager              *pager
+	wal                *wal
+	mt                 *memtable // active memtable; nil unless MemtableBytes > 0
+	imm                *memtable // memtable being applied by the checkpointer, or nil
+	activeStart        lsn       // log position of the active memtable's first record
+	metaLogPos         *lsn      // compaction copies: where in the parent's log their meta points
+	root               uint32
+	ckpt               uint64
+	opts               Options
 
 	scratch       page
 	scratch2      []byte // two pages, for sibling balancing
@@ -120,6 +128,8 @@ type DB struct {
 	done          chan struct{}
 	stopOnce      sync.Once
 	closed        bool
+	opening       bool                     // startup maintenance must drain buffers without a worker
+	compactMu     sync.Mutex               // serialize copies that share compact.tmp
 	ckptMu        sync.Mutex               // one checkpoint or compaction at a time
 	holds         map[string]time.Duration // longest writer-lock hold per section (diagnostics)
 	stalls        uint64                   // writer waits for the memtable to drain
@@ -240,7 +250,6 @@ func Open(dir string, opts Options) (*DB, error) {
 		return nil, err
 	}
 	w := newWAL(dir)
-	w.heapOnly = opts.CacheBytes > 0
 	w.strictSync = opts.Sync
 	if opts.ChangeFeed != nil && !opts.ChangeFeed.Disabled {
 		normalized, _ := normalizeChangeOptions(*opts.ChangeFeed)
@@ -267,11 +276,11 @@ func Open(dir string, opts Options) (*DB, error) {
 		f.Close()
 		return nil, err
 	}
-	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
+	db := &DB{dirLock: directoryLock, dir: dir, pager: pg, wal: w, opts: opts, opening: true, scratch: make(page, PageSize), scratch2: make([]byte, 0, 2*PageSize),
 		stop: make(chan struct{}), done: make(chan struct{}), ckptReq: make(chan ckptRequest, 16), ckptDone: make(chan struct{})}
 	db.cond = sync.NewCond(&db.mu)
 	if opts.MemtableBytes > 0 {
-		db.mt = newMemtable()
+		db.mt = newMemtable(opts.MemtableBytes)
 	}
 	st, err := f.Stat()
 	if err == nil {
@@ -314,6 +323,7 @@ func Open(dir string, opts Options) (*DB, error) {
 	}
 	if err != nil {
 		// release the lock and descriptors: a failed open must not wedge the next one
+		db.releaseMemtables()
 		w.close()
 		pg.close()
 		return nil, err
@@ -323,6 +333,7 @@ func Open(dir string, opts Options) (*DB, error) {
 	os.RemoveAll(filepath.Join(dir, "compact.tmp"))
 	os.Remove(oldPath)
 	lockOwned = false
+	db.opening = false
 	go db.flusher()
 	go db.checkpointer()
 	return db, nil
@@ -404,7 +415,7 @@ func (db *DB) putLocked(key, val []byte, del bool) error {
 }
 
 func (db *DB) memtableFull() bool {
-	return db.mt != nil && int64(db.mt.bytes) >= db.opts.MemtableBytes
+	return db.mt != nil && int64(db.mt.bufferedBytes()) >= db.opts.MemtableBytes
 }
 
 func (db *DB) flusher() {
@@ -464,16 +475,31 @@ func (db *DB) noteActiveStartLocked() {
 
 // stallLocked is the engine's only flow control: a writer waits when the
 // memtable being applied has not drained and the active one has grown to
-// four times its budget, i.e. when writes outrun the disk for a sustained
+// twice its budget, i.e. when writes outrun the disk for a sustained
 // stretch. Writer lock held on entry and exit.
-func (db *DB) stallLocked() {
-	for db.mt != nil && int64(db.mt.bytes) >= 4*db.opts.MemtableBytes && !db.closed && db.failed == nil {
+func (db *DB) stallLocked() error {
+	for db.mt != nil && int64(db.mt.bufferedBytes())/2 >= db.opts.MemtableBytes && !db.closed && db.failed == nil {
 		db.stalls++
+		if db.opening {
+			// Open has not published the handle or started its workers. Recovery
+			// cleanup can generate enough tombstones to need another checkpoint.
+			db.mu.Unlock()
+			err := db.runCheckpoint(true)
+			db.mu.Lock()
+			if err != nil && db.failed == nil {
+				db.failed = err
+			}
+			continue
+		}
 		if db.imm == nil {
 			db.requestCheckpoint()
 		}
 		db.cond.Wait()
 	}
+	if db.closed {
+		return ErrClosed
+	}
+	return db.failed
 }
 
 // Batch aggregates writes into one log write and one flush, applied
@@ -610,7 +636,10 @@ func (b *Batch) CommitContext(ctx context.Context) error {
 		}
 		return err
 	}
-	db.stallLocked()
+	if err := db.stallLocked(); err != nil {
+		db.mu.Unlock()
+		return err
+	}
 	if err := ctx.Err(); err != nil {
 		db.mu.Unlock()
 		return err
@@ -1009,10 +1038,10 @@ func formatVersionAt(path string) (uint32, error) {
 	return best, nil
 }
 
-// dirtyPressure reports whether dirty pages fill three quarters of the cache
+// dirtyPressure reports whether dirty pages fill one quarter of the cache
 // limit; the checkpoint that follows makes them evictable again.
 func (db *DB) dirtyPressure() bool {
-	return db.pager.limit > 0 && db.pager.dirtyN > db.pager.limit*3/4
+	return db.pager.limit > 0 && db.pager.dirtyN > max(db.pager.limit/4, 2)
 }
 
 // needCheckpoint decides, after a write, whether a full checkpoint is due:
@@ -1066,6 +1095,10 @@ func (db *DB) walkLeaves(n *node, fn func(key, val []byte) error) error {
 
 // Stats reports resident and file-level counters.
 type Stats struct {
+	// WALBufferBytes is allocated active, spare and in-flight log-buffer storage.
+	WALBufferBytes int
+	// InFlightPages counts resident checkpoint pages not already counted dirty.
+	InFlightPages                                           int
 	ResidentPages, HighWaterPages, FreePages, DirtyPages    int
 	Loads, Writes, Evictions, Balances, Merges, Relocations uint64
 	Height                                                  int
@@ -1082,9 +1115,21 @@ func (db *DB) Stats() Stats {
 	if db.closed || db.failed != nil {
 		return Stats{}
 	}
+	db.pager.loadMu.Lock()
+	defer db.pager.loadMu.Unlock()
 	s := Stats{HighWaterPages: int(db.pager.hwm), FreePages: len(db.pager.free), DirtyPages: db.pager.dirtyN,
 		Loads: db.pager.loads, Writes: db.pager.writes, Evictions: db.pager.evictions, Balances: db.balances, Merges: db.merges, Relocations: db.relocations,
 		ResidentPages: int(db.pager.resident.Load())}
+	db.wal.mu.Lock()
+	s.WALBufferBytes = len(db.wal.bufStore) + len(db.wal.spareStore) + len(db.wal.inflightStore)
+	db.wal.mu.Unlock()
+	if cs := db.activeCapture; cs != nil {
+		for _, n := range cs.nodes {
+			if n.writing && !n.dirty && db.pager.pages[n.id].Load() == n {
+				s.InFlightPages++
+			}
+		}
+	}
 	if n := db.pager.loaded(db.root); n != nil {
 		s.Height = int(n.data.level()) + 1
 	}

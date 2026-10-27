@@ -1,8 +1,10 @@
 package db
 
 import (
+	"hash/maphash"
 	"sort"
 	"sync"
+	"unsafe"
 )
 
 type mtEntry struct {
@@ -21,13 +23,14 @@ type mtValue struct {
 // of one. Every entry is already in the log, so nothing here is at risk.
 //
 // Keys are kept in order by a small in-memory B+tree (wide nodes, contiguous
-// arrays: an insert is a few binary searches and a short move), and a map
+// arrays: an insert is a few binary searches and a short move), and a keyed hash table
 // serves point reads and updates. A scan copies out just the entries of its
 // range. Values are replaced, never mutated, so a copy taken by a reader
 // stays valid while the writer keeps going. Every method runs under the
 // database's writer lock (put) or reader lock (the rest).
 type memtable struct {
-	m     map[string]*mtValue
+	slots []mtSlot
+	seed  maphash.Seed
 	root  *mtNode
 	first *mtNode // leftmost leaf; leaves are linked for range reads
 	n     int
@@ -37,6 +40,10 @@ type memtable struct {
 	snapMu sync.Mutex
 	sorted []mtEntry // every entry in order; cached until the next put
 	valid  bool
+
+	budget  int64
+	storage *memtableStorage
+	values  []mtValue // current slab; map/tree pointers keep earlier slabs alive
 }
 
 // mtFanout is the most keys a node holds before it splits.
@@ -49,31 +56,69 @@ type mtNode struct {
 	next     *mtNode    // leaves
 }
 
-func newMemtable() *memtable {
-	leaf := &mtNode{}
-	return &memtable{m: map[string]*mtValue{}, root: leaf, first: leaf}
+func newMemtable(budget ...int64) *memtable {
+	t := &memtable{storage: newMemtableStorage(), seed: maphash.MakeSeed()}
+	if len(budget) > 0 {
+		t.budget = budget[0]
+	}
+	t.root = t.newLeaf()
+	t.first = t.root
+	return t
 }
 
 // put stores a copy of val, or a tombstone. Writer lock held.
 func (t *memtable) put(key, val []byte, del bool) {
-	k := string(key)
-	var nv mtValue
-	if !del {
-		nv.v = append([]byte(nil), val...)
-	} else {
-		nv.del = true
+	if len(t.slots) == 0 {
+		capacity := 16
+		if t.budget > 0 {
+			expected := int(t.budget / int64(len(key)+len(val)+192))
+			for capacity < min(expected*4/3+1, 1<<20) {
+				capacity *= 2
+			}
+		}
+		t.growSlots(capacity)
 	}
-	if p, ok := t.m[k]; ok {
-		t.bytes += len(nv.v) - len(p.v)
-		*p = nv
+	slot, hash := t.slot(key)
+	if p := slot.val; p != nil {
+		var v []byte
+		if !del {
+			v = t.storage.alloc(len(val))
+			copy(v, val)
+		}
+		t.bytes += len(v) - len(p.v)
+		*p = mtValue{v: v, del: del}
 	} else {
-		t.bytes += len(k) + len(nv.v)
+		// One immutable allocation holds both key and initial value. Neither
+		// is modified: replacing a value leaves snapshot aliases intact.
+		n := len(key)
+		if !del {
+			n += len(val)
+		}
+		if (t.n+1)*4 >= len(t.slots)*3 {
+			t.growSlots(2 * len(t.slots))
+			slot, hash = t.slot(key)
+		}
+		record := t.storage.alloc(n)
+		copy(record, key)
+		k := unsafe.String(unsafe.SliceData(record), len(key))
+		var v []byte
+		if !del {
+			copy(record[len(key):], val)
+			v = record[len(key):n:n]
+		}
+		t.bytes += len(k) + len(v)
 		t.n++
 		if len(k) > 0 {
 			t.byTag[k[0]]++
 		}
-		p := &mtValue{v: nv.v, del: nv.del}
-		t.m[k] = p
+		// Stable pointers without one separately allocated object per key.
+		if len(t.values) == 0 {
+			t.values = memtableArray[mtValue](t.storage, mtFanout)
+		}
+		p := &t.values[0]
+		t.values = t.values[1:]
+		*p = mtValue{v: v, del: del}
+		*slot = mtSlot{hash: hash, key: k, val: p}
 		t.insert(k, p)
 	}
 	t.snapMu.Lock()
@@ -102,8 +147,13 @@ func (t *memtable) insertInto(n *mtNode, k string, p *mtValue) (string, *mtNode)
 			return "", nil
 		}
 		mid := len(n.keys) / 2
-		r := &mtNode{keys: append([]string(nil), n.keys[mid:]...), vals: append([]*mtValue(nil), n.vals[mid:]...), next: n.next}
-		n.keys, n.vals, n.next = n.keys[:mid:mid], n.vals[:mid:mid], r
+		r := t.newLeaf()
+		r.keys = append(r.keys, n.keys[mid:]...)
+		r.vals = append(r.vals, n.vals[mid:]...)
+		r.next = n.next
+		clear(n.keys[mid:])
+		clear(n.vals[mid:])
+		n.keys, n.vals, n.next = n.keys[:mid], n.vals[:mid], r
 		return r.keys[0], r
 	}
 	sk, right := t.insertInto(n.children[i], k, p)
@@ -127,8 +177,12 @@ func (t *memtable) insertInto(n *mtNode, k string, p *mtValue) (string, *mtNode)
 
 // get reports the buffered value; del is true for a tombstone.
 func (t *memtable) get(key []byte) (v []byte, del, ok bool) {
-	p, ok := t.m[string(key)]
-	if !ok {
+	if len(t.slots) == 0 {
+		return nil, false, false
+	}
+	slot, _ := t.slot(key)
+	p := slot.val
+	if p == nil {
 		return nil, false, false
 	}
 	return p.v, p.del, true
@@ -179,15 +233,18 @@ func (t *memtable) snapshot() []mtEntry {
 	if t.valid {
 		return t.sorted
 	}
-	t.sorted, t.valid = t.rangeInto(make([]mtEntry, 0, t.n), nil, nil), true
+	t.sorted, t.valid = t.rangeInto(memtableArray[mtEntry](t.storage, t.n)[:0], nil, nil), true
 	return t.sorted
 }
 
 func (t *memtable) reset() {
-	leaf := &mtNode{}
-	t.m = map[string]*mtValue{}
+	t.releaseBuffers()
+	t.storage = newMemtableStorage()
+	leaf := t.newLeaf()
+	t.slots = nil
 	t.root, t.first = leaf, leaf
 	t.n, t.bytes = 0, 0
+	t.values = nil
 	t.byTag = [256]int{}
 	t.snapMu.Lock()
 	t.sorted, t.valid = nil, false

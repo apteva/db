@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.6.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.7.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
 runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.6
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.6
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.6
+go get github.com/apteva/db@v0.2.0-alpha.7
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.7
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.7
 ```
 
 ```go
@@ -227,29 +227,23 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
 * **B+tree over fixed-size 16KB slotted pages** (`page.go`). Each slot carries the
   cell offset, the key length and an 8-byte big-endian key prefix, so binary search
   runs over the compact slot array and touches the cell only on a prefix tie.
-* **Mapped reads, private writes** (`pager.go`). The data file is mapped
-  read-only (the mapping doubles as the file grows). A clean page is a view into
-  the OS page cache: loading it costs a small struct and a page fault, no copy and
-  no syscall, and the cache is shared across threads and processes. The writer
-  copies a page into a private buffer before modifying it; a checkpoint writes the
-  buffer and hands the page back to the mapping. With `Options.CacheBytes` set,
-  clean leaf pages are evicted by a CLOCK sweep (internal pages stay resident so
-  checkpoints can always reach dirty leaves) and a checkpoint runs once dirty pages
-  reach three quarters of the limit.
-* **Writable-buffer lifetime** (`page_buffers.go`, `wal_buffer.go`). In the
-  default unlimited-cache mode, private leaf and overflow pages use anonymous mapped arenas; small internal pages use
-  Go storage. WAL buffers up to 16 MiB remain on the Go heap to avoid increasing GC
-  work on small databases; larger buffers use owned anonymous mappings.
-  Checkpoint captures and snapshot overlays retain explicit references; unused
-  arenas and superseded WAL buffers are returned to the OS when those references
-  are released. Compaction and backup write completed pages in bounded batches
-  instead of retaining an entire replacement tree. Bounded-cache mode retains
-  Go writable buffers and its original compaction builder to preserve parallel
-  read CPU efficiency. Backup always uses the streaming builder. Sibling balancing reuses its
-  cell-length scratch slice. These
-  mappings are outside Go's heap, so measure total process RSS and memory footprint
-  as well as `runtime.MemStats`. `CacheBytes` controls the logical page cache,
-  not a hard limit on all process memory, memtables or snapshot versions.
+* **Mapped reads, private writes** (`pager.go`). The data file uses stable
+  read-only 64 MiB segments. Growing it adds segments without duplicating old
+  mappings. Verified clean reads use mapped bytes directly, even after a page
+  descriptor is evicted. Dirty pages stay resident; with `Options.CacheBytes`
+  set, partial checkpoints begin at one quarter of the page target.
+* **Buffer ownership** (`page_buffers.go`, `node_buffers.go`, `memtable_buffers.go`,
+  `wal_buffer.go`). Writable pages, page descriptors and memtable records/metadata
+  use owned native buffers. Snapshots, cursors and checkpoint I/O retain explicit
+  references. Retired buffers return to the OS without waiting for Go GC. Small
+  internal pages have separate buffers so they cannot pin mostly empty leaf
+  arenas. Normal WAL flush buffers stay on the Go heap; bursts above 2 MiB use
+  reclaimable mappings. Both cache modes stream compaction/backup output and
+  reuse checkpoint vectors/scratch storage. Unneeded old file-page mappings are
+  reclaimed after copies or checkpoint/snapshot retirement, preserving file
+  contents and all live views. These allocations sit outside Go's heap; measure
+  process RSS and physical footprint as well as `runtime.MemStats`.
+  `CacheBytes` is a logical page target, not a hard total-memory limit.
 * **Sibling balancing** (`tree.go`, `balanceLeaf`). A leaf that overflows
   first sheds cells to a neighbour with room and rewrites the separator; it splits
   only when both neighbours are full. Leaves end up ~87% full after random inserts
@@ -258,12 +252,12 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   in memory (they are already in the log) and applied to the tree in key
   order once `Options.MemtableBytes` is reached, so each leaf write carries
   many records. The memtable is a small in-memory B+tree (wide nodes,
-  contiguous arrays) with a map for point reads: a scan copies out only the
+  contiguous arrays) with a keyed hash table for point reads: a scan copies out only the
   entries of its range, so probes stay cheap while writers run. Applying a
   sorted batch reuses the leaf reached for the previous key and splits an
   overflowing leaf at the insertion point, keeping the left part full. If dirty pages fill
   the cache mid-apply, a partial checkpoint writes them out but leaves the log
-  alone, so replay after a crash rebuilds the memtable. Default budget: half
+  alone, so replay after a crash rebuilds the memtable. Default budget: one half
   of `CacheBytes` with a cache limit; without one, inserts go straight to
   the tree, which is faster on this design (a random insert costs about
   1µs, a skip-list insert with its allocations about as much).
@@ -355,11 +349,14 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   a captured page copies it first. Log rotation, file truncation, old-log
   deletion and the directory sync all happen off the lock; the log's bulk writes
   run on the flusher goroutine with a second buffer. Flow control: a writer waits
-  only when the active memtable reaches four times its budget.
+  when the active memtable reaches twice its budget while the previous table is applying.
+  The budget includes native record/metadata storage and replaced values.
 * **Non-blocking compaction and backup** copy a snapshot while writers continue,
   replay the log delta into the copy in rounds, and hold the lock only for the
   last few records and two renames; the copy's meta points back into the shared
-  log so nothing is flushed under the lock. With 64MB cache and 16MB memtable,
+  log so nothing is flushed under the lock. The new mappings are warmed only after
+  the old file has closed, preserving read performance without retaining two trees.
+  With 64MB cache and 16MB memtable,
   the longest single write wait during checkpoints and compactions measured 4 to
   6 ms in historical runs; see BENCHMARKS.md for current validation.
 * **Snapshots** (`snapshot.go`). `Snapshot()` pins the root and memtable;

@@ -2,9 +2,19 @@ package db
 
 import "syscall"
 
-const walHeapBufferBytes = 16 << 20
+const walHeapBufferBytes = 2 << 20
 
-// Keep the small and moderate buffers on the Go heap. Removing all of that live
+// Flush a complete prefix before crossing the ordinary backlog bound. Growing
+// first would double a nearly full buffer only to flush it immediately. A
+// single oversized record/batch still stays intact and is allowed to exceed it.
+func (w *wal) prepareAppendLocked(extra int) error {
+	if len(w.buf) > 0 && extra > walMaxBuffered-len(w.buf) {
+		return w.flushLocked()
+	}
+	return nil
+}
+
+// Keep normal flush buffers on the Go heap. Removing all of that live
 // storage lowers Go's GC target and adds collection overhead to allocation-heavy
 // queries on small databases. Large log bursts still use reclaimable mappings.
 func newWALBuffer(size int) []byte {
@@ -26,7 +36,7 @@ func (w *wal) reserveBuffer(extra int) {
 	if extra <= cap(w.buf)-len(w.buf) {
 		return
 	}
-	size := max(len(w.buf)+extra, 2*cap(w.buf))
+	size := max(len(w.buf)+extra, 2*cap(w.buf), 2*walFlushBytes)
 	var buf []byte
 	if w.heapOnly {
 		buf = make([]byte, size)
@@ -49,6 +59,23 @@ func (w *wal) releaseBuffers() {
 		releaseWALBuffer(w.spareStore)
 	}
 	w.buf, w.spare, w.bufStore, w.spareStore = nil, nil, nil, nil
+}
+
+// A checkpoint barrier has drained both pending and in-flight I/O. Return
+// oversized burst storage instead of retaining it throughout a read-only phase.
+// Ordinary heap buffers remain reusable; no live record or I/O slice is retired.
+func (w *wal) releaseBurstBuffers() {
+	if w.heapOnly || len(w.buf) != 0 || w.inflight != nil {
+		return
+	}
+	if len(w.bufStore) > walHeapBufferBytes {
+		releaseWALBuffer(w.bufStore)
+		w.buf, w.bufStore = nil, nil
+	}
+	if len(w.spareStore) > walHeapBufferBytes {
+		releaseWALBuffer(w.spareStore)
+		w.spare, w.spareStore = nil, nil
+	}
 }
 
 // Only buffers larger than the heap-buffer threshold are mapped. Stores

@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"syscall"
+)
 
 // copyPageWriter belongs exclusively to a private sorted backup/compaction
 // builder. Completed leaves never change again; contiguous ids share one
@@ -9,6 +12,7 @@ import "fmt"
 type copyPageWriter struct {
 	pg    *pager
 	data  []byte
+	store []byte
 	nodes []*node
 }
 
@@ -22,7 +26,12 @@ func (w *copyPageWriter) add(n *node) error {
 		}
 	}
 	if w.data == nil {
-		w.data = make([]byte, 0, pageBufferArenaBytes)
+		var err error
+		w.store, err = syscall.Mmap(-1, 0, pageBufferArenaBytes, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+		if err != nil {
+			return err
+		}
+		w.data = w.store[:0]
 		w.nodes = make([]*node, 0, pageBufferArenaBytes/PageSize)
 	}
 	n.data.setCrc(pageCrc(n.data))
@@ -52,6 +61,13 @@ func (w *copyPageWriter) flush() error {
 	}
 	clear(w.nodes)
 	w.nodes, w.data = w.nodes[:0], w.data[:0]
-	w.pg.releaseUnusedBuffers(true)
+	w.pg.releaseUnusedBuffers()
 	return nil
+}
+
+func (w *copyPageWriter) close() {
+	if w.store != nil {
+		syscall.Munmap(w.store)
+		w.store, w.data = nil, nil
+	}
 }

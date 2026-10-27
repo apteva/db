@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -32,9 +33,11 @@ const (
 // applies a batch only once its final record is intact, so a batch is
 // all-or-nothing after a crash. flags bit 1 marks a tombstone.
 type wal struct {
-	dir    string
-	f      fileLike
-	crcTab *crc32.Table
+	rotateMu      sync.Mutex    // serialize generation preparation/switching, not appends
+	compactionPin atomic.Uint64 // replay floor + 1; zero means no private copy needs it
+	dir           string
+	f             fileLike
+	crcTab        *crc32.Table
 
 	err     error      // sticky I/O failure; protected by mu
 	mu      sync.Mutex // guards buf, base, durable, gen, f, inflight
@@ -62,7 +65,7 @@ type wal struct {
 	retain     *ChangeFeedOptions // immutable during a live Open
 	strictSync bool               // rotation must fence concurrent synchronous commits
 	changeGens []changeGeneration // protected by mu
-	heapOnly   bool               // bounded-cache mode preserves the original allocation policy
+	heapOnly   bool               // test hook for the heap-backed allocation policy
 }
 
 func walPath(dir string, gen uint64) string {
@@ -91,16 +94,14 @@ func walGens(dir string) ([]uint64, error) {
 
 // walMaxBuffered bounds memory when the disk falls behind: past it an
 // appender writes synchronously (backpressure).
-const walMaxBuffered = 64 << 20
+const walMaxBuffered = 4 << 20
 
 func newWAL(dir string) *wal {
 	w := &wal{dir: dir, crcTab: crc32.MakeTable(crc32.Castagnoli), syncFn: syncFull, kick: make(chan struct{}, 1)}
 	w.inflightOn = sync.NewCond(&w.mu)
 	w.syncDone = sync.NewCond(&w.mu)
-	// Both buffers start at the normal flush capacity; large bursts may grow them.
-	w.bufStore = newWALBuffer(2 * walFlushBytes)
-	w.spareStore = newWALBuffer(2 * walFlushBytes)
-	w.buf, w.spare = w.bufStore[:0], w.spareStore[:0]
+	// Allocate rotating buffers on the first append. Private copy builders
+	// and read-only opens never need a log append buffer.
 	return w
 }
 
@@ -171,6 +172,8 @@ func (w *wal) start(gen uint64, size uint64) error {
 // old generation is not synced here: records that must be durable already
 // are, and a checkpoint's meta only advances past them once the tree is.
 func (w *wal) rotate() error {
+	w.rotateMu.Lock()
+	defer w.rotateMu.Unlock()
 	w.mu.Lock()
 	next := w.gen + 1
 	w.mu.Unlock()
@@ -216,6 +219,7 @@ func (w *wal) flushAndPosition() (gen, off uint64, err error) {
 	if err := w.flushLocked(); err != nil {
 		return 0, 0, err
 	}
+	w.releaseBurstBuffers()
 	return w.gen, w.base, nil
 }
 
@@ -235,6 +239,9 @@ func (w *wal) size() uint64 {
 
 // dropBefore deletes generation files older than gen.
 func (w *wal) dropBefore(gen uint64) {
+	if pin := w.compactionPin.Load(); pin != 0 {
+		gen = min(gen, pin-1)
+	}
 	if w.retain != nil {
 		w.dropChangeBefore(gen)
 		return
@@ -286,8 +293,7 @@ func encodeRecord(dst []byte, key, val []byte, more, del bool, tab *crc32.Table)
 	return dst
 }
 
-// Bounded-cache mode keeps Go's original append growth to preserve both
-// the established CPU behavior and its smaller long-lived WAL capacities.
+// Heap-backed append growth is retained for allocation/recovery tests.
 func encodeRecordHeap(dst []byte, key, val []byte, more, del bool, tab *crc32.Table) []byte {
 	start := len(dst)
 	var flags byte
@@ -317,11 +323,16 @@ func (w *wal) append(key, val []byte, del bool) (lsn, error) {
 		w.mu.Unlock()
 		return lsn{}, err
 	}
+	extra := 11 + len(key) + len(val)
+	if err := w.prepareAppendLocked(extra); err != nil {
+		w.mu.Unlock()
+		return lsn{}, err
+	}
 	if w.heapOnly {
 		w.buf = encodeRecordHeap(w.buf, key, val, false, del, w.crcTab)
 		w.bufStore = w.buf[:cap(w.buf)]
 	} else {
-		w.reserveBuffer(11 + len(key) + len(val))
+		w.reserveBuffer(extra)
 		w.buf = encodeRecord(w.buf, key, val, false, del, w.crcTab)
 	}
 	l := lsn{w.gen, w.base + uint64(len(w.buf))}
@@ -335,6 +346,10 @@ func (w *wal) appendRaw(rec []byte) (lsn, error) {
 	w.mu.Lock()
 	if w.err != nil {
 		err := w.err
+		w.mu.Unlock()
+		return lsn{}, err
+	}
+	if err := w.prepareAppendLocked(len(rec)); err != nil {
 		w.mu.Unlock()
 		return lsn{}, err
 	}
@@ -538,7 +553,7 @@ const groupCommitWait = 150 * time.Microsecond
 
 // replayFrom feeds records from (gen, off) and every later generation to fn.
 // It returns the generation and intact end offset of the last file read.
-func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) error) (lastGen, end uint64, err error) {
+func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) error, through ...lsn) (lastGen, end uint64, err error) {
 	gens, err := walGens(w.dir)
 	if err != nil {
 		return 0, 0, err
@@ -548,6 +563,9 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
 		if g < gen {
 			continue
 		}
+		if len(through) > 0 && g > through[0].gen {
+			break
+		}
 		start := uint64(walHeaderSize)
 		if g == gen {
 			start = max(off, walHeaderSize)
@@ -556,7 +574,11 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
 		if err != nil {
 			return 0, 0, err
 		}
-		e, err := w.replayFile(f, start, fn)
+		limit := ^uint64(0)
+		if len(through) > 0 && g == through[0].gen {
+			limit = through[0].off
+		}
+		e, err := w.replayFile(f, start, fn, limit)
 		f.Close()
 		if err != nil {
 			return 0, 0, err
@@ -571,12 +593,15 @@ func (w *wal) replayFrom(gen, off uint64, fn func(key, val []byte, del bool) err
 
 // replayFile reads one generation from off to its end and returns the
 // offset after the last intact batch. A torn tail simply ends replay.
-func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bool) error) (uint64, error) {
+func (w *wal) replayFile(f *os.File, off uint64, fn func(key, val []byte, del bool) error, limits ...uint64) (uint64, error) {
 	st, err := f.Stat()
 	if err != nil {
 		return 0, err
 	}
 	size := uint64(st.Size())
+	if len(limits) > 0 {
+		size = min(size, limits[0])
+	}
 	if off >= size {
 		return size, nil
 	}
