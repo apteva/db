@@ -329,7 +329,10 @@ func TestCrashRecoveryWithFaultInjection(t *testing.T) {
 			}
 			break
 		}
-		note("crash after %d writes; wal before revert: %s", ctl.writes, walRecords(dir))
+		ctl.mu.Lock()
+		writes := ctl.writes
+		ctl.mu.Unlock()
+		note("crash after %d writes; wal before revert: %s", writes, walRecords(dir))
 		ctl.crash()
 		db.crash()
 		note("wal after revert: %s", walRecords(dir))

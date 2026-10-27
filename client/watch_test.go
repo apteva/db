@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func watchFixture(t *testing.T, opts server.Options) (*db.DB, *client.Client) {
+func watchFixture(t *testing.T, opts server.Options) (*db.DB, *client.Client, *httptest.Server) {
 	t.Helper()
 	database, err := db.Open(t.TempDir(), db.Options{ChangeFeed: &db.ChangeFeedOptions{}, Sync: true, SyncMode: db.SyncOS})
 	if err != nil {
@@ -26,13 +26,13 @@ func watchFixture(t *testing.T, opts server.Options) (*db.DB, *client.Client) {
 	transport.Config = handler.NewHTTPServer("")
 	transport.StartTLS()
 	httpClient := transport.Client()
-	httpClient.Timeout = 100 * time.Millisecond
+	httpClient.Timeout = 5 * time.Second
 	c, err := client.New(transport.URL, client.Options{Token: token, HTTPClient: httpClient})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { c.Close(); handler.Close(); transport.Close(); database.Close() })
-	return database, c
+	return database, c, transport
 }
 func remoteChange(t *testing.T, c *client.ChangeCursor) db.Change {
 	t.Helper()
@@ -42,7 +42,7 @@ func remoteChange(t *testing.T, c *client.ChangeCursor) db.Change {
 	return c.Change().Clone()
 }
 func TestRemoteChangeFeedSnapshotResumeAndFiltering(t *testing.T) {
-	database, c := watchFixture(t, server.Options{})
+	database, c, transport := watchFixture(t, server.Options{})
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := c.CreateCollection(ctx, "orders"); err != nil {
@@ -103,8 +103,17 @@ func TestRemoteChangeFeedSnapshotResumeAndFiltering(t *testing.T) {
 	if err = feed.Close(); err != nil {
 		t.Fatal(err)
 	}
+	// Only the watch gets a short client's timeout. Normal RPCs need enough
+	// time for durable writes on race-instrumented CI; the watch must outlive it.
+	shortHTTP := *transport.Client()
+	shortHTTP.Timeout = 100 * time.Millisecond
+	shortClient, err := client.New(transport.URL, client.Options{Token: token, HTTPClient: &shortHTTP})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer shortClient.Close()
 	opts.After = last
-	replay, err := c.Watch(ctx, opts)
+	replay, err := shortClient.Watch(ctx, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +143,7 @@ func TestRemoteChangeFeedSnapshotResumeAndFiltering(t *testing.T) {
 	}
 }
 func TestRemoteWatchCapacityDoesNotBlockCRUD(t *testing.T) {
-	_, c := watchFixture(t, server.Options{MaxConcurrentRequests: 1, MaxWatchers: 2})
+	_, c, _ := watchFixture(t, server.Options{MaxConcurrentRequests: 1, MaxWatchers: 2})
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	one, err := c.Watch(ctx, db.WatchOptions{})
@@ -161,7 +170,7 @@ func TestRemoteWatchCapacityDoesNotBlockCRUD(t *testing.T) {
 	}
 }
 func TestRemoteWatchUsesSeparateConnections(t *testing.T) {
-	database, c := watchFixture(t, server.Options{MaxWatchers: 100})
+	database, c, _ := watchFixture(t, server.Options{MaxWatchers: 100})
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	feeds := make([]*client.ChangeCursor, 70)
@@ -197,7 +206,7 @@ func TestRemoteWatchUsesSeparateConnections(t *testing.T) {
 }
 
 func TestRemoteSnapshotCountDocuments(t *testing.T) {
-	_, c := watchFixture(t, server.Options{})
+	_, c, _ := watchFixture(t, server.Options{})
 	ctx := context.Background()
 	if err := c.CreateCollection(ctx, "counts"); err != nil {
 		t.Fatal(err)
