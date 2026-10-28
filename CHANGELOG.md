@@ -28,6 +28,12 @@ the migration.
   a power loss right after a log rotation could lose the new file's directory
   entry and, with Sync, records already acknowledged in it. DURABILITY.md now
   states that deleting checkpointed generations is not fsynced, and why.
+- Fix: a checkpoint whose free list sat just above a multiple of 4,092 ids
+  panicked while writing the list, because each page of the list takes its id
+  from the free ids it records (present since 0.1.0). Since alpha.7 the panic
+  deadlocked the checkpointer under the writer lock instead of crashing, so
+  the database hung; the 60-minute macOS soak timed out on alpha.8 this way.
+  The list now grows until its remaining ids fit, and a checkpoint panic crashes.
 - Benchmark harness: the batched AptevaDB settle step now compacts, matching the
   Pebble batch settle, so disk sizes compare like for like.
 - Retain 48 interleaved fresh-process trials against alpha.8. One-million-group

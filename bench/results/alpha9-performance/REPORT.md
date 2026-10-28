@@ -27,6 +27,11 @@ regressions everywhere.**
   sync when they write no pages, released one-page buffers are reused, and build
   entries sort without reflection.
 - Durability fix: creating a log generation fsyncs the directory.
+- Hang fix, found by the release soak after measurement: checkpoints sized the
+  persisted free list before allocating its pages, which take their ids from
+  that list, so a list just above a multiple of 4,092 ids panicked; since
+  alpha.7 the panic deadlocked the checkpointer. The fix does not touch any
+  measured path except free-list capture during checkpoints.
 
 ## Method and identities
 
@@ -35,8 +40,9 @@ regressions everywhere.**
   source is identical. Only the candidate's benchmark harness (`bench/main.go`,
   `bench/agg.go`, `bench/spill_groups`) was copied in.
 - **Candidate:** the release working tree. Engine sources are hashed in
-  [candidate-source-sha256.json](candidate-source-sha256.json); only
-  documentation and CI changed after measurement.
+  [candidate-source-sha256.json](candidate-source-sha256.json). After
+  measurement, documentation and CI changed, and so did `checkpoint.go` (the
+  hang fix above) plus its test, so that file's hash differs in the release.
 - **Records:** binaries and the raw archive are identified in
   [source-identity.json](source-identity.json), with build metadata in
   [build-info.txt](build-info.txt).
@@ -138,7 +144,10 @@ and change-feed stress run all passed on the candidate
 ([output](validation-race-soak.txt)). That run preceded one later `wal.go`
 change: deleting checkpointed log generations no longer fsyncs the directory,
 for the reason given in DURABILITY.md. The unit tests and the CI fuzz smoke ran
-on the final tree. The tag's release workflow repeats the race, stress and soak
+on the final tree. The 60-minute soak then hung on macOS; the cause was the
+free-list panic above, and the fix was validated by a deterministic regression
+test, the unit and race suites and a repeated soak before tagging. The tag's
+release workflow repeats the race, stress and soak
 gates on Linux and macOS before publishing.
 
 New tests cover the result order, `$first`/`$last` and limits of a sharded merge

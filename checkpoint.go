@@ -94,8 +94,17 @@ func (db *DB) stopCheckpointer() {
 func (db *DB) runCheckpoint(full bool) error {
 	db.ckptMu.Lock()
 	defer db.ckptMu.Unlock()
+	// Not deferred: a panic under the writer lock must crash the process,
+	// not deadlock here waiting for that lock.
 	workStart := time.Now()
-	defer func() { db.mu.Lock(); db.noteHold("checkpoint-work", workStart); db.mu.Unlock() }()
+	err := db.checkpointWork(full)
+	db.mu.Lock()
+	db.noteHold("checkpoint-work", workStart)
+	db.mu.Unlock()
+	return err
+}
+
+func (db *DB) checkpointWork(full bool) error {
 	if full && db.wal.size() >= walRotateBytes {
 		if err := db.wal.rotate(); err != nil {
 			return err
@@ -393,15 +402,18 @@ func (db *DB) captureFreelist(cs *captureSet) (uint32, error) {
 		}
 	}
 	db.freelistPages = db.freelistPages[:0]
-	count := len(pg.free) + len(pg.pending) + len(cs.toRelease)
-	need := (count + idsPerFreelistPage - 1) / idsPerFreelistPage
-	if need == 0 {
+	// Each page of the list may take its id from pg.free, shrinking the list
+	// it holds, so pages are added until the ids left fit. Every page removes
+	// at most one id, so the last page may hold none but never starts past
+	// the end of ids.
+	var pages []*node
+	for len(pages)*idsPerFreelistPage < len(pg.free)+len(pg.pending)+len(cs.toRelease) {
+		pages = append(pages, pg.alloc(pageFreelist, 0))
+	}
+	if len(pages) == 0 {
 		return 0, nil
 	}
-	pages := make([]*node, need)
-	for i := range pages {
-		pages[i] = pg.alloc(pageFreelist, 0)
-	}
+	count := len(pg.free) + len(pg.pending) + len(cs.toRelease)
 	ids := make([]uint32, 0, count)
 	ids = append(ids, pg.free...)
 	ids = append(ids, pg.pending...)
