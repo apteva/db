@@ -1,20 +1,22 @@
-AptevaDB alpha.8 adds bounded native aggregation and resident-memory controls.
+AptevaDB alpha.9 makes aggregation faster, in memory and when it spills to disk, adds a typed group visitor and fixes a log-rotation durability gap.
 
-- `AggregateEach`/`RunEach` stream owned results from one snapshot. Proven compound-index group order supports equality prefixes, mixed directions and early limits; explicit ordered prefixes also accelerate the existing materializing API.
-- Opt-in disk-backed hash aggregation and stable external sorts preserve typed accumulator state, exact signed-128 integer subtotals, snapshots, cancellation and shared memory/disk budgets. Private scratch leases support cleanup after cancellation, errors and process crashes.
-- `MemoryStats` separates private page/descriptor/memtable/WAL buffers, leased/pinned storage, aggregation reservations, mapped residency estimates and process RSS. `MappedCacheBytes`/`TrimMemory` reclaim cold file translations; `ManagedMemoryBytes` adds soft pre-WAL admission/backpressure. Both targets default to disabled.
-- Correct the pre-existing test-harness diagnostic race and isolate the short watch RPC timeout fixture, without changing those production contracts.
+- **Faster bounded (spill) aggregation.** Partition fanout adapts with budgeted I/O buffers, temporary records use a compact codec, and reconstruction uses arenas. Temporary spill records changed; no persistent format changed.
+- **`AggregateGroups`/`RunGroups`** stream completed groups as a borrowed, typed `GroupView` without building result maps. An integer SUM that overflowed int64 is reported, never rounded, and `IntegerSum` returns its exact signed 128-bit value.
+- **Faster in-memory aggregation.**
+  - Filter fields are extracted first, and the rest only for documents that pass.
+  - Each document's directory is decoded once, and field names are checked before decoding values.
+  - Float and string-equality predicates have fast paths.
+  - Sharded `$group` above 8,192 groups merges by key hash on all cores; row order, `$first`/`$last` and limits match the serial run.
+- **Faster index builds.** A checkpoint with nothing buffered is skipped, empty checkpoints skip their page sync, page buffers are reused, and entries sort without reflection.
+- **Durability fix.** Creating a log generation now fsyncs the database directory. Before, a power loss right after a log rotation could lose the new file's directory entry and, with `Sync`, records already acknowledged in it.
 
-The [benchmark report](https://github.com/apteva/db/blob/v0.2.0-alpha.8/bench/results/aggregation-memory/REPORT.md) retains 110 final fresh-process comparisons with alpha.7, including one-million-document guards. Ordered aggregation reduced median CPU by 73%, peak RSS by 32% and peak physical footprint by 32%. Cold-page reclamation reduced idle RSS from 201 to 43 MiB; lifetime peaks stayed similar. At a 16 MiB budget, disk-backed aggregation completed a workload alpha.7 rejected. Versus a 128 MiB RAM execution, spill reduced peak RSS by 30% but took 3.5 times as long. Some guard medians remained slower, with overlapping timing ranges on the busy workstation; these results do not establish zero regressions everywhere.
+**Results.** The [benchmark report](https://github.com/apteva/db/blob/v0.2.0-alpha.9/bench/results/alpha9-performance/REPORT.md) compares this release with alpha.8 in 48 interleaved fresh processes. All raw trials are kept.
 
-New aggregation options/streaming are embedded Go APIs; no new HTTP streaming endpoint is included. Query budgets and managed/mapped targets are not hard process RSS limits. Unsorted group order is unspecified; float partial merges may change IEEE-754 rounding. Integer accumulation remains exact. See [usage](https://github.com/apteva/db/blob/v0.2.0-alpha.8/USAGE.md) and [operations](https://github.com/apteva/db/blob/v0.2.0-alpha.8/OPERATIONS.md) for the full contracts.
+- **Spill, one million groups, 12 MiB budget:** 56% faster for COUNT and 63% for numeric aggregates, with 82–85% fewer spill bytes and one merge pass instead of 17. The typed visitor takes 0.52 s and 0.86 s.
+- **In-memory aggregation:** 11–54% faster on one core. The parallel 100,000-group query is 52% faster.
+- **Key-value, batched and durable writes:** unchanged within noise.
+- **Trade-off:** the numeric spill workload's peak RSS rose by 5 MiB.
 
-**Format remains 10; existing alpha.5–alpha.7 directories need no new migration.** Opening formats 3–9 still permanently upgrades them to format 10; back up with the original binary first. This is a public prerelease alpha.
+The workstation was busy (load 9–36), so these results do not establish zero regressions everywhere. The benchmark harness's batched settle step now compacts, as its Pebble counterpart did, so disk sizes compare like for like. See [usage](https://github.com/apteva/db/blob/v0.2.0-alpha.9/USAGE.md#typed-group-visitor-alpha9) for the visitor contract.
 
-```sh
-go get github.com/apteva/db@v0.2.0-alpha.8
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.8
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.8
-```
-
-Linux/macOS amd64/arm64 CLI/server archives include the usage and operations guides. Verify downloads against `SHA256SUMS`.
+**Format remains 10; alpha.5–alpha.8 directories need no migration.** Opening formats 3–9 still permanently upgrades them to format 10, so back up with the original binary first. This is a public prerelease alpha.

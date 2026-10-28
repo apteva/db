@@ -386,3 +386,34 @@ Source), with private execution files. Completion, callback stop, cancellation
 and errors close and remove scratch. Open cleans abandoned default executions;
 call CleanupAggregationTemp(ctx, customRoot) for a custom root after a crash.
 Live executions hold OS leases and are skipped. Cleanup errors are returned.
+
+## Typed group visitor (alpha.9)
+
+When a caller needs only some groups, or typed values, AggregateGroups skips the
+per-group result maps that AggregateEach builds:
+
+```go
+err := orders.AggregateGroups(ctx, []byte(`[
+  {"$group":{"_id":"$customer","total":{"$sum":"$amount"},"n":{"$count":{}}}}
+]`), db.AggregateOptions{MaxMemoryBytes: 16 << 20, AllowDiskUse: true},
+	func(g db.GroupView) error {
+		n, _ := g.Int64("n")
+		customer, _ := g.String("_id") // borrowed: copy it to keep it
+		_, _ = n, customer
+		return nil // a non-nil error stops execution and is returned unchanged
+	})
+```
+
+The pipeline must end in a single $group with no earlier $group or $count. DB,
+snapshots and collections expose AggregateGroups; Collection.RunGroups and
+Pipeline.RunGroups take a compiled pipeline, with the same Source caveats as
+RunEach. Options, budgets, disk use, Stats and cancellation behave as for
+AggregateEach.
+
+A GroupView, and any string returned by String, is valid only during the
+callback; Any returns an owned value. Fields are addressed as "_id", "_id.<name>"
+for compound ids, or an accumulator name. Kind distinguishes missing, null,
+int, float, string, bool, document and array. Int64 reports false rather than
+rounding an integer SUM that overflowed int64, and IntegerSum returns its exact
+signed 128-bit value. To reject such overflow in groups the caller does not
+return, check every group in the callback.

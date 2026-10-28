@@ -1,0 +1,17 @@
+{
+ "baseline": {
+  "description": "v0.2.0-alpha.8 engine: git archive of 2b19d13 (alpha.8 tag 4f57eb9 plus a [skip ci] evidence commit; engine source identical), with the candidate bench/main.go, bench/agg.go and bench/spill_groups copied in",
+  "commit": "2b19d1385391e48db00a7e5eadadfbfd69e5be9f",
+  "tag_commit": "4f57eb9b66baa03f292977e442323cedd821f68e"
+ },
+ "candidate": {
+  "description": "working tree on top of 2b19d13 at benchmark time; engine .go files hashed in candidate-source-sha256.json; only docs/CI changed afterwards"
+ },
+ "binaries_sha256": {
+  "spill-alpha8": "feb8fe49dc4b4ece8ab4af28d9895a7de8dba3a622ed75ab170477a984b8bf82",
+  "bench-cand": "49d09db1671f4d8bdcb514586c12ba74f0d99c85f6bf86ed5bb8fb8a792fe6ff",
+  "bench-alpha8": "1ae9a1fdc73a1a26e569dff387818519d59027a244bde93654da668a945ce66a",
+  "spill-cand": "86f4b4513e7ec621181f13db0575686a52633c5d2e537061ac469dee5d337226"
+ },
+ "raw_archive_sha256": "a8b855678459dbeabcbcb42c5279743bd0521d99691cec0c0d0365c32febc708"
+}

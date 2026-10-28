@@ -1,0 +1,15 @@
+== vet
+vet-ok
+== race
+ok  	github.com/apteva/db	591.846s
+ok  	github.com/apteva/db/client	3.023s
+?   	github.com/apteva/db/cmd/aptevadb-server	[no test files]
+?   	github.com/apteva/db/cmd/aptevadbctl	[no test files]
+?   	github.com/apteva/db/cmd/demo	[no test files]
+?   	github.com/apteva/db/examples/embedded	[no test files]
+?   	github.com/apteva/db/internal/protocol	[no test files]
+?   	github.com/apteva/db/server	[no test files]
+race-exit=0
+== stress/soak
+ok  	github.com/apteva/db	187.529s
+soak-exit=0

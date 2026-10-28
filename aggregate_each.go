@@ -28,6 +28,7 @@ type AggregateStats struct {
 	InputRows, Groups, Returned                  int64
 	PeakMemoryBytes, SpilledBytes, PeakDiskBytes int64
 	SpillRuns, MergePasses                       int
+	SpillPartitions, MaxPartitionDepth           int
 }
 
 var ErrDiskLimit = errors.New("aptevadb: aggregation temporary disk quota exceeded")
@@ -36,13 +37,14 @@ var errAggregateStopped = errors.New("aptevadb: aggregate consumer stopped")
 type rowSource func(func(map[string]any) error) error
 
 type aggregateExec struct {
-	stateLimit int64
-	ctx        context.Context
-	options    AggregateOptions
-	stats      *AggregateStats
-	budget     *memoryBudget
-	limits     Limits
-	disk       *aggregateDisk
+	groupVisitor func(GroupView) error
+	stateLimit   int64
+	ctx          context.Context
+	options      AggregateOptions
+	stats        *AggregateStats
+	budget       *memoryBudget
+	limits       Limits
+	disk         *aggregateDisk
 }
 
 // AggregateEach streams completed result rows from one snapshot. A callback
@@ -67,7 +69,7 @@ func (s *Snapshot) AggregateEach(ctx context.Context, pipeline []byte, opts Aggr
 func (c *Collection) RunEach(ctx context.Context, p *Pipeline, opts AggregateOptions, yield func(map[string]any) bool) error {
 	return c.runEach(ctx, p, opts, yield, false)
 }
-func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOptions, yield func(map[string]any) bool, collect bool) (retErr error) {
+func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOptions, yield func(map[string]any) bool, collect bool, visitors ...func(GroupView) error) (retErr error) {
 	ctx = orBackground(ctx)
 	if yield == nil || p == nil {
 		return ErrPipeline
@@ -81,7 +83,7 @@ func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOpt
 			return err
 		}
 		defer s.Close()
-		return cc.runEach(ctx, p, opts, yield, collect)
+		return cc.runEach(ctx, p, opts, yield, collect, visitors...)
 	}
 	if err := c.check(); err != nil {
 		return err
@@ -92,6 +94,9 @@ func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOpt
 	x, err := newAggregateExecution(ctx, p, opts, c.db.memory)
 	if err != nil {
 		return err
+	}
+	if len(visitors) > 0 {
+		x.groupVisitor = visitors[0]
 	}
 	defer func() { retErr = errors.Join(retErr, x.finish()) }()
 	src, q, ordered, index, err := c.aggregateSource(ctx, p, opts)
@@ -124,7 +129,7 @@ func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOpt
 func (p *Pipeline) RunEach(ctx context.Context, src Source, opts AggregateOptions, yield func(map[string]any) bool) error {
 	return p.runEachSource(ctx, src, opts, yield, false)
 }
-func (p *Pipeline) runEachSource(ctx context.Context, src Source, opts AggregateOptions, yield func(map[string]any) bool, collect bool) (retErr error) {
+func (p *Pipeline) runEachSource(ctx context.Context, src Source, opts AggregateOptions, yield func(map[string]any) bool, collect bool, visitors ...func(GroupView) error) (retErr error) {
 	ctx = orBackground(ctx)
 	if src == nil || yield == nil || p == nil {
 		return ErrPipeline
@@ -137,6 +142,9 @@ func (p *Pipeline) runEachSource(ctx context.Context, src Source, opts Aggregate
 		return err
 	}
 	defer func() { retErr = errors.Join(retErr, x.finish()) }()
+	if len(visitors) > 0 {
+		x.groupVisitor = visitors[0]
+	}
 	return x.execute(p, srcSpec{src: src}, &env{ctx: ctx, budget: x.budget, count: -1}, false, yield, collect)
 }
 func newAggregateExecution(ctx context.Context, p *Pipeline, opts AggregateOptions, owner *memoryTracker) (*aggregateExec, error) {
@@ -211,6 +219,9 @@ func (x *aggregateExec) execute(p *Pipeline, spec srcSpec, e *env, ordered bool,
 	})
 	if errors.Is(err, errAggregateStopped) {
 		return nil
+	}
+	if err == nil {
+		return x.ctx.Err()
 	}
 	return err
 }
@@ -472,6 +483,12 @@ func (x *aggregateExec) stage(up rowSource, st stage, e *env) rowSource {
 }
 
 func (x *aggregateExec) group(pl *plan, src srcSpec, e *env, ordered bool, emit func(map[string]any) error) error {
+	estimate := int64(0)
+	if e.c != nil {
+		if n, err := e.c.approxCount(); err == nil {
+			estimate = int64(n)
+		}
+	}
 	makeGroup := func() *grouper {
 		g := newGrouper(pl.group, x.limits.MaxGroups)
 		g.budget = x.budget
@@ -488,6 +505,9 @@ func (x *aggregateExec) group(pl *plan, src srcSpec, e *env, ordered bool, emit 
 		}
 		if x.options.AllowDiskUse {
 			g.capBytes = x.stateLimit
+			if !ordered && g.compactCount() {
+				g.counts = make(map[string]int64)
+			}
 		}
 		return g
 	}
@@ -507,19 +527,27 @@ func (x *aggregateExec) group(pl *plan, src srcSpec, e *env, ordered bool, emit 
 			return ErrLimit
 		}
 		x.stats.Groups++
+		view := GroupView{spec: pl.group, state: gs}
+
+		if x.groupVisitor != nil {
+			if err := x.ctx.Err(); err != nil {
+				return err
+			}
+			x.stats.Returned++
+			return x.groupVisitor(view)
+		}
 		return emit(g.row(gs))
 	}
 	flush := func() error {
-		if len(g.order) == 0 {
+		if g.size() == 0 {
 			return nil
 		}
 		if partitions == nil {
-			partitions = x.disk.partitions()
+			unit := g.charge / int64(max(1, g.size()))
+			partitions = x.disk.partitions(pl.group, estimate, unit)
 		}
-		for _, gs := range g.order {
-			if err := partitions.add(gs); err != nil {
-				return err
-			}
+		if err := g.each(false, partitions.add); err != nil {
+			return err
 		}
 		g.release()
 		g = makeGroup()
@@ -528,10 +556,8 @@ func (x *aggregateExec) group(pl *plan, src srcSpec, e *env, ordered bool, emit 
 
 	finishBucket := func() error {
 		if partitions == nil {
-			for _, gs := range g.order {
-				if err := output(gs); err != nil {
-					return err
-				}
+			if err := g.each(true, output); err != nil {
+				return err
 			}
 			if ordered && !g.resetOrdered() {
 				g.release()
@@ -617,11 +643,27 @@ func (g *grouper) canAdd(vals []value, idIdx, accIdx []int) bool {
 		}
 	}
 	cost := int64(2*keyBytes + 32 + 160)
-	if g.used == len(g.states) {
+	if g.slab > 1 {
+		cost = 160 + g.textCost([]int{keyBytes})
+		if keyBytes > cap(g.keyBuf) {
+			capacity := max(keyBytes, 2*cap(g.keyBuf))
+			capacity = (capacity + 15) &^ 15
+			cost += int64(capacity - cap(g.keyBuf))
+		}
+	}
+	if g.counts != nil {
+		cost = 128 + g.textCost([]int{keyBytes})
+		if keyBytes > cap(g.keyBuf) {
+			capacity := max(keyBytes, 2*cap(g.keyBuf))
+			capacity = (capacity + 15) &^ 15
+			cost += int64(capacity - cap(g.keyBuf))
+		}
+	}
+	if g.counts == nil && g.used == len(g.states) {
 		cost += int64(g.nextSlab()) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)
 	}
 	for _, i := range accIdx {
-		if i >= 0 {
+		if g.counts == nil && i >= 0 {
 			cost += int64(len(vals[i].s))
 		}
 	}

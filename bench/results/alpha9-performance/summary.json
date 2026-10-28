@@ -1,0 +1,3482 @@
+[
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "build two indexes (seconds)",
+  "trials": 3,
+  "median": 0.08,
+  "min": 0.08,
+  "max": 0.1,
+  "values": [
+   0.1,
+   0.08,
+   0.08
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 5.9,
+  "min": 5.5,
+  "max": 6.1,
+  "values": [
+   6.1,
+   5.5,
+   5.9
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 10.8,
+  "min": 10.0,
+  "max": 12.0,
+  "values": [
+   12.0,
+   10.8,
+   10.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 4.4,
+  "min": 4.3,
+  "max": 4.7,
+  "values": [
+   4.7,
+   4.3,
+   4.4
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "indexed: 20 customers ($in), count",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "indexed: amount > 999.5 (0.05%), group by region",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "indexed: one customer's orders, sum",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.03,
+  "min": 0.02,
+  "max": 0.04,
+  "values": [
+   0.04,
+   0.02,
+   0.03
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 3.0,
+  "min": 3.0,
+  "max": 3.0,
+  "values": [
+   3.0,
+   3.0,
+   3.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours-par",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 1.3,
+  "min": 1.2,
+  "max": 1.3,
+  "values": [
+   1.3,
+   1.2,
+   1.3
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours-par",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 9.4,
+  "min": 9.2,
+  "max": 10.2,
+  "values": [
+   10.2,
+   9.2,
+   9.4
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours-par",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 1.0,
+  "min": 0.9,
+  "max": 1.0,
+  "values": [
+   1.0,
+   0.9,
+   1.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours-par",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.03,
+  "min": 0.02,
+  "max": 0.04,
+  "values": [
+   0.04,
+   0.03,
+   0.02
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "ours-par",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 0.7,
+  "min": 0.7,
+  "max": 0.8,
+  "values": [
+   0.8,
+   0.7,
+   0.7
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "pebble",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 7.5,
+  "min": 7.5,
+  "max": 7.7,
+  "values": [
+   7.7,
+   7.5,
+   7.5
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "pebble",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 13.5,
+  "min": 13.2,
+  "max": 14.7,
+  "values": [
+   14.7,
+   13.2,
+   13.5
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "pebble",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 6.3,
+  "min": 6.3,
+  "max": 6.8,
+  "values": [
+   6.8,
+   6.3,
+   6.3
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "pebble",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.15,
+  "min": 0.13,
+  "max": 0.17,
+  "values": [
+   0.17,
+   0.15,
+   0.13
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "pebble",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 4.9,
+  "min": 4.8,
+  "max": 4.9,
+  "values": [
+   4.9,
+   4.8,
+   4.9
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "build two indexes (seconds)",
+  "trials": 3,
+  "median": 0.04,
+  "min": 0.04,
+  "max": 0.04,
+  "values": [
+   0.04,
+   0.04,
+   0.04
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 5.6,
+  "min": 5.6,
+  "max": 5.6,
+  "values": [
+   5.6,
+   5.6,
+   5.6
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 19.8,
+  "min": 19.7,
+  "max": 20.3,
+  "values": [
+   20.3,
+   19.7,
+   19.8
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 13.4,
+  "min": 13.4,
+  "max": 13.5,
+  "values": [
+   13.5,
+   13.4,
+   13.4
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "indexed: 20 customers ($in), count",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "indexed: amount > 999.5 (0.05%), group by region",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "indexed: one customer's orders, sum",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.05,
+  "min": 0.05,
+  "max": 0.05,
+  "values": [
+   0.05,
+   0.05,
+   0.05
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "alpha8",
+  "engine": "sqlite-c",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 2.3,
+  "min": 2.3,
+  "max": 2.3,
+  "values": [
+   2.3,
+   2.3,
+   2.3
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "build two indexes (seconds)",
+  "trials": 3,
+  "median": 0.07,
+  "min": 0.06,
+  "max": 0.07,
+  "values": [
+   0.07,
+   0.06,
+   0.07
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 2.7,
+  "min": 2.6,
+  "max": 2.8,
+  "values": [
+   2.8,
+   2.6,
+   2.7
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 9.0,
+  "min": 8.9,
+  "max": 10.3,
+  "values": [
+   10.3,
+   9.0,
+   8.9
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 3.9,
+  "min": 3.8,
+  "max": 4.0,
+  "values": [
+   4.0,
+   3.9,
+   3.8
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "indexed: 20 customers ($in), count",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "indexed: amount > 999.5 (0.05%), group by region",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "indexed: one customer's orders, sum",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.03,
+  "min": 0.03,
+  "max": 0.03,
+  "values": [
+   0.03,
+   0.03,
+   0.03
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 2.0,
+  "min": 1.9,
+  "max": 2.1,
+  "values": [
+   1.9,
+   2.1,
+   2.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours-par",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 0.6,
+  "min": 0.6,
+  "max": 0.7,
+  "values": [
+   0.7,
+   0.6,
+   0.6
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours-par",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 4.5,
+  "min": 4.5,
+  "max": 4.7,
+  "values": [
+   4.7,
+   4.5,
+   4.5
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours-par",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 1.1,
+  "min": 0.8,
+  "max": 1.3,
+  "values": [
+   1.1,
+   1.3,
+   0.8
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours-par",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.03,
+  "min": 0.02,
+  "max": 0.03,
+  "values": [
+   0.03,
+   0.03,
+   0.02
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "ours-par",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 0.5,
+  "min": 0.5,
+  "max": 0.6,
+  "values": [
+   0.6,
+   0.5,
+   0.5
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 4.7,
+  "min": 4.6,
+  "max": 4.8,
+  "values": [
+   4.8,
+   4.6,
+   4.7
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 11.3,
+  "min": 10.5,
+  "max": 15.4,
+  "values": [
+   15.4,
+   10.5,
+   11.3
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 5.7,
+  "min": 5.7,
+  "max": 6.0,
+  "values": [
+   6.0,
+   5.7,
+   5.7
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.15,
+  "min": 0.13,
+  "max": 0.16,
+  "values": [
+   0.16,
+   0.15,
+   0.13
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 4.0,
+  "min": 3.8,
+  "max": 4.0,
+  "values": [
+   4.0,
+   3.8,
+   4.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "build two indexes (seconds)",
+  "trials": 3,
+  "median": 0.04,
+  "min": 0.04,
+  "max": 0.06,
+  "values": [
+   0.06,
+   0.04,
+   0.04
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "filter + group + sort + limit",
+  "trials": 3,
+  "median": 5.7,
+  "min": 5.6,
+  "max": 5.9,
+  "values": [
+   5.9,
+   5.7,
+   5.6
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "group by customer (100k groups), top 10",
+  "trials": 3,
+  "median": 19.7,
+  "min": 19.5,
+  "max": 21.3,
+  "values": [
+   21.3,
+   19.5,
+   19.7
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "group by region: sum, count",
+  "trials": 3,
+  "median": 13.2,
+  "min": 13.1,
+  "max": 16.3,
+  "values": [
+   16.3,
+   13.1,
+   13.2
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "indexed: 20 customers ($in), count",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "indexed: amount > 999.5 (0.05%), group by region",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "indexed: one customer's orders, sum",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "load (seconds)",
+  "trials": 3,
+  "median": 0.05,
+  "min": 0.05,
+  "max": 0.44,
+  "values": [
+   0.44,
+   0.05,
+   0.05
+  ]
+ },
+ {
+  "suite": "agg",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "range filter, global count + avg",
+  "trials": 3,
+  "median": 2.3,
+  "min": 2.3,
+  "max": 2.4,
+  "values": [
+   2.4,
+   2.3,
+   2.3
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 789.0,
+  "min": 732.0,
+  "max": 856.0,
+  "values": [
+   856.0,
+   789.0,
+   732.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 503.0,
+  "min": 416.0,
+  "max": 526.0,
+  "values": [
+   526.0,
+   503.0,
+   416.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 689.0,
+  "min": 680.0,
+  "max": 720.0,
+  "values": [
+   720.0,
+   680.0,
+   689.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 38.0,
+  "min": 38.0,
+  "max": 38.0,
+  "values": [
+   38.0,
+   38.0,
+   38.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 372.0,
+  "min": 369.0,
+  "max": 470.0,
+  "values": [
+   372.0,
+   470.0,
+   369.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 976.0,
+  "min": 959.0,
+  "max": 1022.0,
+  "values": [
+   1022.0,
+   976.0,
+   959.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 865.0,
+  "min": 855.0,
+  "max": 916.0,
+  "values": [
+   916.0,
+   855.0,
+   865.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 149.0,
+  "min": 143.0,
+  "max": 162.0,
+  "values": [
+   149.0,
+   162.0,
+   143.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 38.0,
+  "min": 37.0,
+  "max": 39.0,
+  "values": [
+   38.0,
+   39.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "alpha8",
+  "engine": "ours-batch1000",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 423.0,
+  "min": 420.0,
+  "max": 464.0,
+  "values": [
+   464.0,
+   420.0,
+   423.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 738.0,
+  "min": 738.0,
+  "max": 803.0,
+  "values": [
+   803.0,
+   738.0,
+   738.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 488.0,
+  "min": 472.0,
+  "max": 501.0,
+  "values": [
+   501.0,
+   472.0,
+   488.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 691.0,
+  "min": 683.0,
+  "max": 787.0,
+  "values": [
+   787.0,
+   683.0,
+   691.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 39.0,
+  "min": 37.0,
+  "max": 39.0,
+  "values": [
+   37.0,
+   39.0,
+   39.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 400.0,
+  "min": 376.0,
+  "max": 435.0,
+  "values": [
+   400.0,
+   376.0,
+   435.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 1021.0,
+  "min": 975.0,
+  "max": 1052.0,
+  "values": [
+   1052.0,
+   1021.0,
+   975.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 931.0,
+  "min": 911.0,
+  "max": 1024.0,
+  "values": [
+   931.0,
+   1024.0,
+   911.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 150.0,
+  "min": 144.0,
+  "max": 151.0,
+  "values": [
+   151.0,
+   144.0,
+   150.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 37.0,
+  "min": 37.0,
+  "max": 39.0,
+  "values": [
+   37.0,
+   39.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "batch",
+  "build": "cand",
+  "engine": "ours-batch1000",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 435.0,
+  "min": 430.0,
+  "max": 496.0,
+  "values": [
+   430.0,
+   435.0,
+   496.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 189.0,
+  "min": 189.0,
+  "max": 189.0,
+  "values": [
+   189.0,
+   189.0,
+   189.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 2293.0,
+  "min": 2293.0,
+  "max": 2476.0,
+  "values": [
+   2476.0,
+   2293.0,
+   2293.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 2147.0,
+  "min": 2048.0,
+  "max": 2164.0,
+  "values": [
+   2164.0,
+   2147.0,
+   2048.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 1076.0,
+  "min": 1064.0,
+  "max": 1114.0,
+  "values": [
+   1114.0,
+   1076.0,
+   1064.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 54.0,
+  "min": 54.0,
+  "max": 56.0,
+  "values": [
+   56.0,
+   54.0,
+   54.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 3208.0,
+  "min": 2760.0,
+  "max": 3339.0,
+  "values": [
+   3339.0,
+   2760.0,
+   3208.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 136.0,
+  "min": 136.0,
+  "max": 136.0,
+  "values": [
+   136.0,
+   136.0,
+   136.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 2476.0,
+  "min": 2259.0,
+  "max": 2558.0,
+  "values": [
+   2558.0,
+   2476.0,
+   2259.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 2277.0,
+  "min": 1987.0,
+  "max": 2313.0,
+  "values": [
+   2313.0,
+   2277.0,
+   1987.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 279.0,
+  "min": 263.0,
+  "max": 380.0,
+  "values": [
+   380.0,
+   263.0,
+   279.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 56.0,
+  "min": 53.0,
+  "max": 57.0,
+  "values": [
+   57.0,
+   56.0,
+   53.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "pebble-batch1000",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 2119.0,
+  "min": 1949.0,
+  "max": 2335.0,
+  "values": [
+   2335.0,
+   2119.0,
+   1949.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 134.0,
+  "min": 134.0,
+  "max": 134.0,
+  "values": [
+   134.0,
+   134.0,
+   134.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 2879.0,
+  "min": 2830.0,
+  "max": 3259.0,
+  "values": [
+   3259.0,
+   2879.0,
+   2830.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 2586.0,
+  "min": 2562.0,
+  "max": 2775.0,
+  "values": [
+   2775.0,
+   2586.0,
+   2562.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 13745.0,
+  "min": 13399.0,
+  "max": 14115.0,
+  "values": [
+   14115.0,
+   13745.0,
+   13399.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 133.0,
+  "min": 131.0,
+  "max": 140.0,
+  "values": [
+   140.0,
+   133.0,
+   131.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 1.0,
+  "min": 0.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 135.0,
+  "min": 135.0,
+  "max": 135.0,
+  "values": [
+   135.0,
+   135.0,
+   135.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 2847.0,
+  "min": 2830.0,
+  "max": 3153.0,
+  "values": [
+   3153.0,
+   2847.0,
+   2830.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 2587.0,
+  "min": 2558.0,
+  "max": 2740.0,
+  "values": [
+   2740.0,
+   2587.0,
+   2558.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 1283.0,
+  "min": 1141.0,
+  "max": 1483.0,
+  "values": [
+   1283.0,
+   1141.0,
+   1483.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 118.0,
+  "min": 116.0,
+  "max": 125.0,
+  "values": [
+   125.0,
+   118.0,
+   116.0
+  ]
+ },
+ {
+  "suite": "batch-comp",
+  "build": "cand",
+  "engine": "sqlite-c-txn1000",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 4.0,
+  "min": 2.0,
+  "max": 5.0,
+  "values": [
+   4.0,
+   5.0,
+   2.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "ours-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "ours-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4547043.0,
+  "min": 3930778.0,
+  "max": 4809317.0,
+  "values": [
+   4809317.0,
+   4547043.0,
+   3930778.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "ours-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 521880.0,
+  "min": 427973.0,
+  "max": 543555.0,
+  "values": [
+   521880.0,
+   543555.0,
+   427973.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "ours-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 115808.0,
+  "min": 75913.0,
+  "max": 132587.0,
+  "values": [
+   115808.0,
+   132587.0,
+   75913.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "pebble-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "pebble-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4824410.0,
+  "min": 3794854.0,
+  "max": 4889077.0,
+  "values": [
+   4824410.0,
+   4889077.0,
+   3794854.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "pebble-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 868814.0,
+  "min": 763935.0,
+  "max": 1043173.0,
+  "values": [
+   1043173.0,
+   868814.0,
+   763935.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "pebble-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 169983.0,
+  "min": 155033.0,
+  "max": 205595.0,
+  "values": [
+   205595.0,
+   169983.0,
+   155033.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "sqlite-c-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4321690.0,
+  "min": 4092939.0,
+  "max": 4347486.0,
+  "values": [
+   4321690.0,
+   4347486.0,
+   4092939.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 4255993.0,
+  "min": 4108897.0,
+  "max": 4280196.0,
+  "values": [
+   4108897.0,
+   4280196.0,
+   4255993.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "alpha8",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 4223621.0,
+  "min": 3940588.0,
+  "max": 4386842.0,
+  "values": [
+   3940588.0,
+   4386842.0,
+   4223621.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "ours-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "ours-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4318848.0,
+  "min": 4209426.0,
+  "max": 4385363.0,
+  "values": [
+   4385363.0,
+   4318848.0,
+   4209426.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "ours-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 466609.0,
+  "min": 408016.0,
+  "max": 490221.0,
+  "values": [
+   490221.0,
+   408016.0,
+   466609.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "ours-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 102655.0,
+  "min": 86566.0,
+  "max": 118725.0,
+  "values": [
+   118725.0,
+   102655.0,
+   86566.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "pebble-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "pebble-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4280814.0,
+  "min": 4212754.0,
+  "max": 4563064.0,
+  "values": [
+   4212754.0,
+   4563064.0,
+   4280814.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "pebble-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 840807.0,
+  "min": 793073.0,
+  "max": 934956.0,
+  "values": [
+   840807.0,
+   793073.0,
+   934956.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "pebble-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 174543.0,
+  "min": 167787.0,
+  "max": 214879.0,
+  "values": [
+   174543.0,
+   167787.0,
+   214879.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "sqlite-c-sync",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 0.0,
+  "values": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 4265770.0,
+  "min": 3975908.0,
+  "max": 4492926.0,
+  "values": [
+   3975908.0,
+   4265770.0,
+   4492926.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert-par10",
+  "trials": 3,
+  "median": 4318898.0,
+  "min": 3881938.0,
+  "max": 4464693.0,
+  "values": [
+   3881938.0,
+   4318898.0,
+   4464693.0
+  ]
+ },
+ {
+  "suite": "durable",
+  "build": "cand",
+  "engine": "sqlite-c-sync",
+  "metric": "random insert-par50",
+  "trials": 3,
+  "median": 4425031.0,
+  "min": 4238454.0,
+  "max": 4993915.0,
+  "values": [
+   4238454.0,
+   4993915.0,
+   4425031.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 718.0,
+  "min": 660.0,
+  "max": 732.0,
+  "values": [
+   718.0,
+   732.0,
+   660.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random find-hit-par10",
+  "trials": 3,
+  "median": 119.0,
+  "min": 85.0,
+  "max": 126.0,
+  "values": [
+   126.0,
+   119.0,
+   85.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 463.0,
+  "min": 436.0,
+  "max": 528.0,
+  "values": [
+   528.0,
+   463.0,
+   436.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 798.0,
+  "min": 793.0,
+  "max": 807.0,
+  "values": [
+   793.0,
+   798.0,
+   807.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 37.0,
+  "min": 37.0,
+  "max": 38.0,
+  "values": [
+   38.0,
+   37.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 398.0,
+  "min": 393.0,
+  "max": 446.0,
+  "values": [
+   446.0,
+   398.0,
+   393.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 1039.0,
+  "min": 1005.0,
+  "max": 1141.0,
+  "values": [
+   1039.0,
+   1005.0,
+   1141.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq find-hit-par10",
+  "trials": 3,
+  "median": 147.0,
+  "min": 136.0,
+  "max": 205.0,
+  "values": [
+   147.0,
+   205.0,
+   136.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 980.0,
+  "min": 931.0,
+  "max": 1043.0,
+  "values": [
+   931.0,
+   1043.0,
+   980.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 188.0,
+  "min": 182.0,
+  "max": 191.0,
+  "values": [
+   188.0,
+   191.0,
+   182.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 37.0,
+  "min": 37.0,
+  "max": 38.0,
+  "values": [
+   37.0,
+   38.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 1270.0,
+  "min": 472.0,
+  "max": 1309.0,
+  "values": [
+   472.0,
+   1309.0,
+   1270.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 718.0,
+  "min": 705.0,
+  "max": 720.0,
+  "values": [
+   718.0,
+   705.0,
+   720.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random find-hit-par10",
+  "trials": 3,
+  "median": 102.0,
+  "min": 96.0,
+  "max": 117.0,
+  "values": [
+   102.0,
+   117.0,
+   96.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 499.0,
+  "min": 494.0,
+  "max": 514.0,
+  "values": [
+   494.0,
+   499.0,
+   514.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 778.0,
+  "min": 739.0,
+  "max": 781.0,
+  "values": [
+   778.0,
+   739.0,
+   781.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 38.0,
+  "min": 37.0,
+  "max": 38.0,
+  "values": [
+   38.0,
+   38.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 398.0,
+  "min": 360.0,
+  "max": 437.0,
+  "values": [
+   437.0,
+   398.0,
+   360.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 128.0,
+  "min": 128.0,
+  "max": 128.0,
+  "values": [
+   128.0,
+   128.0,
+   128.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 1009.0,
+  "min": 1000.0,
+  "max": 1053.0,
+  "values": [
+   1009.0,
+   1000.0,
+   1053.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq find-hit-par10",
+  "trials": 3,
+  "median": 212.0,
+  "min": 175.0,
+  "max": 254.0,
+  "values": [
+   175.0,
+   212.0,
+   254.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 979.0,
+  "min": 934.0,
+  "max": 1187.0,
+  "values": [
+   979.0,
+   1187.0,
+   934.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 192.0,
+  "min": 191.0,
+  "max": 201.0,
+  "values": [
+   201.0,
+   192.0,
+   191.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 37.0,
+  "min": 37.0,
+  "max": 38.0,
+  "values": [
+   38.0,
+   37.0,
+   37.0
+  ]
+ },
+ {
+  "suite": "kv",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 481.0,
+  "min": 443.0,
+  "max": 499.0,
+  "values": [
+   499.0,
+   481.0,
+   443.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 200.0,
+  "min": 142.0,
+  "max": 200.0,
+  "values": [
+   142.0,
+   200.0,
+   200.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 2415.0,
+  "min": 2345.0,
+  "max": 2482.0,
+  "values": [
+   2482.0,
+   2345.0,
+   2415.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random find-hit-par10",
+  "trials": 3,
+  "median": 636.0,
+  "min": 551.0,
+  "max": 691.0,
+  "values": [
+   691.0,
+   551.0,
+   636.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 2148.0,
+  "min": 2042.0,
+  "max": 2423.0,
+  "values": [
+   2423.0,
+   2042.0,
+   2148.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 1748.0,
+  "min": 1461.0,
+  "max": 2739.0,
+  "values": [
+   2739.0,
+   1748.0,
+   1461.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 57.0,
+  "min": 55.0,
+  "max": 58.0,
+  "values": [
+   58.0,
+   55.0,
+   57.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 3590.0,
+  "min": 2957.0,
+  "max": 3780.0,
+  "values": [
+   3780.0,
+   3590.0,
+   2957.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 138.0,
+  "min": 138.0,
+  "max": 138.0,
+  "values": [
+   138.0,
+   138.0,
+   138.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 2627.0,
+  "min": 2410.0,
+  "max": 2844.0,
+  "values": [
+   2844.0,
+   2410.0,
+   2627.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq find-hit-par10",
+  "trials": 3,
+  "median": 657.0,
+  "min": 514.0,
+  "max": 876.0,
+  "values": [
+   657.0,
+   514.0,
+   876.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 2288.0,
+  "min": 2093.0,
+  "max": 2357.0,
+  "values": [
+   2288.0,
+   2093.0,
+   2357.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 680.0,
+  "min": 672.0,
+  "max": 704.0,
+  "values": [
+   704.0,
+   680.0,
+   672.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 56.0,
+  "min": 53.0,
+  "max": 56.0,
+  "values": [
+   56.0,
+   53.0,
+   56.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "pebble",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 2188.0,
+  "min": 1824.0,
+  "max": 2249.0,
+  "values": [
+   2188.0,
+   1824.0,
+   2249.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random disk",
+  "trials": 3,
+  "median": 134.0,
+  "min": 134.0,
+  "max": 134.0,
+  "values": [
+   134.0,
+   134.0,
+   134.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random find-hit",
+  "trials": 3,
+  "median": 2994.0,
+  "min": 2891.0,
+  "max": 3244.0,
+  "values": [
+   3244.0,
+   2891.0,
+   2994.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random find-hit-par10",
+  "trials": 3,
+  "median": 2923.0,
+  "min": 2437.0,
+  "max": 4388.0,
+  "values": [
+   4388.0,
+   2437.0,
+   2923.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random find-miss",
+  "trials": 3,
+  "median": 2661.0,
+  "min": 2594.0,
+  "max": 2750.0,
+  "values": [
+   2750.0,
+   2594.0,
+   2661.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random insert",
+  "trials": 3,
+  "median": 19182.0,
+  "min": 18308.0,
+  "max": 21928.0,
+  "values": [
+   21928.0,
+   18308.0,
+   19182.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random scan",
+  "trials": 3,
+  "median": 135.0,
+  "min": 131.0,
+  "max": 187.0,
+  "values": [
+   187.0,
+   131.0,
+   135.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "random settle",
+  "trials": 3,
+  "median": 3.0,
+  "min": 1.0,
+  "max": 4.0,
+  "values": [
+   4.0,
+   1.0,
+   3.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq disk",
+  "trials": 3,
+  "median": 135.0,
+  "min": 135.0,
+  "max": 135.0,
+  "values": [
+   135.0,
+   135.0,
+   135.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq find-hit",
+  "trials": 3,
+  "median": 2982.0,
+  "min": 2923.0,
+  "max": 3082.0,
+  "values": [
+   2982.0,
+   2923.0,
+   3082.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq find-hit-par10",
+  "trials": 3,
+  "median": 2216.0,
+  "min": 2116.0,
+  "max": 3427.0,
+  "values": [
+   3427.0,
+   2116.0,
+   2216.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq find-miss",
+  "trials": 3,
+  "median": 2720.0,
+  "min": 2673.0,
+  "max": 2822.0,
+  "values": [
+   2822.0,
+   2720.0,
+   2673.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq insert",
+  "trials": 3,
+  "median": 13856.0,
+  "min": 9860.0,
+  "max": 16508.0,
+  "values": [
+   16508.0,
+   9860.0,
+   13856.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq scan",
+  "trials": 3,
+  "median": 116.0,
+  "min": 116.0,
+  "max": 120.0,
+  "values": [
+   120.0,
+   116.0,
+   116.0
+  ]
+ },
+ {
+  "suite": "kv-comp",
+  "build": "cand",
+  "engine": "sqlite-c",
+  "metric": "seq settle",
+  "trials": 3,
+  "median": 0.0,
+  "min": 0.0,
+  "max": 4.0,
+  "values": [
+   4.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 1959074480.0,
+  "min": 1958859312.0,
+  "max": 1959244320.0,
+  "values": [
+   1959244320.0,
+   1959074480.0,
+   1958859312.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 776.0,
+  "min": 773.0,
+  "max": 786.0,
+  "values": [
+   776.0,
+   773.0,
+   786.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 17.0,
+  "min": 17.0,
+  "max": 17.0,
+  "values": [
+   17.0,
+   17.0,
+   17.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 19218432.0,
+  "min": 18808832.0,
+  "max": 19234816.0,
+  "values": [
+   19218432.0,
+   19234816.0,
+   18808832.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 192000000.0,
+  "min": 192000000.0,
+  "max": 192000000.0,
+  "values": [
+   192000000.0,
+   192000000.0,
+   192000000.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.473815,
+  "min": 0.46749599999999997,
+  "max": 0.5651160000000001,
+  "values": [
+   0.473815,
+   0.46749599999999997,
+   0.5651160000000001
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 1.965038,
+  "min": 1.9263750000000002,
+  "max": 1.9672120000000002,
+  "values": [
+   1.9263750000000002,
+   1.9672120000000002,
+   1.965038
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 1.828515625,
+  "min": 1.7458407500000002,
+  "max": 2.072947417,
+  "values": [
+   1.828515625,
+   1.7458407500000002,
+   2.072947417
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 1050923128.0,
+  "min": 1050798216.0,
+  "max": 1051070760.0,
+  "values": [
+   1050798216.0,
+   1051070760.0,
+   1050923128.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 324.0,
+  "min": 320.0,
+  "max": 325.0,
+  "values": [
+   320.0,
+   325.0,
+   324.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 19791872.0,
+  "min": 19120128.0,
+  "max": 19873792.0,
+  "values": [
+   19120128.0,
+   19873792.0,
+   19791872.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 29013856.0,
+  "min": 29013824.0,
+  "max": 29013888.0,
+  "values": [
+   29013888.0,
+   29013856.0,
+   29013824.0
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.09597900000000001,
+  "min": 0.087502,
+  "max": 0.19231199999999998,
+  "values": [
+   0.087502,
+   0.09597900000000001,
+   0.19231199999999998
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 0.946753,
+  "min": 0.924787,
+  "max": 1.08684,
+  "values": [
+   0.924787,
+   0.946753,
+   1.08684
+  ]
+ },
+ {
+  "suite": "spill-count",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 0.798627958,
+  "min": 0.783928375,
+  "max": 1.32900775,
+  "values": [
+   0.783928375,
+   0.798627958,
+   1.32900775
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 370823744.0,
+  "min": 370736784.0,
+  "max": 370916480.0,
+  "values": [
+   370823744.0,
+   370736784.0,
+   370916480.0
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 114.0,
+  "min": 113.0,
+  "max": 117.0,
+  "values": [
+   114.0,
+   117.0,
+   113.0
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 19480576.0,
+  "min": 19464192.0,
+  "max": 19628032.0,
+  "values": [
+   19480576.0,
+   19464192.0,
+   19628032.0
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 29013856.0,
+  "min": 29013824.0,
+  "max": 29013856.0,
+  "values": [
+   29013856.0,
+   29013856.0,
+   29013824.0
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.042970999999999995,
+  "min": 0.039867,
+  "max": 0.053903,
+  "values": [
+   0.039867,
+   0.053903,
+   0.042970999999999995
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 0.534418,
+  "min": 0.52911,
+  "max": 0.550864,
+  "values": [
+   0.52911,
+   0.550864,
+   0.534418
+  ]
+ },
+ {
+  "suite": "spill-count-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 0.521173959,
+  "min": 0.497179958,
+  "max": 0.558664,
+  "values": [
+   0.497179958,
+   0.558664,
+   0.521173959
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 3522963600.0,
+  "min": 3522918032.0,
+  "max": 3523180128.0,
+  "values": [
+   3522963600.0,
+   3522918032.0,
+   3523180128.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 1090.0,
+  "min": 1088.0,
+  "max": 1092.0,
+  "values": [
+   1088.0,
+   1090.0,
+   1092.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 17.0,
+  "min": 17.0,
+  "max": 17.0,
+  "values": [
+   17.0,
+   17.0,
+   17.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 20234240.0,
+  "min": 19988480.0,
+  "max": 20643840.0,
+  "values": [
+   20643840.0,
+   19988480.0,
+   20234240.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 560000000.0,
+  "min": 560000000.0,
+  "max": 560000000.0,
+  "values": [
+   560000000.0,
+   560000000.0,
+   560000000.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.884777,
+  "min": 0.884005,
+  "max": 1.0289359999999999,
+  "values": [
+   0.884777,
+   1.0289359999999999,
+   0.884005
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 2.633859,
+  "min": 2.623993,
+  "max": 2.692365,
+  "values": [
+   2.633859,
+   2.692365,
+   2.623993
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "alpha8",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 3.056559416,
+  "min": 2.964567583,
+  "max": 3.691828791,
+  "values": [
+   2.964567583,
+   3.691828791,
+   3.056559416
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 2090406904.0,
+  "min": 2090326456.0,
+  "max": 2090844216.0,
+  "values": [
+   2090326456.0,
+   2090844216.0,
+   2090406904.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 472.0,
+  "min": 466.0,
+  "max": 475.0,
+  "values": [
+   472.0,
+   466.0,
+   475.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 25591808.0,
+  "min": 25362432.0,
+  "max": 26869760.0,
+  "values": [
+   25591808.0,
+   26869760.0,
+   25362432.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 99128032.0,
+  "min": 99127968.0,
+  "max": 99128064.0,
+  "values": [
+   99128064.0,
+   99128032.0,
+   99127968.0
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.206534,
+  "min": 0.20252399999999998,
+  "max": 0.210892,
+  "values": [
+   0.206534,
+   0.210892,
+   0.20252399999999998
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 1.183267,
+  "min": 1.164755,
+  "max": 1.1845620000000001,
+  "values": [
+   1.164755,
+   1.183267,
+   1.1845620000000001
+  ]
+ },
+ {
+  "suite": "spill-numeric",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 1.126796333,
+  "min": 1.118972625,
+  "max": 1.179105458,
+  "values": [
+   1.118972625,
+   1.179105458,
+   1.126796333
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "allocated",
+  "trials": 3,
+  "median": 1377806080.0,
+  "min": 1377642528.0,
+  "max": 1377917152.0,
+  "values": [
+   1377917152.0,
+   1377642528.0,
+   1377806080.0
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "gc",
+  "trials": 3,
+  "median": 330.0,
+  "min": 328.0,
+  "max": 331.0,
+  "values": [
+   330.0,
+   331.0,
+   328.0
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "merge_passes",
+  "trials": 3,
+  "median": 1.0,
+  "min": 1.0,
+  "max": 1.0,
+  "values": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "peak_rss",
+  "trials": 3,
+  "median": 25280512.0,
+  "min": 25198592.0,
+  "max": 25804800.0,
+  "values": [
+   25198592.0,
+   25804800.0,
+   25280512.0
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "spilled_bytes",
+  "trials": 3,
+  "median": 99128160.0,
+  "min": 99128096.0,
+  "max": 99128256.0,
+  "values": [
+   99128160.0,
+   99128096.0,
+   99128256.0
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "system",
+  "trials": 3,
+  "median": 0.166128,
+  "min": 0.157638,
+  "max": 0.180568,
+  "values": [
+   0.166128,
+   0.180568,
+   0.157638
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "user",
+  "trials": 3,
+  "median": 0.828851,
+  "min": 0.827179,
+  "max": 0.855833,
+  "values": [
+   0.827179,
+   0.855833,
+   0.828851
+  ]
+ },
+ {
+  "suite": "spill-numeric-typed",
+  "build": "cand",
+  "engine": "ours",
+  "metric": "wall",
+  "trials": 3,
+  "median": 0.857402625,
+  "min": 0.835913667,
+  "max": 0.87218575,
+  "values": [
+   0.835913667,
+   0.87218575,
+   0.857402625
+  ]
+ }
+]

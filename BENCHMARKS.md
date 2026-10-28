@@ -31,6 +31,18 @@ memtables, readers and sync policy. Record background load; do not benchmark bes
 builds, tests or soak runs. Historical results under bench/results refer to their
 original builds. They do not establish release performance or a universal lead.
 
+## Aggregation, spill and index-build performance (alpha.9)
+
+The [validation report](bench/results/alpha9-performance/REPORT.md) compares
+alpha.8 with the release source in 48 interleaved fresh processes covering KV,
+batched and durable writes, in-memory aggregation, index builds and the
+one-million-group spill workload (`bench/spill_groups`). Spill aggregation is
+56–63% faster with 82–85% fewer spill bytes; in-memory aggregation is 11–54%
+faster on one core. Numeric spill peak RSS rose 5 MiB. The batched AptevaDB
+settle now compacts, matching the Pebble batch settle. Background load was
+high; every trial and its load sample are retained, and no universal lead or
+zero-regression claim is made.
+
 ## Bounded aggregation and resident-memory controls (alpha.8)
 
 The [validation report](bench/results/aggregation-memory/REPORT.md) compares

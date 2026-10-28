@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"container/heap"
 	"context"
-	"encoding/binary"
 	"fmt"
 	"hash/crc32"
 	"io"
@@ -17,13 +16,16 @@ import (
 )
 
 type aggregateRun struct {
-	path      string
-	size      int64
-	order     uint64
-	maxRecord int64
-	level     int
+	store                   *aggregateStore
+	first, last, lastLength int64
+	path                    string
+	size                    int64
+	order                   uint64
+	maxRecord               int64
+	level                   int
 }
 type aggregateDisk struct {
+	header     []byte
 	stateLimit int64
 	lease      *os.File
 	leasePath  string
@@ -165,6 +167,14 @@ func (d *aggregateDisk) create() (*aggregateRun, *os.File, error) {
 	return r, f, nil
 }
 func (d *aggregateDisk) remove(r *aggregateRun) error {
+	if r.store != nil {
+		d.budget.reserve(-256)
+		r.store.refs--
+		if r.store.refs == 0 {
+			return d.remove(r.store.run)
+		}
+		return nil
+	}
 	if err := os.Remove(r.path); err != nil {
 		return err
 	}
@@ -179,7 +189,17 @@ func (d *aggregateDisk) writeRecord(w io.Writer, r *aggregateRun, data []byte) e
 	if uint64(len(data)) > math.MaxUint32 {
 		return ErrLimit
 	}
-	n := int64(len(data) + 8)
+	if err := d.accountRecord(r, int64(len(data)+8)); err != nil {
+		return err
+	}
+	d.header = le.AppendUint32(d.header[:0], uint32(len(data)))
+	d.header = le.AppendUint32(d.header, uint32(crc32.ChecksumIEEE(data)))
+	if err := writeFull(w, d.header); err != nil {
+		return err
+	}
+	return writeFull(w, data)
+}
+func (d *aggregateDisk) accountRecord(r *aggregateRun, n int64) error {
 	quota := d.options.MaxDiskBytes
 	if quota == 0 {
 		quota = 1 << 30
@@ -187,18 +207,14 @@ func (d *aggregateDisk) writeRecord(w io.Writer, r *aggregateRun, data []byte) e
 	if n > quota-d.used {
 		return ErrDiskLimit
 	}
-	var head [8]byte
-	binary.LittleEndian.PutUint32(head[:], uint32(len(data)))
-	binary.LittleEndian.PutUint32(head[4:], crc32.ChecksumIEEE(data))
-	// Reserve quota before any write, including coexistence with merge inputs.
 	d.used += n
 	r.size += n
+	if r.store != nil {
+		r.store.run.size += n
+	}
 	d.stats.SpilledBytes += n
 	d.stats.PeakDiskBytes = max(d.stats.PeakDiskBytes, d.used)
-	if err := writeFull(w, head[:]); err != nil {
-		return err
-	}
-	return writeFull(w, data)
+	return nil
 }
 func writeFull(w io.Writer, b []byte) error {
 	for len(b) > 0 {
@@ -212,39 +228,6 @@ func writeFull(w io.Writer, b []byte) error {
 		b = b[n:]
 	}
 	return nil
-}
-
-func putScalar(b []byte, s scalar) []byte {
-	b = append(b, byte(s.k))
-	b = le.AppendUint64(b, uint64(s.i))
-	b = le.AppendUint64(b, math.Float64bits(s.f))
-	b = le.AppendUint32(b, uint32(len(s.s)))
-	return append(b, s.s...)
-}
-func groupRecord(g *groupState) []byte {
-	b := make([]byte, 0, 64+len(g.key)+len(g.accs)*64)
-	b = le.AppendUint32(b, uint32(len(g.key)))
-	b = append(b, g.key...)
-	b = le.AppendUint32(b, uint32(len(g.id)))
-	for _, s := range g.id {
-		b = putScalar(b, s)
-	}
-	b = le.AppendUint32(b, uint32(len(g.accs)))
-	for _, s := range g.accs {
-		b = le.AppendUint64(b, uint64(s.isum))
-		b = le.AppendUint64(b, math.Float64bits(s.fsum))
-		b = le.AppendUint64(b, uint64(s.count))
-		var flags byte
-		if s.hasFloat {
-			flags |= 1
-		}
-		if s.hasExt {
-			flags |= 2
-		}
-		b = append(b, flags)
-		b = putScalar(b, s.ext)
-	}
-	return b
 }
 
 // Internal temporary records preserve typed payloads, both signed-128 limbs,
@@ -277,56 +260,6 @@ func (r *aggregateDecoder) u64() uint64 {
 	}
 	return le.Uint64(r.take(8))
 }
-func (r *aggregateDecoder) str() string {
-	n := r.u32()
-	if n > len(r.b) {
-		r.err = ErrCorrupt
-		return ""
-	}
-	return string(r.take(n))
-}
-func (r *aggregateDecoder) scalar() scalar {
-	if len(r.b) < 1 {
-		r.err = ErrCorrupt
-		return scalar{}
-	}
-	s := scalar{k: kind(r.take(1)[0]), i: int64(r.u64()), f: math.Float64frombits(r.u64())}
-	s.s = r.str()
-	return s
-}
-func decodeGroup(b []byte) (*groupState, error) {
-	r := aggregateDecoder{b: b}
-	g := &groupState{key: r.str()}
-	n := r.u32()
-	if n > len(r.b)/21 {
-		return nil, ErrCorrupt
-	}
-	g.id = make([]scalar, n)
-	for i := range g.id {
-		g.id[i] = r.scalar()
-	}
-	n = r.u32()
-	if n > len(r.b)/46 {
-		return nil, ErrCorrupt
-	}
-	g.accs = make([]accState, n)
-	for i := range g.accs {
-		s := &g.accs[i]
-		s.isum = int64(r.u64())
-		s.fsum = math.Float64frombits(r.u64())
-		s.count = int64(r.u64())
-		if len(r.b) < 1 {
-			return nil, ErrCorrupt
-		}
-		flags := r.take(1)[0]
-		s.hasFloat, s.hasExt = flags&1 != 0, flags&2 != 0
-		s.ext = r.scalar()
-	}
-	if r.err != nil || len(r.b) != 0 {
-		return nil, ErrCorrupt
-	}
-	return g, nil
-}
 func groupStorage(g *groupState) int64 {
 	n := int64(128 + len(g.key) + len(g.id)*64 + len(g.accs)*80)
 	for _, s := range g.id {
@@ -339,16 +272,22 @@ func groupStorage(g *groupState) int64 {
 }
 
 type aggregateRead struct {
-	buffer int64
-	f      *os.File
-	in     *bufio.Reader
-	run    *aggregateRun
-	data   []byte
-	cost   int64
-	group  *groupState
-	row    map[string]any
-	seq    uint64
-	d      *aggregateDisk
+	header      [8]byte
+	state       groupState
+	stateSpec   *groupSpec
+	stateCost   int64
+	payload     []byte
+	payloadCost int64
+	buffer      int64
+	f           *os.File
+	in          *bufio.Reader
+	run         *aggregateRun
+	data        []byte
+	cost        int64
+	group       *groupState
+	row         map[string]any
+	seq         uint64
+	d           *aggregateDisk
 }
 
 func (d *aggregateDisk) bufferBytes() int {
@@ -364,9 +303,17 @@ func (d *aggregateDisk) reader(run *aggregateRun) (*aggregateRead, error) {
 		d.budget.reserve(-buffer)
 		return nil, err
 	}
-	return &aggregateRead{f: f, in: bufio.NewReaderSize(f, int(buffer)), run: run, d: d, buffer: buffer}, nil
+	var input io.Reader = f
+	if run.store != nil {
+		input = &aggregateSegmentReader{f: f, next: run.first, left: run.size, physical: run.store.run.size}
+	}
+	return &aggregateRead{f: f, in: bufio.NewReaderSize(input, int(buffer)), run: run, d: d, buffer: buffer}, nil
 }
-func (r *aggregateRead) close() { r.d.budget.reserve(-r.cost - r.buffer); r.cost = 0; _ = r.f.Close() }
+func (r *aggregateRead) close() {
+	r.d.budget.reserve(-r.cost - r.buffer - r.stateCost - r.payloadCost)
+	r.cost = 0
+	_ = r.f.Close()
+}
 
 func (r *aggregateRead) next(groups bool) error {
 	if err := r.d.ctx.Err(); err != nil {
@@ -377,8 +324,8 @@ func (r *aggregateRead) next(groups bool) error {
 	r.data = nil
 	r.group = nil
 	r.row = nil
-	var head [8]byte
-	_, err := io.ReadFull(r.in, head[:])
+	head := r.header[:]
+	_, err := io.ReadFull(r.in, head)
 	if err != nil {
 		return err
 	}
@@ -387,6 +334,9 @@ func (r *aggregateRead) next(groups bool) error {
 		return ErrCorrupt
 	}
 	cost := n*4 + 256
+	if r.stateSpec != nil {
+		cost = 0
+	}
 	if err := r.d.budget.reserve(cost); err != nil {
 		return err
 	}
@@ -395,7 +345,18 @@ func (r *aggregateRead) next(groups bool) error {
 	if borrowed {
 		r.data, err = r.in.Peek(int(n))
 	} else {
-		r.data = make([]byte, int(n))
+		if r.stateSpec != nil {
+			if n > r.payloadCost {
+				if err := r.d.budget.reserve(n - r.payloadCost); err != nil {
+					return err
+				}
+				r.payloadCost = n
+				r.payload = make([]byte, int(n))
+			}
+			r.data = r.payload[:int(n)]
+		} else {
+			r.data = make([]byte, int(n))
+		}
 		_, err = io.ReadFull(r.in, r.data)
 	}
 	if err != nil {
@@ -405,7 +366,12 @@ func (r *aggregateRead) next(groups bool) error {
 		return ErrCorrupt
 	}
 	if groups {
-		r.group, err = decodeGroup(r.data)
+		if r.stateSpec != nil {
+			err = decodeGroupRecord(r.data, r.stateSpec, &r.state)
+			r.group = &r.state
+		} else {
+			return ErrCorrupt
+		}
 	} else {
 		if n < 8 {
 			return ErrCorrupt

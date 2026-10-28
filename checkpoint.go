@@ -425,11 +425,14 @@ func (db *DB) captureFreelist(cs *captureSet) (uint32, error) {
 // writeCapture does the I/O of a checkpoint without any lock held.
 func (db *DB) writeCapture(cs *captureSet) error {
 	f := db.pager.f
-	if err := db.writeCheckpointPages(cs.pages); err != nil {
-		return err
-	}
-	if err := db.wal.syncFn(f); err != nil {
-		return err
+	if len(cs.pages) > 0 {
+		// pages must be stable before the meta that references them
+		if err := db.writeCheckpointPages(cs.pages); err != nil {
+			return err
+		}
+		if err := db.wal.syncFn(f); err != nil {
+			return err
+		}
 	}
 	if err := writeAt(f, cs.metaBuf, int64(cs.meta.checkpoint%2)*PageSize); err != nil {
 		return err

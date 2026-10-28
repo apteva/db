@@ -2,12 +2,14 @@ package db
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"sync"
 	"unicode/utf8"
@@ -405,9 +407,16 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 	}
 	// 0. apply what is buffered: the bulk inserts below go straight to the
 	// tree, and a buffered tombstone for one of their keys (a swept or
-	// dropped index that used this id) would otherwise shadow them
-	if err := db.Checkpoint(); err != nil {
-		return fail(err)
+	// dropped index that used this id) would otherwise shadow them. With
+	// nothing buffered there is nothing to apply, and the checkpoint would
+	// only cost its syncs.
+	db.mu.RLock()
+	buffered := db.imm != nil || (db.mt != nil && db.mt.len() > 0)
+	db.mu.RUnlock()
+	if buffered {
+		if err := db.Checkpoint(); err != nil {
+			return fail(err)
+		}
 	}
 	// 1. entries from a snapshot
 	s, err := db.Snapshot()
@@ -495,11 +504,11 @@ func (c *Collection) CreateIndex(ctx context.Context, name, field string, opts .
 		return fail(err)
 	}
 	// 2. sort: mostly by the fixed-width head of the encoded value
-	sort.Slice(refs, func(i, j int) bool {
-		if refs[i].head != refs[j].head {
-			return refs[i].head < refs[j].head
+	slices.SortFunc(refs, func(a, b entryRef) int {
+		if a.head != b.head {
+			return cmp.Compare(a.head, b.head)
 		}
-		return bytes.Compare(refs[i].key(arena), refs[j].key(arena)) < 0
+		return bytes.Compare(a.key(arena), b.key(arena))
 	})
 	// 3. insert in order, in chunks under the writer lock, skipping keys
 	// that maintenance has handled since the snapshot

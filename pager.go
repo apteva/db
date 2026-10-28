@@ -74,6 +74,7 @@ type pager struct {
 	loads, writes, evictions   uint64
 	bufferArenas               []*pageBufferArena
 	bufferTail                 *pageBufferArena
+	spareInternal              []*pageBufferArena // released one-page mappings kept for reuse
 	nodeArenas                 []*nodeArena
 	nodeTail, internalNodeTail *nodeArena
 }
@@ -124,7 +125,13 @@ func (pg *pager) close() error {
 			pg.memory.pages.Add(-int64(len(a.data)))
 		}
 	}
-	pg.bufferArenas, pg.bufferTail = nil, nil
+	for _, a := range pg.spareInternal {
+		syscall.Munmap(a.data)
+		if pg.memory != nil {
+			pg.memory.pages.Add(-int64(len(a.data)))
+		}
+	}
+	pg.bufferArenas, pg.bufferTail, pg.spareInternal = nil, nil, nil
 	for _, m := range pg.maps {
 		syscall.Munmap(m)
 	}
@@ -309,7 +316,7 @@ func (pg *pager) alloc(typ byte, level byte) *node {
 	if typ == pageInternal {
 		// Sparse parents can outlive hundreds of completed leaves. Keeping
 		// these small buffers separate avoids pinning whole leaf arenas.
-		n.data, n.buffer = pg.allocInternalPageBuffer()
+		n.data, n.buffer = pg.allocInternalPageBuffer(true)
 	} else {
 		n.data, n.buffer = pg.allocPageBuffer()
 	}

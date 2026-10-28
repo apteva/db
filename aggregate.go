@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/maphash"
 	"math"
 	"sort"
 	"strings"
 	"sync"
+	"unsafe"
 )
 
 // Source streams key/value pairs into a pipeline; yield returns false to stop.
@@ -554,6 +556,28 @@ func (p *pred) eval(v value) bool {
 }
 
 func (p *pred) evalScalar(v value) bool {
+	// fast paths: a float field against a constant that is exact as a
+	// float64, and string equality. NaN keeps compareValues' ordering.
+	if p.op >= opGt && p.op <= opLte && v.k == kFloat && v.f == v.f {
+		c, exact := p.v.f, p.v.k == kFloat && p.v.f == p.v.f
+		if p.v.k == kInt && p.v.i >= -1<<53 && p.v.i <= 1<<53 {
+			c, exact = float64(p.v.i), true
+		}
+		if exact {
+			switch p.op {
+			case opGt:
+				return v.f > c
+			case opGte:
+				return v.f >= c
+			case opLt:
+				return v.f < c
+			}
+			return v.f <= c
+		}
+	}
+	if p.op == opEq && v.k == kString && p.v.k == kString {
+		return bytes.Equal(v.s, p.v.s)
+	}
 	if p.op >= opGt && p.op <= opLte && v.isNum() && p.v.isNum() {
 		c := compareValues(v, p.v)
 		switch p.op {
@@ -628,26 +652,32 @@ type accState struct {
 }
 
 type groupState struct {
-	key  string // owned encoded key, also backing the string/document ID parts
-	id   []scalar
-	accs []accState
+	key      string // owned encoded key, also backing the string/document ID parts
+	id       []scalar
+	accs     []accState
+	absorbed bool // folded into an earlier shard's group by mergePartitioned
 }
 
 type grouper struct {
-	spec     *groupSpec
-	groups   map[string]*groupState
-	single   *groupState // the one group when _id is null
-	order    []*groupState
-	keyBuf   []byte
-	max      int
-	states   []groupState
-	ids      []scalar
-	accs     []accState
-	used     int
-	budget   *memoryBudget
-	capBytes int64
-	charge   int64
-	slab     int // nonzero: bounded streaming/spill allocation granularity
+	counts     map[string]int64
+	countKeys  []string
+	countState *groupState
+	arena      []byte
+	spec       *groupSpec
+	groups     map[string]*groupState
+	single     *groupState // the one group when _id is null
+	order      []*groupState
+	keyBuf     []byte
+	max        int
+	states     []groupState
+	ids        []scalar
+	accs       []accState
+	used       int
+	budget     *memoryBudget
+	capBytes   int64
+	charge     int64
+	slab       int    // nonzero: bounded streaming/spill allocation granularity
+	keyArena   []byte // slab 0: backs groupState.key, one allocation per chunk
 }
 
 // Groups own query-local slabs: addresses remain stable through shard merges,
@@ -655,7 +685,11 @@ type grouper struct {
 func (g *grouper) allocGroup() (*groupState, error) {
 	if g.used == len(g.states) {
 		n := g.nextSlab()
-		if err := g.reserve(int64(n) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)); err != nil {
+		per := 64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80
+		if g.slab == 0 {
+			per += 160 // the map entry and order slot, charged with the slab
+		}
+		if err := g.reserve(int64(n) * per); err != nil {
 			return nil, err
 		}
 		g.states = make([]groupState, n)
@@ -702,6 +736,9 @@ func (g *grouper) add(get func(string) value) error {
 // vals[idIdx[i]] is _id part i, vals[accIdx[j]] is accumulator j's operand
 // (accIdx -1 means the accumulator's constant).
 func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
+	if g.counts != nil {
+		return g.addCount(vals, idIdx, accIdx)
+	}
 	spec := g.spec
 	var gs *groupState
 	if len(idIdx) == 0 {
@@ -818,15 +855,33 @@ func (g *grouper) lookup(vals []value, idIdx []int) (*groupState, error) {
 		if len(g.groups) >= g.max {
 			return nil, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
 		}
-		if err := g.reserve(int64(len(kb)) + 160); err != nil {
-			return nil, err
+		if g.slab > 0 {
+			cost := int64(len(kb)) + 160
+			if g.slab > 1 {
+				cost = 160
+			}
+			if err := g.reserve(cost); err != nil {
+				return nil, err
+			}
 		}
 		var err error
 		gs, err = g.allocGroup()
 		if err != nil {
 			return nil, err
 		}
-		gs.key = string(kb)
+		switch {
+		case g.slab > 1:
+			gs.key, err = g.ownText(borrowedString(kb))
+			if err != nil {
+				return nil, err
+			}
+		case g.slab == 1:
+			gs.key = string(kb)
+		default:
+			if gs.key, err = g.ownKey(kb); err != nil {
+				return nil, err
+			}
+		}
 		off := 0
 		for i, ix := range idIdx {
 			v := vals[ix]
@@ -933,6 +988,87 @@ func (g *grouper) merge(o *grouper) error {
 	return nil
 }
 
+// partitionedMergeGroups is the group count above which shard results are
+// merged by key hash instead of in pairwise rounds, whose last round runs on
+// one goroutine.
+const partitionedMergeGroups = 8192
+
+// mergePartitioned merges shard groupers (in key-range order) on P workers,
+// each owning the keys that hash to it. A worker visits shards in order, so
+// a key's group is the one from its first shard and later shards fold into
+// it, as in the pairwise merge. The result keeps the serial encounter order;
+// only its order (not its map) is filled, which is all finishGroup reads.
+// ok is false when the pairwise merge should run instead.
+func mergePartitioned(gs []*grouper) (*grouper, bool, error) {
+	total := 0
+	for _, g := range gs {
+		if g.single != nil || g.counts != nil {
+			return nil, false, nil
+		}
+		total += len(g.order)
+	}
+	if total < partitionedMergeGroups {
+		return nil, false, nil
+	}
+	parts := len(gs)
+	seed := maphash.MakeSeed()
+	buckets := make([][][]*groupState, len(gs)) // [shard][partition]
+	var wg sync.WaitGroup
+	for i, g := range gs {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			b := make([][]*groupState, parts)
+			for p := range b {
+				b[p] = make([]*groupState, 0, len(g.order)/parts+len(g.order)/(4*parts)+1)
+			}
+			for _, st := range g.order {
+				p := maphash.String(seed, st.key) % uint64(parts)
+				b[p] = append(b[p], st)
+			}
+			buckets[i] = b
+		}()
+	}
+	wg.Wait()
+	spec := gs[0].spec
+	for p := 0; p < parts; p++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			n := 0
+			for i := range gs {
+				n += len(buckets[i][p])
+			}
+			first := make(map[string]*groupState, n)
+			for i := range gs {
+				for _, st := range buckets[i][p] {
+					if c := first[st.key]; c != nil {
+						mergeState(spec, c, st)
+						st.absorbed = true
+					} else {
+						first[st.key] = st
+					}
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	g := gs[0]
+	order := make([]*groupState, 0, total)
+	for _, o := range gs {
+		for _, st := range o.order {
+			if !st.absorbed {
+				order = append(order, st)
+			}
+		}
+	}
+	if len(order) > g.max {
+		return nil, true, fmt.Errorf("%w: more than %d groups", ErrLimit, g.max)
+	}
+	g.order, g.groups = order, nil
+	return g, true, nil
+}
+
 func mergeState(spec *groupSpec, a, b *groupState) {
 	for i := range spec.accs {
 		x, y := &a.accs[i], &b.accs[i]
@@ -987,6 +1123,7 @@ type plan struct {
 	group         *groupSpec
 	idIdx, accIdx []int
 	nvals         int
+	npred         int // need[:npred] are the fields the predicates read
 	next          int // first stage that runs on materialised rows
 	limits        Limits
 	countOnly     bool // the group stands for a trailing $count
@@ -1052,6 +1189,7 @@ func (p *Pipeline) plan() plan {
 		predicateFields(pl.preds[j], func(f string) { local(f) })
 		predRefs[j] = local(pl.preds[j].field)
 	}
+	pl.npred = len(pl.need)
 	// a $lookup unwound on its own field joins in the stream
 	var jp *joinPlan
 	resolve := local
@@ -1169,21 +1307,26 @@ func (p *Pipeline) plan() plan {
 // document; documents built the same way share a layout, so the hint
 // usually hits and no other entry is touched.
 func extractFields(doc []byte, need []fieldPath, vals []value, hints []int) {
-	for j := range vals {
-		vals[j] = value{}
-	}
 	n, dir, ok := docDir(doc)
 	if !ok {
+		clear(vals)
 		return
 	}
+	extractFieldsDir(doc, n, dir, need, vals, hints)
+}
+
+// extractFieldsDir is extractFields over an already decoded directory. Every
+// vals[j] is written, so callers need not clear it between documents.
+func extractFieldsDir(doc []byte, n int, dir []byte, need []fieldPath, vals []value, hints []int) {
 	for j := range need {
 		want, rest := need[j].top, need[j].rest
 		var v value
 		found := false
 		if h := hints[j]; h < n {
-			name, hv, ok := decodeEntry(doc, docOffset(dir, n, h))
-			if ok && len(name) == len(want) && string(name) == want {
-				v, found = hv, true
+			// check the name in place before decoding the payload
+			off := docOffset(dir, n, h)
+			if p := off + 1 + len(want); off < len(doc) && int(doc[off]) == len(want) && p < len(doc) && string(doc[off+1:p]) == want {
+				v, _, found = decodePayload(doc, doc[p], p+1)
 			}
 		}
 		if !found {
@@ -1206,9 +1349,7 @@ func extractFields(doc []byte, need []fieldPath, vals []value, hints []int) {
 		if found && rest != "" {
 			v = pathValue(v, rest)
 		}
-		if found {
-			vals[j] = v
-		}
+		vals[j] = v
 	}
 }
 
@@ -1284,12 +1425,18 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 				return false
 			}
 		}
-		if _, _, ok := docDir(val); !ok {
+		dn, dir, ok := docDir(val)
+		if !ok {
 			return true // not a document: invisible to pipelines
 		}
-		extractFields(val, pl.paths, vals[:len(pl.need)], hints)
+		// predicate fields come first: a rejected document skips the rest
+		np := pl.npred
+		extractFieldsDir(val, dn, dir, pl.paths[:np], vals[:np], hints[:np])
 		if !pl.matches(vals) {
 			return true
+		}
+		if np < len(pl.need) {
+			extractFieldsDir(val, dn, dir, pl.paths[np:], vals[np:len(pl.need)], hints[np:])
 		}
 		seen++
 		if seen <= pl.skip {
@@ -1597,6 +1744,12 @@ func (p *Pipeline) runSharded(ctx context.Context, shards []srcSpec, e *env) ([]
 			return nil, err
 		}
 	}
+	if merged, ok, err := mergePartitioned(groupers); ok {
+		if err != nil {
+			return nil, err
+		}
+		return p.finishGroup(ctx, &pl, merged, e)
+	}
 	// merge adjacent pairs in rounds, each round in parallel (key-range
 	// order is kept, which $first, $last and the row order rely on): with
 	// many groups the merge is a large part of the work
@@ -1903,6 +2056,25 @@ func validateFilterNumbers(v any) error {
 		}
 	}
 	return nil
+}
+
+// ownKey copies kb into the grouper's key arena (unbounded runs; bounded
+// ones use ownText). Arena chunks are reserved whole, so the shared budget is
+// touched once per chunk rather than per group.
+func (g *grouper) ownKey(kb []byte) (string, error) {
+	if len(kb) == 0 {
+		return "", nil
+	}
+	if len(kb) > cap(g.keyArena)-len(g.keyArena) {
+		n := max(16<<10, len(kb))
+		if err := g.reserve(int64(n)); err != nil {
+			return "", err
+		}
+		g.keyArena = make([]byte, 0, n)
+	}
+	start := len(g.keyArena)
+	g.keyArena = append(g.keyArena, kb...)
+	return unsafe.String(&g.keyArena[start], len(kb)), nil
 }
 
 func (g *grouper) nextSlab() int {

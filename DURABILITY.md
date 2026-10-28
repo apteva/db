@@ -66,8 +66,11 @@ only then is older log space released. A crash at any point in that
 sequence leaves either the old meta page or the new one valid, and the log
 covers the difference.
 
-The directory is fsynced after every file rename, log rotation and log
-generation deletion, so the set of files recovery finds is itself durable.
+The directory is fsynced after every file rename and after each new log
+generation is created, so recovery finds every file that holds acknowledged
+records. Deleting fully checkpointed generations is not fsynced: one that
+reappears after a crash is older than the checkpoint, so replay skips it and
+the next cleanup removes it.
 
 ## Operations with their own rules
 

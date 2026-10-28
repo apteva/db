@@ -5,6 +5,38 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.9] - 2026-10-28
+
+- Add AggregateGroups/RunGroups with a borrowed, typed GroupView for pipelines
+  ending in $group. It skips per-group result maps, reports integer SUM overflow
+  instead of rounding it, and exposes the exact signed 128-bit subtotal.
+- Speed up bounded (spill) aggregation: adaptive partition fanout with budgeted
+  I/O buffers, a compact temporary record codec, arena-backed reconstruction and
+  compact COUNT state. Temporary spill records changed; nothing persistent did.
+- Speed up in-memory aggregation: extract filter fields first and skip the rest
+  for rejected documents, decode each document's directory once, check field
+  names before decoding values, and add float-vs-number and string-equality
+  predicate fast paths (NaN ordering unchanged).
+- Sharded $group with more than 8,192 groups merges shard results by key hash
+  on all workers instead of pairwise rounds; group keys share per-query arenas
+  and the memory budget is charged per slab. Row order, $first/$last and limits
+  match the serial run.
+- Index builds skip the initial checkpoint when nothing is buffered, checkpoints
+  skip the page sync when they write no pages, released one-page buffers are
+  reused instead of unmapped, and build entries sort without reflection.
+- Fix: creating a log generation now fsyncs the database directory. Previously
+  a power loss right after a log rotation could lose the new file's directory
+  entry and, with Sync, records already acknowledged in it. DURABILITY.md now
+  states that deleting checkpointed generations is not fsynced, and why.
+- Benchmark harness: the batched AptevaDB settle step now compacts, matching the
+  Pebble batch settle, so disk sizes compare like for like.
+- Retain 48 interleaved fresh-process trials against alpha.8. One-million-group
+  spill: COUNT 56% and numeric 63% faster, 82–85% fewer spill bytes, one merge
+  pass instead of 17; numeric spill peak RSS rose 5 MiB. In-memory aggregation is
+  11–54% faster on one core; KV, batched and durable writes are unchanged within
+  noise. The workstation was busy; no zero-regression claim is made.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.8] - 2026-10-27
 
 - Add native AggregateEach/RunEach and collecting WithOptions APIs, with proven

@@ -131,10 +131,18 @@ func (w *wal) prepareGen(gen uint64) (fileLike, uint64, error) {
 			f.Close()
 			return nil, 0, err
 		}
+		// the new file's directory entry must be durable before any
+		// record in it is acknowledged as such
+		if err := syncLogDirectory(w.dir); err != nil {
+			f.Close()
+			return nil, 0, err
+		}
 		size = walHeaderSize
 	}
 	return f, size, nil
 }
+
+var syncLogDirectory = syncRestoreDirectory
 
 // openGenLocked makes a prepared generation current for appends. Caller
 // holds w.mu.
@@ -251,6 +259,8 @@ func (w *wal) dropBefore(gen uint64) {
 	if err != nil {
 		return
 	}
+	// No directory sync: a generation that reappears after a crash is older
+	// than the checkpoint, so replay skips it and the next drop removes it.
 	for _, g := range gens {
 		if g < gen {
 			os.Remove(walPath(w.dir, g))

@@ -497,7 +497,11 @@ func (o *oursBatch) Settle() error {
 	if err := o.b.Commit(); err != nil {
 		return err
 	}
-	return o.db.Checkpoint()
+	// the same packed layout pebble-batch's settle (a full compaction) reaches
+	if err := o.db.Checkpoint(); err != nil {
+		return err
+	}
+	return o.db.Compact(context.Background())
 }
 func (o *oursBatch) Close() error {
 	if err := o.b.Commit(); err != nil {

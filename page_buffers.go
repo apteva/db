@@ -43,9 +43,26 @@ func (pg *pager) allocPageBuffer() (page, *pageBufferArena) {
 	return page(a.data[start:a.next:a.next]), a
 }
 
+// spareInternalPages bounds the released one-page mappings kept for reuse:
+// every checkpoint frees the copied parents and the next write copies them
+// again, so recycling them saves an mmap/munmap pair and a page fault each.
+const spareInternalPages = 64
+
 // Sparse parents use one-page mappings so a retained parent cannot pin a
 // mostly empty leaf arena. They still share the same explicit view/I/O leases.
-func (pg *pager) allocInternalPageBuffer() (page, *pageBufferArena) {
+// zero clears a recycled mapping; callers that overwrite the whole page skip it.
+func (pg *pager) allocInternalPageBuffer(zero bool) (page, *pageBufferArena) {
+	if k := len(pg.spareInternal); k > 0 {
+		a := pg.spareInternal[k-1]
+		pg.spareInternal[k-1] = nil
+		pg.spareInternal = pg.spareInternal[:k-1]
+		if zero {
+			clear(a.data)
+		}
+		a.next, a.live = PageSize, 1
+		pg.bufferArenas = append(pg.bufferArenas, a)
+		return page(a.data), a
+	}
 	data, err := syscall.Mmap(-1, 0, PageSize, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
 	if err != nil {
 		panic("aptevadb: cannot allocate internal page buffer: " + err.Error())
@@ -69,7 +86,7 @@ func (pg *pager) copyPageBuffer(n *node) {
 	var buf page
 	var a *pageBufferArena
 	if n.pageType() == pageInternal {
-		buf, a = pg.allocInternalPageBuffer()
+		buf, a = pg.allocInternalPageBuffer(false)
 	} else {
 		buf, a = pg.allocPageBuffer()
 	}
@@ -83,6 +100,10 @@ func (pg *pager) copyPageBuffer(n *node) {
 func (pg *pager) releaseUnusedBuffers() {
 	kept := pg.bufferArenas[:0]
 	for _, a := range pg.bufferArenas {
+		if a.live == 0 && len(a.data) == PageSize && a != pg.bufferTail && len(pg.spareInternal) < spareInternalPages {
+			pg.spareInternal = append(pg.spareInternal, a)
+			continue
+		}
 		if a.live == 0 && syscall.Munmap(a.data) == nil {
 			if pg.memory != nil {
 				pg.memory.pages.Add(-int64(len(a.data)))
