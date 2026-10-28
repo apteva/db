@@ -1,0 +1,13 @@
+{
+ "Path": "github.com/apteva/db",
+ "Version": "v0.2.0-alpha.9",
+ "Sum": "h1:+O+PD70adsC6vrkAcCPEnQbmmtIhSL8MEP3jSMSTnO0=",
+ "GoModSum": "h1:g1aROFEShHWYjiQW1itoDxRf1X5dSw4Cl6jsxyKNluc=",
+ "Origin": {
+  "VCS": "git",
+  "URL": "https://github.com/apteva/db",
+  "Hash": "8d6daf262403b0c669323fc02e3f9f3674d845d7",
+  "Ref": "refs/tags/v0.2.0-alpha.9"
+ },
+ "Resolved": "proxy.golang.org with sum.golang.org, GOWORK=off, fresh module cache"
+}

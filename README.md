@@ -86,6 +86,9 @@ KV comparisons use `Upsert` (matching the other engines' replacement behavior);
 Alpha.9 adds the [typed group visitor](USAGE.md#typed-group-visitor-alpha9) and
 faster in-memory and spill aggregation; the [comparison with alpha.8](bench/results/alpha9-performance/REPORT.md)
 retains 48 interleaved trials and the remaining tradeoffs.
+The [publication verification](bench/results/alpha9-performance/release-alpha9/RELEASE.md)
+confirms Linux/macOS CI and soak, public Go installation, all four archive
+checksums, the downloaded server/driver and alpha.8 directory compatibility.
 
 Alpha.8 adds [bounded native aggregation](USAGE.md#bounded-native-aggregation-alpha8)
 and [resident-memory controls](OPERATIONS.md#resident-memory-controls-alpha8).

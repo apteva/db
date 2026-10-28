@@ -1,0 +1,56 @@
+== x/aptevadb_0.2.0-alpha.9_darwin_amd64/aptevadb-server
+x/aptevadb_0.2.0-alpha.9_darwin_amd64/aptevadb-server: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=darwin
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_darwin_amd64/aptevadbctl
+x/aptevadb_0.2.0-alpha.9_darwin_amd64/aptevadbctl: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=darwin
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_darwin_arm64/aptevadb-server
+x/aptevadb_0.2.0-alpha.9_darwin_arm64/aptevadb-server: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=arm64
+	build	GOOS=darwin
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_darwin_arm64/aptevadbctl
+x/aptevadb_0.2.0-alpha.9_darwin_arm64/aptevadbctl: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=arm64
+	build	GOOS=darwin
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_linux_amd64/aptevadb-server
+x/aptevadb_0.2.0-alpha.9_linux_amd64/aptevadb-server: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_linux_amd64/aptevadbctl
+x/aptevadb_0.2.0-alpha.9_linux_amd64/aptevadbctl: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_linux_arm64/aptevadb-server
+x/aptevadb_0.2.0-alpha.9_linux_arm64/aptevadb-server: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=arm64
+	build	GOOS=linux
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false
+== x/aptevadb_0.2.0-alpha.9_linux_arm64/aptevadbctl
+x/aptevadb_0.2.0-alpha.9_linux_arm64/aptevadbctl: go1.25.14
+	build	CGO_ENABLED=0
+	build	GOARCH=arm64
+	build	GOOS=linux
+	build	vcs.revision=8d6daf262403b0c669323fc02e3f9f3674d845d7
+	build	vcs.modified=false

@@ -1,0 +1,6 @@
+    soak_test.go:443: phase 0: inserts=12366037 deletes=901365 finds=396067 scans=790201 aggregations=139 maintenance=97; pages=1863 free=164 indexes=2
+    soak_test.go:443: phase 1: inserts=25909396 deletes=1898612 finds=811241 scans=1620424 aggregations=279 maintenance=194; pages=1039 free=1 indexes=0
+    soak_test.go:443: phase 2: inserts=39548259 deletes=2901993 finds=1231062 scans=2459746 aggregations=419 maintenance=291; pages=1707 free=1 indexes=2
+    soak_test.go:443: phase 3: inserts=51337200 deletes=3768280 finds=1605592 scans=3208762 aggregations=556 maintenance=386; pages=1708 free=1 indexes=2
+--- PASS: TestSoak (1201.50s)
+ok  	github.com/apteva/db	1201.680s

@@ -1,0 +1,113 @@
+[
+ {
+  "conclusion": "success",
+  "databaseId": 40771991774,
+  "event": "push",
+  "headSha": "8d6daf262403b0c669323fc02e3f9f3674d845d7",
+  "jobs": [
+   {
+    "completedAt": "2026-10-28T21:31:02Z",
+    "conclusion": "success",
+    "name": "fuzz smoke (ubuntu)",
+    "startedAt": "2026-10-28T21:26:42Z"
+   },
+   {
+    "completedAt": "2026-10-28T21:39:41Z",
+    "conclusion": "success",
+    "name": "race detector (ubuntu-latest)",
+    "startedAt": "2026-10-28T21:26:42Z"
+   },
+   {
+    "completedAt": "2026-10-28T21:33:20Z",
+    "conclusion": "success",
+    "name": "vet and test (ubuntu-latest)",
+    "startedAt": "2026-10-28T21:26:42Z"
+   },
+   {
+    "completedAt": "2026-10-28T21:42:20Z",
+    "conclusion": "success",
+    "name": "race detector (macos-latest)",
+    "startedAt": "2026-10-28T21:26:42Z"
+   },
+   {
+    "completedAt": "2026-10-28T21:35:23Z",
+    "conclusion": "success",
+    "name": "vet and test (macos-latest)",
+    "startedAt": "2026-10-28T21:26:42Z"
+   }
+  ],
+  "name": "ci"
+ },
+ {
+  "conclusion": "success",
+  "databaseId": 40772012639,
+  "event": "workflow_dispatch",
+  "headSha": "8d6daf262403b0c669323fc02e3f9f3674d845d7",
+  "jobs": [
+   {
+    "completedAt": "2026-10-28T22:47:24Z",
+    "conclusion": "success",
+    "name": "soak (ubuntu-latest)",
+    "startedAt": "2026-10-28T21:26:53Z"
+   },
+   {
+    "completedAt": "2026-10-28T22:57:34Z",
+    "conclusion": "success",
+    "name": "soak (macos-latest)",
+    "startedAt": "2026-10-28T21:36:55Z"
+   }
+  ],
+  "name": "soak"
+ },
+ {
+  "conclusion": "success",
+  "databaseId": 40783947471,
+  "event": "push",
+  "headSha": "8d6daf262403b0c669323fc02e3f9f3674d845d7",
+  "jobs": [
+   {
+    "completedAt": "2026-10-28T23:17:09Z",
+    "conclusion": "success",
+    "name": "verify (macos-latest)",
+    "startedAt": "2026-10-28T22:58:24Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:15:10Z",
+    "conclusion": "success",
+    "name": "verify (ubuntu-latest)",
+    "startedAt": "2026-10-28T22:58:24Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:17:48Z",
+    "conclusion": "success",
+    "name": "build (darwin, amd64)",
+    "startedAt": "2026-10-28T23:17:12Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:18:03Z",
+    "conclusion": "success",
+    "name": "build (linux, amd64)",
+    "startedAt": "2026-10-28T23:17:11Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:17:52Z",
+    "conclusion": "success",
+    "name": "build (linux, arm64)",
+    "startedAt": "2026-10-28T23:17:12Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:17:39Z",
+    "conclusion": "success",
+    "name": "build (darwin, arm64)",
+    "startedAt": "2026-10-28T23:17:12Z"
+   },
+   {
+    "completedAt": "2026-10-28T23:18:17Z",
+    "conclusion": "success",
+    "name": "publish",
+    "startedAt": "2026-10-28T23:18:06Z"
+   }
+  ],
+  "name": "release"
+ }
+]
