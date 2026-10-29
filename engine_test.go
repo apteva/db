@@ -887,8 +887,12 @@ func TestChecksumDetectsCorruption(t *testing.T) {
 	}
 	victim := int64(n.id)
 	db.mu.RUnlock()
+	// Flip every bit: writing a fixed byte is a no-op when the page already
+	// holds it (about 1 run in 256 with random values).
 	f, _ := os.OpenFile(filepath.Join(dir, "data"), os.O_RDWR, 0)
-	f.WriteAt([]byte{0xff}, victim*PageSize+PageSize/2)
+	b := make([]byte, 1)
+	f.ReadAt(b, victim*PageSize+PageSize/2)
+	f.WriteAt([]byte{^b[0]}, victim*PageSize+PageSize/2)
 	f.Close()
 	if err := db.Verify(bg); !errors.Is(err, ErrCorrupt) {
 		t.Fatalf("Verify did not detect the corrupt page: %v", err)
