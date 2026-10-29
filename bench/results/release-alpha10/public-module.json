@@ -1,0 +1,10 @@
+{
+    "Version": "v0.2.0-alpha.10",
+    "Time": "2026-10-29T07:27:02Z",
+    "Origin": {
+        "VCS": "git",
+        "URL": "https://github.com/apteva/db",
+        "Hash": "420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b",
+        "Ref": "refs/tags/v0.2.0-alpha.10"
+    }
+}

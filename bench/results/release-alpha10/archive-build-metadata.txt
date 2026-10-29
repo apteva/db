@@ -1,0 +1,48 @@
+darwin_amd64/aptevadbctl: mod github.com/apteva/db v0.2.0-alpha.10 
+darwin_amd64/aptevadbctl: build CGO_ENABLED=0
+darwin_amd64/aptevadbctl: build GOARCH=amd64
+darwin_amd64/aptevadbctl: build GOOS=darwin
+darwin_amd64/aptevadbctl: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+darwin_amd64/aptevadbctl: build vcs.modified=false
+darwin_amd64/aptevadb-server: mod github.com/apteva/db v0.2.0-alpha.10 
+darwin_amd64/aptevadb-server: build CGO_ENABLED=0
+darwin_amd64/aptevadb-server: build GOARCH=amd64
+darwin_amd64/aptevadb-server: build GOOS=darwin
+darwin_amd64/aptevadb-server: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+darwin_amd64/aptevadb-server: build vcs.modified=false
+darwin_arm64/aptevadbctl: mod github.com/apteva/db v0.2.0-alpha.10 
+darwin_arm64/aptevadbctl: build CGO_ENABLED=0
+darwin_arm64/aptevadbctl: build GOARCH=arm64
+darwin_arm64/aptevadbctl: build GOOS=darwin
+darwin_arm64/aptevadbctl: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+darwin_arm64/aptevadbctl: build vcs.modified=false
+darwin_arm64/aptevadb-server: mod github.com/apteva/db v0.2.0-alpha.10 
+darwin_arm64/aptevadb-server: build CGO_ENABLED=0
+darwin_arm64/aptevadb-server: build GOARCH=arm64
+darwin_arm64/aptevadb-server: build GOOS=darwin
+darwin_arm64/aptevadb-server: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+darwin_arm64/aptevadb-server: build vcs.modified=false
+linux_amd64/aptevadbctl: mod github.com/apteva/db v0.2.0-alpha.10 
+linux_amd64/aptevadbctl: build CGO_ENABLED=0
+linux_amd64/aptevadbctl: build GOARCH=amd64
+linux_amd64/aptevadbctl: build GOOS=linux
+linux_amd64/aptevadbctl: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+linux_amd64/aptevadbctl: build vcs.modified=false
+linux_amd64/aptevadb-server: mod github.com/apteva/db v0.2.0-alpha.10 
+linux_amd64/aptevadb-server: build CGO_ENABLED=0
+linux_amd64/aptevadb-server: build GOARCH=amd64
+linux_amd64/aptevadb-server: build GOOS=linux
+linux_amd64/aptevadb-server: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+linux_amd64/aptevadb-server: build vcs.modified=false
+linux_arm64/aptevadbctl: mod github.com/apteva/db v0.2.0-alpha.10 
+linux_arm64/aptevadbctl: build CGO_ENABLED=0
+linux_arm64/aptevadbctl: build GOARCH=arm64
+linux_arm64/aptevadbctl: build GOOS=linux
+linux_arm64/aptevadbctl: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+linux_arm64/aptevadbctl: build vcs.modified=false
+linux_arm64/aptevadb-server: mod github.com/apteva/db v0.2.0-alpha.10 
+linux_arm64/aptevadb-server: build CGO_ENABLED=0
+linux_arm64/aptevadb-server: build GOARCH=arm64
+linux_arm64/aptevadb-server: build GOOS=linux
+linux_arm64/aptevadb-server: build vcs.revision=420f38e09b30a69b3eae0f9bf81f6e7a5d3beb2b
+linux_arm64/aptevadb-server: build vcs.modified=false

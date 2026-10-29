@@ -1,0 +1,42 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+
+	db "github.com/apteva/db"
+)
+
+// Alpha.10 consumer check: RunGroups returns a callback error unchanged.
+func main() {
+	dir, _ := os.MkdirTemp("", "alpha10-consumer-")
+	defer os.RemoveAll(dir)
+	d, err := db.Open(dir, db.Options{})
+	if err != nil {
+		panic(err)
+	}
+	defer d.Close()
+	c, err := d.Collection("items")
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+	for i := 0; i < 100; i++ {
+		doc := map[string]any{"g": int64(i % 5), "n": int64(i)}
+		if err := c.InsertDocument([]byte(fmt.Sprintf("k%03d", i)), doc); err != nil {
+			panic(err)
+		}
+	}
+	stop := errors.New("stop")
+	groups := 0
+	err = c.AggregateGroups(ctx, []byte(`[{"$group":{"_id":"$g","total":{"$sum":"$n"}}}]`), db.AggregateOptions{}, func(g db.GroupView) error {
+		groups++
+		return stop
+	})
+	fmt.Printf("version=%s format=%d callback_error_identical=%v groups_visited=%d\n", db.Version, db.FormatVersion, err == stop, groups)
+	if err != stop {
+		os.Exit(1)
+	}
+}

@@ -83,6 +83,10 @@ Other historical results under `bench/results/` describe their original builds. 
 KV comparisons use `Upsert` (matching the other engines' replacement behavior);
 `Insert` now performs a duplicate-key check. See [BENCHMARKS.md](BENCHMARKS.md).
 
+Alpha.10 returns aggregation errors unchanged; its
+[publication verification](bench/results/release-alpha10/RELEASE.md) records
+Linux/macOS CI and soak, public Go installation and all four archive checksums.
+
 Alpha.9 adds the [typed group visitor](USAGE.md#typed-group-visitor-alpha9) and
 faster in-memory and spill aggregation; the [comparison with alpha.8](bench/results/alpha9-performance/REPORT.md)
 retains 48 interleaved trials and the remaining tradeoffs.
