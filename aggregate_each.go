@@ -98,7 +98,7 @@ func (c *Collection) runEach(ctx context.Context, p *Pipeline, opts AggregateOpt
 	if len(visitors) > 0 {
 		x.groupVisitor = visitors[0]
 	}
-	defer func() { retErr = errors.Join(retErr, x.finish()) }()
+	defer x.finishInto(&retErr)
 	src, q, ordered, index, err := c.aggregateSource(ctx, p, opts)
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (p *Pipeline) runEachSource(ctx context.Context, src Source, opts Aggregate
 	if err != nil {
 		return err
 	}
-	defer func() { retErr = errors.Join(retErr, x.finish()) }()
+	defer x.finishInto(&retErr)
 	if len(visitors) > 0 {
 		x.groupVisitor = visitors[0]
 	}
@@ -182,6 +182,14 @@ func newAggregateExecution(ctx context.Context, p *Pipeline, opts AggregateOptio
 	x := &aggregateExec{ctx: ctx, options: opts, stats: stats, budget: b, limits: limits}
 	x.disk = &aggregateDisk{ctx: ctx, options: opts, stats: stats, budget: b}
 	return x, nil
+}
+
+// finishInto joins a cleanup failure onto *err. A nil cleanup leaves *err
+// untouched, so callers can compare a returned callback error with ==.
+func (x *aggregateExec) finishInto(err *error) {
+	if ferr := x.finish(); ferr != nil {
+		*err = errors.Join(*err, ferr)
+	}
 }
 func (x *aggregateExec) finish() error {
 	x.stats.PeakMemoryBytes = x.budget.peak

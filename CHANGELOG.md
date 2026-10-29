@@ -5,6 +5,15 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.10] - 2026-10-29
+
+- Fix: aggregation returns errors unchanged again. Since alpha.8 every error
+  from Aggregate*, RunEach, AggregateGroups and RunGroups was wrapped by
+  errors.Join with a nil cleanup error, so an error returned by a GroupView
+  callback compared unequal to itself with == (errors.Is still matched).
+  A cleanup failure is still joined onto the result. No API, format or
+  performance change.
+
 ## [0.2.0-alpha.9] - 2026-10-28
 
 - Add AggregateGroups/RunGroups with a borrowed, typed GroupView for pipelines

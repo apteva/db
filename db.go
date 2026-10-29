@@ -79,7 +79,7 @@ var (
 )
 
 // Version is the library version.
-const Version = "0.2.0-alpha.9"
+const Version = "0.2.0-alpha.10"
 
 // FormatVersion is the on-disk format this build writes. Open also reads
 // formats 3 through 9 and upgrades them before returning; see FORMAT.md for the policy.

@@ -76,11 +76,38 @@ func TestGroupVisitorRejectsOmittedOverflow(t *testing.T) {
 		}
 		return nil
 	})
-	if !errors.Is(err, overflow) {
+	if err != overflow {
 		t.Fatal(err)
 	}
 	if _, err = c.AggregateWithOptions(bg, []byte(`[{"$group":{"_id":"$g","sum":{"$sum":"$v"}}},{"$limit":1}]`), AggregateOptions{MaxMemoryBytes: 2 << 20}); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// A visitor error comes back unwrapped, in memory and after a spill.
+func TestGroupVisitorErrorIdentity(t *testing.T) {
+	c := aggregateFixture(t, 0)
+	for i := 0; i < 5000; i++ {
+		var b DocBuilder
+		b.Int("g", int64(i))
+		mustCompat(t, c.Insert([]byte(fmt.Sprintf("%08d", i)), b.Bytes()))
+	}
+	p := `[{"$group":{"_id":"$g","n":{"$sum":1}}}]`
+	pp, err := ParsePipeline([]byte(p))
+	mustCompat(t, err)
+	stop := errors.New("stop")
+	for _, spill := range []bool{false, true} {
+		opts := AggregateOptions{MaxMemoryBytes: 8 << 20}
+		if spill {
+			opts = AggregateOptions{MaxMemoryBytes: 64 << 10, AllowDiskUse: true}
+		}
+		visit := func(GroupView) error { return stop }
+		if err := c.AggregateGroups(bg, []byte(p), opts, visit); err != stop {
+			t.Fatalf("collection spill=%v: %v", spill, err)
+		}
+		if err := pp.RunGroups(bg, c.Source(nil, nil), opts, visit); err != stop {
+			t.Fatalf("source spill=%v: %v", spill, err)
+		}
 	}
 }
 func TestSpillWideStringExtremaAndSkew(t *testing.T) {

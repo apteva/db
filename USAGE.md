@@ -404,6 +404,9 @@ err := orders.AggregateGroups(ctx, []byte(`[
 	})
 ```
 
+Alpha.8 and alpha.9 wrapped that error (and every aggregation error) with
+errors.Join, so only errors.Is matched it; alpha.10 returns it as is.
+
 The pipeline must end in a single $group with no earlier $group or $count. DB,
 snapshots and collections expose AggregateGroups; Collection.RunGroups and
 Pipeline.RunGroups take a compiled pipeline, with the same Source caveats as
