@@ -5,6 +5,25 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.14] - 2026-11-02
+
+- Exact `$countDistinct` for a group whose distinct sets exceed the state
+  limit. Spilled partial states are partitioned by group key, so one group
+  (always the case with `_id: null`) could never be divided: alpha.13
+  repartitioned it until "aggregation partition depth exhausted". Eight
+  filtered distinct counts over 64,084 rows and 24,443 callers failed at a
+  16 MiB budget while six passed. A run whose states all share one key is now
+  read once per disjoint slice of its distinct values; each slice's members
+  are held in memory, and the per-slice counts add up exactly. The other
+  accumulators merge in run order on the first pass. Slices start from the
+  run size and double, with a new seed, when one does not fit, up to 1024;
+  past that the result is ErrLimit. `AggregateStats.DistinctSlices` reports
+  them.
+- Merging partial distinct sets charges only the members the merge adds.
+  Partial states from several workers overlap, and charging each incoming
+  set in full spilled and repartitioned states that fitted.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.13] - 2026-11-02
 
 - Aggregations narrow through `$in` lists on a compound index's leading

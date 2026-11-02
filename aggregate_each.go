@@ -29,6 +29,9 @@ type AggregateStats struct {
 	PeakMemoryBytes, SpilledBytes, PeakDiskBytes int64
 	SpillRuns, MergePasses                       int
 	SpillPartitions, MaxPartitionDepth           int
+	// DistinctSlices counts the value slices of one group's distinct sets
+	// counted in separate passes because they did not fit together.
+	DistinctSlices int
 }
 
 var ErrDiskLimit = errors.New("aptevadb: aggregation temporary disk quota exceeded")

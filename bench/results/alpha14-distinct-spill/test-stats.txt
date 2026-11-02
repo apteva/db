@@ -1,0 +1,9 @@
+  {Strategy:external-hash Index: InputRows:64084 Groups:1 Returned:1 PeakMemoryBytes:10424233 SpilledBytes:6559600 PeakDiskBytes:6559552 SpillRuns:1 MergePasses:3 SpillPartitions:1 MaxPartitionDepth:0 DistinctSlices:2}
+  {Strategy:external-hash Index: InputRows:64084 Groups:1 Returned:1 PeakMemoryBytes:1307994 SpilledBytes:6562820 PeakDiskBytes:6562404 SpillRuns:1 MergePasses:14 SpillPartitions:1 MaxPartitionDepth:0 DistinctSlices:13}
+  {Strategy:external-hash Index: InputRows:64084 Groups:3 Returned:3 PeakMemoryBytes:1145223 SpilledBytes:6574884 PeakDiskBytes:6573204 SpillRuns:1 MergePasses:31 SpillPartitions:3 MaxPartitionDepth:0 DistinctSlices:30}
+  {Strategy:external-hash Index: InputRows:64084 Groups:126 Returned:126 PeakMemoryBytes:1641383 SpilledBytes:13004582 PeakDiskBytes:12999958 SpillRuns:2 MergePasses:13 SpillPartitions:57 MaxPartitionDepth:1 DistinctSlices:11}
+--- PASS: TestGlobalDistinctSpillIsExact (3.29s)
+    --- PASS: TestGlobalDistinctSpillIsExact/global/16MiB (0.43s)
+    --- PASS: TestGlobalDistinctSpillIsExact/global/2MiB (0.87s)
+    --- PASS: TestGlobalDistinctSpillIsExact/grouped/2MiB (0.85s)
+    --- PASS: TestGlobalDistinctSpillIsExact/skewed/2MiB (0.91s)

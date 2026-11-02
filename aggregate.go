@@ -741,6 +741,8 @@ type accState struct {
 	ext      scalar // for SUM/AVG, ext.i holds the signed high limb of isum
 	hasExt   bool
 	set      map[string]struct{} // $countDistinct members (distinctKey encoded)
+	// For $countDistinct, count holds members already counted in disjoint
+	// value slices of the same group (distinctGroup); only final states set it.
 }
 
 type groupState struct {
@@ -1062,7 +1064,7 @@ func accValue(a *accSpec, st *accState) value {
 	case accCount, accCountNonNull:
 		return value{k: kInt, i: st.count}
 	case accCountDistinct:
-		return value{k: kInt, i: int64(len(st.set))}
+		return value{k: kInt, i: int64(len(st.set)) + st.count}
 	default:
 		if st.hasExt {
 			return st.ext.view()

@@ -133,6 +133,11 @@ func (p *aggregatePartitions) add(g *groupState) error {
 	p.scratch = appendGroupRecord(p.scratch[:24], g, p.spec)
 	data := p.scratch[24:]
 	r := p.runs[slot]
+	if !r.keyed {
+		r.key, r.keyed = strings.Clone(g.key), true
+	} else if !r.mixed && r.key != g.key {
+		r.mixed = true
+	}
 	n := len(data) + 8
 	if err := p.d.accountRecord(r, int64(n)); err != nil {
 		return err
@@ -226,7 +231,7 @@ func (g *grouper) mergePartial(other *groupState) (bool, error) {
 			if usePartialExt(int(a.op), x, y) {
 				cost += int64(len(y.ext.s) - len(x.ext.s))
 			}
-			cost += distinctSetCost(y.set)
+			cost += distinctMergeCost(x.set, y.set)
 		}
 	}
 	if g.charge+cost > g.capBytes || cost > g.budget.max-g.budget.used.Load() {
@@ -322,6 +327,15 @@ func (d *aggregateDisk) partitionGroup(run *aggregateRun, spec *groupSpec, depth
 		}
 		if added {
 			continue
+		}
+		if !run.mixed && g.spec.hasDistinct() {
+			// Every state shares one key, so repartitioning by key cannot
+			// divide it: count its distinct members in disjoint value slices.
+			g.release()
+			g = nil
+			r.close()
+			open = false
+			return d.distinctGroup(run, spec, emit)
 		}
 		// Already merged prefix states precede every remaining partial state.
 		// Appending them first preserves first/last across recursive partitions.

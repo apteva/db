@@ -23,6 +23,11 @@ type aggregateRun struct {
 	order                   uint64
 	maxRecord               int64
 	level                   int
+	// key is the group key of a partition's first state; mixed records
+	// that a later state had another key. One key cannot be repartitioned.
+	key   string
+	keyed bool
+	mixed bool
 }
 type aggregateDisk struct {
 	header     []byte

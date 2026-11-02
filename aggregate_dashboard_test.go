@@ -548,15 +548,20 @@ func TestCountDistinctSpillAndLimits(t *testing.T) {
 	if st.SpillPartitions < 2 {
 		t.Fatalf("did not spill: %+v", st)
 	}
-	// one group's set larger than the whole budget: an error, never an estimate
+	// One group's set larger than the whole budget: in memory an error, never
+	// an estimate; with disk, counted exactly in disjoint value slices.
 	q := `[{"$group":{"_id":null,"d":{"$countDistinct":"$i"}}}]`
 	big := aggregateFixture(t, 20000)
-	for _, opts := range []AggregateOptions{{MaxMemoryBytes: 128 << 10}, {MaxMemoryBytes: 128 << 10, AllowDiskUse: true}} {
-		if _, err := big.AggregateWithOptions(bg, []byte(q), opts); !errors.Is(err, ErrLimit) {
-			t.Fatalf("opts=%+v: %v", opts, err)
-		}
+	if _, err := big.AggregateWithOptions(bg, []byte(q), AggregateOptions{MaxMemoryBytes: 128 << 10}); !errors.Is(err, ErrLimit) {
+		t.Fatal(err)
 	}
-	rows, err := big.AggregateWithOptions(bg, []byte(q), AggregateOptions{})
+	var sliced AggregateStats
+	rows, err := big.AggregateWithOptions(bg, []byte(q), AggregateOptions{MaxMemoryBytes: 128 << 10, AllowDiskUse: true, Stats: &sliced})
+	mustCompat(t, err)
+	if rows[0]["d"] != int64(20000) || sliced.DistinctSlices == 0 {
+		t.Fatal(rows, sliced)
+	}
+	rows, err = big.AggregateWithOptions(bg, []byte(q), AggregateOptions{})
 	mustCompat(t, err)
 	if rows[0]["d"] != int64(20000) {
 		t.Fatal(rows)

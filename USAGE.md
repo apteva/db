@@ -478,8 +478,12 @@ index group order.
 **`$countDistinct`.** `{"$countDistinct":"$field"}` counts distinct non-null
 values per group. Values compare by type and content, so 1 and "1" are different.
 The count is exact: each set is held in the memory budget, and with AllowDiskUse
-it spills and merges like other group state. A single group whose set alone
-exceeds the budget returns ErrLimit; it never falls back to an estimate.
+it spills and merges like other group state. Since alpha.14, when one group's
+distinct sets do not fit together (for example several filtered
+`$countDistinct` metrics with `_id: null`), the group's spilled states are read
+once per disjoint slice of the distinct values, and the slice counts add up to
+the exact total. It uses up to 1024 slices (`AggregateStats.DistinctSlices`), and
+returns ErrLimit if one slice still does not fit. It never falls back to an estimate.
 
 **`$lookup` by record key.** `"foreignField":"$key"` matches a string local
 value to the foreign record stored under exactly those bytes. Non-string local
