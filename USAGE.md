@@ -171,6 +171,15 @@ whether sorting is required. QueryStats records examined/returned rows and
 accounted retained query memory. Explain may count bounded index candidates for
 ordinary scalar indexes; it does not execute the result query.
 
+Aggregations narrow a leading `$match` through the same indexes: an exact
+compound index applies when the filter binds a prefix of its fields by equality,
+optionally with a range on the next field (`{"tenant":"acme","day":"2026-10-05"}`
+or `{"tenant":"acme","created":{"$gte":...}}`). The candidate naming the fewest
+documents is read, and only while it names at most an eighth of the collection;
+otherwise the aggregation scans. A sparse compound index applies only when the
+filter requires a non-null value for every component. `AggregateStats.Index`
+names the index used. Before alpha.12 aggregations used single-field indexes only.
+
 ```go
 cur, err := orders.NewIndexCursor(ctx, "tenant_created", db.IndexCursorOptions{
     Prefix: []any{"acme"},

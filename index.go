@@ -724,63 +724,94 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 	var best indexPlan
 	found := false
 	var pkbuf []byte
+	// candidates are exact multi-field or descending indexes over an
+	// equality prefix and an optional range on the next field, the longest
+	// prefix first, then single-field indexes over one predicate each; the
+	// fewest entries so far bound every later count
+	type candidate struct {
+		d     indexDef
+		rs    []indexRange
+		uniq  bool // each document has at most one entry in rs
+		score int
+	}
+	var cands []candidate
+	for _, d := range defs {
+		if d.Encoding != 2 || len(d.Fields) == 0 || len(d.Fields) == 1 && !d.Fields[0].Desc {
+			continue
+		}
+		if d.Sparse && !sparseCovers(d, preds) {
+			continue
+		}
+		lo, hi, prefix, ranged, err := exactIndexBounds(d, preds)
+		if err != nil || prefix == 0 && !ranged {
+			continue
+		}
+		score := prefix * 2
+		if ranged {
+			score++
+		}
+		cands = append(cands, candidate{d, []indexRange{{lo, hi}}, true, score})
+	}
+	sort.SliceStable(cands, func(i, j int) bool { return cands[i].score > cands[j].score })
 	for _, p := range preds {
 		for _, d := range defs {
 			if len(d.Fields) > 1 || (len(d.Fields) == 1 && d.Fields[0].Desc) || d.Field != p.field {
 				continue
 			}
-			rs, ok := indexRangesFor(d, p)
-			if !ok {
-				continue
+			if rs, ok := indexRangesFor(d, p); ok {
+				cands = append(cands, candidate{d, rs, len(rs) == 1 && p.op == opEq && !(p.v.isNum() && p.v.num() == 0), 0})
 			}
-			limit := cap
-			if found {
-				limit = best.count
-			}
-			var seen map[string]struct{}
-			if len(rs) > 1 || p.op != opEq || (p.v.isNum() && p.v.num() == 0) {
-				seen = map[string]struct{}{}
-			}
-			pkbuf = pkbuf[:0]
-			var offs []int
-			over := false
-			for _, r := range rs {
-				err := c.rawScan(r.lo, r.hi, func(k, _ []byte) bool {
-					pk := primaryKeyOfDef(d, k)
-					if pk == nil {
+		}
+	}
+	for _, cand := range cands {
+		d, rs := cand.d, cand.rs
+		limit := cap
+		if found {
+			limit = best.count
+		}
+		var seen map[string]struct{}
+		if !cand.uniq {
+			seen = map[string]struct{}{}
+		}
+		pkbuf = pkbuf[:0]
+		var offs []int
+		over := false
+		for _, r := range rs {
+			err := c.rawScan(r.lo, r.hi, func(k, _ []byte) bool {
+				pk := primaryKeyOfDef(d, k)
+				if pk == nil {
+					return true
+				}
+				if seen != nil {
+					if _, dup := seen[string(pk)]; dup {
 						return true
 					}
-					if seen != nil {
-						if _, dup := seen[string(pk)]; dup {
-							return true
-						}
-						seen[string(pk)] = struct{}{}
-					}
-					if int64(len(pkbuf))+int64(len(offs))*8+int64(len(seen))*64+int64(len(pk))*2 > budget/2 || len(offs)/2 >= limit {
-						over = true
-						return false
-					}
-					offs = append(offs, len(pkbuf), len(pkbuf)+len(pk))
-					pkbuf = append(pkbuf, pk...)
-					return true
-				})
-				if err != nil {
-					return indexPlan{}, false
+					seen[string(pk)] = struct{}{}
 				}
-				if over {
-					break
+				if int64(len(pkbuf))+int64(len(offs))*8+int64(len(seen))*64+int64(len(pk))*2 > budget/2 || len(offs)/2 >= limit {
+					over = true
+					return false
 				}
+				offs = append(offs, len(pkbuf), len(pkbuf)+len(pk))
+				pkbuf = append(pkbuf, pk...)
+				return true
+			})
+			if err != nil {
+				return indexPlan{}, false
 			}
 			if over {
-				continue // a scan reads that many documents faster, or another index does better
+				break
 			}
-			pks := make([][]byte, 0, len(offs)/2)
-			flat := append([]byte(nil), pkbuf...)
-			for i := 0; i < len(offs); i += 2 {
-				pks = append(pks, flat[offs[i]:offs[i+1]:offs[i+1]])
-			}
-			best, found = indexPlan{pks: pks, count: len(pks), name: d.Name, memory: int64(len(flat) + len(pks)*24)}, true
 		}
+		if over {
+			continue // a scan reads that many documents faster, or another index does better
+		}
+		pks := make([][]byte, 0, len(offs)/2)
+		flat := append([]byte(nil), pkbuf...)
+		for i := 0; i < len(offs); i += 2 {
+			pks = append(pks, flat[offs[i]:offs[i+1]:offs[i+1]])
+		}
+		best, found = indexPlan{pks: pks, count: len(pks), name: d.Name, memory: int64(len(flat) + len(pks)*24)}, true
 	}
 	if !found {
 		return indexPlan{}, false

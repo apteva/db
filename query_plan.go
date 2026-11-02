@@ -119,64 +119,16 @@ func (c *Collection) chooseQueryAccess(preds []pred, opts QueryOptions) (queryAc
 			continue
 		}
 		if d.Sparse {
-			complete := true
-			for _, f := range d.Fields {
-				found := false
-				for _, p := range flat {
-					if p.field == f.Field && (p.op == opEq && p.v.k != kNull || p.op >= opGt && p.op <= opLte || p.op == opPrefix) {
-						found = true
-					}
-				}
-				complete = complete && found
-			}
-			if !complete {
+			if !sparseCovers(d, flat) {
 				if opts.Hint != "" {
 					return best, fmt.Errorf("%w: sparse hint cannot cover this filter", ErrPipeline)
 				}
 				continue
 			}
 		}
-		vals := []any{}
-		prefixCount := 0
-		for _, f := range d.Fields {
-			found := false
-			for _, p := range flat {
-				if p.field == f.Field && p.op == opEq && indexable(p.v) {
-					vals = append(vals, p.v.any())
-					prefixCount++
-					found = true
-					break
-				}
-			}
-			if !found {
-				break
-			}
-		}
-		lo, tupleErr := encodeIndexTuple(d, vals)
+		lo, hi, prefixCount, hasRange, tupleErr := exactIndexBounds(d, flat)
 		if tupleErr != nil {
 			return best, tupleErr
-		}
-		hi := prefixEnd(lo)
-		base := append([]byte(nil), lo...)
-		hasRange := false
-		if prefixCount < len(d.Fields) {
-			f := d.Fields[prefixCount]
-			for _, p := range flat {
-				if p.field != f.Field {
-					continue
-				}
-				r, ok := compoundRange(d, base, p, f.Desc)
-				if !ok {
-					continue
-				}
-				hasRange = true
-				if bytes.Compare(r.lo, lo) > 0 {
-					lo = r.lo
-				}
-				if bytes.Compare(r.hi, hi) < 0 {
-					hi = r.hi
-				}
-			}
 		}
 		ordered, reverse := false, false
 		if len(opts.Sort) > 0 {
@@ -244,6 +196,69 @@ func (c *Collection) chooseQueryAccess(preds []pred, opts QueryOptions) (queryAc
 		return best, ErrNoSuchIndex
 	}
 	return best, nil
+}
+
+// sparseCovers reports whether the filter requires a value for every field
+// of a sparse index, so no matching document lacks an entry.
+func sparseCovers(d indexDef, flat []pred) bool {
+	for _, f := range d.Fields {
+		found := false
+		for _, p := range flat {
+			if p.field == f.Field && (p.op == opEq && p.v.k != kNull || p.op >= opGt && p.op <= opLte || p.op == opPrefix) {
+				found = true
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+// exactIndexBounds narrows an exact index to the filter's equality prefix
+// on its leading fields plus at most one range on the next field.
+func exactIndexBounds(d indexDef, flat []pred) (lo, hi []byte, prefixCount int, hasRange bool, err error) {
+	vals := []any{}
+	for _, f := range d.Fields {
+		found := false
+		for _, p := range flat {
+			if p.field == f.Field && p.op == opEq && indexable(p.v) {
+				vals = append(vals, p.v.any())
+				prefixCount++
+				found = true
+				break
+			}
+		}
+		if !found {
+			break
+		}
+	}
+	lo, err = encodeIndexTuple(d, vals)
+	if err != nil {
+		return nil, nil, 0, false, err
+	}
+	hi = prefixEnd(lo)
+	base := append([]byte(nil), lo...)
+	if prefixCount < len(d.Fields) {
+		f := d.Fields[prefixCount]
+		for _, p := range flat {
+			if p.field != f.Field {
+				continue
+			}
+			r, ok := compoundRange(d, base, p, f.Desc)
+			if !ok {
+				continue
+			}
+			hasRange = true
+			if bytes.Compare(r.lo, lo) > 0 {
+				lo = r.lo
+			}
+			if bytes.Compare(r.hi, hi) < 0 {
+				hi = r.hi
+			}
+		}
+	}
+	return lo, hi, prefixCount, hasRange, nil
 }
 
 func compoundRange(d indexDef, prefix []byte, p pred, desc bool) (indexRange, bool) {

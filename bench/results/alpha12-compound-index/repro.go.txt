@@ -1,0 +1,68 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"time"
+
+	adb "github.com/apteva/db"
+)
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func timeIt(c *adb.Collection, label, pipe string) {
+	ctx := context.Background()
+	var ds []time.Duration
+	var out []map[string]any
+	for i := 0; i < 7; i++ {
+		t := time.Now()
+		var err error
+		out, err = c.AggregateParallel(ctx, []byte(pipe), 8)
+		must(err)
+		ds = append(ds, time.Since(t))
+	}
+	sort.Slice(ds, func(i, j int) bool { return ds[i] < ds[j] })
+	fmt.Printf("%-34s median %8.2f ms  groups=%d\n", label, float64(ds[3].Microseconds())/1000, len(out))
+}
+
+func main() {
+	dir, _ := os.MkdirTemp("", "cidx")
+	defer os.RemoveAll(dir)
+	db, err := adb.Open(dir, adb.Options{})
+	must(err)
+	defer db.Close()
+	c, err := db.Collection("inbound")
+	must(err)
+	n := 0
+	pad := strings.Repeat("x", 150)
+	for s := 0; s < 4; s++ {
+		for d := 0; d < 26; d++ {
+			for i := 0; i < 3155; i++ {
+				doc := fmt.Sprintf(`{"scope_id":"s%d","day":"2026-10-%02d","status":"st%d","amount":%d,"caller":"+3361234%04d","created_at":"2026-10-%02dT10:%02d:00.000000Z","f1":"%s","f2":"%s","f3":"%s","f4":"%s","f5":"%s","f6":"%s"}`, s, d+1, i%5, i, i, d+1, i%60, pad, pad, pad, pad, pad, pad)
+				must(c.InsertJSON([]byte(fmt.Sprintf("k%08d", n)), []byte(doc)))
+				n++
+			}
+		}
+	}
+	fmt.Println("docs", n)
+	pipe := `[{"$match":{"scope_id":"s1","day":"2026-10-05"}},{"$group":{"_id":"$status","n":{"$sum":1},"v":{"$sum":"$amount"}}}]`
+	ctx := context.Background()
+	timeIt(c, "no index", pipe)
+	must(c.CreateCompoundIndex(ctx, "scope_day", []adb.IndexField{{Field: "scope_id"}, {Field: "day"}}))
+	timeIt(c, "compound (scope_id, day)", pipe)
+	must(c.CreateIndex(ctx, "scope", "scope_id"))
+	timeIt(c, "+ single scope_id", pipe)
+	must(c.CreateIndex(ctx, "day", "day"))
+	timeIt(c, "+ single day", pipe)
+	var hits int
+	t := time.Now()
+	must(c.Query(ctx, []byte(`{"scope_id":"s1","day":"2026-10-05"}`), adb.QueryOptions{}, func(k, d []byte) bool { hits++; return true }))
+	fmt.Printf("Query (find path) %d hits in %.2f ms\n", hits, float64(time.Since(t).Microseconds())/1000)
+}

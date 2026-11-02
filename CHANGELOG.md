@@ -5,6 +5,23 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.12] - 2026-11-02
+
+- Aggregations use compound indexes. The planner for a pipeline's leading
+  `$match` (Aggregate, AggregateParallel, AggregateEach, RunEach,
+  AggregateGroups, Query's filter fallback, and lookup source selection)
+  considered single-field ascending indexes only, so a filter such as
+  `{"tenant":"acme","day":"2026-10-05"}` scanned the whole collection even
+  with a `(tenant, day)` index; Query already used it. Exact compound and
+  descending indexes now apply with an equality prefix and an optional range
+  on the next field, the same bounds Query uses. Compound candidates are
+  counted first, so a selective tuple bounds the counting of broader
+  single-field candidates. A sparse compound index applies only when the
+  filter requires a non-null value for each component. On 328k records with
+  3.2k matching a tenant and day, a grouped aggregate went from about 14 ms
+  to under 1 ms.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.11] - 2026-11-02
 
 - **Fix: wrong counts from a lone `$count` with AllowDiskUse.** A grouped

@@ -1,0 +1,7 @@
+module cidx
+
+go 1.26
+
+require github.com/apteva/db v0.2.0-alpha.11
+
+replace github.com/apteva/db => ../../..
