@@ -51,7 +51,12 @@ func TestAggregateUsesCompoundIndexes(t *testing.T) {
 		{`{"tenant":"t1","day":null}`, "tenant_day"},
 		{`{"day":{"$lte":"2026-10-02"}}`, "day_desc"},
 		{`{"day":{"$gte":"2026-10-29"},"status":"s1"}`, "day_desc"},
-		{`{"tenant":{"$in":["t1","t2"]},"day":"2026-10-07"}`, "day_desc"},
+		{`{"tenant":{"$in":["t1","t2"]},"day":"2026-10-07"}`, "tenant_day"},
+		{`{"tenant":{"$in":["t3"]},"day":"2026-10-05"}`, "tenant_day"},
+		{`{"$and":[{"tenant":{"$ne":null}},{"tenant":{"$in":["t3","t1","t3"]}},{"$and":[{"day":{"$ne":null}},{"day":{"$gte":"2026-10-03"}}]},{"$and":[{"day":{"$ne":null}},{"day":{"$lt":"2026-10-06"}}]}]}`, "tenant_day"},
+		{`{"tenant":"t3","day":{"$in":[2,2.0,12]}}`, "tenant_day"},
+		{`{"tenant":"t1","day":{"$in":[null,"2026-10-03"]}}`, "tenant_day"},
+		{`{"tenant":{"$in":["t0","t1","t2","t3","t4","t5","t6"]},"day":{"$in":["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10"]}}`, ""}, // 70 tuples exceed maxInRanges
 		{`{"tenant":"t3"}`, ""}, // more than an eighth of the collection
 		{`{"status":"s2"}`, ""},
 	}
@@ -126,5 +131,12 @@ func TestAggregateSkipsIncompleteSparseCompoundIndex(t *testing.T) {
 	}
 	if n, used := count(`{"tenant":"t4","day":"d4"}`); n == 0 || !used {
 		t.Fatalf("tenant and day: n=%d indexed=%v", n, used)
+	}
+	if n, used := count(`{"tenant":{"$in":["t4","t6"]},"day":{"$in":["d4","d6"]}}`); n == 0 || !used {
+		t.Fatalf("tenant and day lists: n=%d indexed=%v", n, used)
+	}
+	// a listed null matches documents without the field, which a sparse index omits
+	if n, used := count(`{"tenant":"t5","day":{"$in":["d4",null]}}`); n != 500 || used {
+		t.Fatalf("tenant and day or null: n=%d indexed=%v", n, used)
 	}
 }

@@ -725,7 +725,7 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 	found := false
 	var pkbuf []byte
 	// candidates are exact multi-field or descending indexes over an
-	// equality prefix and an optional range on the next field, the longest
+	// equality or $in prefix and an optional range on the next field, the longest
 	// prefix first, then single-field indexes over one predicate each; the
 	// fewest entries so far bound every later count
 	type candidate struct {
@@ -742,7 +742,7 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 		if d.Sparse && !sparseCovers(d, preds) {
 			continue
 		}
-		lo, hi, prefix, ranged, err := exactIndexBounds(d, preds)
+		rs, prefix, ranged, err := exactIndexRanges(d, preds)
 		if err != nil || prefix == 0 && !ranged {
 			continue
 		}
@@ -750,7 +750,7 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 		if ranged {
 			score++
 		}
-		cands = append(cands, candidate{d, []indexRange{{lo, hi}}, true, score})
+		cands = append(cands, candidate{d, rs, true, score})
 	}
 	sort.SliceStable(cands, func(i, j int) bool { return cands[i].score > cands[j].score })
 	for _, p := range preds {

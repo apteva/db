@@ -1,0 +1,33 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/apps/mcp/database/engine
+cpu: Apple M1 Pro
+BenchmarkScopedDayAggregates/aptevadb/aggregate_eq-10         	     924	   1259921 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_eq-10           	      73	  18293676 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in1-10        	     981	   1301773 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in1-10          	      73	  17299459 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in2-10        	      38	  27084321 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in2-10          	       3	 362653278 ns/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/apps/mcp/database/engine
+cpu: Apple M1 Pro
+BenchmarkScopedDayAggregates/aptevadb/aggregate_eq-10         	     958	   1223122 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_eq-10           	      70	  17509673 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in1-10        	     878	   1386914 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in1-10          	      49	  21619930 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in2-10        	      39	  26358535 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in2-10          	       3	 382743486 ns/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/apteva/apps/mcp/database/engine
+cpu: Apple M1 Pro
+BenchmarkScopedDayAggregates/aptevadb/aggregate_eq-10         	     842	   1245387 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_eq-10           	      68	  16920670 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in1-10        	    1004	   1222782 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in1-10          	      70	  16863049 ns/op
+BenchmarkScopedDayAggregates/aptevadb/aggregate_in2-10        	      46	  25066958 ns/op
+BenchmarkScopedDayAggregates/aptevadb/batch14_in2-10          	       3	 344639750 ns/op
+PASS

@@ -204,7 +204,7 @@ func sparseCovers(d indexDef, flat []pred) bool {
 	for _, f := range d.Fields {
 		found := false
 		for _, p := range flat {
-			if p.field == f.Field && (p.op == opEq && p.v.k != kNull || p.op >= opGt && p.op <= opLte || p.op == opPrefix) {
+			if p.field == f.Field && (p.op == opEq && p.v.k != kNull || p.op >= opGt && p.op <= opLte || p.op == opPrefix || p.op == opIn && len(p.in) > 0 && !hasNull(p.in)) {
 				found = true
 			}
 		}
@@ -213,6 +213,15 @@ func sparseCovers(d indexDef, flat []pred) bool {
 		}
 	}
 	return true
+}
+
+func hasNull(vs []value) bool {
+	for _, v := range vs {
+		if v.k == kNull {
+			return true
+		}
+	}
+	return false
 }
 
 // exactIndexBounds narrows an exact index to the filter's equality prefix
@@ -259,6 +268,64 @@ func exactIndexBounds(d indexDef, flat []pred) (lo, hi []byte, prefixCount int, 
 		}
 	}
 	return lo, hi, prefixCount, hasRange, nil
+}
+
+// maxInRanges bounds the index ranges $in lists on an exact index's leading
+// fields expand to.
+const maxInRanges = 64
+
+// exactIndexRanges extends exactIndexBounds to $in on the leading fields:
+// each combination of listed values bounds one range, deduplicated and in
+// key order, while there are at most maxInRanges of them. Distinct value
+// tuples give disjoint ranges.
+func exactIndexRanges(d indexDef, flat []pred) (ranges []indexRange, prefixCount int, hasRange bool, err error) {
+	combos := [][]pred{nil}
+	for _, f := range d.Fields {
+		var choice []pred
+		for _, p := range flat {
+			if p.field != f.Field {
+				continue
+			}
+			if p.op == opEq && indexable(p.v) {
+				choice = []pred{p}
+				break
+			}
+			if p.op == opIn && choice == nil && len(p.in) > 0 {
+				for _, v := range p.in {
+					if !indexable(v) {
+						choice = nil
+						break
+					}
+					choice = append(choice, pred{field: p.field, op: opEq, v: v})
+				}
+			}
+		}
+		if choice == nil || len(combos)*len(choice) > maxInRanges {
+			break
+		}
+		next := make([][]pred, 0, len(combos)*len(choice))
+		for _, c := range combos {
+			for _, p := range choice {
+				next = append(next, append(append([]pred(nil), c...), p))
+			}
+		}
+		combos = next
+	}
+	seen := map[string]bool{}
+	for _, c := range combos {
+		// the combination's equalities come first, so they bind the prefix
+		lo, hi, n, ranged, err := exactIndexBounds(d, append(c, flat...))
+		if err != nil {
+			return nil, 0, false, err
+		}
+		if k := string(lo) + "\x00" + string(hi); !seen[k] {
+			seen[k] = true
+			ranges = append(ranges, indexRange{lo, hi})
+		}
+		prefixCount, hasRange = n, ranged
+	}
+	sort.Slice(ranges, func(i, j int) bool { return bytes.Compare(ranges[i].lo, ranges[j].lo) < 0 })
+	return ranges, prefixCount, hasRange, nil
 }
 
 func compoundRange(d indexDef, prefix []byte, p pred, desc bool) (indexRange, bool) {

@@ -174,10 +174,13 @@ ordinary scalar indexes; it does not execute the result query.
 Aggregations narrow a leading `$match` through the same indexes: an exact
 compound index applies when the filter binds a prefix of its fields by equality,
 optionally with a range on the next field (`{"tenant":"acme","day":"2026-10-05"}`
-or `{"tenant":"acme","created":{"$gte":...}}`). The candidate naming the fewest
+or `{"tenant":"acme","created":{"$gte":...}}`). Since alpha.13 a prefix field may
+also be an `$in` list: each combination of listed values reads one index range,
+up to 64 combinations; beyond that the prefix stops at the previous field. The candidate naming the fewest
 documents is read, and only while it names at most an eighth of the collection;
 otherwise the aggregation scans. A sparse compound index applies only when the
-filter requires a non-null value for every component. `AggregateStats.Index`
+filter requires a non-null value for every component (an `$in` list counts when
+it lists no null). `AggregateStats.Index`
 names the index used. Before alpha.12 aggregations used single-field indexes only.
 
 ```go

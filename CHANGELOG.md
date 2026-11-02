@@ -5,6 +5,20 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.13] - 2026-11-02
+
+- Aggregations narrow through `$in` lists on a compound index's leading
+  fields. Alpha.12 used a compound index only for `$eq` on those fields, so
+  `{"tenant":{"$in":["acme"]},"day":{"$gte":...,"$lt":...}}` scanned the
+  collection while the same filter with `$eq` read about 1% of it. Each
+  combination of listed values now bounds one index range, deduplicated
+  (equal numbers share a key) and in key order, up to 64 combinations;
+  past that the prefix stops at the previous field. Equality still binds a
+  field when both are given. A sparse compound index counts an `$in` list
+  without null as requiring a value. Query's filter fallback and lookup
+  source selection use the same planner.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.12] - 2026-11-02
 
 - Aggregations use compound indexes. The planner for a pipeline's leading
