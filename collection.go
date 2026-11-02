@@ -626,6 +626,11 @@ func (c *Collection) reorder(p *Pipeline, pl *plan) (*Pipeline, *Collection, boo
 			return nil, nil, false // order-dependent: run as written
 		}
 	}
+	// filters name fields of the original layout; a key join has no local
+	// index to probe the other way round
+	if pl.group.hasWhere() || jp.spec.foreignField == keyField {
+		return nil, nil, false
+	}
 	if _, ok := c.indexOn(jp.spec.localField); !ok {
 		return nil, nil, false
 	}
@@ -668,7 +673,7 @@ func (c *Collection) reorder(p *Pipeline, pl *plan) (*Pipeline, *Collection, boo
 	if err != nil || ipF.count > max(64, size/probeRatio) {
 		return nil, nil, false
 	}
-	g := &groupSpec{idNames: pl.group.idNames}
+	g := &groupSpec{idNames: pl.group.idNames, idTrunc: pl.group.idTrunc}
 	for _, f := range pl.group.idFields {
 		g.idFields = append(g.idFields, rename(f))
 	}

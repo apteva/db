@@ -266,7 +266,7 @@ func groupStorage(g *groupState) int64 {
 		n += int64(len(s.s))
 	}
 	for _, s := range g.accs {
-		n += int64(len(s.ext.s))
+		n += int64(len(s.ext.s)) + distinctSetCost(s.set)
 	}
 	return n
 }

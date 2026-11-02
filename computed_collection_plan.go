@@ -79,6 +79,9 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 			if i != len(pipeline.stages)-1 || p.group != nil {
 				return nil, ErrComputedCollection
 			}
+			if st.exprs != nil {
+				return nil, ErrComputedCollection
+			}
 			p.project = st.project
 			body := array[i].(map[string]any)["$project"].(map[string]any)
 			for name, v := range body {
@@ -96,7 +99,7 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				}
 			}
 		case stGroup:
-			if i != len(pipeline.stages)-1 || st.group.idNames != nil || len(st.group.idFields) > 1 || len(st.group.accs) > 64 {
+			if i != len(pipeline.stages)-1 || st.group.idNames != nil || len(st.group.idFields) > 1 || len(st.group.accs) > 64 || st.group.idTrunc != nil || st.group.hasWhere() {
 				return nil, ErrComputedCollection
 			}
 			p.group = st.group

@@ -35,6 +35,10 @@ const (
 	prePassBudget = 1 << 18
 )
 
+// keyField as a $lookup foreignField names the foreign record's key: a
+// string local value matches the record stored under exactly those bytes.
+const keyField = "$key"
+
 func (e *env) collection(name string) (*Collection, error) {
 	if e == nil || e.c == nil {
 		return nil, fmt.Errorf("%w: $lookup needs a collection to run in (use Collection.Aggregate)", ErrPipeline)
@@ -158,6 +162,7 @@ type lookupExec struct {
 	table   *lookupTable
 	idx     indexDef
 	useIdx  bool
+	useKey  bool // foreignField is the record key: point reads
 	probes  int
 	budget  int // index probes allowed before hashing instead
 	vals    []value
@@ -177,6 +182,10 @@ type lookupExec struct {
 	dbuf    []byte  // document read buffer for probes
 	arena   []byte  // and the bytes of their string fields
 	filter  *joinFilter
+	single  bool // probing one value: rows are consumed before the next read
+	scratch frow
+	locked  bool // the caller holds the database's reader lock
+	kbuf    []byte
 }
 
 // entryOnly reports whether the join needs nothing from foreign documents
@@ -201,6 +210,13 @@ func (e *env) lookup(spec *lookupSpec, fneed []string, keepDoc bool, limit int, 
 		limit = e.count
 	}
 
+	if spec.foreignField == keyField {
+		// a record key is found by one tree descent, cheaper than a probe of
+		// any index; point reads also need no memory, where a table over a
+		// large foreign collection could exceed the query's budget
+		lk.useKey = true
+		return lk, nil
+	}
 	if def, ok := from.indexOn(spec.foreignField); ok && limit >= 0 {
 		size, err := from.approxCount()
 		if err != nil {
@@ -225,7 +241,7 @@ func (e *env) lookup(spec *lookupSpec, fneed []string, keepDoc bool, limit int, 
 // streaming prefix over the source and returns the local join values when
 // there are at most smallOuter of them within prePassBudget documents.
 func (lk *lookupExec) prepare(pre func() ([]value, bool)) error {
-	if lk.useIdx || lk.table != nil {
+	if lk.useIdx || lk.useKey || lk.table != nil {
 		return nil
 	}
 	e := lk.e
@@ -353,7 +369,7 @@ func (lk *lookupExec) ensureTable() error {
 func (lk *lookupExec) clone() *lookupExec {
 	c := *lk
 	c.kb, c.chunk, c.vchunk, c.arena, c.lo, c.hi, c.dbuf = nil, nil, nil, nil, nil, nil, nil
-	c.cGen, c.cID, c.cUpper, c.pkbuf, c.pkoffs = 0, 0, nil, nil, nil
+	c.cGen, c.cID, c.cUpper, c.pkbuf, c.pkoffs, c.scratch, c.kbuf = 0, 0, nil, nil, nil, frow{}, nil
 	c.fkval, c.fkhint = make([]value, 1), make([]int, 1)
 	c.vals = make([]value, len(lk.fneed))
 	c.hints = make([]int, len(lk.fneed))
@@ -506,6 +522,25 @@ func (lk *lookupExec) buildTable() (*lookupTable, error) {
 	return t, nil
 }
 
+// readRow is row for a document a probe read. Without an array to dedup
+// by row identity, the consumer is done with the row before the next read,
+// so the row and its fields alias the read buffer instead of copying.
+func (lk *lookupExec) readRow(doc []byte) *frow {
+	if !lk.single {
+		return lk.row(doc)
+	}
+	fr := &lk.scratch
+	if len(lk.fneed) > 0 {
+		extractFields(doc, lk.fpaths, lk.vals, lk.hints)
+		fr.vals = lk.vals
+	}
+	fr.doc = nil
+	if lk.keepDoc {
+		fr.doc = doc
+	}
+	return fr
+}
+
 // row copies what the join needs out of a foreign document.
 func (lk *lookupExec) row(doc []byte) *frow {
 	if len(lk.chunk) == 0 {
@@ -542,7 +577,31 @@ func (lk *lookupExec) row(doc []byte) *frow {
 // probe calls fn with every foreign document matching v, each once.
 func (lk *lookupExec) probe(v value, fn func(fr *frow) bool) error {
 	if v.k != kArray {
-		return lk.probeOne(v, fn)
+		lk.single = true
+		err := lk.probeOne(v, fn)
+		lk.single = false
+		return err
+	}
+	if lk.useKey {
+		// a key names one record: probe each distinct key once, each
+		// row consumed before the next read
+		var keys [][]byte
+		var perr error
+		lk.single = true
+		walkArray(v.s, func(e value) bool {
+			if e.k == kString {
+				for _, k := range keys {
+					if bytes.Equal(k, e.s) {
+						return true
+					}
+				}
+				keys = append(keys, e.s)
+			}
+			perr = lk.probeOne(e, fn)
+			return perr == nil
+		})
+		lk.single = false
+		return perr
 	}
 	var seen []*frow
 	var perr error
@@ -567,6 +626,37 @@ func (lk *lookupExec) probeOne(v value, fn func(fr *frow) bool) error {
 	}
 	if v.k == kMissing {
 		v = value{k: kNull}
+	}
+	if lk.useKey {
+		if v.k != kString || len(v.s) > MaxKeySize {
+			return nil // record keys are bytes: only strings name them
+		}
+		var doc []byte
+		var ok bool
+		var err error
+		if lk.locked {
+			// an in-place scan holds the lock a Find would take again
+			if err := lk.from.check(); err != nil {
+				return err
+			}
+			lk.kbuf = lk.from.ikey(lk.kbuf[:0], v.s)
+			doc, ok, err = lk.from.db.findLocked(lk.from.view(), lk.kbuf, lk.dbuf)
+		} else {
+			doc, ok, err = lk.from.Find(v.s, lk.dbuf)
+		}
+		if err != nil || !ok {
+			return err
+		}
+		lk.dbuf = doc
+		if _, _, ok := docDir(doc); !ok {
+			return nil
+		}
+		if lk.entryOnly() {
+			fn(&emptyRow)
+			return nil
+		}
+		fn(lk.readRow(doc))
+		return nil
 	}
 	// the index has no entry for a missing foreign field, which null must
 	// match: null probes go through the table
@@ -669,7 +759,7 @@ func (lk *lookupExec) probeOne(v value, fn func(fr *frow) bool) error {
 		if !matches {
 			continue
 		}
-		if !fn(lk.row(doc)) {
+		if !fn(lk.readRow(doc)) {
 			return nil
 		}
 	}

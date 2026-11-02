@@ -28,10 +28,10 @@ func (g *grouper) each(ids bool, emit func(*groupState) error) error {
 		}
 		g.countState = &groupState{id: make([]scalar, len(g.spec.idFields)), accs: make([]accState, 1)}
 	}
-	for _, key := range g.countKeys {
+	for i, key := range g.countKeys {
 		s := g.countState
 		s.key = key
-		s.accs[0] = accState{count: g.counts[key]}
+		s.accs[0] = accState{count: g.countVals[i]}
 		if ids {
 			if err := decodeGroupKey(key, s.id); err != nil {
 				return err
@@ -81,8 +81,10 @@ func (g *grouper) addCount(vals []value, ids, accs []int) error {
 		}
 		g.keyBuf = make([]byte, 0, capacity)
 	}
+	// The key borrows keyBuf: it may only look the map up. Assigning through
+	// it would replace an existing entry's stored key with the scratch bytes.
 	key := borrowedString(g.countKey(vals, ids))
-	old, ok := g.counts[key]
+	idx, ok := g.counts[key]
 	if !ok {
 		if len(g.counts) >= g.max {
 			return ErrLimit
@@ -91,24 +93,37 @@ func (g *grouper) addCount(vals []value, ids, accs []int) error {
 			return err
 		}
 		var err error
-		key, err = g.ownText(key)
-		if err != nil {
+		if idx, err = g.newCount(key); err != nil {
 			return err
 		}
-		g.countKeys = append(g.countKeys, key)
 	}
 	increment := int64(1)
-	if g.spec.accs[0].op == accCountNonNull {
+	if accs[0] >= 0 && vals[accs[0]].k == kSkip {
+		increment = 0
+	} else if g.spec.accs[0].op == accCountNonNull {
 		if accs[0] < 0 || vals[accs[0]].k == kMissing || vals[accs[0]].k == kNull {
 			increment = 0
 		}
 	}
-	g.counts[key] = old + increment
+	g.countVals[idx] += increment
 	return nil
 }
+
+// newCount adds a zero counter under an owned copy of key.
+func (g *grouper) newCount(key string) (int, error) {
+	owned, err := g.ownText(key)
+	if err != nil {
+		return 0, err
+	}
+	idx := len(g.countKeys)
+	g.countKeys = append(g.countKeys, owned)
+	g.countVals = append(g.countVals, 0)
+	g.counts[owned] = idx
+	return idx, nil
+}
 func (g *grouper) mergeCount(other *groupState) (bool, error) {
-	key := other.key
-	old, ok := g.counts[key]
+	key := other.key // borrows the reader's buffer: lookups only
+	idx, ok := g.counts[key]
 	if !ok {
 		cost := 128 + g.textCost([]int{len(key)})
 		if g.charge+cost > g.capBytes || cost > g.budget.max-g.budget.used.Load() {
@@ -118,12 +133,10 @@ func (g *grouper) mergeCount(other *groupState) (bool, error) {
 			return false, err
 		}
 		var err error
-		key, err = g.ownText(key)
-		if err != nil {
+		if idx, err = g.newCount(key); err != nil {
 			return false, err
 		}
-		g.countKeys = append(g.countKeys, key)
 	}
-	g.counts[key] = old + other.accs[0].count
+	g.countVals[idx] += other.accs[0].count
 	return true, nil
 }

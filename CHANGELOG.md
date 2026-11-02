@@ -5,6 +5,39 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.11] - 2026-11-02
+
+- **Fix: wrong counts from a lone `$count` with AllowDiskUse.** A grouped
+  `$group` whose only accumulator is `$count` or `$countNonNull`, run by
+  AggregateEach, RunEach, AggregateWithOptions or AggregateGroups with
+  `AllowDiskUse: true`, returned wrong counts without an error, whether or
+  not it spilled. Most groups came back with 0. The compact counter state
+  assigned counters through a borrowed key buffer, and a Go map assignment
+  replaces the stored key, so existing entries' keys were overwritten.
+  Present in alpha.9 and alpha.10. Alpha.8, plain Aggregate/Run and runs
+  without AllowDiskUse were correct. Counters are now indexed by owned keys.
+- Add filtered accumulators: any `$group` accumulator takes a `where` filter
+  in $match syntax, evaluated against the row as it reaches the group,
+  including joined fields.
+- Add `$dateTrunc` (hour, day, week, month, year) with IANA time zones,
+  `startOfWeek` and `epochUnit`, as a `$group` key, a compound-key part or a
+  computed `$project` field. The zone database is embedded. Hours are reported
+  as the UTC instant the local hour starts at, so daylight-saving changes give
+  distinct, ordered buckets.
+- Add `$countDistinct`: an exact distinct count per group, held in the memory
+  budget and spilled with other group state; ErrLimit rather than an estimate.
+- Add `$lookup` on the record key (`"foreignField":"$key"`). It reads records
+  directly, with no index or table and no memory beyond the current row, and
+  under the in-place scan's lock when the source is checkpointed.
+- Index-probe joins no longer copy each matched document's fields when the
+  local value is a scalar.
+- Computed collections reject the new features; existing definitions are
+  unaffected.
+- Benchmark harness: `-dashboard` compares a call-reporting workload against
+  Pebble and SQLite (FILTER clauses, COUNT(DISTINCT), a Go function for
+  local-time buckets, a JOIN on the primary key).
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.10] - 2026-10-29
 
 - Fix: aggregation returns errors unchanged again. Since alpha.8 every error

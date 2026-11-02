@@ -12,6 +12,7 @@ go build -o aptevadb-bench .
 ./aptevadb-bench -n 1000000 -engines ours-batch1000,pebble-batch1000,sqlite-c-txn1000,sqlite-go-txn1000
 ./aptevadb-bench -n 50000 -agg
 ./aptevadb-bench -n 10000 -join
+./aptevadb-bench -n 1000000 -dashboard
 ./aptevadb-bench -n 50000 -computed
 ./aptevadb-bench -n 20000 -computedcollections
 ./aptevadb-bench -n 1000 -durable -engines ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync
@@ -30,6 +31,18 @@ and ranges. State source revision, compiler, OS/CPU, key/value sizes, caches,
 memtables, readers and sync policy. Record background load; do not benchmark beside
 builds, tests or soak runs. Historical results under bench/results refer to their
 original builds. They do not establish release performance or a universal lead.
+
+## Dashboard aggregation (alpha.11)
+
+The [dashboard report](bench/results/alpha11-dashboard/REPORT.md) runs filtered
+metrics, UTC and Europe/Paris buckets, distinct counts and record-key joins over
+1M calls and 200k prospects against Pebble and SQLite (FILTER, COUNT(DISTINCT),
+a Go function for zoned buckets, a primary-key JOIN). Over five fresh-process
+trials, AptevaDB had the lowest median on all ten queries, on one core and on 10.
+The narrowest lead is the selective key join on one core, 42.0 against 45.1 ms
+(sqlite-c). AptevaDB's files are larger: 196 against 157 MiB. `-agg`/`-join`
+medians stay within the trial ranges of alpha.10. The machine was loaded (load
+average 6.8–14.3), and no zero-regression claim is made.
 
 ## Aggregation, spill and index-build performance (alpha.9)
 

@@ -16,6 +16,8 @@ func appendGroupRecord(b []byte, g *groupState, spec *groupSpec) []byte {
 		switch a.op {
 		case accCount, accCountNonNull:
 			b = le.AppendUint64(b, uint64(s.count))
+		case accCountDistinct:
+			b = appendDistinct(b, s.set)
 		case accSum, accAvg:
 			var flags byte
 			if s.hasFloat {
@@ -110,6 +112,8 @@ func decodeGroupRecord(b []byte, spec *groupSpec, g *groupState) error {
 		switch a.op {
 		case accCount, accCountNonNull:
 			s.count = int64(r.u64())
+		case accCountDistinct:
+			s.set = decodeDistinct(&r)
 		case accSum, accAvg:
 			if len(r.b) < 1 {
 				return ErrCorrupt
@@ -163,6 +167,8 @@ func groupRecordSize(g *groupState, spec *groupSpec) int {
 		switch a.op {
 		case accCount, accCountNonNull:
 			n += 8
+		case accCountDistinct:
+			n += distinctRecordSize(s.set)
 		case accSum, accAvg:
 			n += 17
 			if s.hasFloat {

@@ -58,6 +58,7 @@ var (
 	flagOursMB              = flag.Int64("ourscachemb", 0, "page cache limit in MB for our engine (0: keep everything resident)")
 	flagDurable             = flag.Bool("durable", false, "durable-insert mode: single writer, then 10 and 50 concurrent writers; no find phases")
 	flagAgg                 = flag.Bool("agg", false, "aggregation mode: load N documents, run the pipelines (engines: ours, pebble, sqlite-c)")
+	flagDashboard           = flag.Bool("dashboard", false, "dashboard mode: calls and prospects, filtered metrics, local-time buckets, distinct counts and key joins (engines: ours, ours-par, pebble, sqlite-c, sqlite-go)")
 	flagJoin                = flag.Bool("join", false, "join mode: users and orders collections, $lookup pipelines against SQL joins (engines: ours, ours-par, sqlite-c)")
 	flagComputedCollections = flag.Bool("computedcollections", false, "native maintained collections versus on-demand queries, Pebble application maintenance and SQLite triggers")
 	flagComputed            = flag.Bool("computed", false, "stored computed fields versus application writes/read-time derivation, Pebble and SQLite generated columns")
@@ -82,7 +83,7 @@ func main() {
 		switch {
 		case *flagJoin:
 			*flagEngines = "ours,ours-par,sqlite-c,sqlite-go"
-		case *flagAgg:
+		case *flagAgg, *flagDashboard:
 			*flagEngines = "ours,ours-par,pebble,sqlite-c,sqlite-go"
 		case *flagDurable:
 			*flagEngines = "ours-sync,pebble-sync,sqlite-c-sync,sqlite-go-sync"
@@ -103,6 +104,10 @@ func main() {
 	}
 	if *flagCompatibility {
 		runCompatibilityBench(dir, *flagN, *flagReps)
+		return
+	}
+	if *flagDashboard {
+		runDashboardBench(dir, *flagN, strings.Split(*flagEngines, ","), max(*flagReps, 3))
 		return
 	}
 	if *flagAgg {

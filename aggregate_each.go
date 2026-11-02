@@ -259,7 +259,8 @@ func (c *Collection) aggregateSource(ctx context.Context, p *Pipeline, opts Aggr
 		}
 		i++
 	}
-	if i >= len(p.stages) || p.stages[i].kind != stGroup || len(p.stages[i].group.idFields) == 0 {
+	// a $dateTrunc key does not follow the date's index order
+	if i >= len(p.stages) || p.stages[i].kind != stGroup || len(p.stages[i].group.idFields) == 0 || p.stages[i].group.hasTrunc() {
 		return fallback()
 	}
 	g := p.stages[i].group
@@ -514,7 +515,7 @@ func (x *aggregateExec) group(pl *plan, src srcSpec, e *env, ordered bool, emit 
 		if x.options.AllowDiskUse {
 			g.capBytes = x.stateLimit
 			if !ordered && g.compactCount() {
-				g.counts = make(map[string]int64)
+				g.counts = make(map[string]int)
 			}
 		}
 		return g
@@ -670,9 +671,12 @@ func (g *grouper) canAdd(vals []value, idIdx, accIdx []int) bool {
 	if g.counts == nil && g.used == len(g.states) {
 		cost += int64(g.nextSlab()) * (64 + int64(len(g.spec.idFields))*64 + int64(len(g.spec.accs))*80)
 	}
-	for _, i := range accIdx {
+	for j, i := range accIdx {
 		if g.counts == nil && i >= 0 {
 			cost += int64(len(vals[i].s))
+			if g.spec.accs[j].op == accCountDistinct {
+				cost += 9 + 160 + distinctEntryCost
+			}
 		}
 	}
 	if len(idIdx) == 0 {
@@ -680,9 +684,12 @@ func (g *grouper) canAdd(vals []value, idIdx, accIdx []int) bool {
 		if g.single == nil {
 			cost = 160 + int64(len(g.spec.accs))*80
 		}
-		for _, i := range accIdx {
+		for j, i := range accIdx {
 			if i >= 0 {
 				cost += int64(len(vals[i].s))
+				if g.spec.accs[j].op == accCountDistinct {
+					cost += 9 + 160 + distinctEntryCost
+				}
 			}
 		}
 	}

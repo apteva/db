@@ -218,7 +218,7 @@ func (g *grouper) mergePartial(other *groupState) (bool, error) {
 	if existing == nil {
 		cost = 160 + g.slabCost() + g.textCost([]int{len(other.key)})
 		for _, a := range other.accs {
-			cost += int64(len(a.ext.s))
+			cost += int64(len(a.ext.s)) + distinctSetCost(a.set)
 		}
 	} else {
 		for i, a := range g.spec.accs {
@@ -226,6 +226,7 @@ func (g *grouper) mergePartial(other *groupState) (bool, error) {
 			if usePartialExt(int(a.op), x, y) {
 				cost += int64(len(y.ext.s) - len(x.ext.s))
 			}
+			cost += distinctSetCost(y.set)
 		}
 	}
 	if g.charge+cost > g.capBytes || cost > g.budget.max-g.budget.used.Load() {
@@ -249,6 +250,11 @@ func (g *grouper) mergePartial(other *groupState) (bool, error) {
 		copy(gs.accs, other.accs)
 		for i := range gs.accs {
 			s := &gs.accs[i]
+			if c := distinctSetCost(s.set); c > 0 {
+				if err = g.reserve(c); err != nil {
+					return false, err
+				}
+			}
 			if s.ext.s != "" {
 				if err = g.reserve(int64(len(s.ext.s))); err != nil {
 					return false, err
@@ -292,7 +298,7 @@ func (d *aggregateDisk) partitionGroup(run *aggregateRun, spec *groupSpec, depth
 	g.slab = max(1, min(256, int(d.stateLimit/int64((64+len(spec.idFields)*64+len(spec.accs)*80)*8))))
 	g.capBytes = d.stateLimit
 	if g.compactCount() {
-		g.counts = make(map[string]int64)
+		g.counts = make(map[string]int)
 	}
 	defer func() {
 		if g != nil {

@@ -420,3 +420,60 @@ int, float, string, bool, document and array. Int64 reports false rather than
 rounding an integer SUM that overflowed int64, and IntegerSum returns its exact
 signed 128-bit value. To reject such overflow in groups the caller does not
 return, check every group in the callback.
+
+## Dashboard aggregation (alpha.11)
+
+One `$group` can compute several filtered metrics, bucket by local calendar
+time, count distinct values and join records by key:
+
+```go
+rows, err := calls.Aggregate(ctx, []byte(`[
+  {"$lookup":{"from":"prospects","localField":"prospect","foreignField":"$key","as":"p"}},
+  {"$unwind":{"path":"$p","preserveNullAndEmptyArrays":true}},
+  {"$group":{
+    "_id":{"campaign":"$campaign",
+           "day":{"$dateTrunc":{"date":"$created_at","unit":"day","timezone":"Europe/Paris"}}},
+    "calls":{"$count":{}},
+    "answered":{"$count":{},"where":{"status":"answered"}},
+    "revenue":{"$sum":"$amount","where":{"kind":"sale"}},
+    "callers":{"$countDistinct":"$caller","where":{"status":"answered"}},
+    "paris":{"$count":{},"where":{"p.city":"Paris"}}}}
+]`))
+```
+
+**Filtered accumulators.** Any accumulator takes an optional `where` filter in
+$match syntax ($eq, $ne, $gt, $gte, $lt, $lte, $prefix, $in, $and, $or). It sees
+the row as it reaches the $group, so joined fields such as `p.city` work. A row
+the filter rejects contributes nothing to that accumulator, while the group still
+exists. If no row passes, `$count`, `$sum` and `$countDistinct` return 0 and
+`$avg`, `$min`, `$max`, `$first` and `$last` return null. `"where":{}` passes
+every row.
+
+**`$dateTrunc`.** Usable as the whole `_id`, as a part of a compound `_id`,
+or as a computed `$project` field. `unit` is hour, day, week, month or year.
+`timezone` is an IANA name (default UTC; "Local" is rejected because it depends
+on the machine). The zone database is compiled into the binary. `startOfWeek`
+names a weekday (default Sunday). Days, weeks, months and years come back as
+`YYYY-MM-DD` of the local start, so a Paris day is 23 or 25 hours long across a
+daylight-saving change. Hours come back as the UTC instant the local hour starts
+at (`2026-10-25T00:00:00Z`), so the repeated autumn hour gives two distinct,
+ordered buckets. The date field may be an RFC 3339 string with any offset, a
+bare `YYYY-MM-DD` (midnight in the pipeline's zone), or a Unix epoch number,
+milliseconds by default or seconds with `"epochUnit":"s"`. Any other value,
+or a date outside years 0–9999, buckets as null. A `$dateTrunc` key never uses
+index group order.
+
+**`$countDistinct`.** `{"$countDistinct":"$field"}` counts distinct non-null
+values per group. Values compare by type and content, so 1 and "1" are different.
+The count is exact: each set is held in the memory budget, and with AllowDiskUse
+it spills and merges like other group state. A single group whose set alone
+exceeds the budget returns ErrLimit; it never falls back to an estimate.
+
+**`$lookup` by record key.** `"foreignField":"$key"` matches a string local
+value to the foreign record stored under exactly those bytes. Non-string local
+values match nothing. An array local value matches each named record once. The
+join reads each record directly and builds no table, so it needs no index and
+no memory beyond the current row.
+
+Computed collections reject all four features for now; they keep running the
+pipelines they accept today.

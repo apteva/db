@@ -68,10 +68,12 @@ var (
 // Pipeline is a compiled MongoDB-style aggregation pipeline.
 //
 // Stages: $match (equality, $eq $ne $gt $gte $lt $lte $in; an array field
-// matches when any element does), $group (_id as null, "$field" or an
-// object of "$field" refs; $sum $avg $min $max $count $countNonNull $first $last), $sort
+// matches when any element does), $group (_id as null, "$field", a
+// $dateTrunc or an object of those; $sum $avg $min $max $count $countNonNull
+// $countDistinct $first $last, each with an optional where filter), $sort
 // (one or more keys, in order), $skip, $limit, $project (inclusion or
-// exclusion), $count, $unwind, $lookup (from/localField/foreignField/as).
+// exclusion, plus computed $dateTrunc fields), $count, $unwind, $lookup
+// (from/localField/foreignField/as; foreignField "$key" is the record key).
 // Field references may be dotted paths into nested documents.
 //
 // Leading $match/$skip/$limit stages, a $lookup immediately unwound on its
@@ -143,6 +145,7 @@ const (
 	accFirst
 	accLast
 	accCountNonNull
+	accCountDistinct
 )
 
 type accSpec struct {
@@ -150,11 +153,13 @@ type accSpec struct {
 	op    accOp
 	field string // "$field" operand; "" means constant c
 	c     value
+	where []pred // non-nil: only matching rows reach the accumulator
 }
 
 type groupSpec struct {
-	idFields []string // empty: _id is null
-	idNames  []string // non-nil: composite _id document
+	idFields []string     // empty: _id is null
+	idNames  []string     // non-nil: composite _id document
+	idTrunc  []*dateTrunc // non-nil: part i is idTrunc[i] of idFields[i] when set
 	accs     []accSpec
 }
 
@@ -170,6 +175,7 @@ type stage struct {
 	sortKeys  []sortKey
 	n         int
 	project   map[string]bool
+	exprs     map[string]projectExpr // computed $project fields
 	countName string
 	unwind    string
 	preserve  bool
@@ -310,6 +316,8 @@ func parseStage(op string, body json.RawMessage) (stage, error) {
 			return stage{}, errors.New("$project needs a non-empty object")
 		}
 		inc := map[string]bool{}
+		var exprs map[string]projectExpr
+		excluded := false
 		for k, v := range m {
 			switch x := v.(type) {
 			case bool:
@@ -317,11 +325,30 @@ func parseStage(op string, body json.RawMessage) (stage, error) {
 			case json.Number:
 				i, _ := x.Int64()
 				inc[k] = i != 0
+			case map[string]any:
+				if k == "_id" || k == "" || strings.HasPrefix(k, "$") {
+					return stage{}, errors.New("$project cannot compute _id or a $-prefixed field")
+				}
+				t, err := parseExpr(x)
+				if err != nil {
+					return stage{}, err
+				}
+				if exprs == nil {
+					exprs = map[string]projectExpr{}
+				}
+				exprs[k] = projectExpr{trunc: t}
+				inc[k] = true
 			default:
-				return stage{}, errors.New("$project values must be 0/1 or booleans")
+				return stage{}, errors.New("$project values must be 0/1, booleans or expressions")
+			}
+			if !inc[k] && k != "_id" {
+				excluded = true
 			}
 		}
-		return stage{kind: stProject, project: inc}, nil
+		if exprs != nil && excluded {
+			return stage{}, errors.New("$project cannot mix exclusions with computed fields")
+		}
+		return stage{kind: stProject, project: inc, exprs: exprs}, nil
 	case "$count":
 		s, ok := arg.(string)
 		if !ok || s == "" {
@@ -456,27 +483,65 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 		return nil, errors.New("$group needs _id")
 	}
 	g := &groupSpec{}
+	// part reads one _id component: a "$field" ref or a $dateTrunc
+	part := func(v any) (string, *dateTrunc, error) {
+		if f, ok := fieldRef(v); ok {
+			return f, nil, nil
+		}
+		if m, ok := v.(map[string]any); ok {
+			t, err := parseExpr(m)
+			if err != nil {
+				return "", nil, err
+			}
+			return t.field, t, nil
+		}
+		return "", nil, errors.New("_id parts must be \"$field\" refs or $dateTrunc")
+	}
+	addPart := func(f string, t *dateTrunc) {
+		g.idFields = append(g.idFields, f)
+		if t != nil && g.idTrunc == nil {
+			g.idTrunc = make([]*dateTrunc, len(g.idFields)-1, len(g.idFields))
+		}
+		if g.idTrunc != nil {
+			g.idTrunc = append(g.idTrunc, t)
+		}
+	}
 	switch id := idRaw.(type) {
 	case nil:
 	case string:
-		f, ok := fieldRef(id)
-		if !ok {
-			return nil, errors.New("_id must be null, \"$field\" or an object of \"$field\" refs")
+		f, t, err := part(id)
+		if err != nil {
+			return nil, errors.New("_id must be null, \"$field\", a $dateTrunc or an object of those")
 		}
-		g.idFields = []string{f}
+		addPart(f, t)
 	case map[string]any:
+		single := false
+		for k := range id {
+			single = len(id) == 1 && strings.HasPrefix(k, "$")
+		}
+		if single {
+			f, t, err := part(id)
+			if err != nil {
+				return nil, err
+			}
+			addPart(f, t)
+			break
+		}
 		names := make([]string, 0, len(id))
 		for k := range id {
+			if strings.HasPrefix(k, "$") {
+				return nil, errors.New("composite _id names cannot start with $")
+			}
 			names = append(names, k)
 		}
 		sort.Strings(names)
 		for _, k := range names {
-			f, ok := fieldRef(id[k])
-			if !ok {
-				return nil, errors.New("composite _id values must be \"$field\" refs")
+			f, t, err := part(id[k])
+			if err != nil {
+				return nil, fmt.Errorf("composite _id %s: %v", k, err)
 			}
 			g.idNames = append(g.idNames, k)
-			g.idFields = append(g.idFields, f)
+			addPart(f, t)
 		}
 	default:
 		return nil, errors.New("_id must be null, \"$field\" or an object")
@@ -490,11 +555,35 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 	sort.Strings(names)
 	for _, name := range names {
 		spec, ok := m[name].(map[string]any)
-		if !ok || len(spec) != 1 {
+		if !ok {
+			return nil, fmt.Errorf("accumulator %s needs {$op: operand}", name)
+		}
+		var where []pred
+		if w, has := spec["where"]; has {
+			wm, ok := w.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("accumulator %s: where needs a filter object", name)
+			}
+			var err error
+			if where, err = parseMatch(wm); err != nil {
+				return nil, fmt.Errorf("accumulator %s where: %v", name, err)
+			}
+			if where == nil {
+				where = []pred{} // an empty filter matches every row
+			}
+		}
+		ops := len(spec)
+		if where != nil {
+			ops--
+		}
+		if ops != 1 {
 			return nil, fmt.Errorf("accumulator %s needs {$op: operand}", name)
 		}
 		for opName, operand := range spec {
-			a := accSpec{name: name}
+			if opName == "where" {
+				continue
+			}
+			a := accSpec{name: name, where: where}
 			switch opName {
 			case "$sum":
 				a.op = accSum
@@ -508,6 +597,8 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 				a.op = accCount
 			case "$countNonNull":
 				a.op = accCountNonNull
+			case "$countDistinct":
+				a.op = accCountDistinct
 			case "$first":
 				a.op = accFirst
 			case "$last":
@@ -517,7 +608,7 @@ func parseGroup(m map[string]any) (*groupSpec, error) {
 			}
 			if f, ok := fieldRef(operand); ok {
 				a.field = f
-			} else if a.op == accCountNonNull {
+			} else if a.op == accCountNonNull || a.op == accCountDistinct {
 				return nil, fmt.Errorf("accumulator %s needs a nonempty \"$field\" reference", name)
 			} else if a.op == accCount {
 				a.c = value{k: kInt, i: 1}
@@ -649,6 +740,7 @@ type accState struct {
 	count    int64
 	ext      scalar // for SUM/AVG, ext.i holds the signed high limb of isum
 	hasExt   bool
+	set      map[string]struct{} // $countDistinct members (distinctKey encoded)
 }
 
 type groupState struct {
@@ -659,25 +751,28 @@ type groupState struct {
 }
 
 type grouper struct {
-	counts     map[string]int64
-	countKeys  []string
-	countState *groupState
-	arena      []byte
-	spec       *groupSpec
-	groups     map[string]*groupState
-	single     *groupState // the one group when _id is null
-	order      []*groupState
-	keyBuf     []byte
-	max        int
-	states     []groupState
-	ids        []scalar
-	accs       []accState
-	used       int
-	budget     *memoryBudget
-	capBytes   int64
-	charge     int64
-	slab       int    // nonzero: bounded streaming/spill allocation granularity
-	keyArena   []byte // slab 0: backs groupState.key, one allocation per chunk
+	counts      map[string]int // compact count state: key -> index into countVals
+	countVals   []int64
+	countKeys   []string
+	countState  *groupState
+	arena       []byte
+	spec        *groupSpec
+	groups      map[string]*groupState
+	single      *groupState // the one group when _id is null
+	order       []*groupState
+	keyBuf      []byte
+	max         int
+	states      []groupState
+	ids         []scalar
+	accs        []accState
+	used        int
+	budget      *memoryBudget
+	capBytes    int64
+	charge      int64
+	slab        int    // nonzero: bounded streaming/spill allocation granularity
+	keyArena    []byte // slab 0: backs groupState.key, one allocation per chunk
+	distinctBuf []byte
+	truncs      []truncEval // materialised rows: one evaluator per _id part
 }
 
 // Groups own query-local slabs: addresses remain stable through shard merges,
@@ -716,17 +811,27 @@ func (g *grouper) add(get func(string) value) error {
 	vals := make([]value, len(spec.idFields)+len(spec.accs))
 	idIdx := make([]int, len(spec.idFields))
 	accIdx := make([]int, len(spec.accs))
+	if spec.idTrunc != nil && g.truncs == nil {
+		g.truncs = make([]truncEval, len(spec.idTrunc))
+	}
 	for i, f := range spec.idFields {
 		vals[i] = get(f)
+		if spec.idTrunc != nil && spec.idTrunc[i] != nil {
+			g.truncs[i].t = spec.idTrunc[i]
+			vals[i] = g.truncs[i].eval(vals[i])
+		}
 		idIdx[i] = i
 	}
 	for i, a := range spec.accs {
-		if a.field == "" {
-			accIdx[i] = -1
-			continue
-		}
 		j := len(spec.idFields) + i
-		vals[j] = get(a.field)
+		switch {
+		case a.where != nil && !matchAll(a.where, get):
+			vals[j] = value{k: kSkip}
+		case a.field == "":
+			vals[j] = a.c
+		default:
+			vals[j] = get(a.field)
+		}
 		accIdx[i] = j
 	}
 	return g.addVals(vals, idIdx, accIdx)
@@ -762,6 +867,9 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 		if accIdx[i] >= 0 {
 			v = vals[accIdx[i]]
 		}
+		if v.k == kSkip {
+			continue
+		}
 		st := &gs.accs[i]
 		switch a.op {
 		case accSum, accAvg:
@@ -779,6 +887,10 @@ func (g *grouper) addVals(vals []value, idIdx, accIdx []int) error {
 		case accCountNonNull:
 			if v.k != kMissing && v.k != kNull {
 				st.count++
+			}
+		case accCountDistinct:
+			if err := g.addDistinct(st, v); err != nil {
+				return err
 			}
 		case accMin, accMax:
 			if v.k == kMissing || v.k == kNull {
@@ -949,6 +1061,8 @@ func accValue(a *accSpec, st *accState) value {
 		}
 	case accCount, accCountNonNull:
 		return value{k: kInt, i: st.count}
+	case accCountDistinct:
+		return value{k: kInt, i: int64(len(st.set))}
 	default:
 		if st.hasExt {
 			return st.ext.view()
@@ -1082,6 +1196,8 @@ func mergeState(spec *groupSpec, a, b *groupState) {
 			x.count += y.count
 		case accCount, accCountNonNull:
 			x.count += y.count
+		case accCountDistinct:
+			mergeDistinct(x, y)
 		case accMin, accMax:
 			if !y.hasExt {
 				continue
@@ -1126,7 +1242,9 @@ type plan struct {
 	npred         int // need[:npred] are the fields the predicates read
 	next          int // first stage that runs on materialised rows
 	limits        Limits
-	countOnly     bool // the group stands for a trailing $count
+	countOnly     bool       // the group stands for a trailing $count
+	gates         []gateDef  // filtered accumulator operands, derived per record
+	truncs        []truncDef // $dateTrunc _id parts, derived per record
 }
 
 // joinPlan is a streaming $lookup: each source document is joined with
@@ -1222,6 +1340,14 @@ func (p *Pipeline) plan() plan {
 		}
 	}
 	var idRefs, accRefs []ref
+	// filtered accumulators: the refs of each filter's leaf fields
+	type gateRefs struct {
+		acc      int
+		predRefs []ref // per predicate; kind 3 marks $and/$or
+		fields   []string
+		refs     []ref
+	}
+	var gateRs []gateRefs
 	if i < len(p.stages) && p.stages[i].kind == stGroup {
 		g := p.stages[i].group
 		ok := true
@@ -1230,7 +1356,26 @@ func (p *Pipeline) plan() plan {
 			ok = ok && r.kind != 2 // grouping by the whole joined document: materialise
 			idRefs = append(idRefs, r)
 		}
-		for _, a := range g.accs {
+		for ai, a := range g.accs {
+			if a.where != nil {
+				gr := gateRefs{acc: ai}
+				for _, pr := range a.where {
+					if pr.op == opAnd || pr.op == opOr {
+						gr.predRefs = append(gr.predRefs, ref{kind: 3})
+						predicateFields(pr, func(f string) {
+							r := resolve(f)
+							ok = ok && r.kind != 2
+							gr.fields = append(gr.fields, f)
+							gr.refs = append(gr.refs, r)
+						})
+						continue
+					}
+					r := resolve(pr.field)
+					ok = ok && r.kind != 2
+					gr.predRefs = append(gr.predRefs, r)
+				}
+				gateRs = append(gateRs, gr)
+			}
 			if a.field == "" {
 				accRefs = append(accRefs, ref{0, -1})
 				continue
@@ -1243,7 +1388,7 @@ func (p *Pipeline) plan() plan {
 			pl.group = g
 			i++
 		} else {
-			idRefs, accRefs = nil, nil
+			idRefs, accRefs, gateRs = nil, nil, nil
 		}
 	}
 	if pl.group == nil && i < len(p.stages) && p.stages[i].kind == stCount {
@@ -1297,6 +1442,32 @@ func (p *Pipeline) plan() plan {
 			} else {
 				pl.accIdx = append(pl.accIdx, fix(r))
 			}
+		}
+		// derived slots follow every extracted one
+		for j, t := range pl.group.idTrunc {
+			if t != nil {
+				pl.truncs = append(pl.truncs, truncDef{t: t, src: pl.idIdx[j], out: pl.nvals})
+				pl.idIdx[j] = pl.nvals
+				pl.nvals++
+			}
+		}
+		for _, gr := range gateRs {
+			a := &pl.group.accs[gr.acc]
+			gd := gateDef{preds: a.where, src: pl.accIdx[gr.acc], c: a.c, out: pl.nvals}
+			for _, r := range gr.predRefs {
+				if r.kind == 3 {
+					gd.predIdx = append(gd.predIdx, -1)
+				} else {
+					gd.predIdx = append(gd.predIdx, fix(r))
+				}
+			}
+			gd.fields = gr.fields
+			for _, r := range gr.refs {
+				gd.fieldIdx = append(gd.fieldIdx, fix(r))
+			}
+			pl.gates = append(pl.gates, gd)
+			pl.accIdx[gr.acc] = pl.nvals
+			pl.nvals++
 		}
 	}
 	return pl
@@ -1419,6 +1590,7 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 	seen, emitted, visited := 0, 0, 0
 	var eerr error
 	r := rec{vals: vals}
+	d := pl.deriver()
 	process := func(val []byte) bool {
 		if visited++; visited&4095 == 0 {
 			if eerr = ctx.Err(); eerr != nil {
@@ -1450,6 +1622,9 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 		more := pl.limit < 0 || emitted < pl.limit
 		if pl.join == nil {
 			r.fdoc = nil
+			if d != nil {
+				d.apply(vals)
+			}
 			eerr = emit(&r)
 			return eerr == nil && more
 		}
@@ -1466,6 +1641,9 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 				return true
 			}
 			r.fdoc = fr.doc
+			if d != nil {
+				d.apply(vals)
+			}
 			eerr = emit(&r)
 			return eerr == nil
 		})
@@ -1480,6 +1658,9 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 			}
 			if jp.postMatches(vals) {
 				r.fdoc = nil
+				if d != nil {
+					d.apply(vals)
+				}
 				eerr = emit(&r)
 			}
 		}
@@ -1499,6 +1680,9 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 		}
 		var ovf []byte
 		var serr error
+		if lk != nil {
+			lk.locked = lk.useKey
+		}
 		err := spec.c.db.scanLeaves(spec.c.view(), lo, hi, func(lv leafView) bool {
 			for c := lv.i; c < lv.j; c++ {
 				val := lv.p.leafVal(c)
@@ -1516,6 +1700,9 @@ func (pl *plan) stream(ctx context.Context, spec srcSpec, e *env, keepDoc bool, 
 			}
 			return true
 		})
+		if lk != nil {
+			lk.locked = false
+		}
 		if err != errNeedMerge {
 			if err == nil {
 				err = serr
@@ -1912,8 +2099,15 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 			return nil, err
 		}
 		out := make([]map[string]any, len(rows))
+		var evals map[string]*truncEval // one per computed field, kept across rows
+		for name, x := range s.exprs {
+			if evals == nil {
+				evals = map[string]*truncEval{}
+			}
+			evals[name] = &truncEval{t: x.trunc}
+		}
 		for i, r := range rows {
-			m := make(map[string]any, len(r))
+			m := make(map[string]any, len(r)+len(s.exprs))
 			for k, v := range r {
 				keep := true
 				if inclusion {
@@ -1930,6 +2124,10 @@ func applyRows(s *stage, rows []map[string]any, limits Limits, e *env) ([]map[st
 				if keep {
 					m[k] = v
 				}
+			}
+			for name, x := range s.exprs {
+				ev := evals[name]
+				setRowField(m, name, ev.eval(rowField(r, x.trunc.field)).any())
 			}
 			out[i] = m
 		}
