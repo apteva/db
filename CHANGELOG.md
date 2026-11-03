@@ -5,6 +5,19 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.15] - 2026-11-03
+
+- `$like` filter operator: a SQL LIKE pattern over several fields joined by a
+  separator, with SQLite's default semantics (`%`, `_` per UTF-8 character,
+  ASCII-only case folding, no escape; missing/null fields read as empty). It
+  composes with `$and`/`$or` and works in Query, CountDocuments, `$match`,
+  accumulator `where`, change feeds and computed collections. It never selects
+  an index; indexed conjuncts still bound the scan. At 200k documents a
+  three-field search inside a centre + 90-day compound-index range adds about
+  0.6 ms to a count; over the whole collection it costs about 0.4 µs per
+  document.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.14] - 2026-11-02
 
 - Exact `$countDistinct` for a group whose distinct sets exceed the state

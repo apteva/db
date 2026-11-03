@@ -1,9 +1,9 @@
-AptevaDB alpha.14 makes distinct counts exact when one group's distinct sets outgrow the memory budget.
+AptevaDB alpha.15 adds `$like`, a multi-field text search filter.
 
-- **Distinct counts no longer fail with "aggregation partition depth exhausted".** Spilled group state is partitioned by group key. A group with `_id: null` has a single key, so its state could not be split, and alpha.13 repartitioned it until the depth limit. Eight filtered `$countDistinct` metrics over 64,084 rows and 24,443 distinct callers failed at a 16 MiB budget; six fit. Such a group's spilled states are now read once per disjoint slice of the distinct values, and the slice counts add up to the exact total. Slices start from the spilled size and double when one does not fit, up to 1024, reported as `AggregateStats.DistinctSlices`. The other accumulators of that group are merged on the first pass.
-- **Merging distinct sets charges only new members.** Partial states from parallel workers overlap; each incoming set used to be charged in full.
-- Results are exact, as before: no estimate is ever used.
+- **`$like` matches a SQL LIKE pattern over several fields joined by a separator**, e.g. `{"$like":{"fields":["resource_key","opportunity_key","commercial_id"],"separator":" ","pattern":"%23 op%"}}`. Semantics are SQLite's default LIKE over `coalesce(a,'') || ' ' || coalesce(b,'')`: `%` and `_` are wildcards (`_` is one UTF-8 character), ASCII letters fold case, there is no escape character, and missing or null fields read as empty.
+- **It filters wherever filters apply**: Query, CountDocuments, `$match`, accumulator `where`, change feeds and computed collections, nested in `$and`/`$or`.
+- **It never selects an index.** Indexed conjuncts still choose the access path, so a search bounded by an equality and a date range only reads that range. At 200k documents a search inside a centre + 90-day range adds about 0.6 ms to a count; an unbounded search costs about 0.4 µs per document.
 
-See [USAGE.md](https://github.com/apteva/db/blob/v0.2.0-alpha.14/USAGE.md#dashboard-aggregation-alpha11) for the rules.
+See [USAGE.md](https://github.com/apteva/db/blob/v0.2.0-alpha.15/USAGE.md#multi-field-like-alpha15) for the rules.
 
-**Format remains 10; alpha.5–alpha.13 directories need no migration.** Opening formats 3–9 still permanently upgrades them to format 10, so back up with the original binary first. This is a public prerelease alpha.
+**Format remains 10; alpha.5–alpha.14 directories need no migration.** Opening formats 3–9 still permanently upgrades them to format 10, so back up with the original binary first. This is a public prerelease alpha.

@@ -124,6 +124,7 @@ const (
 	opPrefix
 	opAnd
 	opOr
+	opLike // composite: reads several fields, like $and/$or
 )
 
 type pred struct {
@@ -132,7 +133,11 @@ type pred struct {
 	v        value
 	in       []value
 	children [][]pred
+	like     *likeSpec
 }
+
+// composite predicates read several fields through a getter.
+func (p *pred) composite() bool { return p.op >= opAnd }
 
 type accOp uint8
 
@@ -422,6 +427,14 @@ func parseMatchDepth(m map[string]any, depth int, nodes *int) ([]pred, error) {
 					return nil, err
 				}
 				pr.children = append(pr.children, children)
+			}
+			preds = append(preds, pr)
+			continue
+		}
+		if field == "$like" {
+			pr, err := parseLike(cond)
+			if err != nil {
+				return nil, err
 			}
 			preds = append(preds, pr)
 			continue
@@ -1362,7 +1375,7 @@ func (p *Pipeline) plan() plan {
 			if a.where != nil {
 				gr := gateRefs{acc: ai}
 				for _, pr := range a.where {
-					if pr.op == opAnd || pr.op == opOr {
+					if pr.composite() {
 						gr.predRefs = append(gr.predRefs, ref{kind: 3})
 						predicateFields(pr, func(f string) {
 							r := resolve(f)
@@ -1534,7 +1547,7 @@ func (pl *plan) matches(vals []value) bool {
 	for j := range pl.preds {
 		pr := &pl.preds[j]
 		matched := false
-		if pr.op == opAnd || pr.op == opOr {
+		if pr.composite() {
 			matched = pr.matches(func(field string) value {
 				for i, name := range pl.need {
 					if name == field {
@@ -2190,6 +2203,9 @@ func (db *DB) AggregateParallel(ctx context.Context, pipeline []byte, shards int
 }
 
 func (p *pred) matches(get func(string) value) bool {
+	if p.op == opLike {
+		return p.like.matches(get)
+	}
 	if p.op == opAnd || p.op == opOr {
 		for _, children := range p.children {
 			matched := matchAll(children, get)
@@ -2205,7 +2221,11 @@ func (p *pred) matches(get func(string) value) bool {
 	return p.eval(get(p.field))
 }
 func predicateFields(p pred, fn func(string)) {
-	if p.op == opAnd || p.op == opOr {
+	if p.op == opLike {
+		for _, f := range p.like.fields {
+			fn(f)
+		}
+	} else if p.op == opAnd || p.op == opOr {
 		for _, children := range p.children {
 			for _, child := range children {
 				predicateFields(child, fn)
@@ -2217,7 +2237,7 @@ func predicateFields(p pred, fn func(string)) {
 }
 func hasLogical(preds []pred) bool {
 	for _, p := range preds {
-		if p.op == opAnd || p.op == opOr {
+		if p.composite() {
 			return true
 		}
 	}
@@ -2230,7 +2250,7 @@ func flattenConjunction(preds []pred) []pred {
 			for _, children := range p.children {
 				out = append(out, flattenConjunction(children)...)
 			}
-		} else if p.op != opOr {
+		} else if !p.composite() {
 			out = append(out, p)
 		}
 	}

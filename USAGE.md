@@ -216,6 +216,27 @@ pattern meaning. Arrays in ordinary queries match if any scalar element matches.
 Integer filter literals outside int64 are rejected; explicit decimals use finite
 float64. Malformed filters and trailing JSON return ErrPipeline.
 
+## Multi-field LIKE (alpha.15)
+
+`$like` is a filter-level operator, beside `$and`/`$or`, that matches a SQL LIKE
+pattern against several fields joined by a separator:
+
+```json
+{"$and":[{"centre":"C07"},{"created_ms":{"$gte":1775001600000}},
+  {"$like":{"fields":["resource_key","opportunity_key","commercial_id"],"separator":" ","pattern":"%23 op%"}}]}
+```
+
+Semantics are SQLite's default LIKE over `coalesce(a,'') || sep || coalesce(b,'')`:
+`%` matches any run, `_` exactly one UTF-8 character, ASCII letters compare
+case-insensitively (other letters exactly), and there is no escape character.
+Missing and null fields read as the empty string; any other non-string value
+makes the predicate false. 1–16 fields, a pattern of at most 4096 bytes; the
+separator defaults to empty. `$like` never selects an index: the other
+conjuncts choose the access path and `$like` filters the documents it yields,
+so bound it with indexed predicates. It applies wherever filters do: Query,
+CountDocuments, `$match`, accumulator `where`, change feeds and computed
+collections. A count containing `$like` evaluates documents.
+
 ## Nullable uniqueness and budgets
 
 IndexOptions{Unique:true, NullsDistinct:true} permits repeated null tuples, matching
