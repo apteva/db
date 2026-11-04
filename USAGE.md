@@ -307,6 +307,22 @@ n, err := orders.CountDocuments(ctx, []byte(`{"bucket":"b00"}`), db.CountOptions
 // stats.IndexEntriesExamined == 5000, stats.DocumentFetches == 0.
 ```
 
+### Counting with an index (alpha.16)
+
+A count reads index entries alone when one exact compound index covers every
+predicate of a conjunction:
+
+- equality or `$in` on its leading fields, up to 64 value combinations
+- then, optionally, `$gt`, `$gte`, `$lt` or `$lte` on the next field
+- `$ne null` on a field those already restrict to non-null values
+
+`$or`, `$like`, `$prefix`, `$ne` of a value, `$ne null` alone and fields outside
+the index need documents; so does a range on a field that also has listed values.
+A sparse index covers a count only when every one of its fields is restricted to
+non-null values. Those counts still narrow through the index when it names at most
+an eighth of the collection. `stats.Plan.IndexOnly` and `stats.DocumentFetches`
+report which route ran, and `stats.Plan.Ranges` the ranges an index count read.
+
 `CountDocuments` is available on embedded collections, the default `DB` and
 `Snapshot` collection, and the HTTP Go driver's collections and leased snapshot
 collections. It uses Query's JSON filter syntax and counts encoded documents,

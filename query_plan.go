@@ -19,6 +19,7 @@ type QueryPlan struct {
 	Index          string
 	Fields         []IndexField
 	EqualityPrefix int
+	Ranges         int // index ranges an index-count plan reads
 	Reverse        bool
 	SortInMemory   bool
 	MaxMemoryBytes int64
@@ -83,7 +84,7 @@ func (c *Collection) ExplainQuery(ctx context.Context, filter []byte, opts Query
 	if err != nil {
 		return a.info, err
 	}
-	if a.info.Index == "" && opts.Hint == "" && len(opts.Sort) == 0 && !opts.KeyDescending {
+	if a.info.Index == "" && opts.Hint == "" && !opts.KeyDescending {
 		if ip, ok := c.indexPlanBudget(preds, a.info.MaxMemoryBytes); ok {
 			a.info.Access = "index-filter"
 			a.info.Index = ip.name
@@ -407,6 +408,15 @@ func (h *queryHeap) Pop() any {
 }
 func rowCost(r queryRow) int64 { return int64(len(r.key) + len(r.doc) + 128) }
 
+// queryIndexPlan narrows a query that found no single index range, such as $in
+// on a leading field, when reading its documents by key is the cheaper route.
+func (c *Collection) queryIndexPlan(preds []pred, opts QueryOptions, a queryAccess) (indexPlan, bool) {
+	if opts.Hint != "" || opts.KeyDescending {
+		return indexPlan{}, false
+	}
+	return c.indexPlanBudget(preds, a.info.MaxMemoryBytes)
+}
+
 func (c *Collection) queryAdvanced(ctx context.Context, preds []pred, opts QueryOptions, a queryAccess, yield func([]byte, []byte) bool) error {
 	stats := opts.Stats
 	if stats == nil {
@@ -438,6 +448,12 @@ func (c *Collection) queryAdvanced(ctx context.Context, preds []pred, opts Query
 			}
 			return cur.Err()
 		}
+	} else if ip, ok := c.queryIndexPlan(preds, opts, a); ok {
+		stats.Plan.Access = "index-filter"
+		stats.Plan.Index = ip.name
+		stats.PeakMemoryBytes = ip.memory
+		sort.Slice(ip.pks, func(i, j int) bool { return bytes.Compare(ip.pks[i], ip.pks[j]) < 0 })
+		src = c.rangesSource(ctx, ip)
 	} else {
 		src = c.Source(nil, nil)
 	}

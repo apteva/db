@@ -37,7 +37,7 @@ func TestCountDocumentsCoverageAndFallback(t *testing.T) {
 		{`{"bucket":"b00","rank":1}`, 1, true},
 		{`{"bucket":null}`, 2, true}, {`{"bucket":"b00","rank":null}`, 2, true},
 		{`{"$and":[{"bucket":"b00"},{"bucket":{"$eq":"b00"}}]}`, 5, true},
-		{`{"$and":[{"bucket":"b00"},{"bucket":"b01"}]}`, 0, false},
+		{`{"$and":[{"bucket":"b00"},{"bucket":"b01"}]}`, 0, true},
 		{`{"bucket":"b00","extra":true}`, 2, false},
 		{`{"bucket":"b00","$or":[{"rank":1},{"rank":null}]}`, 3, false},
 		{`{"$or":[{"bucket":"b00"},{"bucket":null}]}`, 7, false},

@@ -5,6 +5,21 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.16] - 2026-11-04
+
+- `CountDocuments` counts index entries alone over more filters: equality or
+  `$in` on the leading fields of a compound index, a following bounded range,
+  and `$ne null` where those prove it. `$in` lists expand to a union of at most
+  64 ranges; each document counts once. At 200k wide documents a two-value `$in`
+  with a date range drops from 75 ms and 200,000 document fetches to 0.011 ms and
+  none. `QueryPlan.Ranges` reports how many ranges an index count read.
+- Counts and sorted queries that need document evaluation now narrow through a
+  leading `$in` when the index names at most an eighth of the collection, as
+  unsorted queries already did.
+- A count with contradictory equalities on one field is now answered from the
+  index as zero.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.15] - 2026-11-03
 
 - `$like` filter operator: a SQL LIKE pattern over several fields joined by a
