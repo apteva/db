@@ -697,10 +697,10 @@ type indexPlan struct {
 
 // indexPlan picks one indexable predicate of a leading $match. Equality and
 // $in are preferred over ranges. The entries are counted first (a key-only
-// pass): the index is used only while it names at most an eighth of the
-// collection, since reading documents one by one costs more than scanning
-// them past that. The executor still checks every predicate on each
-// document.
+// pass): the index is used only while it names at most a quarter of the
+// collection, since reading documents one by one, about twice a scan's cost
+// each, comes to more than scanning them near a third to a half. The executor
+// still checks every predicate on each document.
 func (c *Collection) indexPlan(preds []pred) (indexPlan, bool) {
 	return c.indexPlanBudget(preds, DefaultQueryMemoryBytes)
 }
@@ -713,11 +713,9 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 	if len(defs) == 0 {
 		return indexPlan{}, false
 	}
-	size, err := c.approxCount()
-	if err != nil {
-		return indexPlan{}, false
-	}
-	cap := max(indexCountMin, size/8)
+	// Past indexCountMin entries the choice matters, so it takes the collection's
+	// real size; an estimate can be several times off in either direction.
+	size := -1
 	// collect each candidate's primary keys (bounded) and take the fewest;
 	// several ranges, or a range a multikey document may fall in more than
 	// once, are deduplicated
@@ -765,42 +763,62 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 	}
 	for _, cand := range cands {
 		d, rs := cand.d, cand.rs
-		limit := cap
+		limit := indexCountMin
 		if found {
 			limit = best.count
+		} else if size >= 0 {
+			limit = max(indexCountMin, size/indexCountShare)
 		}
-		var seen map[string]struct{}
-		if !cand.uniq {
-			seen = map[string]struct{}{}
-		}
-		pkbuf = pkbuf[:0]
 		var offs []int
 		over := false
-		for _, r := range rs {
-			err := c.rawScan(r.lo, r.hi, func(k, _ []byte) bool {
-				pk := primaryKeyOfDef(d, k)
-				if pk == nil {
-					return true
-				}
-				if seen != nil {
-					if _, dup := seen[string(pk)]; dup {
+		collect := func() error {
+			var seen map[string]struct{}
+			if !cand.uniq {
+				seen = map[string]struct{}{}
+			}
+			pkbuf, offs, over = pkbuf[:0], offs[:0], false
+			for _, r := range rs {
+				err := c.rawScan(r.lo, r.hi, func(k, _ []byte) bool {
+					pk := primaryKeyOfDef(d, k)
+					if pk == nil {
 						return true
 					}
-					seen[string(pk)] = struct{}{}
+					if seen != nil {
+						if _, dup := seen[string(pk)]; dup {
+							return true
+						}
+						seen[string(pk)] = struct{}{}
+					}
+					if int64(len(pkbuf))+int64(len(offs))*8+int64(len(seen))*64+int64(len(pk))*2 > budget/2 || len(offs)/2 >= limit {
+						over = true
+						return false
+					}
+					offs = append(offs, len(pkbuf), len(pkbuf)+len(pk))
+					pkbuf = append(pkbuf, pk...)
+					return true
+				})
+				if err != nil {
+					return err
 				}
-				if int64(len(pkbuf))+int64(len(offs))*8+int64(len(seen))*64+int64(len(pk))*2 > budget/2 || len(offs)/2 >= limit {
-					over = true
-					return false
+				if over {
+					return nil
 				}
-				offs = append(offs, len(pkbuf), len(pkbuf)+len(pk))
-				pkbuf = append(pkbuf, pk...)
-				return true
-			})
-			if err != nil {
+			}
+			return nil
+		}
+		if err := collect(); err != nil {
+			return indexPlan{}, false
+		}
+		if over && !found && size < 0 {
+			var err error
+			if size, err = c.collectionSize(defs); err != nil {
 				return indexPlan{}, false
 			}
-			if over {
-				break
+			if wider := size / indexCountShare; wider > limit {
+				limit = wider
+				if err := collect(); err != nil {
+					return indexPlan{}, false
+				}
 			}
 		}
 		if over {
@@ -823,8 +841,42 @@ func (c *Collection) indexPlanBudget(preds []pred, budget int64) (indexPlan, boo
 }
 
 // indexCountMin is the smallest entry count an index is used up to, however
-// small the collection.
-const indexCountMin = 1 << 12
+// small the collection. indexCountShare is the share of a larger collection
+// it is used up to: one document in this many.
+const (
+	indexCountMin   = 1 << 12
+	indexCountShare = 4
+)
+
+// collectionSize counts documents through an exact index, which holds one entry
+// for each, reading no documents. Other indexes can omit or repeat documents, so
+// without an exact one it falls back on the estimate.
+func (c *Collection) collectionSize(defs []indexDef) (int, error) {
+	for _, d := range defs {
+		if d.Encoding != 2 || len(d.Fields) == 0 || len(d.Fields) == 1 && !d.Fields[0].Desc || d.Sparse {
+			continue
+		}
+		lo, err := encodeIndexTuple(d, nil)
+		if err != nil {
+			return 0, err
+		}
+		hi := prefixEnd(lo)
+		n := 0
+		err = c.db.scanLeaves(c.view(), lo, hi, func(lv leafView) bool {
+			n += lv.j - lv.i
+			return true
+		})
+		if errors.Is(err, errNeedMerge) {
+			n = 0
+			err = c.rawScan(lo, hi, func(_, _ []byte) bool {
+				n++
+				return true
+			})
+		}
+		return n, err
+	}
+	return c.approxCount()
+}
 
 // rangesSource yields the documents the plan's primary keys name, in
 // entry order.

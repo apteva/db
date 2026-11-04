@@ -57,7 +57,8 @@ func TestAggregateUsesCompoundIndexes(t *testing.T) {
 		{`{"tenant":"t3","day":{"$in":[2,2.0,12]}}`, "tenant_day"},
 		{`{"tenant":"t1","day":{"$in":[null,"2026-10-03"]}}`, "tenant_day"},
 		{`{"tenant":{"$in":["t0","t1","t2","t3","t4","t5","t6"]},"day":{"$in":["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10"]}}`, ""}, // 70 tuples exceed maxInRanges
-		{`{"tenant":"t3"}`, ""}, // more than an eighth of the collection
+		{`{"tenant":"t3"}`, "tenant_day"},
+		{`{"tenant":{"$in":["t0","t1","t3"]}}`, ""}, // more than a quarter of the collection
 		{`{"status":"s2"}`, ""},
 	}
 	run := func(c *Collection, pipe []byte, mode int) ([]map[string]any, string) {

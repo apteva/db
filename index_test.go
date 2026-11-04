@@ -145,9 +145,9 @@ func TestSecondaryIndexes(t *testing.T) {
 				t.Fatalf("%s: got %d want %d", c.pipe, got, want)
 			}
 			// the planner reads through an index only while it names at
-			// most an eighth of the collection (or indexCountMin documents);
+			// most a quarter of the collection (or indexCountMin documents);
 			// a scan is faster past that
-			if selective := want <= max(indexCountMin, int64(len(docs))/8); used != 1 && selective {
+			if selective := want <= max(indexCountMin, int64(len(docs))/indexCountShare); used != 1 && selective {
 				t.Fatalf("%s: index not used", c.pipe)
 			} else if used != 0 && !selective {
 				t.Fatalf("%s: index used for %d of %d documents", c.pipe, want, len(docs))
