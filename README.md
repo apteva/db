@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.16.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.17.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
 runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.16
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.16
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.16
+go get github.com/apteva/db@v0.2.0-alpha.17
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.17
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.17
 ```
 
 ```go
@@ -397,7 +397,7 @@ Benchmarks report write costs, all-group queries and 10/32-reader throughput.
   next component (since alpha.12, for aggregations as well as queries; since
   alpha.13 the prefix may be `$in` lists, up to 64 value combinations),
   takes the most selective candidate, and reads through it only while it
-  names at most an eighth of the collection, then re-checks every predicate
+  names at most a quarter of the collection, then re-checks every predicate
   on the fetched document. Unique index creation instead stages and validates
   the whole index before publishing it atomically. `VerifyIndexes` cross-checks
   entries, documents and unique constraints.

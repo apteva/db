@@ -5,6 +5,22 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.17] - 2026-11-04
+
+- A filter that needs documents now narrows through an index while the index
+  names at most a quarter of the collection, measured against the collection's
+  real size. This replaces the eighth stated for alpha.16, which was applied to
+  an estimate that can be several times off in either direction: on 125,865 real
+  documents it read 45,489, so narrowing stopped near 5,700 entries. Past 4,096
+  entries the size is counted from an index with one entry per document, reading
+  no documents; a collection without such an index still uses the estimate.
+- Only `$in` scopes of several values change. An equality or a one-value `$in`
+  already read through the index with no cutoff. Results are unchanged. On those
+  real documents, a `$in` scope and `$like` count: 6,116 entries 65.4 ms to
+  14.6 ms, 13,693 entries 78.8 ms to 32.2 ms, 25,737 entries 99.7 ms to 59.3 ms;
+  31,803 entries and above still scan, at the same cost.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.16] - 2026-11-04
 
 - `CountDocuments` counts index entries alone over more filters: equality or

@@ -1,9 +1,20 @@
-AptevaDB alpha.16 counts more filters from index entries alone, without fetching documents.
+AptevaDB alpha.17 narrows filters through an index for more of the collection.
 
-- **`CountDocuments` covers `$in` prefixes and bounded ranges.** Equality or `$in` on the leading fields of a compound index, a following range, and `$ne null` where those prove it, count index entries only. `$in` lists expand to at most 64 ranges, and each document counts once. At 200k wide documents a two-value `$in` with a date range drops from 75 ms and 200,000 document fetches to 0.011 ms and none.
-- **Filters that still need documents read fewer.** Counts and sorted queries narrow through a leading `$in` when the index names at most an eighth of the collection, as unsorted queries already did. A two-value `$in`, date range and `$like` count drops from 81 ms to 15 ms.
-- **Results are unchanged.** Index counts are compared with document evaluation over thousands of randomised filters, including nulls, mixed types, large integers and buffered writes.
+- **The cutoff follows the real collection size.** A filter that needs documents reads them by key while the index names at most a quarter of the collection. This replaces the eighth stated for alpha.16, which was applied to an estimate that can be several times off in either direction: on 125,865 real documents it read 45,489, so narrowing stopped near 5,700 entries. Past 4,096 entries the size is now counted from an index with one entry per document, reading no documents. A collection without such an index still uses the estimate.
+- **Only `$in` scopes of several values change.** An equality or a one-value `$in` already read through the index with no cutoff.
+- **Results are unchanged.**
 
-See [USAGE.md](https://github.com/apteva/db/blob/v0.2.0-alpha.16/USAGE.md#counting-with-an-index-alpha16) for the rules.
+A `$in` scope and `$like` count on those real documents, best of 5, warm:
 
-**Format remains 10; alpha.5–alpha.15 directories need no migration.** Opening formats 3–9 still permanently upgrades them to format 10, so back up with the original binary first. This is a public prerelease alpha.
+| Entries in scope | alpha.16 | alpha.17 |
+|---:|---:|---:|
+| 4,567 | 10.7 ms | 12.1 ms |
+| 6,116 | 65.4 ms | 14.6 ms |
+| 13,693 | 78.8 ms | 32.2 ms |
+| 25,737 | 99.7 ms | 59.3 ms |
+| 31,803 | 109.7 ms | 111.2 ms |
+| 62,537 | 158.4 ms | 160.3 ms |
+
+The first row reads by key on both, so that difference is noise. Cold reads were not measured.
+
+**Format remains 10; alpha.5–alpha.16 directories need no migration.** Opening formats 3–9 still permanently upgrades them to format 10, so back up with the original binary first. This is a public prerelease alpha.

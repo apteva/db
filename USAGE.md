@@ -177,7 +177,7 @@ optionally with a range on the next field (`{"tenant":"acme","day":"2026-10-05"}
 or `{"tenant":"acme","created":{"$gte":...}}`). Since alpha.13 a prefix field may
 also be an `$in` list: each combination of listed values reads one index range,
 up to 64 combinations; beyond that the prefix stops at the previous field. The candidate naming the fewest
-documents is read, and only while it names at most an eighth of the collection;
+documents is read, and only while it names at most a quarter of the collection;
 otherwise the aggregation scans. A sparse compound index applies only when the
 filter requires a non-null value for every component (an `$in` list counts when
 it lists no null). `AggregateStats.Index`
@@ -320,7 +320,7 @@ predicate of a conjunction:
 the index need documents; so does a range on a field that also has listed values.
 A sparse index covers a count only when every one of its fields is restricted to
 non-null values. Those counts still narrow through the index when it names at most
-an eighth of the collection. `stats.Plan.IndexOnly` and `stats.DocumentFetches`
+a quarter of the collection. `stats.Plan.IndexOnly` and `stats.DocumentFetches`
 report which route ran, and `stats.Plan.Ranges` the ranges an index count read.
 
 `CountDocuments` is available on embedded collections, the default `DB` and
