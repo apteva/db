@@ -5,6 +5,16 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.18] - 2026-11-05
+
+- `$like` accepts `literal` in place of `pattern` for a plain substring search:
+  `{"$like":{"fields":["label"],"literal":"100%"}}`. `%` and `_` are ordinary
+  characters, ASCII letters compare case-insensitively, and missing and null
+  fields read as the empty string. An empty literal matches every string. Giving
+  both `literal` and `pattern` is an error.
+- Existing `pattern` filters are unchanged.
+- Format remains 10. No migration.
+
 ## [0.2.0-alpha.17] - 2026-11-04
 
 - A filter that needs documents now narrows through an index while the index

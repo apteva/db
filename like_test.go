@@ -242,3 +242,85 @@ func TestLikeRejectsInvalid(t *testing.T) {
 		}
 	}
 }
+
+func TestLikeLiteral(t *testing.T) {
+	d, err := Open(t.TempDir(), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	c, err := d.Collection("labels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	rows := map[string]any{"percent": "Remise 100% ok", "digits": "100 points", "underscore": "x A_B y", "letter": "AxB", "backslash": `a\b`, "accent": "ÉNERGIE", "null": nil}
+	for key, label := range rows {
+		var b DocBuilder
+		if label == nil {
+			b.Null("label")
+		} else {
+			b.String("label", label.(string))
+		}
+		if err := c.Insert([]byte(key), b.Bytes()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, tc := range []struct {
+		literal string
+		want    []string
+	}{
+		{"100%", []string{"percent"}},
+		{"%", []string{"percent"}},
+		{"a_b", []string{"underscore"}},
+		{"_", []string{"underscore"}},
+		{`\`, []string{"backslash"}},
+		{"REMISE", []string{"percent"}},
+		{"énergie", nil},
+		{"ÉNERGIE", []string{"accent"}},
+		{"", []string{"accent", "backslash", "digits", "letter", "null", "percent", "underscore"}},
+	} {
+		literal, _ := json.Marshal(tc.literal)
+		filter := []byte(fmt.Sprintf(`{"$like":{"fields":["label"],"literal":%s}}`, literal))
+		var got []string
+		err := c.Query(ctx, filter, QueryOptions{}, func(key, _ []byte) bool {
+			got = append(got, string(key))
+			return true
+		})
+		if err != nil {
+			t.Fatal(tc.literal, err)
+		}
+		if strings.Join(got, ",") != strings.Join(tc.want, ",") {
+			t.Errorf("query %q: got %v want %v", tc.literal, got, tc.want)
+		}
+		n, err := c.CountDocuments(ctx, filter, CountOptions{})
+		if err != nil || n != int64(len(tc.want)) {
+			t.Errorf("count %q: got %d, %v, want %d", tc.literal, n, err, len(tc.want))
+		}
+		agg, err := c.Aggregate(ctx, []byte(fmt.Sprintf(`[{"$match":%s},{"$group":{"_id":null,"n":{"$sum":1}}}]`, filter)))
+		if err != nil {
+			t.Fatal(tc.literal, err)
+		}
+		total := "0"
+		if len(agg) > 0 {
+			total = fmt.Sprint(agg[0]["n"])
+		}
+		if total != fmt.Sprint(len(tc.want)) {
+			t.Errorf("aggregate %q: %v want %d", tc.literal, agg, len(tc.want))
+		}
+	}
+}
+
+func TestLikeLiteralRejectsInvalid(t *testing.T) {
+	c, _ := likeFixture(t, 1)
+	for _, f := range []string{
+		`{"$like":{"fields":["a"],"literal":1}}`,
+		`{"$like":{"fields":["a"],"literal":null}}`,
+		`{"$like":{"fields":["a"],"literal":"x","pattern":"%x%"}}`,
+		fmt.Sprintf(`{"$like":{"fields":["a"],"literal":%q}}`, strings.Repeat("x", 4097)),
+	} {
+		if _, err := c.CountDocuments(context.Background(), []byte(f), CountOptions{}); err == nil {
+			t.Errorf("accepted %s", f)
+		}
+	}
+}
