@@ -237,6 +237,13 @@ so bound it with indexed predicates. It applies wherever filters do: Query,
 CountDocuments, `$match`, accumulator `where`, change feeds and computed
 collections. A count containing `$like` evaluates documents.
 
+For a plain substring, give `literal` instead of `pattern`. `%` and `_` are then
+ordinary characters, and an empty literal matches every string:
+
+```json
+{"$like":{"fields":["label"],"literal":"100%"}}
+```
+
 ## Nullable uniqueness and budgets
 
 IndexOptions{Unique:true, NullsDistinct:true} permits repeated null tuples, matching

@@ -15,11 +15,16 @@ import (
 // escape character. Missing and null fields read as the empty string; any
 // other non-string value makes the predicate false. It never uses an index,
 // so it filters the rows the other conjuncts' access path yields.
+//
+// "literal" replaces "pattern" for a plain substring search, in which % and _
+// are ordinary characters. An empty literal matches every string:
+//
+//	{"$like": {"fields": ["a"], "literal": "100%"}}
 type likeSpec struct {
 	fields    []string
 	separator []byte
 	pattern   []byte // ASCII-lowered
-	literal   []byte // set when the pattern is %literal% with no wildcards inside
+	literal   []byte // set for "literal", or when the pattern is %literal% with no wildcards inside
 }
 
 const (
@@ -51,14 +56,22 @@ func parseLike(operand any) (pred, error) {
 		}
 		spec.separator = []byte(s)
 	}
+	for k := range m {
+		if k != "fields" && k != "separator" && k != "pattern" && k != "literal" {
+			return pred{}, errors.New("unknown $like option " + k)
+		}
+	}
+	if raw, exists := m["literal"]; exists {
+		literal, ok := raw.(string)
+		if _, both := m["pattern"]; both || !ok || len(literal) > maxLikePattern {
+			return pred{}, errors.New("$like literal must be a string of at most 4096 bytes, without pattern")
+		}
+		spec.literal = asciiLower([]byte{}, []byte(literal))
+		return pred{op: opLike, like: spec}, nil
+	}
 	pattern, ok := m["pattern"].(string)
 	if !ok || len(pattern) > maxLikePattern {
 		return pred{}, errors.New("$like needs a string pattern of at most 4096 bytes")
-	}
-	for k := range m {
-		if k != "fields" && k != "separator" && k != "pattern" {
-			return pred{}, errors.New("unknown $like option " + k)
-		}
 	}
 	spec.pattern = asciiLower(nil, []byte(pattern))
 	if n := len(spec.pattern); n >= 2 && spec.pattern[0] == '%' && spec.pattern[n-1] == '%' {
