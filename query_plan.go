@@ -92,6 +92,42 @@ func (c *Collection) ExplainQuery(ctx context.Context, filter []byte, opts Query
 	}
 	return a.info, nil
 }
+
+// EstimateQueryCandidates estimates entries in the streaming access range
+// before residual filtering. It samples B-tree pages and uses the snapshot's
+// buffered bounds without scanning records or enumerating index entries.
+// Without a streaming index range it estimates the whole collection.
+func (c *Collection) EstimateQueryCandidates(ctx context.Context, filter []byte, opts QueryOptions) (int, error) {
+	if err := orBackground(ctx).Err(); err != nil {
+		return 0, err
+	}
+	if err := validateQueryOptions(opts); err != nil {
+		return 0, err
+	}
+	if c.snap == nil {
+		s, cc, err := c.readView()
+		if err != nil {
+			return 0, err
+		}
+		defer s.Close()
+		return cc.EstimateQueryCandidates(ctx, filter, opts)
+	}
+	preds, err := queryPredicates(filter)
+	if err != nil {
+		return 0, err
+	}
+	access, err := c.chooseQueryAccess(preds, opts)
+	if err != nil {
+		return 0, err
+	}
+	if access.info.Index == "" {
+		return c.approxCount()
+	}
+	if access.hi != nil && bytes.Compare(access.lo, access.hi) >= 0 {
+		return 0, nil
+	}
+	return c.approxRangeCount(access.lo, access.hi)
+}
 func (c *Collection) chooseQueryAccess(preds []pred, opts QueryOptions) (queryAccess, error) {
 	budget, err := queryBudget(opts)
 	if err != nil {

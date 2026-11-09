@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -793,5 +795,42 @@ func TestApproxCount(t *testing.T) {
 			t.Fatalf("%s: estimate %d for %d keys", name, got, n)
 		}
 		t.Logf("%s: %d keys, estimate %d", name, n, got)
+	}
+}
+
+func TestEstimateQueryCandidates(t *testing.T) {
+	ctx := context.Background()
+	db, err := Open(t.TempDir(), Options{SyncMode: SyncOS})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	c, err := db.Collection("candidate_estimate")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.CreateCompoundIndex(ctx, "by_value", []IndexField{{Field: "value"}}); err != nil {
+		t.Fatal(err)
+	}
+	b := c.NewBatch()
+	for i := 0; i < 2000; i++ {
+		b.UpsertJSON([]byte(fmt.Sprintf("%05d", i)), []byte(fmt.Sprintf(`{"value":%d}`, i)))
+	}
+	if err := b.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	opts := QueryOptions{Hint: "by_value"}
+	for _, tc := range []struct {
+		filter    string
+		low, high int
+	}{
+		{`{"value":100,"residual":false}`, 1, 1},
+		{`{"value":{"$gte":100,"$lt":1700}}`, 800, 2600},
+		{`{"value":{"$gte":300,"$lt":200}}`, 0, 0},
+	} {
+		got, err := c.EstimateQueryCandidates(ctx, []byte(tc.filter), opts)
+		if err != nil || got < tc.low || got > tc.high {
+			t.Fatalf("%s: estimate %d, want [%d,%d], error %v", tc.filter, got, tc.low, tc.high, err)
+		}
 	}
 }
