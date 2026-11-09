@@ -816,6 +816,10 @@ func (c *Collection) indexOn(field string) (indexDef, bool) {
 // two boundary leaves are sampled for their fill. Buffered records are
 // added.
 func (c *Collection) approxCount() (int, error) {
+	return c.approxRangeCount(c.pfx, c.end)
+}
+
+func (c *Collection) approxRangeCount(lo, hi []byte) (int, error) {
 	db := c.db
 	db.mu.RLock()
 	defer db.mu.RUnlock()
@@ -827,7 +831,6 @@ func (c *Collection) approxCount() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	lo, hi := c.pfx, c.end
 	type step struct {
 		between int     // children strictly between the two paths at this level
 		fanout  float64 // children per page at this level
@@ -897,7 +900,9 @@ func (c *Collection) approxCount() (int, error) {
 		est = leaves*fill + float64(lp.numCells()-li) + float64(hj)
 	}
 	n := int(math.Max(0, est))
-	if c.snap == nil && db.mt != nil {
+	if c.snap != nil {
+		n += len(v.memRange(lo, hi))
+	} else if db.mt != nil {
 		// buffered keys of this collection (by leading byte; collections
 		// past the single-byte tags share one bucket)
 		n += db.mt.byTag[c.pfx[0]]
