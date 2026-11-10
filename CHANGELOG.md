@@ -5,6 +5,12 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.22] - 2026-11-10
+
+- Expose the current read revision and the revision captured by a snapshot.
+  Revisions are scoped to an open database handle.
+- File format remains 10.
+
 ## [0.2.0-alpha.21] - 2026-11-10
 
 - Add a snapshot-bound bulk exact union for stored distinct measures.

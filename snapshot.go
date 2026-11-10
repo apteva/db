@@ -38,6 +38,20 @@ type quarantine struct {
 	ids             []uint32
 }
 
+// ReadRevision identifies the state a newly opened snapshot would see.
+// Compare revisions only for snapshots from this open database handle.
+func (db *DB) ReadRevision() (uint64, error) {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	if db.closed {
+		return 0, ErrClosed
+	}
+	return db.revision, db.failed
+}
+
+// Revision identifies the state captured when the snapshot was opened.
+func (s *Snapshot) Revision() uint64 { return s.revision }
+
 // Snapshot takes a consistent view. Close it when done.
 func (db *DB) Snapshot() (*Snapshot, error) { return db.snapshot(true) }
 
