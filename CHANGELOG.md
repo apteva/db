@@ -5,6 +5,15 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.21] - 2026-11-10
+
+- Add a snapshot-bound bulk exact union for stored distinct measures.
+  Adjacent selected memberships share B-tree leaf reads. Requests
+  keep independent result sets and use the saved cardinality for a
+  single bucket.
+- Format remains 10. Existing computed definitions and stored memberships
+  require no rebuild.
+
 ## [0.2.0-alpha.20] - 2026-11-10
 
 - Add resumable online builds for stored rollups over multiple collections.

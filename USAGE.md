@@ -557,3 +557,10 @@ physical group keys and the distinct measure name. Union the emitted opaque
 identity bytes before taking the cardinality. These are type-tagged, exact
 identities and should stay inside trusted code. The scalar group cardinalities
 must never be added for this purpose.
+
+For multiple bucket memberships, use `MergeComputedDistinct` on the same
+snapshot-bound collection. Give each selected bucket a measure name and a
+result index. The engine keeps separate exact unions per result, coalesces
+overlapping physical work, and returns one count per result index.
+`ComputedDistinctMergeOptions` sets a working memory cap and optionally
+records membership prefixes, seeks, leaves, identities, and elapsed time.

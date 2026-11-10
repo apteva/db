@@ -14,8 +14,16 @@ type computedReference struct {
 	after  computedWide
 }
 
+const computedDistinctPrefixOverhead = 9
+
 func computedDistinctPrefix(id uint32, group []byte, slot int) []byte {
-	key := computedViewKey(computedDistinctTag, id, nil)
+	key := make([]byte, 0, computedDistinctPrefixOverhead+len(group))
+	return appendComputedDistinctPrefix(key, id, group, slot)
+}
+
+func appendComputedDistinctPrefix(key []byte, id uint32, group []byte, slot int) []byte {
+	key = append(key, reservedPrefix, computedDistinctTag)
+	key = binary.BigEndian.AppendUint32(key, id)
 	key = binary.BigEndian.AppendUint16(key, uint16(len(group)))
 	key = append(key, group...)
 	return append(key, byte(slot))
