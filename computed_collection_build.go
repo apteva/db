@@ -38,6 +38,7 @@ type computedProgress struct {
 type computedBuild struct {
 	inputs   []*computedCollectionPlan
 	measures []accSpec
+	sumSlots []int
 	ready    atomic.Bool
 }
 
@@ -90,6 +91,11 @@ func (db *DB) prepareComputedBuild(target *Collection, specs []computedInputCata
 		build.measures = append(build.measures, a)
 	}
 	sort.Slice(build.measures, func(i, j int) bool { return build.measures[i].name < build.measures[j].name })
+	for i, a := range build.measures {
+		if a.op == accSum {
+			build.sumSlots = append(build.sumSlots, i)
+		}
+	}
 	for _, p := range build.inputs {
 		for _, a := range p.group.accs {
 			slot := slices.IndexFunc(build.measures, func(out accSpec) bool { return a.name == out.name })

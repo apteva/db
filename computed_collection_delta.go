@@ -14,6 +14,7 @@ type computedGroupState struct {
 	parts   []value
 	members computedWide
 	sums    []computedWide
+	present []computedWide
 }
 type computedCollectionDelta struct {
 	db         *DB
@@ -69,6 +70,13 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 		}
 	}
 	g := &computedGroupState{plan: p, key: key, id: id, parts: parts, sums: make([]computedWide, len(p.output()))}
+	var sumSlots []int
+	if p.build != nil {
+		sumSlots = p.build.sumSlots
+	}
+	if len(sumSlots) != 0 {
+		g.present = make([]computedWide, len(g.sums))
+	}
 	row, found, err := d.db.findLocked(view{d.db, nil}, key, nil)
 	if err != nil {
 		return nil, err
@@ -77,16 +85,30 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 	if err != nil {
 		return nil, err
 	}
-	if found != exists || (exists && (len(counter) != 8 || int64(le.Uint64(counter)) <= 0)) {
+	if found != exists || (exists && (len(counter) != 8+8*len(sumSlots) || int64(le.Uint64(counter)) <= 0)) {
 		return nil, ErrCorrupt
 	}
 	if found {
 		if err := validateComputedDoc(row, 0); err != nil {
 			return nil, ErrCorrupt
 		}
-		g.members.add(int64(le.Uint64(counter)), false)
+		members := int64(le.Uint64(counter))
+		g.members.add(members, false)
+		for j, slot := range sumSlots {
+			present := int64(le.Uint64(counter[8+j*8:]))
+			if present < 0 || present > members {
+				return nil, ErrCorrupt
+			}
+			g.present[slot].add(present, false)
+		}
 		for i, a := range p.output() {
 			v := docField(row, a.name)
+			if g.present != nil && a.op == accSum && g.present[i].lo == 0 {
+				if v.k != kNull {
+					return nil, ErrCorrupt
+				}
+				continue
+			}
 			if v.k != kInt {
 				return nil, ErrCorrupt
 			}
@@ -94,7 +116,7 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 		}
 	}
 	d.groups[string(key)] = g
-	d.bytes += 128 + len(key)*2 + len(g.sums)*16 + len(id.s) + partBytes
+	d.bytes += 128 + len(key)*2 + (len(g.sums)+len(g.present))*16 + len(id.s) + partBytes
 	return g, d.limit()
 }
 func (d *computedCollectionDelta) contribute(p *computedCollectionPlan, doc []byte, negative bool) error {
@@ -136,6 +158,9 @@ func (d *computedCollectionDelta) contribute(p *computedCollectionPlan, doc []by
 			return fmt.Errorf("%w: sum %q needs int64 values", ErrComputedCollection, a.name)
 		}
 		g.sums[slot].add(v.i, negative)
+		if g.present != nil && a.op == accSum {
+			g.present[slot].add(1, negative)
+		}
 	}
 	return nil
 }
@@ -207,17 +232,37 @@ func (d *computedCollectionDelta) finish(ctx context.Context) error {
 				}
 				builder.Doc("_id", tuple.Bytes())
 			}
+			counter := le.AppendUint64(nil, uint64(members))
+			if g.present != nil {
+				for _, slot := range g.plan.build.sumSlots {
+					present, err := g.present[slot].int64()
+					if err != nil {
+						return err
+					}
+					if present < 0 || present > members {
+						return ErrCorrupt
+					}
+					counter = le.AppendUint64(counter, uint64(present))
+				}
+			}
 			for i, a := range g.plan.output() {
 				n, err := g.sums[i].int64()
 				if err != nil {
 					return err
 				}
-				builder.Int(a.name, n)
+				if g.present != nil && a.op == accSum && g.present[i].lo == 0 {
+					if n != 0 {
+						return ErrCorrupt
+					}
+					builder.Null(a.name)
+				} else {
+					builder.Int(a.name, n)
+				}
 			}
 			if err = d.batch.add(g.key, builder.Bytes(), false); err != nil {
 				return err
 			}
-			if err = d.batch.add(counterKey, le.AppendUint64(nil, uint64(members)), false); err != nil {
+			if err = d.batch.add(counterKey, counter, false); err != nil {
 				return err
 			}
 		}
