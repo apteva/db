@@ -39,8 +39,15 @@ func (db *DB) Export(ctx context.Context, w io.Writer) error {
 	if err = encoder.Encode(exportRecord{Kind: "header", Version: 2}); err != nil {
 		return err
 	}
-	names := make([]string, 0, len(s.collections))
-	for n := range s.collections {
+	collections := make(map[string]*Collection, len(s.collections)+len(s.building))
+	for n, c := range s.collections {
+		collections[n] = c
+	}
+	for n, c := range s.building {
+		collections[n] = c
+	}
+	names := make([]string, 0, len(collections))
+	for n := range collections {
 		if !utf8.ValidString(n) {
 			return ErrCollectionName
 		}
@@ -48,7 +55,7 @@ func (db *DB) Export(ctx context.Context, w io.Writer) error {
 	}
 	sort.Strings(names)
 	for _, name := range names {
-		c := s.collections[name].bound(s)
+		c := collections[name].bound(s)
 		fields, err := c.ComputedFields()
 		if err != nil {
 			return err
@@ -62,7 +69,7 @@ func (db *DB) Export(ctx context.Context, w io.Writer) error {
 		}
 	}
 	for _, name := range names {
-		c := s.collections[name].bound(s)
+		c := collections[name].bound(s)
 		if c.state.derived != nil {
 			continue
 		}
@@ -195,7 +202,18 @@ func Import(ctx context.Context, r io.Reader, destination string) error {
 					if len(schema.Fields) > 0 {
 						return ErrComputedCollection
 					}
-					_, err = database.CreateComputedCollection(ctx, name, schema.Computed.Source, schema.Computed.Pipeline)
+					if len(schema.Computed.Inputs) > 0 {
+						if schema.Computed.Source != "" || len(schema.Computed.Pipeline) != 0 {
+							return ErrComputedCollection
+						}
+						var status ComputedBuildStatus
+						status, err = database.BeginComputedCollection(ctx, name, schema.Computed.Inputs)
+						for err == nil && !status.Ready {
+							status, err = database.AdvanceComputedCollection(ctx, name, 1024)
+						}
+					} else {
+						_, err = database.CreateComputedCollection(ctx, name, schema.Computed.Source, schema.Computed.Pipeline)
+					}
 					if err != nil {
 						return err
 					}

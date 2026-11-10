@@ -23,6 +23,7 @@ type Snapshot struct {
 	buffers     []*pageBufferArena // retained private-page storage for overlay entries
 	pos         lsn                // log position at the snapshot
 	collections map[string]*Collection
+	building    map[string]*Collection
 	indexes     []indexDef
 	closed      bool
 }
@@ -73,7 +74,14 @@ func (db *DB) snapshotLocked(logPosition bool) (*Snapshot, error) {
 	s.collections = make(map[string]*Collection)
 	db.colls.mu.RLock()
 	for name, c := range db.colls.byName {
-		s.collections[name] = c
+		if c.computedBuilding() {
+			if s.building == nil {
+				s.building = map[string]*Collection{}
+			}
+			s.building[name] = c
+		} else {
+			s.collections[name] = c
+		}
 	}
 	s.collections[""] = db.def
 	db.colls.mu.RUnlock()

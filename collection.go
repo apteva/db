@@ -172,8 +172,10 @@ func (db *DB) Collections() []string {
 	db.colls.mu.RLock()
 	defer db.colls.mu.RUnlock()
 	out := make([]string, 0, len(db.colls.byName))
-	for n := range db.colls.byName {
-		out = append(out, n)
+	for n, c := range db.colls.byName {
+		if !c.computedBuilding() {
+			out = append(out, n)
+		}
 	}
 	sort.Strings(out)
 	return out
@@ -202,6 +204,9 @@ func (db *DB) collectionByID(id uint32) (*Collection, bool) {
 // empty name is the default collection.
 func (db *DB) Collection(name string) (*Collection, error) {
 	if c, ok := db.lookupCollection(name); ok {
+		if c.computedBuilding() {
+			return nil, ErrComputedCollectionBuilding
+		}
 		return c, nil
 	}
 	if !validCollectionName(name) {
@@ -210,6 +215,9 @@ func (db *DB) Collection(name string) (*Collection, error) {
 	db.colls.create.Lock()
 	defer db.colls.create.Unlock()
 	if c, ok := db.lookupCollection(name); ok {
+		if c.computedBuilding() {
+			return nil, ErrComputedCollectionBuilding
+		}
 		return c, nil
 	}
 	db.colls.mu.RLock()

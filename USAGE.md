@@ -535,5 +535,25 @@ values match nothing. An array local value matches each named record once. The
 join reads each record directly and builds no table, so it needs no index and
 no memory beyond the current row.
 
-Computed collections reject all four features for now; they keep running the
-pipelines they accept today.
+### Online computed collections
+
+`BeginComputedCollection` registers a target and one or more ordinary inputs.
+Each input supplies an optional leading `$match` and a final `$group` with the
+same named dimensions. Inputs may map those names to different fields. Measures
+support filtered counts, integer sums and `$countDistinct`; same-name measures
+use the same reducer. An absent sum is null. Inputs need no application-side
+fanout.
+
+Call `AdvanceComputedCollection` until the returned status is ready. A step
+commits an input's scan cursor and derived writes together. The engine maintains
+the scanned keys on concurrent source writes and continues with the latest state
+of the remaining keys. A reopen retains the last committed position. Snapshots
+started before publication cannot read the view. Logical export keeps the
+definition, and import rebuilds it from the exported source snapshot.
+
+A group stores its exact distinct count. To merge groups, open one snapshot,
+select the permitted group rows and call `ScanComputedDistinct` with their
+physical group keys and the distinct measure name. Union the emitted opaque
+identity bytes before taking the cardinality. These are type-tagged, exact
+identities and should stay inside trusted code. The scalar group cardinalities
+must never be added for this purpose.

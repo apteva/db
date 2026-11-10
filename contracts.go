@@ -133,7 +133,8 @@ func (c *Collection) lookupCollection(name string) (*Collection, bool) {
 		}
 		return nil, false
 	}
-	return c.db.lookupCollection(name)
+	cc, ok := c.db.lookupCollection(name)
+	return cc, ok && !cc.computedBuilding()
 }
 
 // stageRangeLocked collects tombstones without changing any live data.
@@ -202,8 +203,12 @@ func (db *DB) dropCollectionAtomic(ctx context.Context, c *Collection) error {
 		}
 	}
 	if err == nil && c.state.derived != nil {
-		prefix := computedViewKey('r', c.id, nil)
-		err = db.stageRangeLocked(ctx, b, prefix, prefixEnd(prefix))
+		for _, tag := range []byte{'r', computedDistinctTag, computedProgressTag} {
+			prefix := computedViewKey(tag, c.id, nil)
+			if err = db.stageRangeLocked(ctx, b, prefix, prefixEnd(prefix)); err != nil {
+				break
+			}
+		}
 		if err == nil {
 			err = b.add(computedViewKey('m', c.id, nil), nil, true)
 		}
@@ -234,11 +239,17 @@ func (db *DB) dropCollectionAtomic(ctx context.Context, c *Collection) error {
 		db.computedCount--
 	}
 	if p := c.state.derived; p != nil {
-		src := p.source
-		for i, x := range src.state.dependents {
-			if x == p {
-				src.state.dependents = append(src.state.dependents[:i], src.state.dependents[i+1:]...)
-				break
+		inputs := []*computedCollectionPlan{p}
+		if p.build != nil {
+			inputs = p.build.inputs
+		}
+		for _, input := range inputs {
+			src := input.source
+			for i, x := range src.state.dependents {
+				if x == input {
+					src.state.dependents = append(src.state.dependents[:i], src.state.dependents[i+1:]...)
+					break
+				}
 			}
 		}
 		db.derivedCount--
@@ -404,6 +415,9 @@ func (db *DB) OpenCollection(name string) (*Collection, error) {
 	c, ok := db.lookupCollection(name)
 	if !ok {
 		return nil, ErrNoSuchCollection
+	}
+	if c.computedBuilding() {
+		return nil, ErrComputedCollectionBuilding
 	}
 	return c, nil
 }

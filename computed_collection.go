@@ -8,15 +8,17 @@ import (
 )
 
 type computedCollectionCatalog struct {
-	Version  int             `json:"version"`
-	Source   uint32          `json:"source"`
-	Pipeline json.RawMessage `json:"pipeline"`
+	Version  int                    `json:"version"`
+	Source   uint32                 `json:"source"`
+	Pipeline json.RawMessage        `json:"pipeline,omitempty"`
+	Inputs   []computedInputCatalog `json:"inputs,omitempty"`
 }
 
 // ComputedCollectionInfo describes an immutable, stored collection definition.
 type ComputedCollectionInfo struct {
-	Source   string          `json:"source"`
-	Pipeline json.RawMessage `json:"pipeline"`
+	Source   string                    `json:"source"`
+	Pipeline json.RawMessage           `json:"pipeline,omitempty"`
+	Inputs   []ComputedCollectionInput `json:"inputs,omitempty"`
 }
 
 // CreateComputedCollection creates and atomically backfills a read-only
@@ -95,7 +97,7 @@ func (db *DB) CreateComputedCollection(ctx context.Context, name, source string,
 	}{id})
 	err = b.add(collCatalogKey(name), cat, false)
 	if err == nil {
-		data, e := json.Marshal(computedCollectionCatalog{1, src.id, plan.pipeline})
+		data, e := json.Marshal(computedCollectionCatalog{Version: 1, Source: src.id, Pipeline: plan.pipeline})
 		err = e
 		if err == nil {
 			err = b.add(computedViewKey('m', id, nil), data, false)
@@ -169,8 +171,19 @@ func (c *Collection) ComputedCollection() (*ComputedCollectionInfo, error) {
 		return nil, err
 	}
 	var cat computedCollectionCatalog
-	if json.Unmarshal(data, &cat) != nil || cat.Version != 1 {
+	if json.Unmarshal(data, &cat) != nil || (cat.Version != 1 && cat.Version != 2) {
 		return nil, ErrCorrupt
+	}
+	if cat.Version == 2 {
+		info := &ComputedCollectionInfo{}
+		p := c.state.derived
+		if p == nil || p.build == nil || len(p.build.inputs) != len(cat.Inputs) {
+			return nil, ErrCorrupt
+		}
+		for i, input := range cat.Inputs {
+			info.Inputs = append(info.Inputs, ComputedCollectionInput{p.build.inputs[i].source.name, input.Pipeline})
+		}
+		return info, nil
 	}
 	source, ok := db.collectionByID(cat.Source)
 	if !ok { // a held snapshot may outlive both collections' removal
@@ -179,7 +192,7 @@ func (c *Collection) ComputedCollection() (*ComputedCollectionInfo, error) {
 		}
 		source = c.state.derived.source
 	}
-	return &ComputedCollectionInfo{source.name, append(json.RawMessage(nil), cat.Pipeline...)}, nil
+	return &ComputedCollectionInfo{Source: source.name, Pipeline: append(json.RawMessage(nil), cat.Pipeline...)}, nil
 }
 
 func (db *DB) loadComputedCollections() error {
@@ -195,9 +208,33 @@ func (db *DB) loadComputedCollections() error {
 			return false
 		}
 		var cat computedCollectionCatalog
-		if json.Unmarshal(v, &cat) != nil || cat.Version != 1 {
+		if json.Unmarshal(v, &cat) != nil || (cat.Version != 1 && cat.Version != 2) {
 			invalid = ErrCorrupt
 			return false
+		}
+		if cat.Version == 2 {
+			build, err := db.prepareComputedBuild(target, cat.Inputs)
+			if err != nil {
+				invalid = fmt.Errorf("%w: %v", ErrCorrupt, err)
+				return false
+			}
+			ready := true
+			for _, p := range build.inputs {
+				data, found, err := db.findLocked(view{db, nil}, computedProgressKey(target.id, p.source.id), nil)
+				if err != nil {
+					invalid = err
+					return false
+				}
+				if found && (json.Unmarshal(data, &p.progress) != nil || len(p.progress.After) > MaxKeySize ||
+					(p.progress.Rows > 0) != (len(p.progress.After) > 0)) {
+					invalid = ErrCorrupt
+					return false
+				}
+				ready = ready && p.progress.Done
+			}
+			build.ready.Store(ready)
+			db.registerComputedBuild(build)
+			return true
 		}
 		source, ok := db.collectionByID(cat.Source)
 		if !ok || source.id == target.id {

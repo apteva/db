@@ -1,9 +1,13 @@
-AptevaDB alpha.19 supports composite keys for stored computed collections.
-Named scalar group components appear in the stored `_id` and as top-level
-fields for filtering and indexing. Point reads use `ComputedGroupTupleKey`
-with values in lexical alias order. Source edits maintain the rollup and its
-indexes in the same transaction.
+AptevaDB alpha.20 adds resumable online builds for computed rollups over
+multiple sources, with per-measure filters and exact distinct memberships.
+A build advances in bounded transactions, including committed progress.
+Writes maintain the scanned prefixes and readers see the view when the
+last input finishes. Source edits maintain group totals and identity
+reference counts in the same transaction.
 
-This release also exposes streaming query candidate estimates from B-tree
-metadata. File format remains 10. Earlier versions cannot open a database
-containing a stored composite definition.
+Use BeginComputedCollection and AdvanceComputedCollection to build, and
+ScanComputedDistinct on a snapshot-bound collection to merge identities
+over filtered groups. The existing synchronous computed API is unchanged.
+
+File format remains 10. Databases containing online computed definitions
+require alpha.20 or later.
