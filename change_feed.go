@@ -378,13 +378,20 @@ func (f *changeFeed) capture(raw []byte) (*changeFrame, error) {
 				if !ok {
 					return nil, ErrCorrupt
 				}
+				if c.computedBuilding() {
+					continue
+				}
 				id = c.id
 			} else {
 				var cat struct {
-					ID uint32 `json:"id"`
+					ID       uint32 `json:"id"`
+					Building bool   `json:"building"`
 				}
 				if json.Unmarshal(val, &cat) != nil {
 					return nil, ErrCorrupt
+				}
+				if cat.Building {
+					continue
 				}
 				id = cat.ID
 			}
@@ -401,6 +408,7 @@ func (f *changeFeed) capture(raw []byte) (*changeFrame, error) {
 		}
 	}
 	seen := make(map[string]int)
+	var hidden map[uint32]bool
 	metadataBytes := int64(0)
 	for off := 0; off < len(raw); {
 		begin := off
@@ -413,7 +421,7 @@ func (f *changeFeed) capture(raw []byte) (*changeFrame, error) {
 		if !ok {
 			continue
 		}
-		if _, skip := schema[cid]; skip {
+		if _, skip := schema[cid]; skip || hidden[cid] {
 			continue
 		}
 		name, known := names[cid]
@@ -421,6 +429,13 @@ func (f *changeFeed) capture(raw []byte) (*changeFrame, error) {
 			c, ok := f.db.collectionByID(cid)
 			if !ok {
 				return nil, ErrCorrupt
+			}
+			if c.computedBuilding() {
+				if hidden == nil {
+					hidden = make(map[uint32]bool)
+				}
+				hidden[cid] = true
+				continue
 			}
 			name = c.name
 			names[cid] = name

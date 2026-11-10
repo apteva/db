@@ -196,6 +196,36 @@ func TestChangeFeedComputedMembershipAndSchema(t *testing.T) {
 		t.Fatal(r)
 	}
 }
+func TestChangeFeedOnlineComputedPublication(t *testing.T) {
+	d := feedDB(t, Options{})
+	calls := mustCollection(t, d, "calls")
+	mustCompat(t, calls.UpsertJSON([]byte("a"), []byte(`{"day":"Mon","caller":"X"}`)))
+	mustCompat(t, calls.UpsertJSON([]byte("b"), []byte(`{"day":"Mon","caller":"Y"}`)))
+	w := feedWatch(t, d, WatchOptions{})
+	_, err := d.BeginComputedCollection(bg, "metrics", []ComputedCollectionInput{{Source: "calls", Pipeline: []byte(
+		`[{"$group":{"_id":{"day":"$day"},"callers":{"$countDistinct":"$caller"}}}]`)}})
+	mustCompat(t, err)
+	progress, err := d.AdvanceComputedCollection(bg, "metrics", 1)
+	mustCompat(t, err)
+	if progress.Ready {
+		t.Fatal(progress)
+	}
+	mustCompat(t, calls.UpsertJSON([]byte("a"), []byte(`{"day":"Mon","caller":"Z"}`)))
+	event := nextChange(t, w)
+	if event.Collection != "calls" || event.Operation != ChangePut {
+		t.Fatal(event)
+	}
+	progress, err = d.AdvanceComputedCollection(bg, "metrics", 1)
+	mustCompat(t, err)
+	if !progress.Ready {
+		t.Fatal(progress)
+	}
+	event = nextChange(t, w)
+	if event.Collection != "metrics" || event.Operation != ChangeReset {
+		t.Fatal(event)
+	}
+}
+
 func TestChangeFeedConcurrentCloseAndRollback(t *testing.T) {
 	d := feedDB(t, Options{})
 	c := feedWatch(t, d, WatchOptions{})

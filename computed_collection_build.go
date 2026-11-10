@@ -176,8 +176,9 @@ func (db *DB) BeginComputedCollection(ctx context.Context, name string, inputs [
 		return ComputedBuildStatus{}, err
 	}
 	meta, _ := json.Marshal(struct {
-		ID uint32 `json:"id"`
-	}{id})
+		ID       uint32 `json:"id"`
+		Building bool   `json:"building"`
+	}{id, true})
 	catalog, _ := json.Marshal(computedCollectionCatalog{Version: 2, Inputs: specs})
 	batch := db.NewBatch()
 	batch.internal = true
@@ -306,6 +307,22 @@ func (db *DB) AdvanceComputedCollection(ctx context.Context, name string, maxRow
 	if err = batch.add(computedProgressKey(target.id, plan.source.id), data, false); err != nil {
 		return ComputedBuildStatus{}, err
 	}
+	ready := progress.Done
+	for _, p := range build.inputs {
+		if p != plan && !p.progress.Done {
+			ready = false
+		}
+	}
+	if ready {
+		// The publication record also emits the change-feed reset. The
+		// partial catalog and individual backfill rows stay hidden.
+		catalog, _ := json.Marshal(struct {
+			ID uint32 `json:"id"`
+		}{target.id})
+		if err = batch.add(collCatalogKey(target.name), catalog, false); err != nil {
+			return ComputedBuildStatus{}, err
+		}
+	}
 	if err := ctx.Err(); err != nil {
 		return ComputedBuildStatus{}, err
 	}
@@ -316,10 +333,6 @@ func (db *DB) AdvanceComputedCollection(ctx context.Context, name string, maxRow
 		return ComputedBuildStatus{}, err
 	}
 	plan.progress = progress
-	ready := true
-	for _, p := range build.inputs {
-		ready = ready && p.progress.Done
-	}
 	build.ready.Store(ready)
 	return build.status(), db.completeComputedChunkLocked(wal, position)
 }
