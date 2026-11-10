@@ -58,6 +58,63 @@ func ccPut(t *testing.T, c *Collection, key string, customer, amount int64, paid
 	}
 }
 
+func TestComputedCollectionCompositeGroup(t *testing.T) {
+	path := t.TempDir()
+	d, err := Open(path, DurableOptions())
+	mustCompat(t, err)
+	defer func() { d.Close() }()
+	source, err := d.Collection("orders")
+	mustCompat(t, err)
+	put := func(c *Collection, key, centre string, day int64, amount int64) {
+		var b DocBuilder
+		b.String("centre", centre)
+		b.Int("day", day)
+		b.Int("amount", amount)
+		mustCompat(t, c.Upsert([]byte(key), b.Bytes()))
+	}
+	put(source, "a", "east", 9007199254740993, 40)
+	put(source, "b", "east", 9007199254740993, 20)
+	put(source, "c", "east", 9007199254740992, 99)
+	view := ccCreate(t, d, "totals", "orders", `[{"$group":{"_id":{"day":"$day","centre":"$centre"},"amount":{"$sum":"$amount"},"n":{"$count":{}}}}]`)
+	east, err := ComputedGroupTupleKey("east", int64(9007199254740993))
+	mustCompat(t, err)
+	row := computedRow(t, view.Find, string(east))
+	if row["amount"] != int64(60) || row["n"] != int64(2) || row["day"] != int64(9007199254740993) ||
+		!reflect.DeepEqual(row["_id"], map[string]any{"centre": "east", "day": int64(9007199254740993)}) {
+		t.Fatal(row)
+	}
+	mustCompat(t, view.CreateCompoundIndex(bg, "by_centre", []IndexField{{Field: "centre"}}))
+	snap, err := d.Snapshot()
+	mustCompat(t, err)
+	old, err := snap.Collection("totals")
+	mustCompat(t, err)
+	put(source, "a", "west", 9007199254740993, 40)
+	if row := computedRow(t, old.Find, string(east)); row["amount"] != int64(60) {
+		t.Fatal(row)
+	}
+	snap.Close()
+	mustCompat(t, d.Close())
+	d, err = Open(path, DurableOptions())
+	mustCompat(t, err)
+	view, err = d.OpenCollection("totals")
+	mustCompat(t, err)
+	west, err := ComputedGroupTupleKey("west", int64(9007199254740993))
+	mustCompat(t, err)
+	if row := computedRow(t, view.Find, string(west)); row["amount"] != int64(40) {
+		t.Fatal(row)
+	}
+	source, err = d.OpenCollection("orders")
+	mustCompat(t, err)
+	mustCompat(t, source.Delete([]byte("b")))
+	if _, found, err := view.Find(east, nil); err != nil || found {
+		t.Fatal(found, err)
+	}
+	n, err := view.CountDocuments(bg, []byte(`{"centre":"east"}`), CountOptions{Hint: "by_centre"})
+	if err != nil || n != 1 {
+		t.Fatal(n, err)
+	}
+}
+
 func TestComputedCollectionsBackfillAndProjection(t *testing.T) {
 	for _, mem := range []int{0, 256 << 10} {
 		t.Run(fmt.Sprint(mem), func(t *testing.T) {

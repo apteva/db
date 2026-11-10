@@ -10,6 +10,7 @@ type computedGroupState struct {
 	plan    *computedCollectionPlan
 	key     []byte
 	id      value
+	parts   []value
 	members computedWide
 	sums    []computedWide
 }
@@ -31,11 +32,22 @@ func (d *computedCollectionDelta) limit() error {
 }
 
 func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (*computedGroupState, error) {
+	var parts []value
+	var uk []byte
+	var err error
 	id := value{k: kNull}
-	if len(p.group.idFields) > 0 {
-		id = pathValue(value{k: kDoc, s: doc}, p.group.idFields[0])
+	if p.group.idNames != nil {
+		parts = make([]value, len(p.group.idFields))
+		for i, field := range p.group.idFields {
+			parts[i] = pathValue(value{k: kDoc, s: doc}, field)
+		}
+		uk, err = computedTupleKey(parts)
+	} else {
+		if len(p.group.idFields) > 0 {
+			id = pathValue(value{k: kDoc, s: doc}, p.group.idFields[0])
+		}
+		uk, id, err = computedGroupValueKey(id)
 	}
-	uk, normalized, err := computedGroupValueKey(id)
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +56,17 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 		return g, nil
 	}
 	// Own string IDs: callers may reuse a read buffer while backfilling.
-	if normalized.k == kString {
-		normalized.s = append([]byte(nil), normalized.s...)
+	if id.k == kString {
+		id.s = append([]byte(nil), id.s...)
 	}
-	g := &computedGroupState{plan: p, key: key, id: normalized, sums: make([]computedWide, len(p.group.accs))}
+	partBytes := len(parts) * 64
+	for i := range parts {
+		if parts[i].k == kString {
+			parts[i].s = append([]byte(nil), parts[i].s...)
+			partBytes += len(parts[i].s)
+		}
+	}
+	g := &computedGroupState{plan: p, key: key, id: id, parts: parts, sums: make([]computedWide, len(p.group.accs))}
 	row, found, err := d.db.findLocked(view{d.db, nil}, key, nil)
 	if err != nil {
 		return nil, err
@@ -73,7 +92,7 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 		}
 	}
 	d.groups[string(key)] = g
-	d.bytes += 128 + len(key)*2 + len(g.sums)*16 + len(normalized.s)
+	d.bytes += 128 + len(key)*2 + len(g.sums)*16 + len(id.s) + partBytes
 	return g, d.limit()
 }
 func (d *computedCollectionDelta) contribute(p *computedCollectionPlan, doc []byte, negative bool) error {
@@ -159,19 +178,15 @@ func (d *computedCollectionDelta) finish(ctx context.Context) error {
 			}
 		} else {
 			var builder DocBuilder
-			switch g.id.k {
-			case kNull:
-				builder.Null("_id")
-			case kBool:
-				builder.Bool("_id", g.id.i != 0)
-			case kInt:
-				builder.Int("_id", g.id.i)
-			case kFloat:
-				builder.Float("_id", g.id.f)
-			case kString:
-				builder.String("_id", string(g.id.s))
-			default:
-				return ErrCorrupt
+			if g.parts == nil {
+				addComputedGroupValue(&builder, "_id", g.id)
+			} else {
+				var tuple DocBuilder
+				for i, name := range g.plan.group.idNames {
+					addComputedGroupValue(&tuple, name, g.parts[i])
+					addComputedGroupValue(&builder, name, g.parts[i])
+				}
+				builder.Doc("_id", tuple.Bytes())
 			}
 			for i, a := range g.plan.group.accs {
 				n, err := g.sums[i].int64()
@@ -192,6 +207,21 @@ func (d *computedCollectionDelta) finish(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func addComputedGroupValue(builder *DocBuilder, name string, v value) {
+	switch v.k {
+	case kNull:
+		builder.Null(name)
+	case kBool:
+		builder.Bool(name, v.i != 0)
+	case kInt:
+		builder.Int(name, v.i)
+	case kFloat:
+		builder.Float(name, v.f)
+	case kString:
+		builder.String(name, string(v.s))
+	}
 }
 
 func (b *Batch) addComputedCollectionOpsLocked() error {
