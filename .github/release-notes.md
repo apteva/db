@@ -1,8 +1,6 @@
-AptevaDB alpha.21 adds MergeComputedDistinct for bulk unions of stored
-exact distinct memberships on a read snapshot. Adjacent bucket ranges
-reuse B-tree leaf reads, and each output retains an independent exact
-union. A single bucket can return its saved cardinality directly.
-The operation supports working-memory limits and optional diagnostics.
+AptevaDB alpha.22 exposes ReadRevision on a live database and Revision
+on a snapshot. These in-process revisions let callers tie reusable
+results to the exact state the query read, including computed-view and
+catalog updates. Compare revisions only within one open database handle.
 
-File format remains 10. Existing computed collections and membership
-records can be queried in place.
+File format remains 10.
