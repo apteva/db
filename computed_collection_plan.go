@@ -29,9 +29,16 @@ type computedCollectionPlan struct {
 	project        map[string]bool
 	inclusion      bool
 	group          *groupSpec
+	build          *computedBuild
+	progress       computedProgress
+	slots          []int
 }
 
 func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
+	return compileComputedPlan(src, false)
+}
+
+func compileComputedPlan(src []byte, multi bool) (*computedCollectionPlan, error) {
 	raw, err := computedJSON(src)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrComputedCollection, err)
@@ -58,25 +65,18 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 			if len(p.preds)+len(st.preds) > 128 {
 				return nil, ErrComputedCollection
 			}
-			for _, pred := range st.preds {
-				if !computedPathValid(pred.field) || pred.v.k == kDoc || pred.v.k == kArray {
-					return nil, ErrComputedCollection
-				}
-				for _, v := range pred.in {
-					if !indexable(v) {
-						return nil, ErrComputedCollection
-					}
-				}
+			if !validComputedPredicates(st.preds, multi) {
+				return nil, ErrComputedCollection
 			}
 			// Validate original scalar literals as well: valueOf deliberately
 			// permits float promotion in ordinary aggregation, which could round
 			// an overflowing integer in a persistent filter.
-			if err := validateComputedMatch(array[i]); err != nil {
+			if err := validateComputedMatch(array[i], multi); err != nil {
 				return nil, err
 			}
 			p.preds = append(p.preds, st.preds...)
 		case stProject:
-			if i != len(pipeline.stages)-1 || p.group != nil {
+			if multi || i != len(pipeline.stages)-1 || p.group != nil {
 				return nil, ErrComputedCollection
 			}
 			if st.exprs != nil {
@@ -99,7 +99,7 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				}
 			}
 		case stGroup:
-			if i != len(pipeline.stages)-1 || len(st.group.idFields) > 8 || len(st.group.accs) > 64 || st.group.idTrunc != nil || st.group.hasWhere() {
+			if i != len(pipeline.stages)-1 || len(st.group.idFields) > 8 || len(st.group.accs) > 64 || st.group.idTrunc != nil || (!multi && st.group.hasWhere()) {
 				return nil, ErrComputedCollection
 			}
 			p.group = st.group
@@ -122,8 +122,15 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				}
 			}
 			for ai, a := range p.group.accs {
-				if aliases[a.name] || !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount && a.op != accCountNonNull) {
+				if aliases[a.name] || !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount && a.op != accCountNonNull && (!multi || a.op != accCountDistinct)) {
 					return nil, ErrComputedCollection
+				}
+				if a.where != nil {
+					where := body[a.name].(map[string]any)["where"]
+					if len(a.where) > 128 || validateComputedMatch(map[string]any{"$match": where}, true) != nil ||
+						!validComputedPredicates(a.where, true) {
+						return nil, ErrComputedCollection
+					}
 				}
 				if a.field != "" {
 					if !computedPathValid(a.field) || a.op == accCount {
@@ -147,7 +154,17 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 			return nil, fmt.Errorf("%w: only leading $match and a final $project or integer $group are supported", ErrComputedCollection)
 		}
 	}
+	if multi && (p.group == nil || len(p.group.idNames) == 0 || len(p.group.accs) == 0) {
+		return nil, fmt.Errorf("%w: each input needs a named group key and measures", ErrComputedCollection)
+	}
 	return p, nil
+}
+
+func (p *computedCollectionPlan) output() []accSpec {
+	if p.build != nil {
+		return p.build.measures
+	}
+	return p.group.accs
 }
 
 func computedPathValid(path string) bool {
@@ -164,9 +181,39 @@ func computedPathValid(path string) bool {
 func computedOutputValid(name string) bool {
 	return name != "" && len(name) <= 255 && !strings.ContainsAny(name, ".$")
 }
-func validateComputedMatch(stage any) error {
+func validComputedPredicates(preds []pred, logical bool) bool {
+	for _, p := range preds {
+		if logical && (p.op == opAnd || p.op == opOr) {
+			for _, child := range p.children {
+				if !validComputedPredicates(child, logical) {
+					return false
+				}
+			}
+			continue
+		}
+		if !computedPathValid(p.field) || p.v.k == kDoc || p.v.k == kArray {
+			return false
+		}
+		for _, v := range p.in {
+			if !indexable(v) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func validateComputedMatch(stage any, logical bool) error {
 	body := stage.(map[string]any)["$match"].(map[string]any)
-	for _, v := range body {
+	for field, v := range body {
+		if logical && (field == "$and" || field == "$or") {
+			for _, child := range v.([]any) {
+				if err := validateComputedMatch(map[string]any{"$match": child}, logical); err != nil {
+					return err
+				}
+			}
+			continue
+		}
 		vals := []any{v}
 		if ops, ok := v.(map[string]any); ok {
 			vals = nil

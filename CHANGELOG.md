@@ -5,6 +5,16 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.20] - 2026-11-10
+
+- Add resumable online builds for stored rollups over multiple collections.
+  Source writes and computed deltas commit together. Read snapshots expose
+  the collection once every source is caught up.
+- Maintain exact distinct memberships with reference counts. Snapshot
+  readers can merge identities across any selected set of groups.
+- File format remains 10. Existing databases need no migration. Databases
+  with online computed definitions require alpha.20 or later.
+
 ## [0.2.0-alpha.19] - 2026-11-10
 
 - Stored computed collections support named group keys with up to eight scalar

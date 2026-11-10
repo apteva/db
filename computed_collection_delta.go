@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"sort"
@@ -15,10 +16,11 @@ type computedGroupState struct {
 	sums    []computedWide
 }
 type computedCollectionDelta struct {
-	db     *DB
-	batch  *Batch
-	groups map[string]*computedGroupState
-	bytes  int
+	db         *DB
+	batch      *Batch
+	groups     map[string]*computedGroupState
+	references map[string]*computedReference
+	bytes      int
 }
 
 func newComputedCollectionDelta(db *DB, b *Batch) *computedCollectionDelta {
@@ -66,7 +68,7 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 			partBytes += len(parts[i].s)
 		}
 	}
-	g := &computedGroupState{plan: p, key: key, id: id, parts: parts, sums: make([]computedWide, len(p.group.accs))}
+	g := &computedGroupState{plan: p, key: key, id: id, parts: parts, sums: make([]computedWide, len(p.output()))}
 	row, found, err := d.db.findLocked(view{d.db, nil}, key, nil)
 	if err != nil {
 		return nil, err
@@ -83,7 +85,7 @@ func (d *computedCollectionDelta) group(p *computedCollectionPlan, doc []byte) (
 			return nil, ErrCorrupt
 		}
 		g.members.add(int64(le.Uint64(counter)), false)
-		for i, a := range p.group.accs {
+		for i, a := range p.output() {
 			v := docField(row, a.name)
 			if v.k != kInt {
 				return nil, ErrCorrupt
@@ -105,21 +107,35 @@ func (d *computedCollectionDelta) contribute(p *computedCollectionPlan, doc []by
 	}
 	g.members.add(1, negative)
 	for i, a := range p.group.accs {
+		get := func(path string) value { return pathValue(value{k: kDoc, s: doc}, path) }
+		if a.where != nil && !matchAll(a.where, get) {
+			continue
+		}
+		slot := i
+		if p.slots != nil {
+			slot = p.slots[i]
+		}
 		v := a.c
 		if a.field != "" {
-			v = pathValue(value{k: kDoc, s: doc}, a.field)
+			v = get(a.field)
 		}
 		if v.k == kMissing || v.k == kNull {
 			continue
 		}
+		if a.op == accCountDistinct {
+			if err := d.reference(g, slot, v, negative); err != nil {
+				return err
+			}
+			continue
+		}
 		if a.op == accCountNonNull {
-			g.sums[i].add(1, negative)
+			g.sums[slot].add(1, negative)
 			continue
 		}
 		if v.k != kInt {
 			return fmt.Errorf("%w: sum %q needs int64 values", ErrComputedCollection, a.name)
 		}
-		g.sums[i].add(v.i, negative)
+		g.sums[slot].add(v.i, negative)
 	}
 	return nil
 }
@@ -144,6 +160,9 @@ func (d *computedCollectionDelta) change(p *computedCollectionPlan, uk, old, new
 	return d.batch.add(key, projected, false)
 }
 func (d *computedCollectionDelta) finish(ctx context.Context) error {
+	if err := d.finishReferences(ctx); err != nil {
+		return err
+	}
 	keys := make([]string, 0, len(d.groups))
 	for k := range d.groups {
 		keys = append(keys, k)
@@ -188,7 +207,7 @@ func (d *computedCollectionDelta) finish(ctx context.Context) error {
 				}
 				builder.Doc("_id", tuple.Bytes())
 			}
-			for i, a := range g.plan.group.accs {
+			for i, a := range g.plan.output() {
 				n, err := g.sums[i].int64()
 				if err != nil {
 					return err
@@ -266,6 +285,11 @@ func (b *Batch) addComputedCollectionOpsLocked() error {
 			}
 		}
 		for _, plan := range c.state.dependents {
+			// The online builder owns the unscanned suffix. Writes behind
+			// its durable cursor maintain the already accumulated prefix.
+			if plan.build != nil && !plan.progress.Done && bytes.Compare(uk, plan.progress.After) > 0 {
+				continue
+			}
 			if err := delta.change(plan, uk, old, new); err != nil {
 				return err
 			}
