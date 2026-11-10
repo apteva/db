@@ -58,6 +58,12 @@ func (c *Collection) MergeComputedDistinct(ctx context.Context, buckets []Comput
 		}
 		return cc.MergeComputedDistinct(ctx, buckets, results, opts)
 	}
+	c.db.mu.RLock()
+	closed := c.db.closed || c.snap.closed
+	c.db.mu.RUnlock()
+	if closed {
+		return nil, ErrClosed
+	}
 	maxBytes := opts.MaxMemoryBytes
 	if maxBytes == 0 {
 		maxBytes = DefaultQueryMemoryBytes
