@@ -4,15 +4,15 @@ A Go document and key-value database with named collections, atomic transactions
 scalar and compound indexes with mixed directions, snapshots, aggregation, stored computed fields and computed
 collections. Use it embedded, or run the HTTP server and connect with the Go driver.
 
-**Public alpha: v0.2.0-alpha.18.** Go 1.25+, Linux and macOS, amd64 and arm64.
+**Public alpha: v0.2.0-alpha.19.** Go 1.25+, Linux and macOS, amd64 and arm64.
 Windows, replication and SQL are not supported. The module has no external
 runtime dependencies. The file format is 10; opening formats 3–9 upgrades them
 permanently, so keep a backup before upgrading.
 
 ```sh
-go get github.com/apteva/db@v0.2.0-alpha.18
-go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.18
-go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.18
+go get github.com/apteva/db@v0.2.0-alpha.19
+go install github.com/apteva/db/cmd/aptevadbctl@v0.2.0-alpha.19
+go install github.com/apteva/db/cmd/aptevadb-server@v0.2.0-alpha.19
 ```
 
 ```go
@@ -199,7 +199,10 @@ Filtered/projected collections retain the source primary keys. Projection uses
 top-level 0/1 or boolean flags with the same semantics as ordinary aggregation.
 Filters support scalar comparisons and `$in`, including nested source paths.
 
-Groups use `_id: null` or one `"$field.path"` reference to a scalar. Outputs
+Groups use `_id: null`, a scalar field reference, or an object of up to eight
+named scalar field references. Tuple fields appear under `_id` and as
+top-level fields for filtering and indexing. Use `ComputedGroupTupleKey`
+with values in lexical alias order for point reads. Outputs
 support exact int64 `$sum` (a field or integer constant), `$count: {}`,
 and `$countNonNull: "$field.path"`;
 `$sum: 1` also counts rows. Missing/null sum inputs contribute zero; other
@@ -218,7 +221,7 @@ ordinary collection; a snapshot handle reads the definition at that snapshot.
 
 The destination must be a new named collection; the source must already exist
 (use `""` for the default collection). There are at most 64 dependents per source.
-Chaining, joins, array expansion, window stages, composite IDs, averages, extrema
+Chaining, joins, array expansion, window stages, exact distinct counts, averages, extrema
 and floating-point sums are outside this version. Definitions are immutable;
 drop and recreate to change them. Dropping a source with dependents returns
 `ErrComputedCollectionDependency`; drop dependents first. Dropping a computed

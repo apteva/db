@@ -5,6 +5,14 @@ versions follow semantic versioning. Before 1.0, a minor version may change
 the API or the on-disk format; both are listed here when it happens, with
 the migration.
 
+## [0.2.0-alpha.19] - 2026-11-10
+
+- Stored computed collections support named group keys with up to eight scalar
+  components. Tuple fields can be filtered and indexed by name.
+- Expose streaming query candidate estimates from B-tree metadata.
+- Format remains 10. Opening existing collections requires no migration.
+  Older versions cannot open a database containing a stored composite definition.
+
 ## [0.2.0-alpha.18] - 2026-11-05
 
 - `$like` accepts `literal` in place of `pattern` for a plain substring search:

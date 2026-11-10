@@ -22,7 +22,7 @@ type ComputedCollectionInfo struct {
 // CreateComputedCollection creates and atomically backfills a read-only
 // collection. The source must exist and cannot itself be computed. A pipeline
 // may have leading $match stages and one final $project or $group. Groups allow
-// a scalar/null _id and integer $sum / $count / $countNonNull; stored sums
+// a scalar/null or named tuple _id and integer $sum / $count / $countNonNull; stored sums
 // reject final int64 overflow and floating inputs.
 // Inserts, overwrites, deletes and batches maintain stored results and indexes
 // in the same WAL transaction. Creation/drop pause writers while staging at

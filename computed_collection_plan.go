@@ -99,7 +99,7 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				}
 			}
 		case stGroup:
-			if i != len(pipeline.stages)-1 || st.group.idNames != nil || len(st.group.idFields) > 1 || len(st.group.accs) > 64 || st.group.idTrunc != nil || st.group.hasWhere() {
+			if i != len(pipeline.stages)-1 || len(st.group.idFields) > 8 || len(st.group.accs) > 64 || st.group.idTrunc != nil || st.group.hasWhere() {
 				return nil, ErrComputedCollection
 			}
 			p.group = st.group
@@ -109,11 +109,20 @@ func compileComputedCollection(src []byte) (*computedCollectionPlan, error) {
 				}
 			}
 			body := array[i].(map[string]any)["$group"].(map[string]any)
+			aliases := map[string]bool{}
 			if _, composite := body["_id"].(map[string]any); composite {
-				return nil, ErrComputedCollection
+				if len(p.group.idNames) == 0 {
+					return nil, ErrComputedCollection
+				}
+				for _, name := range p.group.idNames {
+					if name == "_id" || !computedOutputValid(name) {
+						return nil, ErrComputedCollection
+					}
+					aliases[name] = true
+				}
 			}
 			for ai, a := range p.group.accs {
-				if !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount && a.op != accCountNonNull) {
+				if aliases[a.name] || !computedOutputValid(a.name) || (a.op != accSum && a.op != accCount && a.op != accCountNonNull) {
 					return nil, ErrComputedCollection
 				}
 				if a.field != "" {
@@ -234,6 +243,32 @@ func (p *computedCollectionPlan) projectDocCapacity(doc []byte, capacity int) ([
 // collection. Keys encode scalar types exactly (unlike index float keys).
 // Missing and null share a key; integral float keys normalize to int64.
 func ComputedGroupKey(v any) ([]byte, error) {
+	x, err := computedKeyScalar(v)
+	if err != nil {
+		return nil, err
+	}
+	k, _, err := computedGroupValueKey(x)
+	return k, err
+}
+
+// ComputedGroupTupleKey encodes named group components in lexical alias
+// order. It is distinct from a scalar key, even for a one-component tuple.
+func ComputedGroupTupleKey(values ...any) ([]byte, error) {
+	if len(values) == 0 || len(values) > 8 {
+		return nil, ErrComputedCollection
+	}
+	parts := make([]value, len(values))
+	for i, v := range values {
+		part, err := computedKeyScalar(v)
+		if err != nil {
+			return nil, err
+		}
+		parts[i] = part
+	}
+	return computedTupleKey(parts)
+}
+
+func computedKeyScalar(v any) (value, error) {
 	var x value
 	switch v.(type) {
 	case nil, bool, int, int64, float64, string:
@@ -242,13 +277,28 @@ func ComputedGroupKey(v any) ([]byte, error) {
 		var err error
 		x, err = computedLiteral(v)
 		if err != nil {
-			return nil, fmt.Errorf("%w: %w", ErrComputedCollection, err)
+			return value{}, fmt.Errorf("%w: %w", ErrComputedCollection, err)
 		}
 	default:
-		return nil, ErrComputedCollection
+		return value{}, ErrComputedCollection
 	}
-	k, _, err := computedGroupValueKey(x)
-	return k, err
+	return x, nil
+}
+
+func computedTupleKey(parts []value) ([]byte, error) {
+	key := []byte{byte(kDoc)}
+	for i, part := range parts {
+		encoded, normalized, err := computedGroupValueKey(part)
+		if err != nil {
+			return nil, err
+		}
+		parts[i] = normalized
+		key = append(le.AppendUint16(key, uint16(len(encoded))), encoded...)
+	}
+	if len(key) > MaxKeySize-6 {
+		return nil, fmt.Errorf("%w: group key too large", ErrComputedCollection)
+	}
+	return key, nil
 }
 func computedGroupValueKey(v value) ([]byte, value, error) {
 	if v.k == kMissing {
