@@ -171,3 +171,64 @@ func TestAggregateBudgetOwnershipReleased(t *testing.T) {
 		t.Fatal("legacy aggregate reservation leaked")
 	}
 }
+
+func TestBackgroundTrimWaitsForIdleChunks(t *testing.T) {
+	d, err := Open(t.TempDir(), Options{CacheBytes: 4 << 20})
+	mustCompat(t, err)
+	defer d.Close()
+	val := bytes.Repeat([]byte{7}, 2048)
+	for i := 0; i < 8000; i++ {
+		mustCompat(t, d.Upsert([]byte(fmt.Sprintf("%06d", i)), val))
+	}
+	mustCompat(t, d.Checkpoint())
+	mustCompat(t, d.Compact(bg))
+	scan := func() {
+		mustCompat(t, d.Scan(nil, nil, func(_, v []byte) bool { return true }))
+	}
+	scan()
+	_, err = d.trimMapped(bg, 1<<20, 3) // establishes recency
+	mustCompat(t, err)
+	scan()
+	for sweep := 1; sweep <= 2; sweep++ {
+		n, err := d.trimMapped(bg, 1<<20, 3)
+		mustCompat(t, err)
+		if n != 0 {
+			t.Fatalf("sweep %d reclaimed %d bytes before chunks were idle for 3 sweeps", sweep, n)
+		}
+	}
+	if n, err := d.trimMapped(bg, 1<<20, 3); err != nil || n != 0 {
+		t.Fatalf("third sweep after the last read must still keep chunks: %d %v", n, err)
+	}
+	n, err := d.trimMapped(bg, 1<<20, 3)
+	mustCompat(t, err)
+	if n == 0 {
+		t.Fatal("chunks idle for 3 sweeps were not reclaimed")
+	}
+	scan()
+	mustCompat(t, d.Verify(bg))
+}
+
+func TestTrimDoesNotBlockReadersDuringScan(t *testing.T) {
+	d, err := Open(t.TempDir(), Options{CacheBytes: 4 << 20})
+	mustCompat(t, err)
+	defer d.Close()
+	for i := 0; i < 4000; i++ {
+		mustCompat(t, d.Upsert([]byte(fmt.Sprintf("%06d", i)), bytes.Repeat([]byte{1}, 2048)))
+	}
+	mustCompat(t, d.Checkpoint())
+	_, err = d.TrimMemory(bg, 1<<20)
+	mustCompat(t, err)
+	// A reader holding the read lock must not prevent a sweep whose residency
+	// is under target from completing: the scan itself needs no writer lock.
+	d.mu.RLock()
+	done := make(chan error, 1)
+	go func() { _, e := d.trimMapped(bg, 1<<40, 1); done <- e }()
+	select {
+	case e := <-done:
+		d.mu.RUnlock()
+		mustCompat(t, e)
+	case <-time.After(5 * time.Second):
+		d.mu.RUnlock()
+		t.Fatal("scan waited for the writer lock")
+	}
+}

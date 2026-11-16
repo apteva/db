@@ -2246,7 +2246,9 @@ func hasLogical(preds []pred) bool {
 func flattenConjunction(preds []pred) []pred {
 	var out []pred
 	for _, p := range preds {
-		if p.op == opAnd {
+		// A one-branch $or is that branch: query builders emit it for a
+		// single scope, and hiding it would cost the planner its index prefix.
+		if p.op == opAnd || p.op == opOr && len(p.children) == 1 {
 			for _, children := range p.children {
 				out = append(out, flattenConjunction(children)...)
 			}

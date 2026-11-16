@@ -238,70 +238,146 @@ func (pg *pager) noteMappedRead(id uint32) {
 // a hot working set may exceed the soft target. Call again after an idle
 // interval, or configure MappedCacheBytes for automatic periodic sweeps.
 func (db *DB) TrimMemory(ctx context.Context, targetBytes int64) (int64, error) {
+	return db.trimMapped(ctx, targetBytes, 1)
+}
+
+// backgroundIdleSweeps is how many consecutive one-second sweeps a mapped
+// chunk must go untouched before the periodic worker drops its translations.
+// Reclaiming chunks idle for one sweep made a working set larger than the
+// target fault back in every second; an explicit TrimMemory keeps that rule.
+const backgroundIdleSweeps = 30
+
+type mappedChunk struct {
+	mapIndex, offset, length int
+	id                       uint64
+	resident                 int64
+}
+
+// trimMapped measures residency without the writer lock: segments are
+// append-only and stay mapped until Close, and the hot/cold words are atomic.
+// The writer lock is held only while candidate chunks are remapped, and only
+// when the measured residency exceeds the target. Chunks read after the scan
+// are skipped, so the lock never drops a translation a reader just used.
+func (db *DB) trimMapped(ctx context.Context, targetBytes int64, minIdle uint8) (int64, error) {
 	if targetBytes < 0 {
 		return 0, ErrOptions
 	}
 	ctx = orBackground(ctx)
+	db.trimMu.Lock()
+	defer db.trimMu.Unlock()
+	db.mu.RLock()
+	if db.closed {
+		db.mu.RUnlock()
+		return 0, ErrClosed
+	}
+	pg := db.pager
+	if pg.hot == nil {
+		db.mu.RUnlock()
+		// If tracking was not enabled, the first request establishes recency
+		// rather than treating every live mapped page as cold immediately.
+		db.mu.Lock()
+		defer db.mu.Unlock()
+		if db.closed {
+			return 0, ErrClosed
+		}
+		if pg.hot == nil {
+			pg.trackMapped = true
+			pg.growHot()
+			for i := range pg.hot {
+				pg.hot[i].Store(^uint64(0))
+			}
+		}
+		return 0, nil
+	}
+	view := &pager{maps: pg.maps, hwm: pg.hwm}
+	hot, cold := pg.hot, pg.cold
+	db.mu.RUnlock()
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	var candidates []mappedChunk
+	var resident int64
+	osPage := syscall.Getpagesize()
+	full := minIdle <= 1 || db.trimResident == nil
+	left := int64(view.hwm) * PageSize
+	var vec []byte
+	var err error
+	for mi, m := range view.maps {
+		if left <= 0 {
+			break
+		}
+		length := int(min(int64(len(m)), left))
+		left -= int64(length)
+		for off := 0; off < length; off += mappedReclaimChunk {
+			if err = ctx.Err(); err != nil {
+				break
+			}
+			end := min(off+mappedReclaimChunk, length)
+			id := (uint64(mi)*minMapBytes + uint64(off)) / mappedReclaimChunk
+			word, bit := id/64, uint64(1)<<(id%64)
+			if int(word) >= len(hot) {
+				continue
+			}
+			for uint64(len(db.trimIdle)) <= id {
+				db.trimIdle = append(db.trimIdle, 0)
+				db.trimResident = append(db.trimResident, -1)
+			}
+			wasHot := hot[word].And(^bit)&bit != 0
+			if wasHot {
+				db.trimIdle[id] = 0
+			} else if db.trimIdle[id] < 255 {
+				db.trimIdle[id]++
+			}
+			// Only chunks read since the last sweep can have gained residency.
+			// Re-measure those, unmeasured chunks, and chunks about to become
+			// candidates; reuse the last measurement for the idle remainder.
+			known := db.trimResident[id]
+			if full || wasHot || known < 0 || known > 0 && db.trimIdle[id] >= minIdle {
+				pages := (end - off + osPage - 1) / osPage
+				if cap(vec) < pages {
+					vec = make([]byte, pages)
+				}
+				v := vec[:pages]
+				if _, _, errno := syscall.Syscall(syscall.SYS_MINCORE, uintptr(unsafe.Pointer(&m[off])), uintptr(end-off), uintptr(unsafe.Pointer(&v[0]))); errno != 0 {
+					err = fmt.Errorf("aptevadb: mapped residency: %w", errno)
+					break
+				}
+				known = 0
+				for _, b := range v {
+					if b&1 != 0 {
+						known++
+					}
+				}
+				db.trimResident[id] = known
+			}
+			n := int64(known) * int64(osPage)
+			if cold[word].Load()&bit != 0 {
+				n = 0
+			}
+			resident += n
+			if n > 0 && db.trimIdle[id] >= minIdle {
+				candidates = append(candidates, mappedChunk{mi, off, end - off, id, n})
+			}
+		}
+		if err != nil {
+			break
+		}
+	}
+	if err != nil || resident <= targetBytes || len(candidates) == 0 {
+		return 0, err
+	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.closed {
 		return 0, ErrClosed
 	}
-	if err := ctx.Err(); err != nil {
-		return 0, err
-	}
-	pg := db.pager
-	// If tracking was not enabled, the first request establishes recency rather
-	// than treating every live mapped page as cold immediately.
-	if pg.hot == nil {
-		pg.trackMapped = true
-		pg.growHot()
-		for i := range pg.hot {
-			pg.hot[i].Store(^uint64(0))
-		}
-		return 0, nil
-	}
-	var chunks []struct {
-		mapIndex, offset, length int
-		resident                 int64
-		hot                      bool
-	}
-	_, err := pg.mappedResidency(ctx, func(mi, length int, vec []byte) error {
-		osPage := syscall.Getpagesize()
-		for off := 0; off < length; off += mappedReclaimChunk {
-			end := min(off+mappedReclaimChunk, length)
-			var n int64
-			for _, b := range vec[off/osPage : (end+osPage-1)/osPage] {
-				if b&1 != 0 {
-					n += int64(osPage)
-				}
-			}
-			id := (uint64(mi)*minMapBytes + uint64(off)) / mappedReclaimChunk
-			word, bit := id/64, uint64(1)<<(id%64)
-			old := pg.hot[word].And(^bit)
-			if pg.cold[word].Load()&bit != 0 {
-				n = 0
-			}
-			chunks = append(chunks, struct {
-				mapIndex, offset, length int
-				resident                 int64
-				hot                      bool
-			}{mi, off, end - off, n, old&bit != 0})
-		}
-		return nil
-	})
-	if err != nil {
-		return 0, err
-	}
-	var reclaimed, resident int64
-	for _, c := range chunks {
-		resident += c.resident
-	}
-	for _, c := range chunks {
+	var reclaimed int64
+	for _, c := range candidates {
 		if resident-reclaimed <= targetBytes {
 			break
 		}
-		if c.hot || c.resident == 0 {
+		word, bit := c.id/64, uint64(1)<<(c.id%64)
+		if pg.hot[word].Load()&bit != 0 {
 			continue
 		}
 		if err := ctx.Err(); err != nil {
@@ -318,8 +394,9 @@ func (db *DB) TrimMemory(ctx context.Context, targetBytes int64) (int64, error) 
 			// pager's existing fail-stop rule rather than exposing dangling views.
 			panic("aptevadb: cannot reclaim page mapping safely: " + errno.Error())
 		}
-		id := (uint64(c.mapIndex)*minMapBytes + uint64(c.offset)) / mappedReclaimChunk
-		pg.cold[id/64].Or(uint64(1) << (id % 64))
+		pg.cold[word].Or(bit)
+		db.trimIdle[c.id] = 0
+		db.trimResident[c.id] = 0
 		reclaimed += c.resident
 	}
 	db.reclaimedMapped += reclaimed
@@ -352,7 +429,7 @@ func (db *DB) memoryWorker() {
 		case <-db.stop:
 			return
 		case <-t.C:
-			_, _ = db.TrimMemory(context.Background(), db.opts.MappedCacheBytes)
+			_, _ = db.trimMapped(context.Background(), db.opts.MappedCacheBytes, backgroundIdleSweeps)
 		}
 	}
 }
