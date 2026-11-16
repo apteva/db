@@ -58,6 +58,11 @@ func TestAggregateUsesCompoundIndexes(t *testing.T) {
 		{`{"tenant":"t1","day":{"$in":[null,"2026-10-03"]}}`, "tenant_day"},
 		{`{"tenant":{"$in":["t0","t1","t2","t3","t4","t5","t6"]},"day":{"$in":["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10"]}}`, ""}, // 70 tuples exceed maxInRanges
 		{`{"tenant":"t3"}`, "tenant_day"},
+		// one-branch $or, as scope builders emit it, keeps the index prefix
+		{`{"$and":[{"$or":[{"tenant":"t3"}]},{"day":"2026-10-05"}]}`, "tenant_day"},
+		{`{"$and":[{"$and":[{"$or":[{"tenant":{"$in":["t1","t2"]}}]}]},{"day":"2026-10-07"}]}`, "tenant_day"},
+		{`{"$or":[{"$and":[{"tenant":"t3"},{"day":{"$gte":"2026-10-03"}},{"day":{"$lt":"2026-10-06"}}]}]}`, "tenant_day"},
+		{`{"$or":[{"tenant":"t3"},{"status":"s1"}]}`, ""}, // a real disjunction still scans
 		{`{"tenant":{"$in":["t0","t1","t3"]}}`, ""}, // more than a quarter of the collection
 		{`{"status":"s2"}`, ""},
 	}
