@@ -90,6 +90,9 @@ type DB struct {
 	memory             *memoryTracker
 	memoryDone         chan struct{}
 	reclaimedMapped    int64
+	trimMu             sync.Mutex // serialises mapped trims; guards trimIdle
+	trimIdle           []uint8    // consecutive sweeps each mapped chunk went unread
+	trimResident       []int32    // OS pages resident per chunk at its last measurement; -1 unknown
 	checkpointPages    []ioPage
 	checkpointNodes    []*node
 	checkpointReleased []uint32
